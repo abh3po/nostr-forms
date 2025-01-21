@@ -12,6 +12,7 @@ import { Response } from "../../containers/ResponsesNew";
 import { V1DraftsController } from "../../containers/Drafts";
 import CreateForm from "../../containers/CreateFormNew";
 import { Dashboard } from "../../containers/Dashboard";
+import EditForm from "../../containers/EditForm";
 
 const withNostrHeaderWrapper = (Component, props) => {
   return (
@@ -44,6 +45,14 @@ function Routing() {
       <Route
         path={`${ROUTES.CREATE_FORMS_NEW}/*`}
         element={withNewCreateFormHeaderWrapper(CreateForm)}
+      />
+      <Route
+        path={`${ROUTES.EDIT_FORM_NADDR}/*`}
+        element={withNewCreateFormHeaderWrapper(EditForm)}
+      />
+       <Route
+        path={`${ROUTES.EDIT_FORM_SECRET}/*`}
+        element={withNewCreateFormHeaderWrapper(EditForm)}
       />
       <Route
         path={`${ROUTES.MY_FORMS}/*`}

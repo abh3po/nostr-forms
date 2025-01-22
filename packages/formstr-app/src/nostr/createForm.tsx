@@ -1,14 +1,9 @@
-import {
-  SimplePool,
-  UnsignedEvent,
-  generateSecretKey,
-  getPublicKey,
-  nip19,
-} from "nostr-tools";
+import { UnsignedEvent, generateSecretKey, getPublicKey } from "nostr-tools";
 import { customPublish, getDefaultRelays, signEvent } from "./common";
 import { IWrap, Tag } from "./types";
 import { nip44Encrypt } from "./utils";
 import { grantAccess, sendWraps } from "./accessControl";
+import { hexToBytes } from "@noble/hashes/utils";
 
 const defaultRelays = getDefaultRelays();
 
@@ -50,10 +45,13 @@ export const createForm = async (
   viewList: Set<string>,
   EditList: Set<string>,
   encryptContent?: boolean,
-  onRelayAccepted?: (url: string) => void
+  onRelayAccepted?: (url: string) => void,
+  secretKey?: string
 ) => {
   let acceptedRelays: string[] = [];
-  let signingKey = generateSecretKey();
+  let signingKey: Uint8Array;
+  if (secretKey) signingKey = hexToBytes(secretKey);
+  else signingKey = generateSecretKey();
   let formPubkey = getPublicKey(signingKey);
 
   let tags: Tag[] = [];

@@ -20,7 +20,7 @@ export const V1DraftsController = () => {
   }
   useEffect(() => {
     if (!parsedDraft) return;
-    initializeForm(parsedDraft);
+    initializeForm({ spec: parsedDraft.formSpec, id: parsedDraft.tempId });
     navigate(ROUTES.CREATE_FORMS_NEW, {
       state: parsedDraft,
     });

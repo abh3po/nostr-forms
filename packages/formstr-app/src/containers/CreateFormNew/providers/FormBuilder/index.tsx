@@ -1,6 +1,6 @@
 import React, { useRef, useState } from "react";
 import { AnswerSettings, FormSpec } from "@formstr/sdk/dist/interfaces";
-import { IFormBuilderContext, ILocalForm } from "./typeDefs";
+import { FormInitData, IFormBuilderContext, ILocalForm } from "./typeDefs";
 import { generateQuestion } from "../../utils";
 import { getDefaultRelays } from "@formstr/sdk";
 import { makeTag } from "../../../../utils/utility";
@@ -30,7 +30,7 @@ export type Field = [
 
 export const FormBuilderContext = React.createContext<IFormBuilderContext>({
   questionsList: [],
-  initializeForm: (draft: { formSpec: Tag[]; tempId: string }) => null,
+  initializeForm: (form: FormInitData) => null,
   saveForm: (onRelayAccepted?: (url: string) => void) => Promise.resolve(),
   editQuestion: (question: Field, tempId: string) => null,
   addQuestion: (primitive?: string, label?: string) => null,
@@ -107,6 +107,8 @@ export default function FormBuilderProvider({
   const [selectedTab, setSelectedTab] = useState<string>(
     HEADER_MENU_KEYS.BUILDER
   );
+  const [secretKey, setSecretKey] = useState<string | null>(null);
+
   const navigate = useNavigate();
 
   const toggleSettingsWindow = () => {
@@ -169,8 +171,8 @@ export default function FormBuilderProvider({
         alert("error creating the form: " + error);
       }
     );
-};
-  
+  };
+
   const saveDraft = () => {
     if (formSettings.formId === "") return;
     type Draft = { formSpec: Tag[]; tempId: string };
@@ -249,14 +251,21 @@ export default function FormBuilderProvider({
     }
   };
 
-  const initializeForm = (draft: { formSpec: Tag[]; tempId: string }) => {
-    let formSpec = draft.formSpec;
-    setFormName(draft.formSpec.filter((f) => f[0] === "name")?.[0][1] || "");
+  const initializeForm = (form: FormInitData) => {
+    setFormName(form.spec.filter((f) => f[0] === "name")?.[0][1] || "");
     let settings = JSON.parse(
-      draft.formSpec.filter((f) => f[0] === "settings")?.[0][1] || "{}"
+      form.spec.filter((f) => f[0] === "settings")?.[0][1] || "{}"
     );
     settings = { ...InitialFormSettings, ...settings };
-    let fields = draft.formSpec.filter((f) => f[0] === "field") as Field[];
+    let fields = form.spec.filter((f) => f[0] === "field") as Field[];
+    setFormSettings((settings) => {
+      return { ...settings, formId: form.id };
+    });
+    let viewList = form.spec.filter((f) => f[0] === "allowed").map((t) => t[1]);
+    let allKeys = form.spec.filter((f) => f[0] === "p").map((t) => t[1]);
+    let editList: string[] = allKeys.filter((p) => !viewList.includes(p));
+    setViewList(new Set(viewList));
+    setEditList(new Set(editList));
     setFormSettings(settings);
     setQuestionsList(fields);
   };

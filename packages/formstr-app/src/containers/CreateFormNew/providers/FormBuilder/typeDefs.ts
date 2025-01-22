@@ -16,8 +16,14 @@ export interface ILocalForm {
   relay: string;
 }
 
+export interface FormInitData {
+  spec: Tag[];
+  id: string;
+  secret?: string;
+}
+
 export interface IFormBuilderContext {
-  initializeForm: (draft: { formSpec: Tag[]; tempId: string }) => void;
+  initializeForm: (form: FormInitData) => void;
   questionsList: Field[];
   saveForm: (onRelayAccepted?: (url: string) => void) => Promise<void>;
   closeSettingsOnOutsideClick: () => void;

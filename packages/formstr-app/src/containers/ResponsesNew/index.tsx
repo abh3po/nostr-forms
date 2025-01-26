@@ -181,13 +181,12 @@ export const Response = () => {
     return columns;
   };
 
-  console.log("should render formSpec", !!formSpec);
   if (!(pubKey || secretKey) || !formId) return <Text>Invalid url</Text>;
 
-  if (formEvent?.content !== "" && !userPubkey)
+  if (formEvent && formEvent.content !== "" && !userPubkey)
     return (
       <>
-        <Text>Friend, You need to login</Text>
+        <Text>This form is private, you need to login to view the form</Text>
         <Button
           onClick={() => {
             requestPubkey();

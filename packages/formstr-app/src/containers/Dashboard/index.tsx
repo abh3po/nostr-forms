@@ -80,25 +80,18 @@ export const Dashboard = () => {
 
   const renderForms = () => {
     if (filter === "local") {
-      let localFormMap = new Map();
-      localForms.forEach((form) => {
-        localFormMap.set(`${form.publicKey}:${form.formId}`, form);
-      });
-      console.log("Local forms length is", localForms.length, localFormMap);
-      return Array.from(localFormMap.keys()).map((key: string) => {
-        console.log("key is ", key);
-        let localForm: ILocalForm = localFormMap.get(key);
-        return (
-          <LocalFormCard
-            key={localForm.key}
-            form={localForm}
-            onDeleted={() => {
-              setLocalForms(localForms.filter((f) => f.key !== localForm.key));
-            }}
-          />
-        );
-      });
+      if (localForms.length == 0) return <EmptyScreen />;
+      return localForms.map((localForm: ILocalForm) => (
+        <LocalFormCard
+          key={localForm.key}
+          form={localForm}
+          onDeleted={() => {
+            setLocalForms(localForms.filter((f) => f.key !== localForm.key));
+          }}
+        />
+      ));
     } else if (filter === "shared") {
+      if (nostrForms.size == 0) return <EmptyScreen />;
       return Array.from(nostrForms.values()).map((formEvent: Event) => {
         let d_tag = formEvent.tags.filter((t) => t[0] === "d")[0]?.[1];
         let key = `${formEvent.kind}:${formEvent.pubkey}:${
@@ -159,14 +152,8 @@ export const Dashboard = () => {
             </div>
           </Dropdown>
         </div>
-
-        {!pubkey && localForms.length === 0 && (
-          <LoggedOutScreen requestLogin={requestPubkey} />
-        )}
+        <div className="form-cards-container">{renderForms()}</div>
         <>
-          <div className="form-cards-container">{renderForms()}</div>
-          {!nostrForms.size && !localForms.length ? <EmptyScreen /> : null}
-          
           {state && (
             <FormDetails
               isOpen={showFormDetails}

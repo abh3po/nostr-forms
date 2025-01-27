@@ -160,7 +160,7 @@ export const FormFiller: React.FC<FormFillerProps> = ({
     } else {
       return (
         <SubmitButton
-          selfSign={settings.disallowAnonymous}
+          selfSign={true}
           edit={false}
           onSubmit={saveResponse}
           form={form}

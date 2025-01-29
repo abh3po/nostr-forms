@@ -1,4 +1,4 @@
-import { ReactNode, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Event, getPublicKey, nip19, nip44 } from "nostr-tools";
 import { useParams, useSearchParams } from "react-router-dom";
 import { Field, Tag } from "@formstr/sdk/dist/formstr/nip101";
@@ -179,14 +179,14 @@ export const Response = () => {
         title: "Author",
         fixed: "left",
         dataIndex: "authorPubkey",
-        width: 1,
+        width: 1.2,
         render: (data: string) => <a href={`https://njump.me/${data}`} target="_blank" rel="noopener noreferrer">{data}</a>
       },
       {
         key: "responsesCount",
         title: "Submissions",
         dataIndex: "responsesCount",
-        width:  1,
+        width:  1.2,
       }
     ];
     const rightColumns:Array<{

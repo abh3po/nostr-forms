@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { ReactNode, useEffect, useState } from "react";
 import { Event, getPublicKey, nip19, nip44 } from "nostr-tools";
 import { useParams, useSearchParams } from "react-router-dom";
 import { Field, Tag } from "@formstr/sdk/dist/formstr/nip101";
@@ -75,6 +75,13 @@ export const Response = () => {
     if (!formEvent && !responses) initialize();
   });
 
+  const getResponderCount = () => {
+    if(!responses) return 0
+    return new Set(
+      responses.map((r) => r.pubkey)
+    ).size
+  }
+
   const getInputs = (responseEvent: Event) => {
     if (responseEvent.content === "") {
       return responseEvent.tags.filter((tag) => tag[0] === "response");
@@ -99,13 +106,25 @@ export const Response = () => {
     }
     return [];
   };
-
+ 
   const getData = (useLabels: boolean = false) => {
     let answers: Array<{
       [key: string]: string;
     }> = [];
-    if (!formSpec) return;
-    (responses || []).forEach((response) => {
+    if (!formSpec || !responses) return;
+    let responsePerPubkey = new Map<string, Event[]>();
+    responses.forEach((r: Event) => {
+      let existingResponse = responsePerPubkey.get(r.pubkey)
+      if(!existingResponse)
+        responsePerPubkey.set(r.pubkey, [r])
+      else 
+        responsePerPubkey.set(r.pubkey, [...existingResponse, r])
+    })
+
+    Array.from(responsePerPubkey.keys()).forEach((pub) => {
+      let pubkeyResponses = responsePerPubkey.get(pub);
+      if(!pubkeyResponses || pubkeyResponses.length == 0) return
+      let response = pubkeyResponses.sort((a, b) => b.created_at - a.created_at)[0]
       let inputs = getInputs(response) as Tag[];
       if (inputs.length === 0) return;
       let answerObject: {
@@ -114,6 +133,7 @@ export const Response = () => {
         key: response.pubkey,
         createdAt: new Date(response.created_at * 1000).toDateString(),
         authorPubkey: nip19.npubEncode(response.pubkey),
+        responsesCount: pubkeyResponses.length.toString()
       };
       inputs.forEach((input) => {
         let questionField = formSpec.find(
@@ -152,21 +172,38 @@ export const Response = () => {
       dataIndex: string;
       fixed?: "left" | "right";
       width?: number;
+      render?: (data: string) => JSX.Element
+    }> = [
+      {
+        key: "author",
+        title: "Author",
+        fixed: "left",
+        dataIndex: "authorPubkey",
+        width: 1,
+        render: (data: string) => <a href={`https://njump.me/${data}`} target="_blank" rel="noopener noreferrer">{data}</a>
+      },
+      {
+        key: "responsesCount",
+        title: "Submissions",
+        dataIndex: "responsesCount",
+        width:  1,
+      }
+    ];
+    const rightColumns:Array<{
+      key: string;
+      title: string;
+      dataIndex: string;
+      fixed?: "left" | "right";
+      width?: number;
+      render?: (data: string) => JSX.Element
     }> = [
       {
         key: "createdAt",
         title: "Created At",
         dataIndex: "createdAt",
-        fixed: "left",
-        width: isMobile() ? 2.5 : 5,
-      },
-      {
-        key: "author",
-        title: "Author Id",
-        dataIndex: "authorPubkey",
-        width: isMobile() ? 2.5 : 5,
-      },
-    ];
+        width: 1
+      }
+    ]
     let fields =
       formSpec?.filter((field) => field[0] === "field") || ([] as Field[]);
     fields.forEach((field) => {
@@ -175,10 +212,10 @@ export const Response = () => {
         key: fieldId,
         title: label,
         dataIndex: fieldId,
-        width: 12,
+        width: 1.5,
       });
     });
-    return columns;
+    return [...columns, ...rightColumns];
   };
 
   if (!(pubKey || secretKey) || !formId) return <Text>Invalid url</Text>;
@@ -205,9 +242,9 @@ export const Response = () => {
               <Divider />
               <div className="response-count-container">
                 <Text className="response-count">
-                  {responses ? responses.length : "Loading..."}{" "}
+                  {responses ? getResponderCount() : "Loading..."}{" "}
                 </Text>
-                <Text className="response-count-label">response(s)</Text>
+                <Text className="response-count-label">responder(s)</Text>
               </div>
             </Card>
           </div>

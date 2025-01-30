@@ -34,11 +34,7 @@ code {
 
 .ant-btn-primary {
   padding: 5.5px 15px;
-  background-image: radial-gradient(
-    rgb(255, 81, 47) 0%,
-    rgb(238, 132, 80) 99%,
-    rgb(236, 74, 9) 100%
-  );
+  background: linear-gradient(180deg, #FF6B00 0%, #FF2E00 60.92%);
   transition: 0.3s;
 
   &:hover {
@@ -68,8 +64,7 @@ code {
   backdrop-filter: blur(30px);
 }
 
-.ant-dropdown-menu {
-  width:200px;
+.ant-dropdown-menu {  
   max-height: 250px;
   overflow-y: scroll;
 }

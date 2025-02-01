@@ -1,6 +1,7 @@
 import { constructFormUrl as constructFormUrlSDK } from "@formstr/sdk";
 import { DEVICE_TYPE, DEVICE_WIDTH } from "../constants/index";
 import { getItem, LOCAL_STORAGE_KEYS, setItem } from "./localStorage";
+import { nip19 } from "nostr-tools";
 
 export function makeTag(length: number) {
   let result = "";
@@ -13,6 +14,20 @@ export function makeTag(length: number) {
     counter += 1;
   }
   return result;
+}
+
+export  const naddrUrl = (
+  publicKey: string,
+  formId: string,
+  relay?: string
+) => {
+  let formUrl =`/f/${nip19.naddrEncode({
+      pubkey: publicKey,
+      identifier: formId,
+      relays: [relay || "wss://relay.damus.io"],
+      kind: 30168,
+    })}`
+  return formUrl
 }
 
 export function constructFormUrl(

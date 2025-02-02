@@ -1,55 +1,12 @@
 import { useState, useEffect } from "react";
 import { Button, Card, Divider, Table, Typography } from "antd";
-import EmptyScreen from "../../components/EmptyScreen";
-import ResponsiveLink from "../../components/ResponsiveLink";
-import { IFormSettings, V1Field } from "@formstr/sdk/dist/interfaces";
-import { constructFormUrl, isMobile, naddrUrl } from "../../utils/utility";
+import { naddrUrl } from "../../utils/utility";
 import StyleWrapper from "./style";
 import { getPublicForms } from "../../nostr/publicForms";
 import { Event } from "nostr-tools";
 import { getDefaultRelays } from "../../nostr/common";
 import { useNavigate } from "react-router-dom";
 import ReactMarkdown from "react-markdown";
-
-const COLUMNS = [
-  {
-    key: "name",
-    title: "Name",
-    dataIndex: "name",
-    width: isMobile() ? 25 : 20,
-    ellipsis: true,
-  },
-  {
-    key: "description",
-    title: "Description",
-    dataIndex: "settings",
-    width: 35,
-    ellipsis: true,
-    render: (settings: IFormSettings) => {
-      return settings?.description || "-";
-    },
-    isDisabled: isMobile,
-  },
-  {
-    key: "fields",
-    title: "Questions",
-    dataIndex: "fields",
-    width: isMobile() ? 20 : 15,
-    ellipsis: true,
-    render: (fields: V1Field[]) => fields.length,
-  },
-  {
-    key: "formUrl",
-    title: "Form Url",
-    dataIndex: "pubkey",
-    width: isMobile() ? 20 : 30,
-    ellipsis: true,
-    render: (pubkey: string) => {
-      let link = constructFormUrl(pubkey);
-      return <ResponsiveLink link={link} />;
-    },
-  },
-];
 
 function PublicForms() {
   const [isLoading, setIsLoading] = useState(false);
@@ -80,6 +37,7 @@ function PublicForms() {
             return (
               <Card
                 title={name}
+                headStyle={{ marginTop: 10 }}
                 style={{
                   fontSize: 12,
                   color: "grey",
@@ -87,8 +45,15 @@ function PublicForms() {
                   margin: 30,
                 }}
               >
-                <div style={{ maxHeight: 100, overflow: "clip" }}>
-                  <ReactMarkdown>{settings.description}</ReactMarkdown>
+                <div
+                  style={{
+                    maxHeight: 100,
+                    textOverflow: "ellipsis",
+                  }}
+                >
+                  <ReactMarkdown>
+                    {settings.description.trim().substring(0, 200) + "..."}
+                  </ReactMarkdown>
                 </div>
                 <Divider />
                 <div
@@ -107,8 +72,10 @@ function PublicForms() {
                   >
                     Open Form
                   </Button>
-                  <Typography.Text style={{ color: "grey" }}>
-                    {new Date(f.created_at * 1000).toString()}
+                  <Typography.Text
+                    style={{ color: "grey", fontSize: 12, margin: 10 }}
+                  >
+                    {new Date(f.created_at * 1000).toDateString().toString()}
                   </Typography.Text>
                 </div>
               </Card>
@@ -117,10 +84,10 @@ function PublicForms() {
             return (
               <Card
                 title="Encrypted Content"
-                style={{ margin: 30, color: "grey" }}
+                style={{ margin: 30, fontSize: 12, color: "grey" }}
               >
                 {" "}
-                {new Date(f.created_at * 1000).toString()}
+                {new Date(f.created_at * 1000).toDateString().toString()}
               </Card>
             );
           }

@@ -70,6 +70,8 @@ const InitialFormSettings: IFormSettings = {
     " tap anywhere on the form to edit, including this description.",
   thankYouPage: true,
   formId: makeTag(6),
+  encryptForm: true,
+  viewKeyInUrl: true
 };
 
 export default function FormBuilderProvider({

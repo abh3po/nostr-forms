@@ -86,7 +86,7 @@ function Submissions() {
           action={() => {
             navigate(ROUTES.PUBLIC_FORMS);
           }}
-          actionLabel="Public Forms"
+          actionLabel="Global Forms"
         />
       )}
     </div>

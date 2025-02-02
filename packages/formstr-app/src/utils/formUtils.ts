@@ -69,22 +69,28 @@ export const getFormSpec = async (
     if (!userPubKey && !paramsViewKey)
       throw Error("No keys provided to access this form");
     let keys;
+    if (paramsViewKey) {
+      return getDecryptedForm(formEvent, paramsViewKey)
+    }
     if (userPubKey)
       keys = await fetchKeys(formEvent.pubkey, formId, userPubKey);
     console.log("got keys as", keys);
     if (keys && onKeysFetched) onKeysFetched(keys || null);
-    let viewKey =
-      paramsViewKey || keys?.find((k) => k[0] === "ViewAccess")?.[1];
+    let viewKey = keys?.find((k) => k[0] === "ViewAccess")?.[1];
     if (!viewKey) return null;
-    let conversationKey = nip44.v2.utils.getConversationKey(
-      viewKey,
-      formEvent.pubkey
-    );
-    let formSpecString = nip44.v2.decrypt(formEvent.content, conversationKey);
-    let FormTemplate = JSON.parse(formSpecString);
-    return FormTemplate;
+    return getDecryptedForm(formEvent, viewKey)
   }
 };
+
+const getDecryptedForm = (formEvent: Event, viewKey: string) => {
+  let conversationKey = nip44.v2.utils.getConversationKey(
+    viewKey,
+    formEvent.pubkey
+  );
+  let formSpecString = nip44.v2.decrypt(formEvent.content, conversationKey);
+  let FormTemplate = JSON.parse(formSpecString);
+  return FormTemplate
+}
 
 export const getAllowedUsers = (formEvent: Event) => {
   return formEvent.tags.filter((t) => t[0] === "allowed").map((t) => t[1]);

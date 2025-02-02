@@ -19,14 +19,17 @@ export function makeTag(length: number) {
 export  const naddrUrl = (
   publicKey: string,
   formId: string,
-  relay?: string
+  relay?: string,
+  viewKey?: string
 ) => {
+  console.log("NADDR URL PARAMETERS", publicKey, formId, relay, viewKey)
   let formUrl =`/f/${nip19.naddrEncode({
       pubkey: publicKey,
       identifier: formId,
       relays: [relay || "wss://relay.damus.io"],
       kind: 30168,
     })}`
+  if(viewKey) formUrl = formUrl + `?viewKey=${viewKey}`
   return formUrl
 }
 

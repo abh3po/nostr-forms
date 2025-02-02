@@ -2,7 +2,7 @@ import { Button, Card, Typography } from "antd";
 import { ILocalForm } from "../../CreateFormNew/providers/FormBuilder/typeDefs";
 import { useNavigate } from "react-router-dom";
 import DeleteFormTrigger from "./DeleteForm";
-import { nip19 } from "nostr-tools";
+import { naddrUrl } from "../../../utils/utility";
 
 interface LocalFormCardProps {
   form: ILocalForm;
@@ -21,12 +21,7 @@ export const LocalFormCard: React.FC<LocalFormCardProps> = ({
   if (form.relay) responseUrl = responseUrl + `?relay=${form.relay}`;
   let formUrl =
     form.publicKey && form.formId
-      ? `/f/${nip19.naddrEncode({
-          pubkey: form.publicKey,
-          identifier: form.formId,
-          relays: [form.relay || "wss://relay.damus.io"],
-          kind: 30168,
-        })}`
+      ? naddrUrl(form.publicKey, form.formId, form.relay, form.viewKey)
       : `/fill/${form.publicKey}`;
   return (
     <Card

@@ -14,7 +14,7 @@ export const HEADER_MENU_KEYS = {
 export const HEADER_MENU = [
   {
     key: HEADER_MENU_KEYS.PUBLIC_FORMS,
-    label: "Public Forms",
+    label: "Global Forms",
     icon: (
       <Link to={ROUTES.PUBLIC_FORMS}>
         <SearchOutlined />

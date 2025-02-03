@@ -27,7 +27,7 @@ const defaultRelays = getDefaultRelays();
 
 export const Dashboard = () => {
   const { state } = useLocation();
-  const { pubkey, requestPubkey } = useProfileContext();
+  const { pubkey } = useProfileContext();
   const [showFormDetails, setShowFormDetails] = useState<boolean>(!!state);
   const [localForms, setLocalForms] = useState<ILocalForm[]>(
     getItem(LOCAL_STORAGE_KEYS.LOCAL_FORMS) || []

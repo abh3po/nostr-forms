@@ -120,6 +120,12 @@ export const FormFiller: React.FC<FormFillerProps> = ({
       throw "Cant submit to a form that has not been published";
     }
     let formResponses = form.getFieldsValue(true);
+    let formRelays = formEvent?.tags
+      .filter((r) => r[0] === "relay")
+      ?.map((r) => r[1]);
+    let responseRelays = Array.from(
+      new Set([...(relays || []), ...(formRelays || [])])
+    );
     const responses: Response[] = Object.keys(formResponses).map(
       (fieldId: string) => {
         let answer = null;
@@ -132,14 +138,19 @@ export const FormFiller: React.FC<FormFillerProps> = ({
     if (anonymous) {
       anonUser = generateSecretKey();
     }
-    sendResponses(pubKey, formId, responses, anonUser, true, relays).then(
-      (res: any) => {
-        console.log("Submitted!");
-        sendNotification(formTemplate!, responses);
-        setFormSubmitted(true);
-        setThankYouScreen(true);
-      }
-    );
+    sendResponses(
+      pubKey,
+      formId,
+      responses,
+      anonUser,
+      true,
+      responseRelays
+    ).then((res: any) => {
+      console.log("Submitted!");
+      sendNotification(formTemplate!, responses);
+      setFormSubmitted(true);
+      setThankYouScreen(true);
+    });
   };
 
   const renderSubmitButton = (settings: IFormSettings) => {

@@ -21,7 +21,7 @@ export const LocalFormCard: React.FC<LocalFormCardProps> = ({
   if (form.relay) responseUrl = responseUrl + `?relay=${form.relay}`;
   let formUrl =
     form.publicKey && form.formId
-      ? naddrUrl(form.publicKey, form.formId, form.relay, form.viewKey)
+      ? naddrUrl(form.publicKey, form.formId, [form.relay], form.viewKey)
       : `/fill/${form.publicKey}`;
   return (
     <Card

@@ -239,7 +239,10 @@ export const sendResponses = async (
   };
 
   const fullEvent = await signEvent(baseEvent, responderSecretKey);
-  const relayList = [...relays, ...defaultRelays];
+  let relayList = relays;
+  if (relayList.length === 0) {
+    relayList = defaultRelays;
+  }
   const messages = await Promise.allSettled(
     customPublish(relayList, fullEvent)
   );

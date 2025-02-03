@@ -13,7 +13,6 @@ function PublicForms() {
   const [forms, setForms] = useState<Event[]>([]);
 
   const navigate = useNavigate();
-
   useEffect(() => {
     (async () => {
       setIsLoading(true);
@@ -65,7 +64,7 @@ function PublicForms() {
                 >
                   <Button
                     onClick={() => {
-                      navigate(naddrUrl(f.pubkey, formId));
+                      navigate(naddrUrl(f.pubkey, formId, getDefaultRelays()));
                     }}
                     style={{ color: "green", borderColor: "green" }}
                     type="dashed"

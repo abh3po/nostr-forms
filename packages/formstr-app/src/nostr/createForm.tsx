@@ -50,7 +50,7 @@ export const createForm = async (
   viewList: Set<string>,
   EditList: Set<string>,
   encryptContent?: boolean,
-  onRelayAccepted?: (url: string) => void    
+  onRelayAccepted?: (url: string) => void
 ) => {
   let acceptedRelays: string[] = [];
   let signingKey = generateSecretKey();
@@ -79,7 +79,7 @@ export const createForm = async (
       ...form.filter((tag: Tag) => !["d", "name"].includes(tag[0])),
     ];
   }
-
+  relayList.forEach((r: string) => tags.push(["relay", r]));
   const baseTemplateEvent: UnsignedEvent = {
     kind: 30168,
     created_at: Math.floor(Date.now() / 1000),
@@ -105,17 +105,17 @@ export const createForm = async (
   });
 
   const templateEvent = await signEvent(baseTemplateEvent, signingKey);
-await sendWraps(wraps);
-await Promise.allSettled(
-  customPublish(relayList, templateEvent, (url: string) => {
-    acceptedRelays.push(url);
-    onRelayAccepted?.(url); 
-  })
-);
-console.log("Accepted by relays", acceptedRelays);
-return {
-  signingKey,
-  viewKey,
-  acceptedRelays,
-};
+  await sendWraps(wraps);
+  await Promise.allSettled(
+    customPublish(relayList, templateEvent, (url: string) => {
+      acceptedRelays.push(url);
+      onRelayAccepted?.(url);
+    })
+  );
+  console.log("Accepted by relays", acceptedRelays);
+  return {
+    signingKey,
+    viewKey,
+    acceptedRelays,
+  };
 };

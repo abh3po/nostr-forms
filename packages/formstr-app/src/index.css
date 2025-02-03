@@ -14,6 +14,18 @@
   font-display: swap;
 }
 
+:root {
+  --background: #dedede;
+  --text: #000;
+  --container-light-bg: #3D7EAE;
+}
+
+:root.dark {
+  --background: #1f1f1f;
+  --text: #ffffff;
+  --container-light-bg: #1f1f1f;
+}
+
 body {
   margin: 0;
   box-sizing: border-box;
@@ -67,4 +79,109 @@ code {
 .ant-dropdown-menu {  
   max-height: 250px;
   overflow-y: scroll;
+}
+
+:root.dark {
+  .ant-layout,
+  .ant-layout-header {
+    background-color: #1f1f1f;
+  }
+
+  .ant-menu {
+    background-color: #1f1f1f;
+    color: var(--text);
+  }
+
+  .ant-card {
+    background-color: #1f1f1f;
+  }
+
+  .ant-modal-content,
+  .ant-modal-header {
+    background-color: #1f1f1f;
+  }
+  .ant-input,
+  .ant-select-selector,
+  .ant-input-number,
+  .ant-picker {
+    background-color: #141414 !important;
+    color: var(--text) !important;
+    border-color: #434343 !important;
+  }
+
+  .ant-select-dropdown,
+  .ant-picker-dropdown {
+    background-color: #1f1f1f;
+  }
+
+  .ant-table {
+    background-color: #1f1f1f;
+    color: var(--text);
+  }
+  
+  .ant-table-thead > tr > th {
+    background-color: #141414 !important;
+    color: var(--text);
+  }
+
+  .ant-table-tbody > tr > td {
+    border-color: #303030;
+  }
+
+  .ant-form-item-label > label {
+    color: var(--text);
+  }
+  .ant-btn {
+    background: #141414;
+    color: var(--text);
+    border-color: #434343;
+  }
+
+  /* Typography */
+  .ant-typography {
+    color: var(--text);
+  }
+
+  /* Tabs */
+  .ant-tabs {
+    color: var(--text);
+  }
+  .ant-tabs-tab {
+    color: rgba(255, 255, 255, 0.85);
+  }
+
+  /* Checkboxes & Radio */
+  .ant-checkbox-wrapper,
+  .ant-radio-wrapper {
+    color: var(--text);
+  }
+
+  /* Message & Notification */
+  .ant-message-notice-content,
+  .ant-notification-notice {
+    background: #1f1f1f;
+    color: var(--text);
+  }
+
+  /* List */
+  .ant-list {
+    color: var(--text);
+    background: #1f1f1f;
+  }
+
+  /* Divider */
+  .ant-divider {
+    border-color: #303030;
+  }
+
+  /* Tooltip */
+  .ant-tooltip-inner {
+    background: #1f1f1f;
+  }
+
+  /* Popover */
+  .ant-popover-inner {
+    background: #1f1f1f;
+  }
+
 }

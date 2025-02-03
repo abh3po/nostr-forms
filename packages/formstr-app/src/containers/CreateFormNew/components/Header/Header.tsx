@@ -20,6 +20,8 @@ import useFormBuilderContext from "../../hooks/useFormBuilderContext";
 import StyleWrapper from "./Header.style";
 import { useState } from "react";
 import { normalizeURL } from "nostr-tools/utils";
+import ThemeSwitch from "./ThemeSwitch";
+import BB8Toggle from "./BB8Toggle";
 
 export const CreateFormHeader: React.FC = () => {
   const [isPostPublishModalOpen, setIsPostPublishModalOpen] = useState(false);
@@ -123,6 +125,10 @@ export const CreateFormHeader: React.FC = () => {
                   onClick={onClickHandler}
                 />
               </Col>
+                <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                  <ThemeSwitch />
+                  <BB8Toggle />
+                </div>
             </Row>
           </Col>
         </Row>

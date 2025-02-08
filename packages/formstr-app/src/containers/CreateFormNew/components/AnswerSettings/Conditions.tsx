@@ -38,9 +38,11 @@ const StyleWrapper = styled.div`
   }
   .rule-item {
     margin-bottom: 12px;
+    margin-top: 10px;
   }
   .rule-label {
-    margin-bottom: 4px;
+    margin-top: 10px
+    margin-bottom: 10px;
     color: rgba(0, 0, 0, 0.65);
   }
 `;
@@ -54,7 +56,7 @@ interface ConditionsProps {
   answerSettings: {
     conditions?: {
       rules: ConditionRule[];
-      logicType?: 'AND' | 'OR';
+      logicType?: "AND" | "OR";
     };
   };
   handleAnswerSettings: (settings: any) => void;
@@ -77,7 +79,7 @@ const Conditions: React.FC<ConditionsProps> = ({
 }) => {
   const { questionsList, questionIdInFocus } = useFormBuilderContext();
   const [isModalOpen, setIsModalOpen] = useState(false);
-
+  console.log("Question Id in focus is", questionIdInFocus);
   const availableQuestions = questionsList.filter(
     (q) => q[1] !== questionIdInFocus
   );
@@ -152,6 +154,14 @@ const Conditions: React.FC<ConditionsProps> = ({
     } catch (e) {
       return [];
     }
+  };
+
+  const getQuestionLabel = (questionId: string): string => {
+    console.log("Get QuestionLabel called", availableQuestions);
+    const question = questionsList.find((q) => q[1] === questionId);
+    console.log("Quest ion is ", question);
+    if (!question) return "";
+    return question[3] || "";
   };
 
   // Render value input based on question type
@@ -281,7 +291,6 @@ const Conditions: React.FC<ConditionsProps> = ({
         </Button>
 
         <Modal
-          title="Configure Conditions"
           open={isModalOpen}
           onCancel={() => setIsModalOpen(false)}
           footer={[
@@ -291,65 +300,97 @@ const Conditions: React.FC<ConditionsProps> = ({
           ]}
           width={600}
         >
-
-{conditions.rules.length > 1 && (
-    <div className="rule-item">
-      <Text className="rule-label">Rules logic</Text>
-      <Select
-        value={conditions.logicType || 'AND'}
-        onChange={(value) => handleAnswerSettings({
-          conditions: {
-            ...conditions,
-            logicType: value
-          }
-        })}
-        style={{ width: "100%" }}
-      >
-        <Select.Option value="AND">All conditions must be true</Select.Option>
-        <Select.Option value="OR">Any condition must be true</Select.Option>
-      </Select>
-    </div>
-  )}
-          {conditions.rules.map((rule, index) => (
-            <div key={index} className="condition-rule">
-              <div className="rule-item">
-                <Text className="rule-label">Show this question if</Text>
-                <Select
-                  placeholder="Select question"
-                  value={rule.questionId}
-                  onChange={(value) => updateRule(index, "questionId", value)}
-                  style={{ width: "100%" }}
-                >
-                  {availableQuestions.map((q) => (
-                    <Select.Option key={q[1]} value={q[1]}>
-                      {q[3]}
-                    </Select.Option>
-                  ))}
-                </Select>
-              </div>
-
-              <div className="rule-item">
-                <Text className="rule-label">Expected answer</Text>
-                {renderValueInput(rule, index)}
-              </div>
-
-              <Button
-                type="text"
-                danger
-                icon={<DeleteOutlined />}
-                onClick={() => handleRemoveRule(index)}
-                style={{ marginTop: 8 }}
+          <div style={{ marginBottom: "20px" }}>
+            {questionIdInFocus ? (
+              <Typography.Text
+                style={{ fontSize: 16, marginBottom: 30, fontWeight: "bold" }}
               >
-                Remove Condition
-              </Button>
+                Conditions for:{" "}
+                <Typography.Text
+                  style={{
+                    fontSize: 16,
+                    marginBottom: 30,
+                    fontWeight: "normal",
+                  }}
+                >
+                  {getQuestionLabel(questionIdInFocus)}
+                </Typography.Text>
+              </Typography.Text>
+            ) : null}
+          </div>
+          {conditions.rules.length > 1 && (
+            <div className="rule-item">
+              <Text className="rule-label">Condition Chaining Strategy</Text>
+              <Select
+                value={conditions.logicType || "AND"}
+                onChange={(value) =>
+                  handleAnswerSettings({
+                    conditions: {
+                      ...conditions,
+                      logicType: value,
+                    },
+                  })
+                }
+                style={{ width: "100%", marginTop: 5 }}
+              >
+                <Select.Option value="AND">
+                  All conditions must be true
+                </Select.Option>
+                <Select.Option value="OR">
+                  Any condition must be true
+                </Select.Option>
+              </Select>
             </div>
-          ))}
+          )}
+          <div
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              gap: 20,
+              marginTop: 20,
+            }}
+          >
+            {conditions.rules.map((rule, index) => (
+              <div key={index} className="condition-rule">
+                <div className="rule-item">
+                  <Text className="rule-label">Show this filed if</Text>
+                  <Select
+                    placeholder="Select question"
+                    value={rule.questionId}
+                    onChange={(value) => updateRule(index, "questionId", value)}
+                    style={{ width: "100%" }}
+                  >
+                    {availableQuestions.map((q) => (
+                      <Select.Option key={q[1]} value={q[1]}>
+                        {q[3]}
+                      </Select.Option>
+                    ))}
+                  </Select>
+                </div>
+
+                <div className="rule-item" style={{ marginTop: 15 }}>
+                  <Text className="rule-label">Expected answer</Text>
+                  {renderValueInput(rule, index)}
+                </div>
+
+                <Button
+                  type="text"
+                  danger
+                  icon={<DeleteOutlined />}
+                  onClick={() => handleRemoveRule(index)}
+                  style={{ marginTop: 8 }}
+                >
+                  Remove Condition
+                </Button>
+              </div>
+            ))}
+          </div>
 
           <Button
             type="dashed"
             onClick={handleAddRule}
             icon={<PlusOutlined />}
-            style={{ width: "100%" }}
+            style={{ width: "100%", marginTop: 16 }}
           >
             Add Condition
           </Button>

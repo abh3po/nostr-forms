@@ -7,6 +7,7 @@ import StyleWrapper from "./style";
 import { RightAnswer } from "./RightAnswer";
 import { Field } from "../../providers/FormBuilder";
 import { IAnswerSettings } from "./types";
+import Conditions from "./Conditions";
 
 const { Text } = Typography;
 
@@ -111,6 +112,11 @@ function AnswerSettings() {
         onChange={handleRightAnswer}
       />
       <Divider className="divider" />
+      <Conditions
+        key={question[1] + "conditions"}
+        answerSettings={answerSettings}
+        handleAnswerSettings={handleAnswerSettings}
+      />
       <Button
         danger
         type="text"

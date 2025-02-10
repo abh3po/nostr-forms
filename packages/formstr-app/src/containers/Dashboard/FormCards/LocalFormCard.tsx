@@ -3,6 +3,7 @@ import { ILocalForm } from "../../CreateFormNew/providers/FormBuilder/typeDefs";
 import { useNavigate } from "react-router-dom";
 import DeleteFormTrigger from "./DeleteForm";
 import { naddrUrl } from "../../../utils/utility";
+import { responsePath } from "../../../utils/formUtils";
 
 interface LocalFormCardProps {
   form: ILocalForm;
@@ -16,9 +17,8 @@ export const LocalFormCard: React.FC<LocalFormCardProps> = ({
 }) => {
   const navigate = useNavigate();
   let responseUrl = form.formId
-    ? `/s/${form.privateKey}/${form.formId}`
+    ? responsePath(form.privateKey, form.formId, form.relay, form.viewKey)
     : `/response/${form.privateKey}`;
-  if (form.relay) responseUrl = responseUrl + `?relay=${form.relay}`;
   let formUrl =
     form.publicKey && form.formId
       ? naddrUrl(form.publicKey, form.formId, [form.relay], form.viewKey)

@@ -22,7 +22,6 @@ export const naddrUrl = (
   relaysEncode?: string[],
   viewKey?: string
 ) => {
-  console.log("NADDR URL PARAMETERS", publicKey, formId, relaysEncode, viewKey);
   let formUrl = `/f/${nip19.naddrEncode({
     pubkey: publicKey,
     identifier: formId,

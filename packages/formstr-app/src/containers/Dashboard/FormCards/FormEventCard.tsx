@@ -3,14 +3,25 @@ import { Button, Card, Typography } from "antd";
 import { Event, nip19 } from "nostr-tools";
 import { useNavigate } from "react-router-dom";
 import DeleteFormTrigger from "./DeleteForm";
+import { naddrUrl } from "../../../utils/utility";
+import { responsePath } from "../../../utils/formUtils";
 
 const { Text } = Typography;
 
 interface FormEventCardProps {
   event: Event;
   onDeleted?: () => void;
+  relay?: string;
+  secretKey?: string;
+  viewKey?: string;
 }
-export const FormEventCard: React.FC<FormEventCardProps> = ({ event, onDeleted }) => {
+export const FormEventCard: React.FC<FormEventCardProps> = ({
+  event,
+  onDeleted,
+  relay,
+  secretKey,
+  viewKey,
+}) => {
   const navigate = useNavigate();
   const name = event.tags.find((tag: Tag) => tag[0] === "name") || [];
   const pubKey = event.pubkey;
@@ -24,16 +35,22 @@ export const FormEventCard: React.FC<FormEventCardProps> = ({ event, onDeleted }
 
   const publicForm = event.content === "";
   const formKey = `${pubKey}:${formId}`;
-  
+
   return (
     <Card
       title={name[1] || "Hidden Form"}
       className="form-card"
-      extra={onDeleted ? <DeleteFormTrigger formKey={formKey} onDeleted={onDeleted} /> : null}
+      extra={
+        onDeleted ? (
+          <DeleteFormTrigger formKey={formKey} onDeleted={onDeleted} />
+        ) : null
+      }
     >
       <Button
         onClick={(e) => {
-          navigate(`/r/${pubKey}/${formId}`);
+          secretKey
+            ? navigate(responsePath(secretKey, formId, relay, viewKey))
+            : navigate(`/r/${pubKey}/${formId}`);
         }}
       >
         View Responses
@@ -42,12 +59,18 @@ export const FormEventCard: React.FC<FormEventCardProps> = ({ event, onDeleted }
         onClick={(e: any) => {
           e.stopPropagation();
           navigate(
-            `/f/${nip19.naddrEncode({
-              identifier: formId,
-              pubkey: pubKey,
-              kind: event.kind,
-              relays: relays.length ? relays : ["wss://relay.damus.io"],
-            })}`
+            // `/f/${nip19.naddrEncode({
+            //   identifier: formId,
+            //   pubkey: pubKey,
+            //   kind: event.kind,
+            //   relays: relays.length ? relays : ["wss://relay.damus.io"],
+            // })}`
+            naddrUrl(
+              pubKey,
+              formId,
+              relays.length ? relays : ["wss://relay.damus.io"],
+              viewKey
+            )
           );
         }}
         style={{

@@ -4,7 +4,6 @@ import { FormDetails } from "../CreateFormNew/components/FormDetails";
 import { Event, SubCloser } from "nostr-tools";
 import { useProfileContext } from "../../hooks/useProfileContext";
 import { getDefaultRelays } from "@formstr/sdk";
-import { LoggedOutScreen } from "./LoggedOutScreen";
 import { FormEventCard } from "./FormCards/FormEventCard";
 import DashboardStyleWrapper from "./index.style";
 import EmptyScreen from "../../components/EmptyScreen";

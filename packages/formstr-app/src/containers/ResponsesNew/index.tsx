@@ -23,13 +23,9 @@ export const Response = () => {
   let { pubKey, formId, secretKey } = useParams();
   let [searchParams] = useSearchParams();
   const { pubkey: userPubkey, requestPubkey } = useProfileContext();
+  const viewKeyParams = searchParams.get("viewKey");
 
   console.log("params received are:", pubKey, formId, secretKey);
-
-  // const onKeysFetched = (keys: Tag[] | null) => {
-  //   let editKey = keys?.find((k) => k[0] === "EditAccess")?.[1] || null;
-  //   setEditKey(editKey);
-  // };
 
   const initialize = async () => {
     if (!formId) return;
@@ -56,7 +52,12 @@ export const Response = () => {
       }
     }
     setFormEvent(formEvent);
-    const formSpec = await getFormSpec(formEvent, userPubkey);
+    const formSpec = await getFormSpec(
+      formEvent,
+      userPubkey,
+      null,
+      viewKeyParams
+    );
     console.log("FormSpec is", formSpec);
     setFormSpec(formSpec);
     let allowedPubkeys;
@@ -76,11 +77,9 @@ export const Response = () => {
   });
 
   const getResponderCount = () => {
-    if(!responses) return 0
-    return new Set(
-      responses.map((r) => r.pubkey)
-    ).size
-  }
+    if (!responses) return 0;
+    return new Set(responses.map((r) => r.pubkey)).size;
+  };
 
   const getInputs = (responseEvent: Event) => {
     if (responseEvent.content === "") {
@@ -106,7 +105,7 @@ export const Response = () => {
     }
     return [];
   };
- 
+
   const getData = (useLabels: boolean = false) => {
     let answers: Array<{
       [key: string]: string;
@@ -114,17 +113,17 @@ export const Response = () => {
     if (!formSpec || !responses) return;
     let responsePerPubkey = new Map<string, Event[]>();
     responses.forEach((r: Event) => {
-      let existingResponse = responsePerPubkey.get(r.pubkey)
-      if(!existingResponse)
-        responsePerPubkey.set(r.pubkey, [r])
-      else 
-        responsePerPubkey.set(r.pubkey, [...existingResponse, r])
-    })
+      let existingResponse = responsePerPubkey.get(r.pubkey);
+      if (!existingResponse) responsePerPubkey.set(r.pubkey, [r]);
+      else responsePerPubkey.set(r.pubkey, [...existingResponse, r]);
+    });
 
     Array.from(responsePerPubkey.keys()).forEach((pub) => {
       let pubkeyResponses = responsePerPubkey.get(pub);
-      if(!pubkeyResponses || pubkeyResponses.length == 0) return
-      let response = pubkeyResponses.sort((a, b) => b.created_at - a.created_at)[0]
+      if (!pubkeyResponses || pubkeyResponses.length == 0) return;
+      let response = pubkeyResponses.sort(
+        (a, b) => b.created_at - a.created_at
+      )[0];
       let inputs = getInputs(response) as Tag[];
       if (inputs.length === 0) return;
       let answerObject: {
@@ -133,7 +132,7 @@ export const Response = () => {
         key: response.pubkey,
         createdAt: new Date(response.created_at * 1000).toDateString(),
         authorPubkey: nip19.npubEncode(response.pubkey),
-        responsesCount: pubkeyResponses.length.toString()
+        responsesCount: pubkeyResponses.length.toString(),
       };
       inputs.forEach((input) => {
         let questionField = formSpec.find(
@@ -158,7 +157,7 @@ export const Response = () => {
   };
 
   const getFormName = () => {
-    if (!formSpec) return "";
+    if (!formSpec) return "Form Details Unnaccessible";
 
     let nameTag = formSpec.find((tag) => tag[0] === "name");
     if (nameTag) return nameTag[1] || "";
@@ -172,7 +171,7 @@ export const Response = () => {
       dataIndex: string;
       fixed?: "left" | "right";
       width?: number;
-      render?: (data: string) => JSX.Element
+      render?: (data: string) => JSX.Element;
     }> = [
       {
         key: "author",
@@ -180,30 +179,38 @@ export const Response = () => {
         fixed: "left",
         dataIndex: "authorPubkey",
         width: 1.2,
-        render: (data: string) => <a href={`https://njump.me/${data}`} target="_blank" rel="noopener noreferrer">{data}</a>
+        render: (data: string) => (
+          <a
+            href={`https://njump.me/${data}`}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            {data}
+          </a>
+        ),
       },
       {
         key: "responsesCount",
         title: "Submissions",
         dataIndex: "responsesCount",
-        width:  1.2,
-      }
+        width: 1.2,
+      },
     ];
-    const rightColumns:Array<{
+    const rightColumns: Array<{
       key: string;
       title: string;
       dataIndex: string;
       fixed?: "left" | "right";
       width?: number;
-      render?: (data: string) => JSX.Element
+      render?: (data: string) => JSX.Element;
     }> = [
       {
         key: "createdAt",
         title: "Created At",
         dataIndex: "createdAt",
-        width: 1
-      }
-    ]
+        width: 1,
+      },
+    ];
     let fields =
       formSpec?.filter((field) => field[0] === "field") || ([] as Field[]);
     fields.forEach((field) => {
@@ -232,41 +239,37 @@ export const Response = () => {
       </>
     );
 
-  if (!!formSpec)
-    return (
-      <div>
-        <SummaryStyle>
-          <div className="summary-container">
-            <Card>
-              <Text className="heading">{getFormName()}</Text>
-              <Divider />
-              <div className="response-count-container">
-                <Text className="response-count">
-                  {responses ? getResponderCount() : "Loading..."}{" "}
-                </Text>
-                <Text className="response-count-label">responder(s)</Text>
-              </div>
-            </Card>
-          </div>
-        </SummaryStyle>
-        <ResponseWrapper>
-          <Export
-            responsesData={getData(true) || []}
-            formName={getFormName()}
+  return (
+    <div>
+      <SummaryStyle>
+        <div className="summary-container">
+          <Card>
+            <Text className="heading">{getFormName()}</Text>
+            <Divider />
+            <div className="response-count-container">
+              <Text className="response-count">
+                {responses ? getResponderCount() : "Loading..."}{" "}
+              </Text>
+              <Text className="response-count-label">responder(s)</Text>
+            </div>
+          </Card>
+        </div>
+      </SummaryStyle>
+      <ResponseWrapper>
+        <Export responsesData={getData(true) || []} formName={getFormName()} />
+        <div style={{ overflow: "scroll", marginBottom: 60 }}>
+          <Table
+            columns={getColumns()}
+            dataSource={getData()}
+            pagination={false}
+            loading={{
+              spinning: !!!responses,
+              tip: "🔎 Looking for your responses...",
+            }}
+            scroll={{ x: isMobile() ? 900 : 1500, y: "calc(65% - 400px)" }}
           />
-          <div style={{ overflow: "scroll", marginBottom: 60 }}>
-            <Table
-              columns={getColumns()}
-              dataSource={getData()}
-              pagination={false}
-              loading={{
-                spinning: !!!responses,
-                tip: "🔎 Looking for your responses...",
-              }}
-              scroll={{ x: isMobile() ? 900 : 1500, y: "calc(65% - 400px)" }}
-            />
-          </div>
-        </ResponseWrapper>
-      </div>
-    );
+        </div>
+      </ResponseWrapper>
+    </div>
+  );
 };

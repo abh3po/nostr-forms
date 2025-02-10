@@ -1,7 +1,9 @@
 import { Button, Card, Checkbox, Divider, Modal, Spin, Typography } from "antd";
-import { constructFormUrl } from "../../../../utils/formUtils";
 import { ReactComponent as Success } from "../../../../Images/success.svg";
-import { constructResponseUrl } from "../../../../utils/formUtils";
+import {
+  constructFormUrl,
+  constructNewResponseUrl,
+} from "../../../../utils/formUtils";
 import FormDetailsStyle from "./FormDetails.style";
 import { useEffect, useState } from "react";
 import { CopyButton } from "../../../../components/CopyButton";
@@ -87,28 +89,28 @@ export const FormDetails: React.FC<FormDetailsProps> = ({
     viewKey?: string
   ) => {
     if (!userPub) return;
-    
+
     setSavedOnNostr("saving");
-    const pool = new SimplePool();    
+    const pool = new SimplePool();
     const relays = getDefaultRelays();
-    
+
     try {
       if (!window.nostr) {
-        throw new Error('Nostr client not available');
+        throw new Error("Nostr client not available");
       }
-  
-      const setupWithTimeout = async ():Promise<SetupResult> => {
+
+      const setupWithTimeout = async (): Promise<SetupResult> => {
         return new Promise(async (resolve, reject) => {
           const timeoutId = setTimeout(() => {
-            reject(new Error('Setup timed out after 15s'));
+            reject(new Error("Setup timed out after 15s"));
           }, 10000);
-  
+
           try {
-            const existingList = await pool.querySync(
-              relays,
-              { kinds: [KINDS.myFormsList], authors: [userPub] }
-            );
-  
+            const existingList = await pool.querySync(relays, {
+              kinds: [KINDS.myFormsList],
+              authors: [userPub],
+            });
+
             let forms: Tag[] = [];
             if (existingList[0]) {
               const formsString = await window.nostr.nip44.decrypt(
@@ -117,15 +119,15 @@ export const FormDetails: React.FC<FormDetailsProps> = ({
               );
               forms = JSON.parse(formsString);
             }
-  
+
             const key = `${formAuthorPub}:${formId}`;
             if (forms.map((f) => f[1]).includes(key)) {
-              console.log('Form already exists in your saved forms');
+              console.log("Form already exists in your saved forms");
               clearTimeout(timeoutId);
               resolve({ status: "exists", forms });
               return;
             }
-  
+
             clearTimeout(timeoutId);
             resolve({ status: "ready", forms });
           } catch (error) {
@@ -134,25 +136,25 @@ export const FormDetails: React.FC<FormDetailsProps> = ({
           }
         });
       };
-  
+
       const setupResult = await setupWithTimeout();
-      
+
       if (setupResult.status === "exists") {
         setSavedOnNostr("saved");
         return;
       }
-  
+
       let secrets = `${formAuthorSecret}`;
       if (viewKey) secrets = `${secrets}:${viewKey}`;
-      
+
       const forms = setupResult.forms;
       forms.push(["f", `${formAuthorPub}:${formId}`, relay, secrets]);
-  
+
       const encryptedString = await window.nostr.nip44.encrypt(
         userPub,
         JSON.stringify(forms)
       );
-      
+
       const myFormEvent: UnsignedEvent = {
         kind: KINDS.myFormsList,
         content: encryptedString,
@@ -160,14 +162,11 @@ export const FormDetails: React.FC<FormDetailsProps> = ({
         tags: [],
         created_at: Math.round(Date.now() / 1000),
       };
-  
+
       const signedEvent = await window.nostr.signEvent(myFormEvent);
-      await Promise.allSettled(
-        pool.publish(relays, signedEvent)
-      );
-  
+      await Promise.allSettled(pool.publish(relays, signedEvent));
+
       setSavedOnNostr("saved");
-  
     } catch (error) {
       console.error("Failed to save to nostr:", error);
       setSavedOnNostr(null);
@@ -197,14 +196,19 @@ export const FormDetails: React.FC<FormDetailsProps> = ({
   };
 
   const formUrl = constructFormUrl(pubKey, formId, relay, viewKey);
-  const responsesUrl = constructResponseUrl(secretKey, formId);
+  const responsesUrl = constructNewResponseUrl(
+    secretKey,
+    formId,
+    relay,
+    viewKey
+  );
 
   function constructEmbeddedUrl(
     pubKey: string,
     formId: string,
     options: { [key: string]: boolean } = {}
   ) {
-    let embeddedUrl = constructFormUrl(pubKey, formId, relay);
+    let embeddedUrl = constructFormUrl(pubKey, formId, relay, viewKey);
     if (options.hideTitleImage) {
       embeddedUrl += "?hideTitleImage=true";
     }

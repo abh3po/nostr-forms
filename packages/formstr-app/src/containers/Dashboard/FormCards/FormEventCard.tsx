@@ -59,12 +59,6 @@ export const FormEventCard: React.FC<FormEventCardProps> = ({
         onClick={(e: any) => {
           e.stopPropagation();
           navigate(
-            // `/f/${nip19.naddrEncode({
-            //   identifier: formId,
-            //   pubkey: pubKey,
-            //   kind: event.kind,
-            //   relays: relays.length ? relays : ["wss://relay.damus.io"],
-            // })}`
             naddrUrl(
               pubKey,
               formId,

@@ -15,33 +15,27 @@ export const fetchKeys = async (
   let aliasPubKey = bytesToHex(
     sha256(`${30168}:${formAuthor}:${formId}:${userPub}`)
   );
-  console.log("alias key calculated is", aliasPubKey);
   let giftWrapsFilter = {
     kinds: [1059],
     "#p": [aliasPubKey],
   };
 
   const accessKeyEvents = await pool.querySync(defaultRelays, giftWrapsFilter);
-  console.log("Access Key events", accessKeyEvents);
   pool.close(defaultRelays);
   let keys: Tag[] | undefined;
   await Promise.allSettled(
     accessKeyEvents.map(async (keyEvent: Event) => {
-      console.log("Decrypting event,", keyEvent);
       try {
         const sealString = await window.nostr.nip44.decrypt(
           keyEvent.pubkey,
           keyEvent.content
         );
-        console.log("Got seal string as", sealString);
         const seal = JSON.parse(sealString) as Event;
-        console.log("seal event is ", seal);
         const rumorString = await window.nostr.nip44.decrypt(
           seal.pubkey,
           seal.content
         );
         const rumor = JSON.parse(rumorString) as UnsignedEvent;
-        console.log("rumor is ", rumor);
         let key = rumor.tags;
         keys = key;
       } catch (e) {
@@ -62,7 +56,6 @@ export const getFormSpec = async (
   if (!formId) {
     throw Error("Invalid Form: Does not have Id");
   }
-  console.log("Getting form spec");
   if (formEvent.content === "") {
     return formEvent.tags;
   } else {
@@ -117,7 +110,6 @@ export const responsePath = (
   const params = new URLSearchParams();
   if (relay) params.append("relay", relay);
   if (viewKey) params.append("viewKey", viewKey);
-  console.log("Parmas to stribng is", params.toString());
   return params.toString() ? `${baseUrl}?${params.toString()}` : baseUrl;
 };
 

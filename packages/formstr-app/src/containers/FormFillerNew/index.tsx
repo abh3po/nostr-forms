@@ -214,7 +214,12 @@ export const FormFiller: React.FC<FormFillerProps> = ({
         </Text>
       </div>
     );
-  } else if (!isPreview && formEvent?.content !== "" && !userPubKey) {
+  } else if (
+    !isPreview &&
+    formEvent?.content !== "" &&
+    !userPubKey &&
+    !viewKeyParams
+  ) {
     return (
       <>
         <Text>

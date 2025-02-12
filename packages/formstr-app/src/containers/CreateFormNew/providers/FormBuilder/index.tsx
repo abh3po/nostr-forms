@@ -71,7 +71,7 @@ const InitialFormSettings: IFormSettings = {
   thankYouPage: true,
   formId: makeTag(6),
   encryptForm: true,
-  viewKeyInUrl: true
+  viewKeyInUrl: true,
 };
 
 export default function FormBuilderProvider({
@@ -252,7 +252,7 @@ export default function FormBuilderProvider({
   };
 
   const initializeForm = (form: FormInitData) => {
-    setFormName(form.spec.filter((f) => f[0] === "name")?.[0][1] || "");
+    setFormName(form.spec.filter((f) => f[0] === "name")?.[0]?.[1] || "");
     let settings = JSON.parse(
       form.spec.filter((f) => f[0] === "settings")?.[0][1] || "{}"
     );

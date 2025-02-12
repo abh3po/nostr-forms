@@ -1,4 +1,4 @@
-import { useLocation, useParams } from "react-router-dom";
+import { useLocation, useParams, useSearchParams } from "react-router-dom";
 import FormBuilder from "../CreateFormNew/FormBuilder";
 import useFormBuilderContext from "../CreateFormNew/hooks/useFormBuilderContext";
 import { useEffect, useState } from "react";
@@ -9,6 +9,9 @@ import { hexToBytes } from "@noble/hashes/utils";
 import { getDefaultRelays } from "@formstr/sdk";
 import { FormInitData } from "../CreateFormNew/providers/FormBuilder/typeDefs";
 import { Spin, Typography } from "antd";
+import { getFormSpec as formSpecFromEvent } from "../../utils/formUtils";
+import { useApplicationContext } from "../../hooks/useApplicationContext";
+import { useProfileContext } from "../../hooks/useProfileContext";
 
 function EditForm() {
   const { naddr, formSecret, formId } = useParams();
@@ -16,9 +19,12 @@ function EditForm() {
     useFormBuilderContext();
   const [initialized, setInitialized] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [formInitData, setFormInitData] = useState<FormInitData | null>(null);
+  const [searchParams] = useSearchParams();
+  const { pubkey: userPub } = useProfileContext();
+  const viewKeyParams = searchParams.get("viewKey");
 
   const fetchFormDataWithFormSecret = async (secret: string, dTag: string) => {
+    console.log("FETCHIUNG FORM WITH SECRET", secret, dTag);
     let formPubkey = getPublicKey(hexToBytes(secret));
     let filter = {
       authors: [formPubkey],
@@ -27,19 +33,20 @@ function EditForm() {
     };
     let pool = new SimplePool();
     let formEvent = await pool.get(getDefaultRelays(), filter);
+    console.log("FORM EVENT IS", formEvent);
     if (!formEvent) {
       setError("Form Not Found :(");
       return;
     }
     console.log("Form Event is");
-    if (formEvent.content === "") {
-      initializeForm({
-        spec: formEvent.tags,
-        id: dTag,
-        secret: secret,
-      });
-      setInitialized(true);
-    }
+    initializeForm({
+      spec:
+        (await formSpecFromEvent(formEvent, userPub, null, viewKeyParams)) ||
+        [],
+      id: dTag,
+      secret: secret,
+    });
+    setInitialized(true);
   };
 
   const fetchFormDatawithNaddr = (naddr: string) => {};

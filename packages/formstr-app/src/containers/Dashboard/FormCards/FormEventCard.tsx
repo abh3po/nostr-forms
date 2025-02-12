@@ -7,7 +7,7 @@ import { naddrUrl } from "../../../utils/utility";
 import { responsePath } from "../../../utils/formUtils";
 import ReactMarkdown from "react-markdown";
 import nip44 from "nostr-tools/nip44";
-import { hexToBytes } from "@noble/hashes/utils";
+import { EditOutlined } from "@ant-design/icons";
 
 const { Text } = Typography;
 
@@ -31,9 +31,14 @@ export const FormEventCard: React.FC<FormEventCardProps> = ({
   if (!publicForm && viewKey) {
     let conversationKey = nip44.v2.utils.getConversationKey(
       viewKey,
-      getPublicKey(hexToBytes(viewKey))
+      event.pubkey
     );
-    tags = JSON.parse(nip44.v2.decrypt(event.content, conversationKey));
+    tags = [
+      ...JSON.parse(nip44.v2.decrypt(event.content, conversationKey)),
+      ...event.tags,
+    ];
+  } else {
+    tags = event.tags;
   }
   const name = event.tags.find((tag: Tag) => tag[0] === "name") || [];
   const pubKey = event.pubkey;
@@ -47,7 +52,7 @@ export const FormEventCard: React.FC<FormEventCardProps> = ({
   const formKey = `${pubKey}:${formId}`;
   let settings: { description?: string } = {};
   if (publicForm || viewKey) {
-    settings = JSON.parse(event.tags.filter((t) => t[0] === "settings")[0][1]);
+    settings = JSON.parse(tags.filter((t) => t[0] === "settings")[0][1]);
   }
 
   return (
@@ -55,19 +60,29 @@ export const FormEventCard: React.FC<FormEventCardProps> = ({
       title={name[1] || "Hidden Form"}
       className="form-card"
       extra={
-        onDeleted ? (
-          <DeleteFormTrigger formKey={formKey} onDeleted={onDeleted} />
-        ) : null
+        <div style={{ display: "flex", flexDirection: "row" }}>
+          {secretKey ? (
+            <EditOutlined
+              style={{ color: "purple", marginBottom: 3 }}
+              onClick={() => navigate(`/edit/${secretKey}/${formId}`)}
+            />
+          ) : null}
+          {onDeleted ? (
+            <DeleteFormTrigger formKey={formKey} onDeleted={onDeleted} />
+          ) : null}
+        </div>
       }
+      style={{
+        fontSize: 12,
+        color: "grey",
+        overflow: "clip",
+      }}
     >
       <div
         style={{
           maxHeight: 100,
           textOverflow: "ellipsis",
-          fontSize: 12,
-          color: "grey",
-          overflow: "clip",
-          margin: 30,
+          marginBottom: 30,
         }}
       >
         <ReactMarkdown>
@@ -81,6 +96,11 @@ export const FormEventCard: React.FC<FormEventCardProps> = ({
           secretKey
             ? navigate(responsePath(secretKey, formId, relay, viewKey))
             : navigate(`/r/${pubKey}/${formId}`);
+        }}
+        type="dashed"
+        style={{
+          color: "purple",
+          borderColor: "purple",
         }}
       >
         View Responses
@@ -99,7 +119,10 @@ export const FormEventCard: React.FC<FormEventCardProps> = ({
         }}
         style={{
           marginLeft: "10px",
+          color: "green",
+          borderColor: "green",
         }}
+        type="dashed"
       >
         Open Form
       </Button>

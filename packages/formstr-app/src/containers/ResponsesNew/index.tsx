@@ -211,8 +211,18 @@ export const Response = () => {
         width: 1,
       },
     ];
+    let uniqueQuestionIds: Set<string> = new Set();
+    responses?.forEach((response: Event) => {
+      let responseTags = response.tags.filter((t) => t[0] === "response");
+      responseTags.forEach((t) => uniqueQuestionIds.add(t[1]));
+    });
+
     let fields =
       formSpec?.filter((field) => field[0] === "field") || ([] as Field[]);
+
+    let extraFields = Array.from(uniqueQuestionIds).filter(
+      (f) => !fields.map((field) => field[1]).includes(f)
+    );
     fields.forEach((field) => {
       let [_, fieldId, __, label, ___, ____] = field;
       columns.push({
@@ -222,6 +232,15 @@ export const Response = () => {
         width: 1.5,
       });
     });
+    extraFields.forEach((q) => {
+      columns.push({
+        key: q,
+        title: q,
+        dataIndex: q,
+        width: 1.5,
+      });
+    });
+
     return [...columns, ...rightColumns];
   };
 

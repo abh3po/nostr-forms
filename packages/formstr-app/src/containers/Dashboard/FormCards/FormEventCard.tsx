@@ -1,10 +1,13 @@
 import { Tag } from "@formstr/sdk/dist/formstr/nip101";
 import { Button, Card, Typography } from "antd";
-import { Event, nip19 } from "nostr-tools";
+import { Event, getPublicKey, nip19 } from "nostr-tools";
 import { useNavigate } from "react-router-dom";
 import DeleteFormTrigger from "./DeleteForm";
 import { naddrUrl } from "../../../utils/utility";
 import { responsePath } from "../../../utils/formUtils";
+import ReactMarkdown from "react-markdown";
+import nip44 from "nostr-tools/nip44";
+import { hexToBytes } from "@noble/hashes/utils";
 
 const { Text } = Typography;
 
@@ -23,6 +26,15 @@ export const FormEventCard: React.FC<FormEventCardProps> = ({
   viewKey,
 }) => {
   const navigate = useNavigate();
+  const publicForm = event.content === "";
+  let tags: Tag[] = [];
+  if (!publicForm && viewKey) {
+    let conversationKey = nip44.v2.utils.getConversationKey(
+      viewKey,
+      getPublicKey(hexToBytes(viewKey))
+    );
+    tags = JSON.parse(nip44.v2.decrypt(event.content, conversationKey));
+  }
   const name = event.tags.find((tag: Tag) => tag[0] === "name") || [];
   const pubKey = event.pubkey;
   const formId = event.tags.find((tag: Tag) => tag[0] === "d")?.[1];
@@ -32,9 +44,11 @@ export const FormEventCard: React.FC<FormEventCardProps> = ({
   if (!formId) {
     return <Card title="Invalid Form Event">{JSON.stringify(event)}</Card>;
   }
-
-  const publicForm = event.content === "";
   const formKey = `${pubKey}:${formId}`;
+  let settings: { description?: string } = {};
+  if (publicForm || viewKey) {
+    settings = JSON.parse(event.tags.filter((t) => t[0] === "settings")[0][1]);
+  }
 
   return (
     <Card
@@ -46,6 +60,22 @@ export const FormEventCard: React.FC<FormEventCardProps> = ({
         ) : null
       }
     >
+      <div
+        style={{
+          maxHeight: 100,
+          textOverflow: "ellipsis",
+          fontSize: 12,
+          color: "grey",
+          overflow: "clip",
+          margin: 30,
+        }}
+      >
+        <ReactMarkdown>
+          {settings.description
+            ? settings.description?.trim().substring(0, 200) + "..."
+            : "Encrypted Content"}
+        </ReactMarkdown>
+      </div>
       <Button
         onClick={(e) => {
           secretKey

@@ -94,10 +94,8 @@ export const constructFormUrl = (
   viewKey?: string
 ) => {
   let naddr = naddrUrl(pubkey, formId, [relay], viewKey);
-  let baseUrl = `${window.location.origin}/#/${naddr}`;
-  let finalUrl = baseUrl;
-  if (viewKey) finalUrl = finalUrl + `?viewKey=${viewKey}`;
-  return finalUrl;
+  let baseUrl = `${window.location.origin}/#${naddr}`;
+  return baseUrl;
 };
 
 export const responsePath = (

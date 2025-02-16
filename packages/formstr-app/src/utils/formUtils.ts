@@ -98,6 +98,19 @@ export const constructFormUrl = (
   return baseUrl;
 };
 
+export const editPath = (
+  scretKey: string,
+  formId: string,
+  relay?: string,
+  viewKey?: string
+) => {
+  const baseUrl = `/edit/${scretKey}/${formId}`;
+  const params = new URLSearchParams();
+  if (relay) params.append("relay", relay);
+  if (viewKey) params.append("viewKey", viewKey);
+  return params.toString() ? `${baseUrl}?${params.toString()}` : baseUrl;
+};
+
 export const responsePath = (
   secretKey: string,
   formId: string,

@@ -3,7 +3,8 @@ import { ILocalForm } from "../../CreateFormNew/providers/FormBuilder/typeDefs";
 import { useNavigate } from "react-router-dom";
 import DeleteFormTrigger from "./DeleteForm";
 import { naddrUrl } from "../../../utils/utility";
-import { responsePath } from "../../../utils/formUtils";
+import { editPath, responsePath } from "../../../utils/formUtils";
+import EditOutlined from "@ant-design/icons/lib/icons/EditOutlined";
 
 interface LocalFormCardProps {
   form: ILocalForm;
@@ -27,7 +28,19 @@ export const LocalFormCard: React.FC<LocalFormCardProps> = ({
     <Card
       title={form.name}
       className="form-card"
-      extra={<DeleteFormTrigger formKey={form.key} onDeleted={onDeleted} />}
+      extra={
+        <div>
+          <EditOutlined
+            style={{ color: "purple", marginBottom: 3 }}
+            onClick={() =>
+              navigate(
+                editPath(form.privateKey, form.formId, form.relay, form.viewKey)
+              )
+            }
+          />
+          <DeleteFormTrigger formKey={form.key} onDeleted={onDeleted} />
+        </div>
+      }
     >
       <Button
         onClick={(e) => {

@@ -108,6 +108,7 @@ export default function FormBuilderProvider({
     HEADER_MENU_KEYS.BUILDER
   );
   const [secretKey, setSecretKey] = useState<string | null>(null);
+  const [viewKey, setViewKey] = useState<string | null | undefined>(null);
 
   const navigate = useNavigate();
 
@@ -147,7 +148,9 @@ export default function FormBuilderProvider({
       viewList,
       editList,
       formSettings.encryptForm,
-      onRelayAccepted
+      onRelayAccepted,
+      secretKey,
+      viewKey
     ).then(
       (artifacts: {
         signingKey: Uint8Array;
@@ -192,10 +195,6 @@ export default function FormBuilderProvider({
     }
     console.log("setting", LOCAL_STORAGE_KEYS.DRAFT_FORMS, draftArr);
     setItem(LOCAL_STORAGE_KEYS.DRAFT_FORMS, draftArr);
-    // console.log(
-    //   "current local storage",
-    //   getItem(LOCAL_STORAGE_KEYS.DRAFT_FORMS)
-    // );
   };
 
   const editQuestion = (question: Field, tempId: string) => {
@@ -254,7 +253,7 @@ export default function FormBuilderProvider({
   const initializeForm = (form: FormInitData) => {
     setFormName(form.spec.filter((f) => f[0] === "name")?.[0]?.[1] || "");
     let settings = JSON.parse(
-      form.spec.filter((f) => f[0] === "settings")?.[0][1] || "{}"
+      form.spec.filter((f) => f[0] === "settings")?.[0]?.[1] || "{}"
     );
     settings = { ...InitialFormSettings, ...settings };
     let fields = form.spec.filter((f) => f[0] === "field") as Field[];
@@ -268,6 +267,8 @@ export default function FormBuilderProvider({
     setEditList(new Set(editList));
     setFormSettings(settings);
     setQuestionsList(fields);
+    setSecretKey(form.secret || null);
+    setViewKey(form.viewKey);
   };
 
   return (

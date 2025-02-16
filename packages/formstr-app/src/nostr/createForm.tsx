@@ -46,13 +46,19 @@ export const createForm = async (
   EditList: Set<string>,
   encryptContent?: boolean,
   onRelayAccepted?: (url: string) => void,
-  secretKey?: string
+  secretKey?: string | null,
+  viewKeyParams?: string | null
 ) => {
   let acceptedRelays: string[] = [];
   let signingKey: Uint8Array;
+  let viewKey: Uint8Array;
+
   if (secretKey) signingKey = hexToBytes(secretKey);
   else signingKey = generateSecretKey();
   let formPubkey = getPublicKey(signingKey);
+
+  if (viewKeyParams) viewKey = hexToBytes(viewKeyParams);
+  else viewKey = generateSecretKey();
 
   let tags: Tag[] = [];
   let formId = form.find((tag: Tag) => tag[0] === "d")?.[1];
@@ -61,7 +67,6 @@ export const createForm = async (
   }
   let name = form.find((tag: Tag) => tag[0] === "name")?.[1] || "";
   let mergedNpubs = getMergedNpubs(viewList, EditList);
-  let viewKey = generateSecretKey();
   tags.push(["d", formId]);
   tags.push(["name", name]);
   let content = "";

@@ -4,7 +4,7 @@ import { Event, getPublicKey, nip19 } from "nostr-tools";
 import { useNavigate } from "react-router-dom";
 import DeleteFormTrigger from "./DeleteForm";
 import { naddrUrl } from "../../../utils/utility";
-import { responsePath } from "../../../utils/formUtils";
+import { editPath, responsePath } from "../../../utils/formUtils";
 import ReactMarkdown from "react-markdown";
 import nip44 from "nostr-tools/nip44";
 import { EditOutlined } from "@ant-design/icons";
@@ -29,14 +29,18 @@ export const FormEventCard: React.FC<FormEventCardProps> = ({
   const publicForm = event.content === "";
   let tags: Tag[] = [];
   if (!publicForm && viewKey) {
-    let conversationKey = nip44.v2.utils.getConversationKey(
-      viewKey,
-      event.pubkey
-    );
-    tags = [
-      ...JSON.parse(nip44.v2.decrypt(event.content, conversationKey)),
-      ...event.tags,
-    ];
+    try {
+      let conversationKey = nip44.v2.utils.getConversationKey(
+        viewKey,
+        event.pubkey
+      );
+      tags = [
+        ...JSON.parse(nip44.v2.decrypt(event.content, conversationKey)),
+        ...event.tags,
+      ];
+    } catch (e) {
+      tags = [];
+    }
   } else {
     tags = event.tags;
   }
@@ -52,7 +56,9 @@ export const FormEventCard: React.FC<FormEventCardProps> = ({
   const formKey = `${pubKey}:${formId}`;
   let settings: { description?: string } = {};
   if (publicForm || viewKey) {
-    settings = JSON.parse(tags.filter((t) => t[0] === "settings")[0][1]);
+    settings = JSON.parse(
+      tags.filter((t) => t[0] === "settings")?.[0]?.[1] || "{}"
+    );
   }
 
   return (
@@ -64,7 +70,9 @@ export const FormEventCard: React.FC<FormEventCardProps> = ({
           {secretKey ? (
             <EditOutlined
               style={{ color: "purple", marginBottom: 3 }}
-              onClick={() => navigate(`/edit/${secretKey}/${formId}`)}
+              onClick={() =>
+                navigate(editPath(secretKey, formId, relay, viewKey))
+              }
             />
           ) : null}
           {onDeleted ? (

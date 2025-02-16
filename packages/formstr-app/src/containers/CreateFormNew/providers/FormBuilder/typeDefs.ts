@@ -20,6 +20,7 @@ export interface FormInitData {
   spec: Tag[];
   id: string;
   secret?: string;
+  viewKey?: string | null;
 }
 
 export interface IFormBuilderContext {

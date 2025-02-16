@@ -1,4 +1,4 @@
-import { useLocation, useParams, useSearchParams } from "react-router-dom";
+import { useParams, useSearchParams } from "react-router-dom";
 import FormBuilder from "../CreateFormNew/FormBuilder";
 import useFormBuilderContext from "../CreateFormNew/hooks/useFormBuilderContext";
 import { useEffect, useState } from "react";
@@ -7,10 +7,8 @@ import { FormFiller } from "../FormFillerNew";
 import { getPublicKey, SimplePool } from "nostr-tools";
 import { hexToBytes } from "@noble/hashes/utils";
 import { getDefaultRelays } from "@formstr/sdk";
-import { FormInitData } from "../CreateFormNew/providers/FormBuilder/typeDefs";
 import { Spin, Typography } from "antd";
 import { getFormSpec as formSpecFromEvent } from "../../utils/formUtils";
-import { useApplicationContext } from "../../hooks/useApplicationContext";
 import { useProfileContext } from "../../hooks/useProfileContext";
 
 function EditForm() {
@@ -24,7 +22,6 @@ function EditForm() {
   const viewKeyParams = searchParams.get("viewKey");
 
   const fetchFormDataWithFormSecret = async (secret: string, dTag: string) => {
-    console.log("FETCHIUNG FORM WITH SECRET", secret, dTag);
     let formPubkey = getPublicKey(hexToBytes(secret));
     let filter = {
       authors: [formPubkey],
@@ -38,23 +35,21 @@ function EditForm() {
       setError("Form Not Found :(");
       return;
     }
-    console.log("Form Event is");
+    let formSpec =
+      (await formSpecFromEvent(formEvent, userPub, null, viewKeyParams)) || [];
+    console.log("Form spec is", formSpec);
     initializeForm({
-      spec:
-        (await formSpecFromEvent(formEvent, userPub, null, viewKeyParams)) ||
-        [],
+      spec: formSpec,
       id: dTag,
       secret: secret,
+      viewKey: viewKeyParams,
     });
     setInitialized(true);
   };
 
-  const fetchFormDatawithNaddr = (naddr: string) => {};
-
   const fetchFormData = async () => {
     console.log("IN THIS WE HAVE", formSecret, formId, naddr);
     if (formSecret && formId) fetchFormDataWithFormSecret(formSecret, formId);
-    else if (naddr) fetchFormDatawithNaddr(naddr);
     else {
       setError("Required Params Not Available");
     }

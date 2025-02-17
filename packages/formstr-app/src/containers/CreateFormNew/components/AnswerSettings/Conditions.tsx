@@ -45,22 +45,19 @@ const StyleWrapper = styled.div`
     margin-bottom: 10px;
     color: rgba(0, 0, 0, 0.65);
   }
+  .condition-group {
+  background: #f0f9ff;
+  border: 1px solid #e6f7ff;
+  border-radius: 4px;
+  padding: 16px;
+  margin-bottom: 16px;
+}
+
+.nested-content {
+  margin-left: 20px;
+  padding-left: 16px;
+  bo
 `;
-
-interface ConditionRule {
-  questionId: string;
-  value: string | string[];
-}
-
-interface ConditionsProps {
-  answerSettings: {
-    conditions?: {
-      rules: ConditionRule[];
-      logicType?: "AND" | "OR";
-    };
-  };
-  handleAnswerSettings: (settings: any) => void;
-}
 
 interface ConditionRule {
   questionId: string;
@@ -73,11 +70,38 @@ interface ConditionRule {
     | "lessThanEqual";
 }
 
+interface ConditionGroup {
+  rules: (ConditionRule | ConditionGroup)[];
+  logicType?: "AND" | "OR";
+}
+
+interface ConditionsProps {
+  answerSettings: {
+    conditions?: ConditionGroup;
+  };
+  handleAnswerSettings: (settings: any) => void;
+}
+
+function isConditionRule(
+  condition: ConditionRule | ConditionGroup
+): condition is ConditionRule {
+  return "questionId" in condition;
+}
+
 const Conditions: React.FC<ConditionsProps> = ({
   answerSettings,
   handleAnswerSettings,
 }) => {
   const { questionsList, questionIdInFocus } = useFormBuilderContext();
+  console.log("Entire form:", JSON.stringify({
+    questions: questionsList.map(q => ({
+      id: q[1],
+      type: q[0],
+      label: q[3],
+      options: q[4],
+      settings: JSON.parse(q[5] || '{}')
+    })),
+  }, null, 2));
   const [isModalOpen, setIsModalOpen] = useState(false);
   console.log("Question Id in focus is", questionIdInFocus);
   const availableQuestions = questionsList.filter(
@@ -91,11 +115,14 @@ const Conditions: React.FC<ConditionsProps> = ({
   const handleAddRule = () => {
     const newConditions = {
       ...conditions,
-      rules: [...conditions.rules, { questionId: "", value: "" }],
+      rules: [...conditions.rules, { 
+        questionId: "", 
+        value: "",
+        operator: "equals"  
+      }],
     };
     handleAnswerSettings({ conditions: newConditions });
-  };
-
+   };
   const handleRemoveRule = (index: number) => {
     const newRules = [...conditions.rules];
     newRules.splice(index, 1);
@@ -122,6 +149,77 @@ const Conditions: React.FC<ConditionsProps> = ({
         [field]: value,
       };
     }
+    handleAnswerSettings({
+      conditions: {
+        ...conditions,
+        rules: newRules,
+      },
+    });
+  };
+
+  const handleAddGroup = () => {
+    const newConditions = {
+      ...conditions,
+      rules: [...conditions.rules, { rules: [], logicType: "AND" }],
+    };
+    handleAnswerSettings({ conditions: newConditions });
+  };
+
+  const addNestedRule = (groupIndex: number) => {
+    const newRules = [...conditions.rules];
+    const group = newRules[groupIndex] as ConditionGroup;
+    group.rules = [
+      ...group.rules,
+      {
+        questionId: "",
+        value: "",
+        operator: "equals",
+      },
+    ];
+    handleAnswerSettings({
+      conditions: {
+        ...conditions,
+        rules: newRules,
+      },
+    });
+  };
+
+  const updateNestedRule = (
+    groupIndex: number,
+    ruleIndex: number,
+    field: string,
+    value: any
+  ) => {
+    const newRules = [...conditions.rules];
+    const group = newRules[groupIndex] as ConditionGroup;
+    const rule = group.rules[ruleIndex] as ConditionRule;
+
+    if (field === "questionId") {
+      const questionType = getQuestionType(value);
+      group.rules[ruleIndex] = {
+        ...rule,
+        questionId: value,
+        value: questionType === AnswerTypes.checkboxes ? [] : "",
+        operator: rule.operator, 
+      };
+    } else {
+      group.rules[ruleIndex] = {
+        ...rule,
+        [field]: value,
+      };
+    }
+
+    handleAnswerSettings({
+      conditions: {
+        ...conditions,
+        rules: newRules,
+      },
+    });
+  };
+  const removeNestedRule = (groupIndex: number, ruleIndex: number) => {
+    const newRules = [...conditions.rules];
+    const group = newRules[groupIndex] as ConditionGroup;
+    group.rules = group.rules.filter((_, index) => index !== ruleIndex);
     handleAnswerSettings({
       conditions: {
         ...conditions,
@@ -166,9 +264,21 @@ const Conditions: React.FC<ConditionsProps> = ({
 
   // Render value input based on question type
   // In Conditions.tsx
-  const renderValueInput = (rule: ConditionRule, index: number) => {
+  const renderValueInput = (
+    rule: ConditionRule,
+    index: number,
+    groupIndex?: number
+  ) => {
     const questionType = getQuestionType(rule.questionId);
     const choices = getQuestionChoices(rule.questionId);
+
+    const handleUpdate = (field: string, value: any) => {
+      if (typeof groupIndex === "number") {
+        updateNestedRule(groupIndex, index, field, value);
+      } else {
+        updateRule(index, field, value);
+      }
+    };
 
     console.log("rule", rule);
     switch (questionType) {
@@ -178,13 +288,11 @@ const Conditions: React.FC<ConditionsProps> = ({
           <Select
             placeholder="Select answer"
             value={rule.value}
-            onChange={(value) => updateRule(index, "value", value)}
+            onChange={(value) => handleUpdate("value", value)}
             style={{ width: "100%" }}
           >
             {choices.map(([id, label]) => (
               <Select.Option key={id} value={id}>
-                {" "}
-                {/* Changed to use ID instead of label */}
                 {label}
               </Select.Option>
             ))}
@@ -197,7 +305,7 @@ const Conditions: React.FC<ConditionsProps> = ({
             mode="multiple"
             placeholder="Select answers"
             value={Array.isArray(rule.value) ? rule.value : []}
-            onChange={(value) => updateRule(index, "value", value)}
+            onChange={(value) => handleUpdate( "value", value)}
             style={{ width: "100%" }}
           >
             {choices.map(([id, label]) => (
@@ -214,7 +322,7 @@ const Conditions: React.FC<ConditionsProps> = ({
           <div>
             <Select
               value={rule.operator || "equals"}
-              onChange={(value) => updateRule(index, "operator", value)}
+              onChange={(value) => handleUpdate("operator", value)}
               style={{ width: "100px", marginRight: "8px" }}
             >
               <Select.Option value="equals">=</Select.Option>
@@ -228,26 +336,21 @@ const Conditions: React.FC<ConditionsProps> = ({
               value={
                 typeof rule.value === "string" ? Number(rule.value) : undefined
               }
-              onChange={(value) =>
-                updateRule(index, "value", value?.toString())
-              }
+              onChange={(value) => handleUpdate("value", value?.toString())}
               style={{ width: "calc(100% - 108px)" }}
             />
           </div>
         );
-      case AnswerTypes.date:
-        return (
-          <DatePicker
-            placeholder="Select expected date"
-            value={
-              typeof rule.value === "string" ? dayjs(rule.value) : undefined
-            }
-            onChange={(date) =>
-              updateRule(index, "value", date?.format("YYYY-MM-DD"))
-            }
-            style={{ width: "100%" }}
-          />
-        );
+        case AnswerTypes.date:
+          const dateValue = Array.isArray(rule.value) ? undefined : rule.value;
+          return (
+            <DatePicker
+              placeholder="Select expected date"
+              value={dateValue ? dayjs(dateValue, "YYYY-MM-DD") : undefined}
+              onChange={(date) => handleUpdate("value", date?.format("YYYY-MM-DD"))}
+              style={{ width: "100%" }}
+            />
+          );
       case AnswerTypes.time:
         return (
           <TimePicker
@@ -258,21 +361,21 @@ const Conditions: React.FC<ConditionsProps> = ({
                 : undefined
             }
             onChange={(time) =>
-              updateRule(index, "value", time?.format("HH:mm:ss"))
+              handleUpdate( "value", time?.format("HH:mm:ss"))
             }
             style={{ width: "100%" }}
           />
         );
-      default:
-        return (
-          <Input
-            placeholder="Enter expected answer"
-            value={typeof rule.value === "string" ? rule.value : ""}
-            onChange={(e) => updateRule(index, "value", e.target.value)}
-            style={{ width: "100%" }}
-          />
-        );
-    }
+        default:
+          return (
+            <Input
+              placeholder="Enter expected answer"
+              value={typeof rule.value === "string" ? rule.value : ""}
+              onChange={(e) => handleUpdate("value", e.target.value)} 
+              style={{ width: "100%" }}
+            />
+          );
+      }
   };
 
   return (
@@ -352,51 +455,164 @@ const Conditions: React.FC<ConditionsProps> = ({
           >
             {conditions.rules.map((rule, index) => (
               <div key={index} className="condition-rule">
-                <div className="rule-item">
-                  <Text className="rule-label">Show this filed if</Text>
-                  <Select
-                    placeholder="Select question"
-                    value={rule.questionId}
-                    onChange={(value) => updateRule(index, "questionId", value)}
-                    style={{ width: "100%" }}
-                  >
-                    {availableQuestions.map((q) => (
-                      <Select.Option key={q[1]} value={q[1]}>
-                        {q[3]}
-                      </Select.Option>
-                    ))}
-                  </Select>
-                </div>
+                {isConditionRule(rule) ? (
+                  <div>
+                    <div className="rule-item">
+                      <Text className="rule-label">Show this field if</Text>
+                      <Select
+                        placeholder="Select question"
+                        value={rule.questionId}
+                        onChange={(value) =>
+                          updateRule(index, "questionId", value)
+                        }
+                        style={{ width: "100%" }}
+                      >
+                        {availableQuestions.map((q) => (
+                          <Select.Option key={q[1]} value={q[1]}>
+                            {q[3]}
+                          </Select.Option>
+                        ))}
+                      </Select>
+                    </div>
 
-                <div className="rule-item" style={{ marginTop: 15 }}>
-                  <Text className="rule-label">Expected answer</Text>
-                  {renderValueInput(rule, index)}
-                </div>
+                    <div className="rule-item" style={{ marginTop: 15 }}>
+                      <Text className="rule-label">Expected answer</Text>
+                      {renderValueInput(rule, index)}
+                    </div>
 
-                <Button
-                  type="text"
-                  danger
-                  icon={<DeleteOutlined />}
-                  onClick={() => handleRemoveRule(index)}
-                  style={{ marginTop: 8 }}
-                >
-                  Remove Condition
-                </Button>
+                    <Button
+                      type="text"
+                      danger
+                      icon={<DeleteOutlined />}
+                      onClick={() => handleRemoveRule(index)}
+                      style={{ marginTop: 8 }}
+                    >
+                      Remove Condition
+                    </Button>
+                  </div>
+                ) : (
+                  <div className="condition-group">
+                    <div className="rule-item">
+                      <Text className="rule-label">Group Logic</Text>
+                      <Select
+                        value={rule.logicType || "AND"}
+                        onChange={(value) =>
+                          updateRule(index, "logicType", value)
+                        }
+                        style={{ width: "100%" }}
+                      >
+                        <Select.Option value="AND">
+                          All conditions must be true
+                        </Select.Option>
+                        <Select.Option value="OR">
+                          Any condition must be true
+                        </Select.Option>
+                      </Select>
+                    </div>
+
+                    <div className="nested-content" style={{ marginLeft: 20 }}>
+                      {rule.rules.map((nestedRule, nestedIndex) => (
+                        <div key={nestedIndex} className="condition-rule">
+                          {isConditionRule(nestedRule) ? (
+                            <div>
+                              <div className="rule-item">
+                                <Text className="rule-label">
+                                  Show this field if
+                                </Text>
+                                <Select
+                                  placeholder="Select question"
+                                  value={nestedRule.questionId}
+                                  onChange={(value) =>
+                                    updateNestedRule(
+                                      index,
+                                      nestedIndex,
+                                      "questionId",
+                                      value
+                                    )
+                                  }
+                                  style={{ width: "100%" }}
+                                >
+                                  {availableQuestions.map((q) => (
+                                    <Select.Option key={q[1]} value={q[1]}>
+                                      {q[3]}
+                                    </Select.Option>
+                                  ))}
+                                </Select>
+                              </div>
+                              <div
+                                className="rule-item"
+                                style={{ marginTop: 15 }}
+                              >
+                                <Text className="rule-label">
+                                  Expected answer
+                                </Text>
+                                {renderValueInput(
+                                  nestedRule,
+                                  nestedIndex,
+                                  index
+                                )}{" "}
+                              </div>
+                            </div>
+                          ) : null}
+                        </div>
+                      ))}
+
+                      <Button
+                        type="dashed"
+                        onClick={() => addNestedRule(index)}
+                        icon={<PlusOutlined />}
+                        style={{ marginTop: 16 }}
+                      >
+                        Add Condition to Group
+                      </Button>
+                    </div>
+
+                    <Button
+                      type="text"
+                      danger
+                      icon={<DeleteOutlined />}
+                      onClick={() => handleRemoveRule(index)}
+                      style={{ marginTop: 16 }}
+                    >
+                      Remove Group
+                    </Button>
+                  </div>
+                )}
               </div>
             ))}
+
+            <Space style={{ marginTop: 16 }}>
+              <Button
+                type="dashed"
+                onClick={handleAddRule}
+                icon={<PlusOutlined />}
+              >
+                Add Condition
+              </Button>
+              <Button
+                type="dashed"
+                onClick={handleAddGroup}
+                icon={<PlusOutlined />}
+              >
+                Add Group
+              </Button>
+            </Space>
           </div>
 
-          <Button
+          {/* <Button
             type="dashed"
             onClick={handleAddRule}
             icon={<PlusOutlined />}
             style={{ width: "100%", marginTop: 16 }}
           >
             Add Condition
-          </Button>
+          </Button> */}
         </Modal>
+    
       </div>
+
     </StyleWrapper>
+    
   );
 };
 

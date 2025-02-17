@@ -9,7 +9,6 @@ export const ROUTES = {
   FORM_FILLER_OLD: "/forms/:formId",
   FORM_FILLER_NEW: "/f/:naddr",
   EDIT_FORM_SECRET: "edit/:formSecret/:formId",
-  EDIT_FORM_NADDR: "e/:naddr",
   PREVIEW: "/preview",
   RESPONSES: "/response/:formSecret",
   RESPONSES_NEW: "/r/:pubKey/:formId",

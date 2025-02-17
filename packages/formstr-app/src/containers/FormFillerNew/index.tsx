@@ -70,7 +70,6 @@ export const FormFiller: React.FC<FormFillerProps> = ({
   }
 
   const onKeysFetched = (keys: Tag[] | null) => {
-    console.log("Keys got", keys);
     let editKey = keys?.find((k) => k[0] === "EditAccess")?.[1] || null;
     setEditKey(editKey);
   };

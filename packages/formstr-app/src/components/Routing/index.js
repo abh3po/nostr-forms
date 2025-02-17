@@ -46,10 +46,6 @@ function Routing() {
         path={`${ROUTES.CREATE_FORMS_NEW}/*`}
         element={withNewCreateFormHeaderWrapper(CreateForm)}
       />
-      <Route
-        path={`${ROUTES.EDIT_FORM_NADDR}/*`}
-        element={withNewCreateFormHeaderWrapper(EditForm)}
-      />
        <Route
         path={`${ROUTES.EDIT_FORM_SECRET}/*`}
         element={withNewCreateFormHeaderWrapper(EditForm)}

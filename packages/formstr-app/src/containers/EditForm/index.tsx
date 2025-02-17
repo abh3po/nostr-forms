@@ -10,9 +10,10 @@ import { getDefaultRelays } from "@formstr/sdk";
 import { Spin, Typography } from "antd";
 import { getFormSpec as formSpecFromEvent } from "../../utils/formUtils";
 import { useProfileContext } from "../../hooks/useProfileContext";
+import { LoadingOutlined } from "@ant-design/icons";
 
 function EditForm() {
-  const { naddr, formSecret, formId } = useParams();
+  const { formSecret, formId } = useParams();
   const { initializeForm, saveDraft, selectedTab, getFormSpec } =
     useFormBuilderContext();
   const [initialized, setInitialized] = useState(false);
@@ -30,14 +31,12 @@ function EditForm() {
     };
     let pool = new SimplePool();
     let formEvent = await pool.get(getDefaultRelays(), filter);
-    console.log("FORM EVENT IS", formEvent);
     if (!formEvent) {
       setError("Form Not Found :(");
       return;
     }
     let formSpec =
       (await formSpecFromEvent(formEvent, userPub, null, viewKeyParams)) || [];
-    console.log("Form spec is", formSpec);
     initializeForm({
       spec: formSpec,
       id: dTag,
@@ -48,7 +47,6 @@ function EditForm() {
   };
 
   const fetchFormData = async () => {
-    console.log("IN THIS WE HAVE", formSecret, formId, naddr);
     if (formSecret && formId) fetchFormDataWithFormSecret(formSecret, formId);
     else {
       setError("Required Params Not Available");
@@ -68,7 +66,37 @@ function EditForm() {
 
   if (error) return <Typography.Text>{error}</Typography.Text>;
 
-  if (!initialized) return <Spin spinning={true} size="default" />;
+  if (!initialized)
+    return (
+      <div
+        style={{
+          position: "fixed",
+          top: "50%",
+          left: "50%",
+          transform: "translate(-50%, -50%)",
+          width: "100%",
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+        }}
+      >
+        <Typography.Text
+          style={{
+            textAlign: "center",
+            display: "block",
+          }}
+        >
+          <Spin
+            indicator={
+              <LoadingOutlined
+                style={{ fontSize: 48, color: "#F7931A" }}
+                spin
+              />
+            }
+          />
+        </Typography.Text>
+      </div>
+    );
 
   if (selectedTab === HEADER_MENU_KEYS.BUILDER) {
     return <FormBuilder />;

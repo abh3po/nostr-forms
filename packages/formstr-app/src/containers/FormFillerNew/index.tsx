@@ -26,6 +26,18 @@ import { AddressPointer } from "nostr-tools/nip19";
 import { LoadingOutlined } from "@ant-design/icons";
 import { sendNotification } from "../../nostr/common";
 import { sendResponses } from "../../nostr/common";
+import { AnswerTypes } from "@formstr/sdk/dist/interfaces";
+
+interface Rule {
+  questionId: string;
+  value: string;
+}
+
+interface AnswerSettings {
+  conditions?: {
+    rules: Rule[];
+  };
+}
 
 const { Text } = Typography;
 
@@ -61,6 +73,9 @@ export const FormFiller: React.FC<FormFillerProps> = ({
   const hideTitleImage = searchParams.get("hideTitleImage") === "true";
   const viewKeyParams = searchParams.get("viewKey");
   const hideDescription = searchParams.get("hideDescription") === "true";
+  const [formAnswers, setFormAnswers] = useState<
+    Record<string, string | string[]>
+  >({});
   const navigate = useNavigate();
 
   isPreview = !!formSpec;
@@ -105,15 +120,123 @@ export const FormFiller: React.FC<FormFillerProps> = ({
 
   const handleInput = (
     questionId: string,
-    answer: string,
+    answer: string | string[],
     message?: string
   ) => {
-    if (!answer || answer === "") {
+    if (
+      !answer ||
+      (typeof answer === "string" && answer === "") ||
+      (Array.isArray(answer) && answer.length === 0)
+    ) {
       form.setFieldValue(questionId, null);
+      setFormAnswers((prev) => ({
+        ...prev,
+        [questionId]: Array.isArray(answer) ? [] : "",
+      }));
       return;
     }
     form.setFieldValue(questionId, [answer, message]);
+    setFormAnswers((prev) => ({ ...prev, [questionId]: answer }));
   };
+
+  interface Rule {
+    questionId: string;
+    value: string | string[];
+    operator?: "equals" | "greaterThan" | "lessThan" | "greaterThanEqual" | "lessThanEqual";
+  }
+
+  interface ConditionGroup {
+    rules: (Rule | ConditionGroup)[];
+    logicType?: "AND" | "OR";
+  }
+  
+  interface AnswerSettings {
+    conditions?: ConditionGroup;
+    renderElement?: string;
+  }
+
+  interface Rule {
+    questionId: string;
+    value: string | string[];
+    operator?:
+      | "equals"
+      | "greaterThan"
+      | "lessThan"
+      | "greaterThanEqual"
+      | "lessThanEqual";
+  }
+
+  // Helper function to evaluate a single rule
+const evaluateRule = (rule: Rule, formAnswers: Record<string, string | string[]>, fields: Field[]): boolean => {
+  const selectedAnswer = formAnswers[rule.questionId];
+  const conditionQuestion = fields.find((q) => q[1] === rule.questionId);
+  if (!conditionQuestion) return false;
+
+  const conditionSettings = JSON.parse(conditionQuestion[5] || "{}");
+  const questionType = conditionSettings.renderElement;
+
+  if (questionType === "checkboxes") {
+    const selectedAnswers = typeof selectedAnswer === "string"
+      ? selectedAnswer.split(";")
+      : selectedAnswer || [];
+    const ruleValues = Array.isArray(rule.value)
+      ? rule.value
+      : [rule.value];
+    return ruleValues.every((v) => selectedAnswers.includes(v));
+  }
+
+  if (questionType === AnswerTypes.number) {
+    const numAnswer = Number(selectedAnswer);
+    const numValue = Number(rule.value);
+
+    switch (rule.operator) {
+      case "greaterThan":
+        return numAnswer > numValue;
+      case "lessThan":
+        return numAnswer < numValue;
+      case "greaterThanEqual":
+        return numAnswer >= numValue;
+      case "lessThanEqual":
+        return numAnswer <= numValue;
+      default:
+        return numAnswer === numValue;
+    }
+  }
+
+  return selectedAnswer?.toString() === rule.value?.toString();
+};
+
+const evaluateConditionGroup = (
+  group: ConditionGroup,
+  formAnswers: Record<string, string | string[]>, 
+  fields: Field[]
+): boolean => {
+  const evaluator = group.logicType === "OR" ? "some" : "every";
+  
+  return group.rules[evaluator]((condition) => {
+    if ('questionId' in condition) {
+      return evaluateRule(condition, formAnswers, fields);
+    } else {
+      return evaluateConditionGroup(condition, formAnswers, fields);
+    }
+  });
+};
+
+const shouldShowQuestion = (question: Field): boolean => {
+  try {
+    const answerSettings = JSON.parse(question[5] || "{}") as AnswerSettings;
+    const conditions = answerSettings.conditions;
+
+    if (!conditions?.rules?.length) {
+      return true;
+    }
+
+    return evaluateConditionGroup(conditions, formAnswers, fields);
+  } catch (error) {
+    console.error("Error in shouldShowQuestion:", error);
+    return true;
+  }
+};
 
   const saveResponse = async (anonymous: boolean = true) => {
     if (!formId || !pubKey) {
@@ -250,6 +373,7 @@ export const FormFiller: React.FC<FormFillerProps> = ({
       formTemplate.find((tag) => tag[0] === "settings")?.[1] || "{}"
     ) as IFormSettings;
     fields = formTemplate.filter((tag) => tag[0] === "field") as Field[];
+    const visibleFields = fields.filter(shouldShowQuestion);
 
     return (
       <FillerStyle $isPreview={isPreview}>
@@ -288,8 +412,10 @@ export const FormFiller: React.FC<FormFillerProps> = ({
                 }
               >
                 <div>
-                  <FormFields fields={fields} handleInput={handleInput} />
+
+                  <FormFields fields={visibleFields} handleInput={handleInput} />
                   <>{renderSubmitButton(settings)}</>
+
                 </div>
               </Form>
             </div>

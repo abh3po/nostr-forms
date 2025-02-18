@@ -1,15 +1,17 @@
 import { Tag } from "@formstr/sdk/dist/formstr/nip101";
-import { Button, Card, Typography } from "antd";
-import { Event, getPublicKey, nip19 } from "nostr-tools";
+import { Button, Card } from "antd";
+import { Event } from "nostr-tools";
 import { useNavigate } from "react-router-dom";
 import DeleteFormTrigger from "./DeleteForm";
 import { naddrUrl } from "../../../utils/utility";
-import { editPath, responsePath } from "../../../utils/formUtils";
+import {
+  editPath,
+  getDecryptedForm,
+  responsePath,
+} from "../../../utils/formUtils";
 import ReactMarkdown from "react-markdown";
-import nip44 from "nostr-tools/nip44";
 import { EditOutlined } from "@ant-design/icons";
-
-const { Text } = Typography;
+import { useEffect, useState } from "react";
 
 interface FormEventCardProps {
   event: Event;
@@ -27,23 +29,18 @@ export const FormEventCard: React.FC<FormEventCardProps> = ({
 }) => {
   const navigate = useNavigate();
   const publicForm = event.content === "";
-  let tags: Tag[] = [];
-  if (!publicForm && viewKey) {
-    try {
-      let conversationKey = nip44.v2.utils.getConversationKey(
-        viewKey,
-        event.pubkey
-      );
-      tags = [
-        ...JSON.parse(nip44.v2.decrypt(event.content, conversationKey)),
-        ...event.tags,
-      ];
-    } catch (e) {
-      tags = [];
-    }
-  } else {
-    tags = event.tags;
-  }
+  const [tags, setTags] = useState<Tag[]>([]);
+  useEffect(() => {
+    const initialize = async () => {
+      if (event.content === "") {
+        setTags(event.tags);
+        return;
+      } else if (viewKey) {
+        setTags(getDecryptedForm(event, viewKey));
+      }
+    };
+    initialize();
+  }, []);
   const name = event.tags.find((tag: Tag) => tag[0] === "name") || [];
   const pubKey = event.pubkey;
   const formId = event.tags.find((tag: Tag) => tag[0] === "d")?.[1];

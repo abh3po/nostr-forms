@@ -134,7 +134,6 @@ export const Response = () => {
         let questionField = formSpec.find(
           (t) => t[0] === "field" && t[1] === input[1]
         );
-        // if (!questionField) return;
         let question = questionField?.[3];
         const label = useLabels ? question || input[1] : input[1];
         let responseLabel = input[2];

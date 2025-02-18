@@ -73,7 +73,7 @@ export const getFormSpec = async (
   }
 };
 
-const getDecryptedForm = (formEvent: Event, viewKey: string) => {
+export const getDecryptedForm = (formEvent: Event, viewKey: string) => {
   let conversationKey = nip44.v2.utils.getConversationKey(
     viewKey,
     formEvent.pubkey

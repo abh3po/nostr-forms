@@ -32,3 +32,25 @@
     transform: rotate(360deg);
   }
 }
+
+.question-input::placeholder {
+  color: black;
+  opacity: 1;
+}
+
+.question-input::-webkit-input-placeholder {
+  color: black;
+  opacity: 1;
+}
+.question-input::-moz-placeholder {
+  color: black;
+  opacity: 1;
+}
+.question-input:-ms-input-placeholder {
+  color: black;
+  opacity: 1;
+}
+.question-input:-moz-placeholder {
+  color: black;
+  opacity: 1;
+}

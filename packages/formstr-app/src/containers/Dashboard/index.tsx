@@ -15,6 +15,7 @@ import { Dropdown, Menu, Typography } from "antd";
 import { DownOutlined } from "@ant-design/icons";
 import { MyForms } from "./FormCards/MyForms";
 import { Drafts } from "./FormCards/Drafts";
+import { LocalForms } from "./FormCards/LocalForms";
 const MENU_OPTIONS = {
   local: "On this device",
   shared: "Shared with me",
@@ -80,15 +81,7 @@ export const Dashboard = () => {
   const renderForms = () => {
     if (filter === "local") {
       if (localForms.length == 0) return <EmptyScreen />;
-      return localForms.map((localForm: ILocalForm) => (
-        <LocalFormCard
-          key={localForm.key}
-          form={localForm}
-          onDeleted={() => {
-            setLocalForms(localForms.filter((f) => f.key !== localForm.key));
-          }}
-        />
-      ));
+      return <LocalForms localForms={localForms} onDeleted={(localForm: ILocalForm) => (setLocalForms(localForms.filter((f) => f.key !== localForm.key)))} />
     } else if (filter === "shared") {
       if (nostrForms.size == 0) return <EmptyScreen />;
       return Array.from(nostrForms.values()).map((formEvent: Event) => {

@@ -8,7 +8,7 @@ import {
   useSearchParams,
 } from "react-router-dom";
 import { useEffect, useState } from "react";
-import { Button, Form, Spin, Typography } from "antd";
+import { Button, Form, Spin, Typography, Steps, Card, Divider, Space } from "antd";
 import { ThankYouScreen } from "./ThankYouScreen";
 import { SubmitButton } from "./SubmitButton/submit";
 import { isMobile } from "../../utils/utility";
@@ -26,8 +26,10 @@ import { AddressPointer } from "nostr-tools/nip19";
 import { LoadingOutlined } from "@ant-design/icons";
 import { sendNotification } from "../../nostr/common";
 import { sendResponses } from "../../nostr/common";
+import { SectionData } from "../CreateFormNew/providers/FormBuilder/typeDefs";
 
 const { Text } = Typography;
+const { Step } = Steps;
 
 interface FormFillerProps {
   formSpec?: Tag[];
@@ -62,6 +64,13 @@ export const FormFiller: React.FC<FormFillerProps> = ({
   const viewKeyParams = searchParams.get("viewKey");
   const hideDescription = searchParams.get("hideDescription") === "true";
   const navigate = useNavigate();
+  const [formAnswers, setFormAnswers] = useState<Record<string, string>>({});
+  
+  // Section state
+  const [sections, setSections] = useState<SectionData[]>([]);
+  const [sectionedFields, setSectionedFields] = useState<Field[][]>([]);
+  const [currentSection, setCurrentSection] = useState<number>(0);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   isPreview = !!formSpec;
 
@@ -92,6 +101,31 @@ export const FormFiller: React.FC<FormFillerProps> = ({
       );
       if (!formSpec) setNoAccess(true);
       setFormTemplate(formSpec);
+      
+      // Process sections if they exist
+      if (formSpec) {
+        const settingsJson = formSpec.find(tag => tag[0] === "settings")?.[1] || "{}";
+        try {
+          const settings = JSON.parse(settingsJson);
+          console.log("Form settings:", settings); // Check if sections exist here
+          if (settings.sections && Array.isArray(settings.sections)) {
+            setSections(settings.sections);
+            
+            // Organize fields by section
+            const allFields = formSpec.filter(tag => tag[0] === "field") as Field[];
+            if (settings.sections.length === 0) {
+              setSectionedFields([allFields]);
+            } else {
+              const organizedFields = settings.sections.map((section: SectionData) => 
+                allFields.filter(field => section.questionIds.includes(field[1]))
+              );
+              setSectionedFields(organizedFields);
+            }
+          }
+        } catch (error) {
+          console.error("Error processing sections:", error);
+        }
+      }
     }
   };
 
@@ -102,6 +136,45 @@ export const FormFiller: React.FC<FormFillerProps> = ({
     initialize(pubKey, formId, relays);
   }, [formEvent, formTemplate, userPubKey]);
 
+  // Process sections when formTemplate changes
+  useEffect(() => {
+    if (!formTemplate) return;
+    
+    
+    const settingsJson = formTemplate.find(tag => tag[0] === "settings")?.[1] || "{}";
+    try {
+      const settings = JSON.parse(settingsJson);
+      if (settings.sections && Array.isArray(settings.sections)) {
+        setSections(settings.sections);
+
+        console.log("Loaded settings:", settings);
+        console.log("Sections:", settings.sections);
+        
+        // Organize fields by section
+        const allFields = formTemplate.filter(tag => tag[0] === "field") as Field[];
+        if (settings.sections.length === 0) {
+          setSectionedFields([allFields]);
+        } else {
+          const organizedFields = settings.sections.map((section: SectionData) => 
+            allFields.filter(field => section.questionIds.includes(field[1]))
+          );
+          setSectionedFields(organizedFields);
+        }
+      } else {
+        // No sections, put all fields in one group
+        const allFields = formTemplate.filter(tag => tag[0] === "field") as Field[];
+        setSectionedFields([allFields]);
+      }
+      console.log("Loaded settings:", settings);
+        console.log("Sections:", settings.sections);
+    } catch (error) {
+      console.error("Error processing sections:", error);
+      // Fallback: put all fields in one section
+      const allFields = formTemplate.filter(tag => tag[0] === "field") as Field[];
+      setSectionedFields([allFields]);
+    }
+  }, [formTemplate]);
+
   const handleInput = (
     questionId: string,
     answer: string,
@@ -109,15 +182,30 @@ export const FormFiller: React.FC<FormFillerProps> = ({
   ) => {
     if (!answer || answer === "") {
       form.setFieldValue(questionId, null);
+      setFormAnswers(prev => ({...prev, [questionId]: ""}));
       return;
     }
     form.setFieldValue(questionId, [answer, message]);
+    setFormAnswers(prev => ({...prev, [questionId]: answer}));
+  };
+
+  const shouldShowQuestion = (question: Field): boolean => {
+    try {
+      const answerSettings = JSON.parse(question[5] || '{}');
+      const conditions = answerSettings.conditions;
+      if (!conditions?.rules?.length) return true;
+      return conditions.rules.every((rule: { questionId: string | number; value: string; }) => formAnswers[rule.questionId] === rule.value);
+    } catch {
+      return true;
+    }
   };
 
   const saveResponse = async (anonymous: boolean = true) => {
     if (!formId || !pubKey) {
       throw "Cant submit to a form that has not been published";
     }
+    
+    setIsSubmitting(true);
     let formResponses = form.getFieldsValue(true);
     let formRelays = formEvent?.tags
       .filter((r) => r[0] === "relay")
@@ -137,22 +225,75 @@ export const FormFiller: React.FC<FormFillerProps> = ({
     if (anonymous) {
       anonUser = generateSecretKey();
     }
-    sendResponses(
-      pubKey,
-      formId,
-      responses,
-      anonUser,
-      true,
-      responseRelays
-    ).then((res: any) => {
+    
+    try {
+      await sendResponses(
+        pubKey,
+        formId,
+        responses,
+        anonUser,
+        true,
+        responseRelays
+      );
       console.log("Submitted!");
       sendNotification(formTemplate!, responses);
       setFormSubmitted(true);
       setThankYouScreen(true);
-    });
+    } catch (error) {
+      console.error("Error submitting form:", error);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleContinue = async () => {
+    try {
+      // Get visible fields in current section
+      const visibleFields = sectionedFields[currentSection]?.filter(shouldShowQuestion) || [];
+      
+      // Validate current section fields
+      await form.validateFields(visibleFields.map(field => field[1]));
+      
+      // If this is the last section, submit
+      if (currentSection === sections.length - 1 || sections.length === 0) {
+        const settings = formTemplate ? JSON.parse(
+          formTemplate.find((tag) => tag[0] === "settings")?.[1] || "{}"
+        ) as IFormSettings : {};
+        
+        if (allowedUsers.length === 0) {
+          saveResponse(!settings.disallowAnonymous);
+        } else {
+          saveResponse(false); // Always self-sign if form has allowedUsers
+        }
+        return;
+      }
+      
+      // Otherwise, go to next section
+      setCurrentSection(prev => prev + 1);
+      form.setFields(
+        (sectionedFields[currentSection + 1] || []).map(field => ({
+          name: field[1],
+          errors: []
+        }))
+      );
+      
+    } catch (error) {
+      console.log("Validation failed:", error);
+    }
+  };
+
+  const handleBack = () => {
+    if (currentSection > 0) {
+      setCurrentSection(prev => prev - 1);
+    }
   };
 
   const renderSubmitButton = (settings: IFormSettings) => {
+    // For multi-section forms, use the built-in Continue/Submit buttons
+    if (sections.length > 1) {
+      return null;
+    }
+    
     if (isPreview) return null;
     if (allowedUsers.length === 0) {
       return (
@@ -242,6 +383,7 @@ export const FormFiller: React.FC<FormFillerProps> = ({
       </>
     );
   }
+  
   let name: string, settings: IFormSettings, fields: Field[];
   if (formTemplate) {
     name = formTemplate.find((tag) => tag[0] === "name")?.[1] || "";
@@ -250,6 +392,132 @@ export const FormFiller: React.FC<FormFillerProps> = ({
     ) as IFormSettings;
     fields = formTemplate.filter((tag) => tag[0] === "field") as Field[];
 
+    // For multi-section forms with steps UI
+    if (sections.length > 1 && !formSubmitted) {
+      return (
+        <FillerStyle $isPreview={isPreview}>
+          {editKey && !isPreview ? (
+            <CheckRequests
+              pubkey={pubKey!}
+              formId={formId!}
+              secretKey={editKey}
+              formEvent={formEvent!}
+            />
+          ) : null}
+          
+          <div className="filler-container">
+            <div className="form-filler">
+              {!hideTitleImage && (
+                <FormTitle
+                  className="form-title"
+                  edit={false}
+                  imageUrl={settings?.titleImageUrl}
+                  formTitle={name}
+                />
+              )}
+              {!hideDescription && (
+                <div className="form-description">
+                  <Text>
+                    <Markdown>{settings?.description}</Markdown>
+                  </Text>
+                </div>
+              )}
+
+              <Steps current={currentSection} style={{ marginBottom: 24 }}>
+                {sections.map((section, index) => (
+                  <Step key={section.id} title={section.title || `Section ${index + 1}`} />
+                ))}
+              </Steps>
+
+              <Form
+                form={form}
+                className={
+                  hideDescription ? "hidden-description" : "with-description"
+                }
+              >
+                <Card>
+                  <div className="section-header">
+                    <Text strong style={{ fontSize: 18 }}>
+                      {sections[currentSection]?.title || `Section ${currentSection + 1}`}
+                    </Text>
+                    {sections[currentSection]?.description && (
+                      <Text style={{ marginTop: 8, display: 'block' }}>
+                        <Markdown>{sections[currentSection].description}</Markdown>
+                      </Text>
+                    )}
+                  </div>
+                  
+                  <Divider />
+                  
+                  <div>
+                    <FormFields 
+                      fields={sectionedFields[currentSection]?.filter(shouldShowQuestion) || []} 
+                      handleInput={handleInput} 
+                    />
+                  </div>
+                </Card>
+                
+                <Space style={{ marginTop: 16, display: 'flex', justifyContent: 'space-between', width: '100%' }}>
+                  <Button 
+                    onClick={handleBack}
+                    disabled={currentSection === 0}
+                  >
+                    Back
+                  </Button>
+                  
+                  <Button
+                    type="primary"
+                    onClick={handleContinue}
+                    loading={isSubmitting}
+                  >
+                    {currentSection === sections.length - 1 ? 'Submit' : 'Continue'}
+                  </Button>
+                </Space>
+              </Form>
+            </div>
+            
+            <div className="branding-container">
+              <Link to="/">
+                <CreatedUsingFormstr />
+              </Link>
+              {!isMobile() && (
+                <a
+                  href="https://github.com/abhay-raizada/nostr-forms"
+                  className="foss-link"
+                >
+                  <Text className="text-style">
+                    Formstr is free and Open Source
+                  </Text>
+                </a>
+              )}
+            </div>
+          </div>
+          
+          {embedded ? (
+            formSubmitted && (
+              <div className="embed-submitted">
+                {" "}
+                <Text>Response Submitted</Text>{" "}
+              </div>
+            )
+          ) : (
+            <ThankYouScreen
+              isOpen={thankYouScreen}
+              onClose={() => {
+                if (!embedded) {
+                  let navigationUrl = editKey ? `/r/${pubKey}/${formId}` : `/`;
+                  navigate(navigationUrl);
+                } else {
+                  setThankYouScreen(false);
+                }
+              }}
+            />
+          )}
+        </FillerStyle>
+      );
+    }
+
+    // For single section or non-sectioned forms (original behavior)
     return (
       <FillerStyle $isPreview={isPreview}>
         {editKey && !isPreview ? (
@@ -287,7 +555,10 @@ export const FormFiller: React.FC<FormFillerProps> = ({
                 }
               >
                 <div>
-                  <FormFields fields={fields} handleInput={handleInput} />
+                  <FormFields 
+                    fields={fields.filter(shouldShowQuestion)} 
+                    handleInput={handleInput} 
+                  />
                   <>{renderSubmitButton(settings)}</>
                 </div>
               </Form>

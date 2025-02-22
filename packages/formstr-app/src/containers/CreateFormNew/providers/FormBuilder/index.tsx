@@ -18,6 +18,7 @@ import {
   LOCAL_STORAGE_KEYS,
   setItem,
 } from "../../../../utils/localStorage";
+import { SectionData } from "./typeDefs";
 
 export type Field = [
   placeholder: string,
@@ -60,6 +61,12 @@ export const FormBuilderContext = React.createContext<IFormBuilderContext>({
   setEditList: (keys: Set<string>) => null,
   viewList: null,
   setViewList: (keys: Set<string>) => null,
+  sections: [],
+  addSection: () => ({ id: '', questionIds: [] }),
+  updateSection: () => {},
+  removeSection: () => {},
+  moveQuestionToSection: () => {},
+  getSectionForQuestion: () => null,
 });
 
 const InitialFormSettings: IFormSettings = {
@@ -130,7 +137,11 @@ export default function FormBuilderProvider({
     let formSpec: Tag[] = [];
     formSpec.push(["d", formSettings.formId || ""]);
     formSpec.push(["name", formName]);
-    formSpec.push(["settings", JSON.stringify(formSettings)]);
+    const updatedSettings = {
+      ...formSettings,
+      sections 
+    };
+    formSpec.push(["settings", JSON.stringify(updatedSettings)]);
     formSpec = [...formSpec, ...questionsList];
     return formSpec;
   };
@@ -193,7 +204,7 @@ export default function FormBuilderProvider({
         return draft;
       });
     }
-    console.log("setting", LOCAL_STORAGE_KEYS.DRAFT_FORMS, draftArr);
+    // console.log("setting", LOCAL_STORAGE_KEYS.DRAFT_FORMS, draftArr);
     setItem(LOCAL_STORAGE_KEYS.DRAFT_FORMS, draftArr);
   };
 
@@ -215,10 +226,16 @@ export default function FormBuilderProvider({
     console.log("called with,", primitive, label, answerSettings);
     console.log("question list was", questionsList);
     setIsLeftMenuOpen(false);
-    setQuestionsList([
-      ...questionsList,
-      generateQuestion(primitive, label, [], answerSettings),
-    ]);
+    
+    const newQuestion = generateQuestion(primitive, label, [], answerSettings);
+    setQuestionsList([...questionsList, newQuestion]);
+    
+    // If sections exist, add the new question to the most recent section
+    if (sections.length > 0) {
+      const lastSection = sections[sections.length - 1];
+      moveQuestionToSection(newQuestion[1], lastSection.id);
+    }
+    
     setTimeout(() => {
       bottomElement?.current?.scrollIntoView({ behavior: "smooth" });
     }, 200);
@@ -256,6 +273,9 @@ export default function FormBuilderProvider({
       form.spec.filter((f) => f[0] === "settings")?.[0]?.[1] || "{}"
     );
     settings = { ...InitialFormSettings, ...settings };
+    if (settings.sections && Array.isArray(settings.sections)) {
+      setSections(settings.sections);
+    }
     let fields = form.spec.filter((f) => f[0] === "field") as Field[];
     setFormSettings((settings) => {
       return { ...settings, formId: form.id };
@@ -270,6 +290,64 @@ export default function FormBuilderProvider({
     setSecretKey(form.secret || null);
     setViewKey(form.viewKey);
   };
+
+  const [sections, setSections] = useState<SectionData[]>([]);
+
+const addSection = (title?: string, description?: string): SectionData => {
+  const newSection: SectionData = {
+    id: `section-${Date.now()}`,
+    title: title || "New Section",
+    description: description || "Click to edit section description",
+    questionIds: [],
+  };
+  setSections(prev => {
+    // If this is the first section, assign all existing questions to it
+    if (prev.length === 0) {
+      const updatedSection = {
+        ...newSection,
+        questionIds: questionsList.map(q => q[1])
+      };
+      return [updatedSection];
+    }
+    
+    return [...prev, newSection];
+  });
+  return newSection;
+};
+
+const updateSection = (id: string, updates: Partial<SectionData>) => {
+  setSections(prev => 
+    prev.map(section => 
+      section.id === id ? { ...section, ...updates } : section
+    )
+  );
+};
+
+const removeSection = (id: string) => {
+  setSections(prev => prev.filter(section => section.id !== id));
+};
+
+const moveQuestionToSection = (questionId: string, sectionId?: string) => {
+  setSections(prev => 
+    prev.map(section => ({
+      ...section,
+      questionIds: section.questionIds.filter(qId => qId !== questionId)
+    })).map(section => {
+      if (sectionId && section.id === sectionId) {
+        return {
+          ...section,
+          questionIds: [...section.questionIds, questionId]
+        };
+      }
+      return section;
+    })
+  );
+};
+
+const getSectionForQuestion = (questionId: string): string | null => {
+  const section = sections.find(s => s.questionIds.includes(questionId));
+  return section ? section.id : null;
+};
 
   return (
     <FormBuilderContext.Provider
@@ -305,6 +383,12 @@ export default function FormBuilderProvider({
         setEditList,
         viewList,
         setViewList,
+        sections,
+      addSection,
+      updateSection,
+      removeSection,
+      moveQuestionToSection,
+      getSectionForQuestion,
       }}
     >
       {children}

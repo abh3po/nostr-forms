@@ -26,7 +26,7 @@ export const LocalForms: React.FC<LocaLFormsProps> = ({
       return newMap;
     });
   };
-
+  console.log("Local Forms are", localForms);
   useEffect(() => {
     let closer: SubCloser;
     const initialize = () => {
@@ -49,31 +49,39 @@ export const LocalForms: React.FC<LocaLFormsProps> = ({
 
   return (
     <>
-      {localForms.map((localForm: ILocalForm) => {
-        let formEvent = eventMap.get(
-          `${localForm.publicKey}:${localForm.formId}`
-        );
-        if (formEvent)
-          return (
-            <FormEventCard
-              event={formEvent}
-              relay={localForm.relay}
-              secretKey={localForm.privateKey}
-              viewKey={localForm.viewKey}
-              onDeleted={ () => { onDeleted(localForm) } }
-            />
+      {Array.from(localForms)
+        .sort(
+          (a, b) =>
+            Number(new Date(b.createdAt).getTime()) -
+            Number(new Date(a.createdAt).getTime())
+        )
+        .map((localForm: ILocalForm) => {
+          let formEvent = eventMap.get(
+            `${localForm.publicKey}:${localForm.formId}`
           );
-        else
-          return (
-            <LocalFormCard
-              key={localForm.key}
-              form={localForm}
-              onDeleted={() => {
-                onDeleted(localForm);
-              }}
-            />
-          );
-      })}
+          if (formEvent)
+            return (
+              <FormEventCard
+                event={formEvent}
+                relay={localForm.relay}
+                secretKey={localForm.privateKey}
+                viewKey={localForm.viewKey}
+                onDeleted={() => {
+                  onDeleted(localForm);
+                }}
+              />
+            );
+          else
+            return (
+              <LocalFormCard
+                key={localForm.key}
+                form={localForm}
+                onDeleted={() => {
+                  onDeleted(localForm);
+                }}
+              />
+            );
+        })}
     </>
   );
 };

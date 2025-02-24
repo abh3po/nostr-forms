@@ -5,6 +5,7 @@ import { getDefaultRelays } from "../../../nostr/common";
 import { Tag } from "../../../nostr/types";
 import { FormEventCard } from "./FormEventCard";
 import { Spin } from "antd";
+import { LoadingOutlined } from "@ant-design/icons";
 
 export const MyForms = () => {
   type FormEventMetadata = {
@@ -166,25 +167,33 @@ export const MyForms = () => {
 
   return (
     <>
-      {refreshing ? <Spin size="large" /> : null}
-      {[...formEvents.values()].map((formMetadata) => {
-        const formId = formMetadata.event.tags.find(
-          (tag: Tag) => tag[0] === "d"
-        )?.[1];
+      {refreshing ? (
+        <Spin
+          indicator={
+            <LoadingOutlined style={{ fontSize: 48, color: "#F7931A" }} spin />
+          }
+        />
+      ) : null}
+      {[...formEvents.values()]
+        .sort((a, b) => b.event.created_at - a.event.created_at)
+        .map((formMetadata) => {
+          const formId = formMetadata.event.tags.find(
+            (tag: Tag) => tag[0] === "d"
+          )?.[1];
 
-        return (
-          <FormEventCard
-            event={formMetadata.event}
-            key={formId}
-            onDeleted={() =>
-              formId && handleFormDeleted(formId, formMetadata.event.pubkey)
-            }
-            secretKey={formMetadata.secrets.secretKey}
-            viewKey={formMetadata.secrets.viewKey}
-            relay={formMetadata.relay}
-          />
-        );
-      })}
+          return (
+            <FormEventCard
+              event={formMetadata.event}
+              key={formId}
+              onDeleted={() =>
+                formId && handleFormDeleted(formId, formMetadata.event.pubkey)
+              }
+              secretKey={formMetadata.secrets.secretKey}
+              viewKey={formMetadata.secrets.viewKey}
+              relay={formMetadata.relay}
+            />
+          );
+        })}
     </>
   );
 };

@@ -1,5 +1,5 @@
 import { Tag } from "@formstr/sdk/dist/formstr/nip101";
-import { Button, Card } from "antd";
+import { Button, Card, Divider } from "antd";
 import { Event } from "nostr-tools";
 import { useNavigate } from "react-router-dom";
 import DeleteFormTrigger from "./DeleteForm";
@@ -96,41 +96,55 @@ export const FormEventCard: React.FC<FormEventCardProps> = ({
             : "Encrypted Content"}
         </ReactMarkdown>
       </div>
-      <Button
-        onClick={(e) => {
-          secretKey
-            ? navigate(responsePath(secretKey, formId, relay, viewKey))
-            : navigate(`/r/${pubKey}/${formId}`);
-        }}
-        type="dashed"
+      <Divider />
+      <div
         style={{
-          color: "purple",
-          borderColor: "purple",
+          display: "flex",
+          flexDirection: "row",
+          justifyContent: "space-between",
         }}
       >
-        View Responses
-      </Button>
-      <Button
-        onClick={(e: any) => {
-          e.stopPropagation();
-          navigate(
-            naddrUrl(
-              pubKey,
-              formId,
-              relays.length ? relays : ["wss://relay.damus.io"],
-              viewKey
-            )
-          );
-        }}
-        style={{
-          marginLeft: "10px",
-          color: "green",
-          borderColor: "green",
-        }}
-        type="dashed"
-      >
-        Open Form
-      </Button>
+        <div>
+          <Button
+            onClick={(e) => {
+              secretKey
+                ? navigate(responsePath(secretKey, formId, relay, viewKey))
+                : navigate(`/r/${pubKey}/${formId}`);
+            }}
+            type="dashed"
+            style={{
+              color: "purple",
+              borderColor: "purple",
+            }}
+          >
+            View Responses
+          </Button>
+          <Button
+            onClick={(e: any) => {
+              e.stopPropagation();
+              navigate(
+                naddrUrl(
+                  pubKey,
+                  formId,
+                  relays.length ? relays : ["wss://relay.damus.io"],
+                  viewKey
+                )
+              );
+            }}
+            style={{
+              marginLeft: "10px",
+              color: "green",
+              borderColor: "green",
+            }}
+            type="dashed"
+          >
+            Open Form
+          </Button>
+        </div>
+        <div style={{ margin: 7 }}>
+          {new Date(event.created_at * 1000).toDateString()}
+        </div>
+      </div>
     </Card>
   );
 };

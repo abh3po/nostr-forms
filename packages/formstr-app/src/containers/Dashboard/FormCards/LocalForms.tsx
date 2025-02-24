@@ -26,7 +26,7 @@ export const LocalForms: React.FC<LocaLFormsProps> = ({
       return newMap;
     });
   };
-  console.log("Local Forms are", localForms);
+
   useEffect(() => {
     let closer: SubCloser;
     const initialize = () => {

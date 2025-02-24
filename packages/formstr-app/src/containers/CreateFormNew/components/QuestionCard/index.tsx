@@ -88,7 +88,8 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
                 key={question[1]}
                 className="question-input"
                 onChange={handleTextChange}
-                value={question[3] || "Click to edit"}
+                defaultValue={"Click to edit"}
+                value={question[3] || ""}
                 placeholder="Enter a Question"
                 autoSize
               />

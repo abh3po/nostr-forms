@@ -15,21 +15,62 @@ import { DownOutlined, MenuOutlined, UserOutlined } from "@ant-design/icons";
 import { HEADER_MENU, HEADER_MENU_KEYS } from "./configs";
 import { useProfileContext } from "../../hooks/useProfileContext";
 import { NostrAvatar } from "./NostrAvatar";
+import { ReactComponent as GeyserIcon } from "../../Images/Geyser.svg";
+import { color } from "framer-motion";
 
 export const NostrHeader = () => {
   const { Header } = Layout;
   const { pubkey, requestPubkey, logout } = useProfileContext();
 
   const dropdownMenuItems: MenuProps["items"] = [
+    ...[
+      pubkey
+        ? {
+            key: "logout",
+            label: <a onClick={logout}>Logout</a>,
+          }
+        : {
+            key: "login",
+            label: <a onClick={requestPubkey}>Login</a>,
+          },
+    ],
     {
-      key: "1",
-      label: <a onClick={logout}>Logout</a>,
+      key: "Support Us",
+      icon: (
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "row",
+            justifyContent: "space-between",
+          }}
+        >
+          <GeyserIcon
+            style={{
+              color: "white",
+              strokeWidth: 20,
+              fill: "black",
+              stroke: "black",
+              maxHeight: 20,
+              maxWidth: 20,
+              backgroundColor: "black",
+              marginRight: 5,
+            }}
+          />
+          <Typography.Text style={{ marginTop: 2 }}>
+            {" "}
+            Support Us
+          </Typography.Text>
+        </div>
+      ),
+      onClick: () => {
+        window.open("https://geyser.fund/project/formstr", "_blank");
+      },
     },
   ];
 
-  const myForms = {
-    key: HEADER_MENU_KEYS.MY_FORMS,
-    icon: pubkey ? (
+  const User = {
+    key: HEADER_MENU_KEYS.USER,
+    icon: (
       <div>
         <Dropdown
           menu={{
@@ -44,19 +85,9 @@ export const NostrHeader = () => {
           </div>
         </Dropdown>
       </div>
-    ) : (
-      <Button
-        type="text"
-        size="small"
-        onClick={() => requestPubkey()}
-        style={{ color: "black" }}
-        icon={<UserOutlined />}
-      >
-        <Typography.Text style={{ marginTop: 3 }}>Login</Typography.Text>
-      </Button>
     ),
   };
-  const newHeaderMenu = [...HEADER_MENU, myForms];
+  const newHeaderMenu = [...HEADER_MENU, User];
   return (
     <>
       <Header

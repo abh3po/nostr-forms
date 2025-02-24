@@ -2,7 +2,6 @@ import { Dashboard } from "../containers/Dashboard";
 
 export const ROUTES = {
   CREATE_FORMS_NEW: "/c",
-  MY_FORMS: "/myforms",
   DASHBOARD: "/dashboard",
   PUBLIC_FORMS: "/public",
   FORM_FILLER: "/fill/:formId",

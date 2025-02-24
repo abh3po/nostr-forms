@@ -10,7 +10,6 @@ import EmptyScreen from "../../components/EmptyScreen";
 import { useApplicationContext } from "../../hooks/useApplicationContext";
 import { getItem, LOCAL_STORAGE_KEYS } from "../../utils/localStorage";
 import { ILocalForm } from "../CreateFormNew/providers/FormBuilder/typeDefs";
-import { LocalFormCard } from "./FormCards/LocalFormCard";
 import { Dropdown, Menu, Typography } from "antd";
 import { DownOutlined } from "@ant-design/icons";
 import { MyForms } from "./FormCards/MyForms";
@@ -81,7 +80,14 @@ export const Dashboard = () => {
   const renderForms = () => {
     if (filter === "local") {
       if (localForms.length == 0) return <EmptyScreen />;
-      return <LocalForms localForms={localForms} onDeleted={(localForm: ILocalForm) => (setLocalForms(localForms.filter((f) => f.key !== localForm.key)))} />
+      return (
+        <LocalForms
+          localForms={localForms}
+          onDeleted={(localForm: ILocalForm) =>
+            setLocalForms(localForms.filter((f) => f.key !== localForm.key))
+          }
+        />
+      );
     } else if (filter === "shared") {
       if (nostrForms.size == 0) return <EmptyScreen />;
       return Array.from(nostrForms.values()).map((formEvent: Event) => {

@@ -1,5 +1,4 @@
 import { Routes, Route, Navigate } from "react-router-dom";
-import MyForms from "../../old/containers/MyForms";
 import PublicForms from "../../containers/PublicForms";
 import { ROUTES } from "../../constants/routes";
 import { FormFillerOld } from "../../old/containers/FormFiller";
@@ -49,10 +48,6 @@ function Routing() {
        <Route
         path={`${ROUTES.EDIT_FORM_SECRET}/*`}
         element={withNewCreateFormHeaderWrapper(EditForm)}
-      />
-      <Route
-        path={`${ROUTES.MY_FORMS}/*`}
-        element={withNostrHeaderWrapper(MyForms)}
       />
       <Route
         path={`${ROUTES.PUBLIC_FORMS}/*`}

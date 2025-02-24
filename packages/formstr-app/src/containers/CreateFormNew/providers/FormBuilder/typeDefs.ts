@@ -1,8 +1,8 @@
 import { AnswerSettings, FormSpec } from "@formstr/sdk/dist/interfaces";
 import { IDraft } from "../../../../old/containers/MyForms/components/Drafts/typeDefs";
-import { Field } from ".";
 import { IFormSettings } from "../../components/FormSettings/types";
 import { Tag } from "@formstr/sdk/dist/formstr/nip101";
+import { Field } from "../../../../nostr/types";
 
 export interface ILocalForm {
   key: string;

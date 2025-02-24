@@ -18,15 +18,7 @@ import {
   LOCAL_STORAGE_KEYS,
   setItem,
 } from "../../../../utils/localStorage";
-
-export type Field = [
-  placeholder: string,
-  fieldId: string,
-  dataType: string,
-  label: string,
-  options: string,
-  config: string,
-];
+import { Field } from "../../../../nostr/types";
 
 export const FormBuilderContext = React.createContext<IFormBuilderContext>({
   questionsList: [],
@@ -193,7 +185,6 @@ export default function FormBuilderProvider({
         return draft;
       });
     }
-    console.log("setting", LOCAL_STORAGE_KEYS.DRAFT_FORMS, draftArr);
     setItem(LOCAL_STORAGE_KEYS.DRAFT_FORMS, draftArr);
   };
 
@@ -212,8 +203,6 @@ export default function FormBuilderProvider({
     label?: string,
     answerSettings?: AnswerSettings
   ) => {
-    console.log("called with,", primitive, label, answerSettings);
-    console.log("question list was", questionsList);
     setIsLeftMenuOpen(false);
     setQuestionsList([
       ...questionsList,

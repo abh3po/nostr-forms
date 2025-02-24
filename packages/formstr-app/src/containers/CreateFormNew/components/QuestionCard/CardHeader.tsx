@@ -1,12 +1,16 @@
 import React from "react";
-import { ArrowDownOutlined, ArrowUpOutlined, MoreOutlined } from "@ant-design/icons";
+import {
+  ArrowDownOutlined,
+  ArrowUpOutlined,
+  MoreOutlined,
+} from "@ant-design/icons";
 import { ReactComponent as Asterisk } from "../../../../Images/asterisk.svg";
 import StyledWrapper from "./CardHeader.style";
 import useFormBuilderContext from "../../hooks/useFormBuilderContext";
 import useDeviceType from "../../../../hooks/useDeviceType";
 import { classNames } from "../../../../utils/utility";
-import { Field } from "../../providers/FormBuilder";
 import DeleteButton from "./DeleteButton";
+import { Field } from "../../../../nostr/types";
 
 interface CardHeaderProps {
   required?: boolean;

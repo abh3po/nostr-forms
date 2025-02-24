@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { Event, getPublicKey, nip19, nip44 } from "nostr-tools";
 import { useParams, useSearchParams } from "react-router-dom";
-import { Field, Tag } from "@formstr/sdk/dist/formstr/nip101";
 import { fetchFormResponses } from "@formstr/sdk/dist/formstr/nip101/fetchFormResponses";
 import SummaryStyle from "./summary.style";
 import { Button, Card, Divider, Table, Typography } from "antd";
@@ -12,6 +11,7 @@ import { fetchFormTemplate } from "@formstr/sdk/dist/formstr/nip101/fetchFormTem
 import { hexToBytes } from "@noble/hashes/utils";
 import { fetchKeys, getAllowedUsers, getFormSpec } from "../../utils/formUtils";
 import { Export } from "./Export";
+import { Field, Tag } from "../../nostr/types";
 
 const { Text } = Typography;
 
@@ -239,7 +239,7 @@ export const Response = () => {
 
   if (!(pubKey || secretKey) || !formId) return <Text>Invalid url</Text>;
 
-  if (formEvent && formEvent.content !== "" && !userPubkey)
+  if (formEvent && formEvent.content !== "" && !userPubkey && !viewKeyParams)
     return (
       <>
         <Text>This form is private, you need to login to view the form</Text>
@@ -247,7 +247,10 @@ export const Response = () => {
           onClick={() => {
             requestPubkey();
           }}
-        ></Button>
+        >
+          {" "}
+          login{" "}
+        </Button>
       </>
     );
 

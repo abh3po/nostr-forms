@@ -6,7 +6,7 @@ import DescriptionStyle from "./description.style";
 import useFormBuilderContext from "../../hooks/useFormBuilderContext";
 import { ChangeEvent, useState, useRef, useEffect } from "react";
 import { Reorder, motion, useDragControls } from "framer-motion";
-import { Field } from "../../providers/FormBuilder";
+import { Field } from "../../../../nostr/types";
 
 interface FloatingButtonProps {
   onClick: () => void;
@@ -48,7 +48,7 @@ const FloatingButton = ({ onClick, containerRef }: FloatingButtonProps) => {
 
 export const QuestionsList = () => {
   const containerRef = useRef<HTMLDivElement>(null);
-  
+
   const {
     formSettings,
     questionsList,
@@ -78,7 +78,8 @@ export const QuestionsList = () => {
     const order = keyType === "UP" ? -1 : +1;
     if (selectedQuestionIndex !== -1) {
       const replaceQuestion = questions[selectedQuestionIndex + order];
-      questions[selectedQuestionIndex + order] = questions[selectedQuestionIndex];
+      questions[selectedQuestionIndex + order] =
+        questions[selectedQuestionIndex];
       questions[selectedQuestionIndex] = replaceQuestion;
     }
     updateQuestionsList(questions);
@@ -93,7 +94,7 @@ export const QuestionsList = () => {
       className="main-content"
       onClick={() => setQuestionIdInFocus()}
       ref={containerRef}
-      style={{ position: 'relative' }}
+      style={{ position: "relative" }}
     >
       <div>
         <FormTitle className="form-title" />
@@ -133,11 +134,10 @@ export const QuestionsList = () => {
         </div>
       </Reorder.Group>
       <div className="mobile-add-btn">
-
-      <FloatingButton 
-        onClick={onPlusButtonClick} 
-        containerRef={containerRef}
-      />
+        <FloatingButton
+          onClick={onPlusButtonClick}
+          containerRef={containerRef}
+        />
       </div>
     </StyleWrapper>
   );

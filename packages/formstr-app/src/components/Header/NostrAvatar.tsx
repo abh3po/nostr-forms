@@ -1,17 +1,13 @@
-import {
-  ProfileFilled,
-  ProfileOutlined,
-  UserOutlined,
-} from "@ant-design/icons";
+import { UserOutlined } from "@ant-design/icons";
 import { getDefaultRelays } from "@formstr/sdk";
 import { Avatar } from "antd";
-import { SimplePool, Event } from "nostr-tools";
+import { SimplePool } from "nostr-tools";
 import { FC, useEffect, useState } from "react";
 
 const defaultRelays = getDefaultRelays();
 
 interface NostrAvatarProps {
-  pubkey: string;
+  pubkey?: string;
 }
 
 interface Profile {
@@ -23,7 +19,7 @@ export const NostrAvatar: FC<NostrAvatarProps> = ({ pubkey }) => {
   async function getProfile() {
     let filter = {
       kinds: [0],
-      authors: [pubkey],
+      authors: [pubkey!],
     };
     let pool = new SimplePool();
     const profile = await pool.get(defaultRelays, filter);
@@ -31,7 +27,7 @@ export const NostrAvatar: FC<NostrAvatarProps> = ({ pubkey }) => {
     pool.close(defaultRelays);
   }
   useEffect(() => {
-    if (!profile) getProfile();
+    if (!profile && pubkey) getProfile();
   });
   return (
     <Avatar

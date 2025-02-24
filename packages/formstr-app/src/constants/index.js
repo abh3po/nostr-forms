@@ -30,22 +30,6 @@ const tabList = [
   },
 ];
 
-const MyFormTab = {
-  drafts: "drafts",
-  savedForms: "savedForms",
-};
-
-const MyFormTabsList = [
-  {
-    key: MyFormTab.drafts,
-    label: "Drafts",
-  },
-  {
-    key: MyFormTab.savedForms,
-    label: "Saved Forms",
-  },
-];
-
 const DEVICE_TYPE = {
   MOBILE: "MOBILE",
   TABLET: "TABLET",
@@ -62,8 +46,6 @@ module.exports = {
   ResponseFilters,
   AnswerTypes,
   tabList,
-  MyFormTabsList,
-  MyFormTab,
   DEVICE_TYPE,
   DEVICE_WIDTH,
 };

@@ -1,16 +1,34 @@
 import { CheckCircleOutlined } from "@ant-design/icons";
-import { Modal, Row, Spin, Typography } from "antd";
+import { Button, Modal, Row, Spin, Typography } from "antd";
 import { normalizeURL } from "nostr-tools/utils";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
-export const RelayPublishedModal = () => {
-  const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
+interface RelayPublishModal {
+  relays: string[];
+  acceptedRelays: string[];
+  isOpen: boolean;
+}
+
+export const RelayPublishModal: React.FC<RelayPublishModal> = ({
+  isOpen,
+  relays,
+  acceptedRelays,
+}) => {
+  const [isModalOpen, setIsModalOpen] = useState<boolean>(isOpen);
+
+  useEffect(() => {
+    setIsModalOpen(isOpen);
+  }, [isOpen]);
+
+  const allRelaysAccepted =
+    relays && relays.every((url) => acceptedRelays.includes(normalizeURL(url)));
+
   const { Text } = Typography;
 
   const renderRelays = () => {
-    if (!relayList) return null;
+    if (!relays) return null;
 
-    return relayList.map(({ url }) => {
+    return relays.map((url) => {
       const normalizedUrl = normalizeURL(url);
       const isAccepted = acceptedRelays.includes(normalizedUrl);
 
@@ -39,17 +57,14 @@ export const RelayPublishedModal = () => {
       open={isModalOpen}
       footer={
         allRelaysAccepted ? (
-          <Button
-            type="primary"
-            onClick={() => setIsPostPublishModalOpen(false)}
-          >
+          <Button type="primary" onClick={() => setIsModalOpen(false)}>
             Done
           </Button>
         ) : null
       }
       closable={allRelaysAccepted}
       maskClosable={allRelaysAccepted}
-      onCancel={() => setIsPostPublishModalOpen(false)}
+      onCancel={() => setIsModalOpen(false)}
     >
       <div>
         <Text strong style={{ display: "block", marginBottom: 16 }}>

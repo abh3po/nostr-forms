@@ -1,14 +1,20 @@
 import { LoadingOutlined, DownOutlined } from "@ant-design/icons";
 import { Button, FormInstance, Dropdown, MenuProps } from "antd";
 import React, { useState } from "react";
+import { sendResponses } from "../../../nostr/common";
+import { RelayPublishModal } from "../../../components/RelayPublishModal/RelaysPublishModal";
+import { Event, generateSecretKey } from "nostr-tools";
+import { Response } from "../../../nostr/types";
 
 interface SubmitButtonProps {
   selfSign: boolean | undefined;
   edit: boolean;
   form: FormInstance;
-  onSubmit: (anonymous: boolean) => Promise<void>;
+  formEvent: Event;
+  onSubmit: () => Promise<void>;
   disabled?: boolean;
   disabledMessage?: string;
+  relays: string[];
 }
 
 export const SubmitButton: React.FC<SubmitButtonProps> = ({
@@ -16,11 +22,52 @@ export const SubmitButton: React.FC<SubmitButtonProps> = ({
   edit,
   form,
   onSubmit,
+  formEvent,
   disabled = false,
   disabledMessage = "disabled",
+  relays,
 }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isDisabled, setIsDisabled] = useState(false);
+  const [acceptedRelays, setAcceptedRelays] = useState<string[]>([]);
+
+  const getResponseRelays = (formEvent: Event) => {
+    let formRelays = formEvent.tags
+      .filter((r) => r[0] === "relay")
+      ?.map((r) => r[1]);
+    return Array.from(new Set([...(relays || []), ...(formRelays || [])]));
+  };
+
+  const saveResponse = async (anonymous: boolean = true) => {
+    let formId = formEvent.tags.find((t) => t[0] === "b")?.[1];
+    let pubKey = formEvent.pubkey;
+    let formResponses = form.getFieldsValue(true);
+    let responseRelays = getResponseRelays(formEvent);
+    const responses: Response[] = Object.keys(formResponses).map(
+      (fieldId: string) => {
+        let answer = null;
+        let message = null;
+        if (formResponses[fieldId]) [answer, message] = formResponses[fieldId];
+        return ["response", fieldId, answer, JSON.stringify({ message })];
+      }
+    );
+    let anonUser = null;
+    if (anonymous) {
+      anonUser = generateSecretKey();
+    }
+    sendResponses(
+      pubKey,
+      formId!,
+      responses,
+      anonUser,
+      true,
+      responseRelays,
+      (url: string) => setAcceptedRelays((prev) => [...prev, url])
+    ).then((res: any) => {
+      setIsSubmitting(false);
+      onSubmit();
+    });
+  };
 
   const submitForm = async (anonymous: boolean = true) => {
     setIsSubmitting(true);
@@ -29,11 +76,10 @@ export const SubmitButton: React.FC<SubmitButtonProps> = ({
       let errors = form.getFieldsError().filter((e) => e.errors.length > 0);
       if (errors.length === 0) {
         setIsDisabled(true);
-        await onSubmit(anonymous);
+        await saveResponse(anonymous);
       }
     } catch (err) {
-    } finally {
-      setIsSubmitting(false);
+      console.log("Error in sending response", err);
     }
   };
 
@@ -67,24 +113,33 @@ export const SubmitButton: React.FC<SubmitButtonProps> = ({
   };
 
   return (
-    <Dropdown.Button
-      menu={menuProps}
-      type="primary"
-      onClick={handleButtonClick}
-      icon={<DownOutlined />}
-      disabled={isDisabled}
-      className="submit-button"
-    >
-      {disabled ? (
-        disabledMessage
-      ) : isSubmitting ? (
-        <span>
-          <LoadingOutlined className="mr-2" />
-          Submitting...
-        </span>
-      ) : (
-        selfSign ? items[1].label : "Submit"
-      )}
-    </Dropdown.Button>
+    <div>
+      <Dropdown.Button
+        menu={menuProps}
+        type="primary"
+        onClick={handleButtonClick}
+        icon={<DownOutlined />}
+        disabled={isDisabled}
+        className="submit-button"
+      >
+        {disabled ? (
+          disabledMessage
+        ) : isSubmitting ? (
+          <span>
+            <LoadingOutlined className="mr-2" />
+            Submitting...
+          </span>
+        ) : selfSign ? (
+          items[1].label
+        ) : (
+          "Submit"
+        )}
+      </Dropdown.Button>
+      <RelayPublishModal
+        relays={relays}
+        acceptedRelays={acceptedRelays}
+        isOpen={isSubmitting}
+      />
+    </div>
   );
 };

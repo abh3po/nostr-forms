@@ -31,18 +31,10 @@ export const SubmitButton: React.FC<SubmitButtonProps> = ({
   const [isDisabled, setIsDisabled] = useState(false);
   const [acceptedRelays, setAcceptedRelays] = useState<string[]>([]);
 
-  const getResponseRelays = (formEvent: Event) => {
-    let formRelays = formEvent.tags
-      .filter((r) => r[0] === "relay")
-      ?.map((r) => r[1]);
-    return Array.from(new Set([...(relays || []), ...(formRelays || [])]));
-  };
-
   const saveResponse = async (anonymous: boolean = true) => {
     let formId = formEvent.tags.find((t) => t[0] === "b")?.[1];
     let pubKey = formEvent.pubkey;
     let formResponses = form.getFieldsValue(true);
-    let responseRelays = getResponseRelays(formEvent);
     const responses: Response[] = Object.keys(formResponses).map(
       (fieldId: string) => {
         let answer = null;
@@ -61,7 +53,7 @@ export const SubmitButton: React.FC<SubmitButtonProps> = ({
       responses,
       anonUser,
       true,
-      responseRelays,
+      relays,
       (url: string) => setAcceptedRelays((prev) => [...prev, url])
     ).then((res: any) => {
       setIsSubmitting(false);

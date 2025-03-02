@@ -31,15 +31,14 @@ const { Text } = Typography;
 interface FormFillerProps {
   formSpec?: Tag[];
   embedded?: boolean;
-  isPreview?: boolean;
 }
 
 export const FormFiller: React.FC<FormFillerProps> = ({
   formSpec,
   embedded,
-  isPreview,
 }) => {
   const { naddr } = useParams();
+  let isPreview = !!formSpec;
   if (!isPreview && !naddr)
     return <Text> Not enough data to render this url </Text>;
   let decodedData;
@@ -62,8 +61,6 @@ export const FormFiller: React.FC<FormFillerProps> = ({
   const viewKeyParams = searchParams.get("viewKey");
   const hideDescription = searchParams.get("hideDescription") === "true";
   const navigate = useNavigate();
-
-  isPreview = !!formSpec;
 
   if (!formId && !formSpec) {
     return null;

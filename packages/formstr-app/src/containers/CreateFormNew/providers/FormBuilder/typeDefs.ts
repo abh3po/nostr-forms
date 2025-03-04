@@ -1,8 +1,7 @@
-import { AnswerSettings, FormSpec } from "@formstr/sdk/dist/interfaces";
-import { IDraft } from "../../../../old/containers/MyForms/components/Drafts/typeDefs";
-import { Field } from ".";
+import { AnswerSettings } from "@formstr/sdk/dist/interfaces";
 import { IFormSettings } from "../../components/FormSettings/types";
 import { Tag } from "@formstr/sdk/dist/formstr/nip101";
+import { Field } from "../../../../nostr/types";
 
 export interface ILocalForm {
   key: string;
@@ -16,8 +15,15 @@ export interface ILocalForm {
   relay: string;
 }
 
+export interface FormInitData {
+  spec: Tag[];
+  id: string;
+  secret?: string;
+  viewKey?: string | null;
+}
+
 export interface IFormBuilderContext {
-  initializeForm: (draft: { formSpec: Tag[]; tempId: string }) => void;
+  initializeForm: (form: FormInitData) => void;
   questionsList: Field[];
   saveForm: (onRelayAccepted?: (url: string) => void) => Promise<void>;
   closeSettingsOnOutsideClick: () => void;

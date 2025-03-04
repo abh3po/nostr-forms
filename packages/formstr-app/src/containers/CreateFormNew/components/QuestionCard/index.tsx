@@ -7,9 +7,9 @@ import { AnswerSettings } from "@formstr/sdk/dist/interfaces";
 import StyledWrapper from "./index.style";
 import { SmallDashOutlined } from "@ant-design/icons";
 import QuestionTextStyle from "./question.style";
-import { Field } from "../../providers/FormBuilder";
 import { Choice } from "./InputElements/OptionTypes/types";
 import UploadImage from "./UploadImage";
+import { Field } from "../../../../nostr/types";
 
 type QuestionCardProps = {
   question: Field;
@@ -26,7 +26,6 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
   firstQuestion,
   lastQuestion,
 }) => {
-  // console.log("question is", question, question[5]);
   let options = JSON.parse(question[4] || "[]") as Array<Choice>;
   const answerSettings = JSON.parse(
     question[5] || '{"renderElement": "shortText"}'

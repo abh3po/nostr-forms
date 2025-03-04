@@ -17,7 +17,6 @@ import Markdown from "react-markdown";
 import { Event, generateSecretKey, nip19 } from "nostr-tools";
 import { FormFields } from "./FormFields";
 import { RequestAccess } from "./RequestAccess";
-import { CheckRequests } from "./CheckRequests";
 import { fetchFormTemplate } from "@formstr/sdk/dist/formstr/nip101/fetchFormTemplate";
 import { useProfileContext } from "../../hooks/useProfileContext";
 import { getAllowedUsers, getFormSpec } from "../../utils/formUtils";
@@ -67,8 +66,9 @@ export const FormFiller: React.FC<FormFillerProps> = ({
   embedded,
 }) => {
   const { naddr } = useParams();
-  let isPreview: boolean = false;
-  if (!naddr) isPreview = true;
+  let isPreview = !!formSpec;
+  if (!isPreview && !naddr)
+    return <Text> Not enough data to render this url </Text>;
   let decodedData;
   if (!isPreview) decodedData = nip19.decode(naddr!).data as AddressPointer;
   let pubKey = decodedData?.pubkey;
@@ -83,7 +83,6 @@ export const FormFiller: React.FC<FormFillerProps> = ({
   const [noAccess, setNoAccess] = useState<boolean>(false);
   const [editKey, setEditKey] = useState<string | undefined | null>();
   const [allowedUsers, setAllowedUsers] = useState<string[]>([]);
-  const [thankYouScreen, setThankYouScreen] = useState(false);
   const [formEvent, setFormEvent] = useState<Event | undefined>();
   const [searchParams] = useSearchParams();
   const hideTitleImage = searchParams.get("hideTitleImage") === "true";
@@ -94,14 +93,11 @@ export const FormFiller: React.FC<FormFillerProps> = ({
   >({});
   const navigate = useNavigate();
 
-  isPreview = !!formSpec;
-
   if (!formId && !formSpec) {
     return null;
   }
 
   const onKeysFetched = (keys: Tag[] | null) => {
-    console.log("Keys got", keys);
     let editKey = keys?.find((k) => k[0] === "EditAccess")?.[1] || null;
     setEditKey(editKey);
   };
@@ -323,10 +319,14 @@ export const FormFiller: React.FC<FormFillerProps> = ({
     }
   };
 
-  const saveResponse = async (anonymous: boolean = true) => {
-    if (!formId || !pubKey) {
-      throw "Cant submit to a form that has not been published";
-    }
+  const getResponseRelays = (formEvent: Event) => {
+    let formRelays = formEvent.tags
+      .filter((r) => r[0] === "relay")
+      ?.map((r) => r[1]);
+    return Array.from(new Set([...(relays || []), ...(formRelays || [])]));
+  };
+
+  const onSubmit = async () => {
     let formResponses = form.getFieldsValue(true);
     const responses: Response[] = Object.keys(formResponses).map(
       (fieldId: string) => {
@@ -336,29 +336,22 @@ export const FormFiller: React.FC<FormFillerProps> = ({
         return ["response", fieldId, answer, JSON.stringify({ message })];
       }
     );
-    let anonUser = null;
-    if (anonymous) {
-      anonUser = generateSecretKey();
-    }
-    sendResponses(pubKey, formId, responses, anonUser, true, relays).then(
-      (res: any) => {
-        console.log("Submitted!");
-        sendNotification(formTemplate!, responses);
-        setFormSubmitted(true);
-        setThankYouScreen(true);
-      }
-    );
+    sendNotification(formTemplate!, responses);
+    setFormSubmitted(true);
   };
 
   const renderSubmitButton = (settings: IFormSettings) => {
     if (isPreview) return null;
+    if (!formEvent) return null;
     if (allowedUsers.length === 0) {
       return (
         <SubmitButton
           selfSign={settings.disallowAnonymous}
           edit={false}
-          onSubmit={saveResponse}
+          onSubmit={onSubmit}
           form={form}
+          relays={getResponseRelays(formEvent)}
+          formEvent={formEvent}
         />
       );
     } else if (!userPubKey) {
@@ -370,8 +363,10 @@ export const FormFiller: React.FC<FormFillerProps> = ({
         <SubmitButton
           selfSign={true}
           edit={false}
-          onSubmit={saveResponse}
+          onSubmit={onSubmit}
           form={form}
+          relays={getResponseRelays(formEvent)}
+          formEvent={formEvent}
         />
       );
     }
@@ -411,7 +406,12 @@ export const FormFiller: React.FC<FormFillerProps> = ({
         </Text>
       </div>
     );
-  } else if (!isPreview && formEvent?.content !== "" && !userPubKey) {
+  } else if (
+    !isPreview &&
+    formEvent?.content !== "" &&
+    !userPubKey &&
+    !viewKeyParams
+  ) {
     return (
       <>
         <Text>
@@ -446,54 +446,42 @@ export const FormFiller: React.FC<FormFillerProps> = ({
 
     return (
       <FillerStyle $isPreview={isPreview}>
-        {editKey && !isPreview ? (
-          <CheckRequests
-            pubkey={pubKey!}
-            formId={formId!}
-            secretKey={editKey}
-            formEvent={formEvent!}
-          />
-        ) : null}
-        {!formSubmitted && (
-          <div className="filler-container">
-            <div className="form-filler">
-              {!hideTitleImage && (
-                <FormTitle
-                  className="form-title"
-                  edit={false}
-                  imageUrl={settings?.titleImageUrl}
-                  formTitle={name}
-                />
-              )}
-              {!hideDescription && (
-                <div className="form-description">
-                  <Text>
-                    <Markdown>{settings?.description}</Markdown>
-                  </Text>
-                </div>
-              )}
+        <div className="filler-container">
+          <div className="form-filler">
+            {!hideTitleImage && (
+              <FormTitle
+                className="form-title"
+                edit={false}
+                imageUrl={settings?.titleImageUrl}
+                formTitle={name}
+              />
+            )}
+            {!hideDescription && (
+              <div className="form-description">
+                <Text>
+                  <Markdown>{settings?.description}</Markdown>
+                </Text>
+              </div>
+            )}
 
-              <Form
-                form={form}
-                onFinish={() => {}}
-                className={
-                  hideDescription ? "hidden-description" : "with-description"
-                }
-              >
-                <div>
-                  <FormFields
-                    fields={visibleFields}
-                    handleInput={handleInput}
-                  />
-                  <>{renderSubmitButton(settings)}</>
-                </div>
-              </Form>
-            </div>
-            <div className="branding-container">
-              <Link to="/">
-                <CreatedUsingFormstr />
-              </Link>
-              {!isMobile() && (
+            <Form
+              form={form}
+              onFinish={() => {}}
+              className={
+                hideDescription ? "hidden-description" : "with-description"
+              }
+            >
+              <div>
+                <FormFields fields={fields} handleInput={handleInput} />
+                <>{renderSubmitButton(settings)}</>
+              </div>
+            </Form>
+          </div>
+          <div className="branding-container">
+            <Link to="/">
+              <CreatedUsingFormstr />
+            </Link>
+            {!isMobile() && (
                 <a
                   href="https://github.com/abhay-raizada/nostr-forms"
                   className="foss-link"

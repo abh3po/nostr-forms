@@ -5,9 +5,9 @@ import useFormBuilderContext from "../../hooks/useFormBuilderContext";
 import { INPUTS_MENU } from "../../configs/menuConfig";
 import StyleWrapper from "./style";
 import { RightAnswer } from "./RightAnswer";
-import { Field } from "../../providers/FormBuilder";
 import { IAnswerSettings } from "./types";
 import Conditions from "./Conditions";
+import { Field } from "../../../../nostr/types";
 
 const { Text } = Typography;
 

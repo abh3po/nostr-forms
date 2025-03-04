@@ -215,7 +215,8 @@ export const sendResponses = async (
   responses: Response[],
   responderSecretKey: Uint8Array | null = null,
   encryptResponses: boolean = true,
-  relays: string[] = []
+  relays: string[] = [],
+  onAcceptedRelays?: (url: string) => void
 ) => {
   let responderPub;
   responderPub = await getUserPublicKey(responderSecretKey);
@@ -239,9 +240,12 @@ export const sendResponses = async (
   };
 
   const fullEvent = await signEvent(baseEvent, responderSecretKey);
-  const relayList = [...relays, ...defaultRelays];
+  let relayList = relays;
+  if (relayList.length === 0) {
+    relayList = defaultRelays;
+  }
   const messages = await Promise.allSettled(
-    customPublish(relayList, fullEvent)
+    customPublish(relayList, fullEvent, onAcceptedRelays)
   );
   console.log("Message from relays", messages);
 };

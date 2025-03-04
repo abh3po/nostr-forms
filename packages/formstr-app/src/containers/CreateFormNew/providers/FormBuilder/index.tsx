@@ -1,15 +1,14 @@
 import React, { useRef, useState } from "react";
-import { AnswerSettings, FormSpec } from "@formstr/sdk/dist/interfaces";
-import { IFormBuilderContext, ILocalForm } from "./typeDefs";
+import { AnswerSettings } from "@formstr/sdk/dist/interfaces";
+import { FormInitData, IFormBuilderContext } from "./typeDefs";
 import { generateQuestion } from "../../utils";
 import { getDefaultRelays } from "@formstr/sdk";
 import { makeTag } from "../../../../utils/utility";
-import { IDraft } from "../../../../old/containers/MyForms/components/Drafts/typeDefs";
 import { HEADER_MENU_KEYS } from "../../components/Header/config";
 import { IFormSettings } from "../../components/FormSettings/types";
 import { Tag } from "@formstr/sdk/dist/formstr/nip101";
 import { bytesToHex } from "@noble/hashes/utils";
-import { getPublicKey, nip04, nip19 } from "nostr-tools";
+import { getPublicKey } from "nostr-tools";
 import { useNavigate } from "react-router-dom";
 import { useProfileContext } from "../../../../hooks/useProfileContext";
 import { createForm } from "../../../../nostr/createForm";
@@ -78,6 +77,8 @@ const InitialFormSettings: IFormSettings = {
     " tap anywhere on the form to edit, including this description.",
   thankYouPage: true,
   formId: makeTag(6),
+  encryptForm: true,
+  viewKeyInUrl: true,
 };
 
 export default function FormBuilderProvider({
@@ -114,6 +115,9 @@ export default function FormBuilderProvider({
   const [selectedTab, setSelectedTab] = useState<string>(
     HEADER_MENU_KEYS.BUILDER
   );
+  const [secretKey, setSecretKey] = useState<string | null>(null);
+  const [viewKey, setViewKey] = useState<string | null | undefined>(null);
+
   const navigate = useNavigate();
 
   const toggleSettingsWindow = () => {
@@ -152,7 +156,9 @@ export default function FormBuilderProvider({
       viewList,
       editList,
       formSettings.encryptForm,
-      onRelayAccepted
+      onRelayAccepted,
+      secretKey,
+      viewKey
     ).then(
       (artifacts: {
         signingKey: Uint8Array;
@@ -176,8 +182,8 @@ export default function FormBuilderProvider({
         alert("error creating the form: " + error);
       }
     );
-};
-  
+  };
+
   const saveDraft = () => {
     if (formSettings.formId === "") return;
     type Draft = { formSpec: Tag[]; tempId: string };
@@ -195,12 +201,7 @@ export default function FormBuilderProvider({
         return draft;
       });
     }
-    console.log("setting", LOCAL_STORAGE_KEYS.DRAFT_FORMS, draftArr);
     setItem(LOCAL_STORAGE_KEYS.DRAFT_FORMS, draftArr);
-    // console.log(
-    //   "current local storage",
-    //   getItem(LOCAL_STORAGE_KEYS.DRAFT_FORMS)
-    // );
   };
 
   const editQuestion = (question: Field, tempId: string) => {
@@ -218,8 +219,6 @@ export default function FormBuilderProvider({
     label?: string,
     answerSettings?: AnswerSettings
   ) => {
-    console.log("called with,", primitive, label, answerSettings);
-    console.log("question list was", questionsList);
     setIsLeftMenuOpen(false);
     setQuestionsList([
       ...questionsList,

@@ -4,18 +4,17 @@ import { FormDetails } from "../CreateFormNew/components/FormDetails";
 import { Event, SubCloser } from "nostr-tools";
 import { useProfileContext } from "../../hooks/useProfileContext";
 import { getDefaultRelays } from "@formstr/sdk";
-import { LoggedOutScreen } from "./LoggedOutScreen";
 import { FormEventCard } from "./FormCards/FormEventCard";
 import DashboardStyleWrapper from "./index.style";
 import EmptyScreen from "../../components/EmptyScreen";
 import { useApplicationContext } from "../../hooks/useApplicationContext";
 import { getItem, LOCAL_STORAGE_KEYS } from "../../utils/localStorage";
 import { ILocalForm } from "../CreateFormNew/providers/FormBuilder/typeDefs";
-import { LocalFormCard } from "./FormCards/LocalFormCard";
 import { Dropdown, Menu, Typography } from "antd";
 import { DownOutlined } from "@ant-design/icons";
 import { MyForms } from "./FormCards/MyForms";
 import { Drafts } from "./FormCards/Drafts";
+import { LocalForms } from "./FormCards/LocalForms";
 const MENU_OPTIONS = {
   local: "On this device",
   shared: "Shared with me",
@@ -27,7 +26,7 @@ const defaultRelays = getDefaultRelays();
 
 export const Dashboard = () => {
   const { state } = useLocation();
-  const { pubkey, requestPubkey } = useProfileContext();
+  const { pubkey } = useProfileContext();
   const [showFormDetails, setShowFormDetails] = useState<boolean>(!!state);
   const [localForms, setLocalForms] = useState<ILocalForm[]>(
     getItem(LOCAL_STORAGE_KEYS.LOCAL_FORMS) || []
@@ -81,15 +80,14 @@ export const Dashboard = () => {
   const renderForms = () => {
     if (filter === "local") {
       if (localForms.length == 0) return <EmptyScreen />;
-      return localForms.map((localForm: ILocalForm) => (
-        <LocalFormCard
-          key={localForm.key}
-          form={localForm}
-          onDeleted={() => {
-            setLocalForms(localForms.filter((f) => f.key !== localForm.key));
-          }}
+      return (
+        <LocalForms
+          localForms={localForms}
+          onDeleted={(localForm: ILocalForm) =>
+            setLocalForms(localForms.filter((f) => f.key !== localForm.key))
+          }
         />
-      ));
+      );
     } else if (filter === "shared") {
       if (nostrForms.size == 0) return <EmptyScreen />;
       return Array.from(nostrForms.values()).map((formEvent: Event) => {

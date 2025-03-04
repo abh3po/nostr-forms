@@ -21,9 +21,7 @@ import {
   getItem,
   setItem,
 } from "../../../utils/localStorage";
-import { ISubmission } from "../MyForms/components/Submissions/submissions.types";
 import { ROUTES as GLOBAL_ROUTES } from "../../../constants/routes";
-import { ROUTES } from "../MyForms/configs/routes";
 import Markdown from "react-markdown";
 
 const { Text } = Typography;
@@ -97,23 +95,6 @@ export const FormFillerOld: React.FC<FormFillerProps> = ({
     form.setFieldValue(questionId, [answer, message]);
   };
 
-  const saveSubmissionLocally = (
-    formId: string,
-    userId: string,
-    createdAt: string
-  ) => {
-    let submissions = getItem<ISubmission[]>(LOCAL_STORAGE_KEYS.SUBMISSIONS);
-    if (!submissions) {
-      submissions = [];
-    }
-    submissions.push({
-      formId,
-      submittedAs: userId,
-      submittedAt: createdAt,
-    });
-    setItem(LOCAL_STORAGE_KEYS.SUBMISSIONS, submissions);
-  };
-
   const saveResponse = async (anonymous: boolean = true) => {
     let formResponses = form.getFieldsValue(true);
     const response = Object.keys(formResponses).map((key: string) => {
@@ -129,7 +110,6 @@ export const FormFillerOld: React.FC<FormFillerProps> = ({
     let userId = null;
     if (formId) {
       userId = await sendResponses(formId, response, anonymous);
-      saveSubmissionLocally(formId, userId, new Date().toString());
     }
     if (formTemplate && !isPreview) sendNotification(formTemplate, response);
     setFormSubmitted(true);
@@ -235,7 +215,7 @@ export const FormFillerOld: React.FC<FormFillerProps> = ({
           isOpen={thankYouScreen}
           onClose={() => {
             if (!embedded) {
-              navigate(`${GLOBAL_ROUTES.MY_FORMS}/${ROUTES.SUBMISSIONS}`);
+              navigate(`${GLOBAL_ROUTES.DASHBOARD}`);
             } else {
               setThankYouScreen(false);
             }

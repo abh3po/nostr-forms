@@ -25,7 +25,7 @@ export const Sharing = () => {
         trigger={isMobile() ? "click" : "hover"}
       >
         <div className="sharing-settings">
-          <div>
+          <div className="property-setting">
             <Text>Configure Form Admins</Text>
             <EditOutlined
               onClick={() => {
@@ -33,7 +33,7 @@ export const Sharing = () => {
               }}
             />
           </div>
-          <div>
+          <div className="property-setting">
             <Text>Participants & Visibility</Text>
             <EditOutlined onClick={() => setIsViewListOpen(true)} />
           </div>

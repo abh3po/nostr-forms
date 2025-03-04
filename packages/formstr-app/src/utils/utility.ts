@@ -1,6 +1,7 @@
 import { constructFormUrl as constructFormUrlSDK } from "@formstr/sdk";
 import { DEVICE_TYPE, DEVICE_WIDTH } from "../constants/index";
 import { getItem, LOCAL_STORAGE_KEYS, setItem } from "./localStorage";
+import { nip19 } from "nostr-tools";
 
 export function makeTag(length: number) {
   let result = "";
@@ -15,6 +16,22 @@ export function makeTag(length: number) {
   return result;
 }
 
+export const naddrUrl = (
+  publicKey: string,
+  formId: string,
+  relaysEncode?: string[],
+  viewKey?: string
+) => {
+  let formUrl = `/f/${nip19.naddrEncode({
+    pubkey: publicKey,
+    identifier: formId,
+    relays: relaysEncode || ["wss://relay.damus.io"],
+    kind: 30168,
+  })}`;
+  if (viewKey) formUrl = formUrl + `?viewKey=${viewKey}`;
+  return formUrl;
+};
+
 export function constructFormUrl(
   publicKey: string,
   formIdentifier: string | null = null
@@ -24,9 +41,9 @@ export function constructFormUrl(
     hostname += "/nostr-forms";
   }
   if (!formIdentifier) `http://${hostname}/#/fill/${publicKey}/`;
-  return !formIdentifier 
-  ? `http://${hostname}/#/fill/${publicKey}`
-  : `http://${hostname}/#/f/${publicKey}/${formIdentifier}`;
+  return !formIdentifier
+    ? `http://${hostname}/#/fill/${publicKey}`
+    : `http://${hostname}/#/f/${publicKey}/${formIdentifier}`;
 }
 
 export function constructDraftUrl(

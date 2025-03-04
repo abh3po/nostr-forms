@@ -6,6 +6,7 @@ import { Sharing } from "./Sharing";
 import { RelayList } from "./RelayList";
 import FormIdentifier from "./FormIdentifier";
 import { Notifications } from "./Notifications";
+import { isMobile } from "../../../../utils/utility";
 
 const { Text } = Typography;
 
@@ -20,7 +21,7 @@ function FormSettings() {
 
   const handlePublicForm = (checked: boolean) => {
     updateFormSetting({
-      publicForm: checked,
+      encryptForm: !checked,
     });
   };
 
@@ -36,6 +37,18 @@ function FormSettings() {
       <Divider className="divider" />
       <div className="form-setting">
         <Text className="property-name">Form Access Settings</Text>
+        <Tooltip
+          title="This toggle will leave the form un-encrypted and allow anyone to view the form."
+          trigger={isMobile() ? "click" : "hover"}
+        >
+          <div className="property-setting">
+            <Text className="property-text">Make Form Public</Text>
+            <Switch
+              defaultChecked={!formSettings.encryptForm}
+              onChange={handlePublicForm}
+            />
+          </div>
+        </Tooltip>
         <Sharing />
       </div>
 

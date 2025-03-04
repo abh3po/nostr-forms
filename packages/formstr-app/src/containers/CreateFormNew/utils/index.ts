@@ -1,7 +1,7 @@
 import { AnswerTypes } from "@formstr/sdk/dist/interfaces";
 import { makeTag } from "../../../utils/utility";
-import { Field } from "../providers/FormBuilder";
 import { IAnswerSettings } from "../components/AnswerSettings/types";
+import { Field } from "../../../nostr/types";
 
 export const generateQuestion = (
   primitive: string = "text",

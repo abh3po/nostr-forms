@@ -1,5 +1,4 @@
 import { Routes, Route, Navigate } from "react-router-dom";
-import MyForms from "../../old/containers/MyForms";
 import PublicForms from "../../containers/PublicForms";
 import { ROUTES } from "../../constants/routes";
 import { FormFillerOld } from "../../old/containers/FormFiller";
@@ -12,6 +11,7 @@ import { Response } from "../../containers/ResponsesNew";
 import { V1DraftsController } from "../../containers/Drafts";
 import CreateForm from "../../containers/CreateFormNew";
 import { Dashboard } from "../../containers/Dashboard";
+import EditForm from "../../containers/EditForm";
 
 const withNostrHeaderWrapper = (Component, props) => {
   return (
@@ -45,9 +45,9 @@ function Routing() {
         path={`${ROUTES.CREATE_FORMS_NEW}/*`}
         element={withNewCreateFormHeaderWrapper(CreateForm)}
       />
-      <Route
-        path={`${ROUTES.MY_FORMS}/*`}
-        element={withNostrHeaderWrapper(MyForms)}
+       <Route
+        path={`${ROUTES.EDIT_FORM_SECRET}/*`}
+        element={withNewCreateFormHeaderWrapper(EditForm)}
       />
       <Route
         path={`${ROUTES.PUBLIC_FORMS}/*`}

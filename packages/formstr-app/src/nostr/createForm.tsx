@@ -1,14 +1,9 @@
-import {
-  SimplePool,
-  UnsignedEvent,
-  generateSecretKey,
-  getPublicKey,
-  nip19,
-} from "nostr-tools";
+import { UnsignedEvent, generateSecretKey, getPublicKey } from "nostr-tools";
 import { customPublish, getDefaultRelays, signEvent } from "./common";
 import { IWrap, Tag } from "./types";
 import { nip44Encrypt } from "./utils";
 import { grantAccess, sendWraps } from "./accessControl";
+import { hexToBytes } from "@noble/hashes/utils";
 
 const defaultRelays = getDefaultRelays();
 
@@ -50,11 +45,20 @@ export const createForm = async (
   viewList: Set<string>,
   EditList: Set<string>,
   encryptContent?: boolean,
-  onRelayAccepted?: (url: string) => void    
+  onRelayAccepted?: (url: string) => void,
+  secretKey?: string | null,
+  viewKeyParams?: string | null
 ) => {
   let acceptedRelays: string[] = [];
-  let signingKey = generateSecretKey();
+  let signingKey: Uint8Array;
+  let viewKey: Uint8Array;
+
+  if (secretKey) signingKey = hexToBytes(secretKey);
+  else signingKey = generateSecretKey();
   let formPubkey = getPublicKey(signingKey);
+
+  if (viewKeyParams) viewKey = hexToBytes(viewKeyParams);
+  else viewKey = generateSecretKey();
 
   let tags: Tag[] = [];
   let formId = form.find((tag: Tag) => tag[0] === "d")?.[1];
@@ -63,7 +67,6 @@ export const createForm = async (
   }
   let name = form.find((tag: Tag) => tag[0] === "name")?.[1] || "";
   let mergedNpubs = getMergedNpubs(viewList, EditList);
-  let viewKey = generateSecretKey();
   tags.push(["d", formId]);
   tags.push(["name", name]);
   let content = "";
@@ -79,7 +82,7 @@ export const createForm = async (
       ...form.filter((tag: Tag) => !["d", "name"].includes(tag[0])),
     ];
   }
-
+  relayList.forEach((r: string) => tags.push(["relay", r]));
   const baseTemplateEvent: UnsignedEvent = {
     kind: 30168,
     created_at: Math.floor(Date.now() / 1000),
@@ -105,17 +108,17 @@ export const createForm = async (
   });
 
   const templateEvent = await signEvent(baseTemplateEvent, signingKey);
-await sendWraps(wraps);
-await Promise.allSettled(
-  customPublish(relayList, templateEvent, (url: string) => {
-    acceptedRelays.push(url);
-    onRelayAccepted?.(url); 
-  })
-);
-console.log("Accepted by relays", acceptedRelays);
-return {
-  signingKey,
-  viewKey,
-  acceptedRelays,
-};
+  await sendWraps(wraps);
+  await Promise.allSettled(
+    customPublish(relayList, templateEvent, (url: string) => {
+      acceptedRelays.push(url);
+      onRelayAccepted?.(url);
+    })
+  );
+  console.log("Accepted by relays", acceptedRelays);
+  return {
+    signingKey,
+    viewKey,
+    acceptedRelays,
+  };
 };

@@ -28,15 +28,31 @@ import { sendNotification } from "../../nostr/common";
 import { sendResponses } from "../../nostr/common";
 import { AnswerTypes } from "@formstr/sdk/dist/interfaces";
 
-interface Rule {
+interface ConditionRule {
   questionId: string;
-  value: string;
+  value: string | string[];
+  operator?:
+    | "equals"
+    | "notEquals"
+    | "contains"
+    | "startsWith"
+    | "endsWith"
+    | "greaterThan"
+    | "lessThan"
+    | "greaterThanEqual"
+    | "lessThanEqual";
+
+  nextLogic?: "AND" | "OR";
+}
+
+interface ConditionGroup {
+  rules: (ConditionRule | ConditionGroup)[];
+  nextLogic?: "AND" | "OR";
 }
 
 interface AnswerSettings {
-  conditions?: {
-    rules: Rule[];
-  };
+  conditions?: ConditionGroup;
+  renderElement?: string;
 }
 
 const { Text } = Typography;
@@ -139,104 +155,173 @@ export const FormFiller: React.FC<FormFillerProps> = ({
     setFormAnswers((prev) => ({ ...prev, [questionId]: answer }));
   };
 
-  interface Rule {
-    questionId: string;
-    value: string | string[];
-    operator?: "equals" | "greaterThan" | "lessThan" | "greaterThanEqual" | "lessThanEqual";
+  function isConditionRule(
+    condition: ConditionRule | ConditionGroup
+  ): condition is ConditionRule {
+    return "questionId" in condition;
   }
 
-  interface ConditionGroup {
-    rules: (Rule | ConditionGroup)[];
-    logicType?: "AND" | "OR";
-  }
-  
-  interface AnswerSettings {
-    conditions?: ConditionGroup;
-    renderElement?: string;
-  }
-
-  interface Rule {
-    questionId: string;
-    value: string | string[];
-    operator?:
-      | "equals"
-      | "greaterThan"
-      | "lessThan"
-      | "greaterThanEqual"
-      | "lessThanEqual";
-  }
-
-  // Helper function to evaluate a single rule
-const evaluateRule = (rule: Rule, formAnswers: Record<string, string | string[]>, fields: Field[]): boolean => {
-  const selectedAnswer = formAnswers[rule.questionId];
-  const conditionQuestion = fields.find((q) => q[1] === rule.questionId);
-  if (!conditionQuestion) return false;
-
-  const conditionSettings = JSON.parse(conditionQuestion[5] || "{}");
-  const questionType = conditionSettings.renderElement;
-
-  if (questionType === "checkboxes") {
-    const selectedAnswers = typeof selectedAnswer === "string"
-      ? selectedAnswer.split(";")
-      : selectedAnswer || [];
-    const ruleValues = Array.isArray(rule.value)
-      ? rule.value
-      : [rule.value];
-    return ruleValues.every((v) => selectedAnswers.includes(v));
-  }
-
-  if (questionType === AnswerTypes.number) {
-    const numAnswer = Number(selectedAnswer);
-    const numValue = Number(rule.value);
-
-    switch (rule.operator) {
-      case "greaterThan":
-        return numAnswer > numValue;
-      case "lessThan":
-        return numAnswer < numValue;
-      case "greaterThanEqual":
-        return numAnswer >= numValue;
-      case "lessThanEqual":
-        return numAnswer <= numValue;
-      default:
-        return numAnswer === numValue;
+  const evaluateRule = (
+    rule: ConditionRule,
+    answers: Record<string, string | string[]>,
+    fields: Field[]
+  ): boolean => {
+    const answer = answers[rule.questionId];
+    if (
+      answer === undefined ||
+      answer === null ||
+      (typeof answer === "string" && answer === "") ||
+      (Array.isArray(answer) && answer.length === 0)
+    ) {
+      return false;
     }
-  }
 
-  return selectedAnswer?.toString() === rule.value?.toString();
-};
+    const question = fields.find((q) => q[1] === rule.questionId);
+    if (!question) return false;
 
-const evaluateConditionGroup = (
-  group: ConditionGroup,
-  formAnswers: Record<string, string | string[]>, 
-  fields: Field[]
-): boolean => {
-  const evaluator = group.logicType === "OR" ? "some" : "every";
-  
-  return group.rules[evaluator]((condition) => {
-    if ('questionId' in condition) {
-      return evaluateRule(condition, formAnswers, fields);
-    } else {
-      return evaluateConditionGroup(condition, formAnswers, fields);
+    try {
+      const answerSettings = JSON.parse(question[5] || "{}") as AnswerSettings;
+      const questionType = answerSettings.renderElement || "shortText";
+
+      // Get answer and rule value as strings for text comparisons
+      const answerStr = String(answer);
+      const ruleValueStr = String(rule.value);
+
+      // Handle different question types and operators
+      switch (questionType) {
+        case "checkboxes":
+          // For checkboxes, check if all required values are selected
+          const selectedValues = Array.isArray(answer) ? answer : [answer];
+          const requiredValues = Array.isArray(rule.value)
+            ? rule.value
+            : [rule.value];
+
+          if (rule.operator === "notEquals") {
+            // At least one required value is not selected
+            return !requiredValues.every((value) =>
+              selectedValues.includes(value)
+            );
+          }
+          // Default is "equals": all required values are selected
+          return requiredValues.every((value) =>
+            selectedValues.includes(value)
+          );
+
+        case "radioButton":
+        case "dropdown":
+          // For single-select questions
+          if (rule.operator === "notEquals") {
+            return answerStr !== ruleValueStr;
+          }
+          return answerStr === ruleValueStr;
+
+        case AnswerTypes.number:
+          // For numbers, apply the appropriate comparison operator
+          const numAnswer = Number(answer);
+          const numValue = Number(rule.value);
+
+          if (isNaN(numAnswer) || isNaN(numValue)) return false;
+
+          switch (rule.operator) {
+            case "notEquals":
+              return numAnswer !== numValue;
+            case "greaterThan":
+              return numAnswer > numValue;
+            case "lessThan":
+              return numAnswer < numValue;
+            case "greaterThanEqual":
+              return numAnswer >= numValue;
+            case "lessThanEqual":
+              return numAnswer <= numValue;
+            case "equals":
+            default:
+              return numAnswer === numValue;
+          }
+
+        case AnswerTypes.date:
+        case AnswerTypes.time:
+          if (rule.operator === "notEquals") {
+            return answerStr !== ruleValueStr;
+          }
+          return answerStr === ruleValueStr;
+
+        default:
+          // Handle text fields with various operators
+          switch (rule.operator) {
+            case "notEquals":
+              return answerStr !== ruleValueStr;
+            case "contains":
+              return answerStr.includes(ruleValueStr);
+            case "startsWith":
+              return answerStr.startsWith(ruleValueStr);
+            case "endsWith":
+              return answerStr.endsWith(ruleValueStr);
+            case "equals":
+            default:
+              return answerStr === ruleValueStr;
+          }
+      }
+    } catch (error) {
+      console.error("Error evaluating rule:", error);
+      return false;
     }
-  });
-};
-
-const shouldShowQuestion = (question: Field): boolean => {
-  try {
-    const answerSettings = JSON.parse(question[5] || "{}") as AnswerSettings;
-    const conditions = answerSettings.conditions;
-
-    if (!conditions?.rules?.length) {
+  };
+  const evaluateGroup = (
+    group: ConditionGroup,
+    answers: Record<string, string | string[]>,
+    fields: Field[]
+  ): boolean => {
+    if (!group.rules || group.rules.length === 0) {
       return true;
     }
 
-    return evaluateConditionGroup(conditions, formAnswers, fields);
-  } catch (error) {
-    console.error("Error in shouldShowQuestion:", error);
-    return true;
-  }
-};
+    let result = isConditionRule(group.rules[0])
+      ? evaluateRule(group.rules[0] as ConditionRule, answers, fields)
+      : evaluateGroup(group.rules[0] as ConditionGroup, answers, fields);
+
+    // Evaluate the rest of the rules, applying the appropriate logic operator
+    for (let i = 1; i < group.rules.length; i++) {
+      const prevRule = group.rules[i - 1];
+      const currentRule = group.rules[i];
+
+      // Get the logic type from the previous rule or default to group's logic type
+      const logicType = isConditionRule(prevRule)
+        ? (prevRule as ConditionRule).nextLogic
+        : (prevRule as ConditionGroup).nextLogic || "AND";
+      const currentResult = isConditionRule(currentRule)
+        ? evaluateRule(currentRule as ConditionRule, answers, fields)
+        : evaluateGroup(currentRule as ConditionGroup, answers, fields);
+
+      // Apply the logic operator
+      if (logicType === "AND") {
+        result = result && currentResult;
+      } else {
+        // OR
+        result = result || currentResult;
+      }
+    }
+
+    return result;
+  };
+
+  const shouldShowQuestion = (question: Field): boolean => {
+    try {
+      const answerSettings = JSON.parse(question[5] || "{}") as AnswerSettings;
+      const conditions = answerSettings.conditions;
+
+      if (!conditions || !conditions.rules || conditions.rules.length === 0) {
+        return true;
+      }
+
+      const fields =
+        (formTemplate?.filter((tag) => tag[0] === "field") as Field[]) || [];
+
+      return evaluateGroup(conditions, formAnswers, fields);
+    } catch (error) {
+      console.error("Error in shouldShowQuestion:", error);
+      return true;
+    }
+  };
 
   const saveResponse = async (anonymous: boolean = true) => {
     if (!formId || !pubKey) {
@@ -396,10 +481,11 @@ const shouldShowQuestion = (question: Field): boolean => {
                 }
               >
                 <div>
-
-                  <FormFields fields={visibleFields} handleInput={handleInput} />
+                  <FormFields
+                    fields={visibleFields}
+                    handleInput={handleInput}
+                  />
                   <>{renderSubmitButton(settings)}</>
-
                 </div>
               </Form>
             </div>

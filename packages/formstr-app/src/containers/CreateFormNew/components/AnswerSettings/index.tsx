@@ -6,6 +6,7 @@ import { INPUTS_MENU } from "../../configs/menuConfig";
 import StyleWrapper from "./style";
 import { RightAnswer } from "./RightAnswer";
 import { IAnswerSettings } from "./types";
+import Conditions from "./Conditions";
 import { Field } from "../../../../nostr/types";
 
 const { Text } = Typography;
@@ -111,6 +112,11 @@ function AnswerSettings() {
         onChange={handleRightAnswer}
       />
       <Divider className="divider" />
+      <Conditions
+        key={question[1] + "conditions"}
+        answerSettings={answerSettings}
+        handleAnswerSettings={handleAnswerSettings}
+      />
       <Button
         danger
         type="text"

@@ -25,6 +25,34 @@ import { AddressPointer } from "nostr-tools/nip19";
 import { LoadingOutlined } from "@ant-design/icons";
 import { sendNotification } from "../../nostr/common";
 import { sendResponses } from "../../nostr/common";
+import { AnswerTypes } from "@formstr/sdk/dist/interfaces";
+
+interface ConditionRule {
+  questionId: string;
+  value: string | string[];
+  operator?:
+    | "equals"
+    | "notEquals"
+    | "contains"
+    | "startsWith"
+    | "endsWith"
+    | "greaterThan"
+    | "lessThan"
+    | "greaterThanEqual"
+    | "lessThanEqual";
+
+  nextLogic?: "AND" | "OR";
+}
+
+interface ConditionGroup {
+  rules: (ConditionRule | ConditionGroup)[];
+  nextLogic?: "AND" | "OR";
+}
+
+interface AnswerSettings {
+  conditions?: ConditionGroup;
+  renderElement?: string;
+}
 
 const { Text } = Typography;
 
@@ -60,6 +88,9 @@ export const FormFiller: React.FC<FormFillerProps> = ({
   const hideTitleImage = searchParams.get("hideTitleImage") === "true";
   const viewKeyParams = searchParams.get("viewKey");
   const hideDescription = searchParams.get("hideDescription") === "true";
+  const [formAnswers, setFormAnswers] = useState<
+    Record<string, string | string[]>
+  >({});
   const navigate = useNavigate();
 
   if (!formId && !formSpec) {
@@ -101,14 +132,191 @@ export const FormFiller: React.FC<FormFillerProps> = ({
 
   const handleInput = (
     questionId: string,
-    answer: string,
+    answer: string | string[],
     message?: string
   ) => {
-    if (!answer || answer === "") {
+    if (
+      !answer ||
+      (typeof answer === "string" && answer === "") ||
+      (Array.isArray(answer) && answer.length === 0)
+    ) {
       form.setFieldValue(questionId, null);
+      setFormAnswers((prev) => ({
+        ...prev,
+        [questionId]: Array.isArray(answer) ? [] : "",
+      }));
       return;
     }
     form.setFieldValue(questionId, [answer, message]);
+    setFormAnswers((prev) => ({ ...prev, [questionId]: answer }));
+  };
+
+  function isConditionRule(
+    condition: ConditionRule | ConditionGroup
+  ): condition is ConditionRule {
+    return "questionId" in condition;
+  }
+
+  const evaluateRule = (
+    rule: ConditionRule,
+    answers: Record<string, string | string[]>,
+    fields: Field[]
+  ): boolean => {
+    const answer = answers[rule.questionId];
+    if (
+      answer === undefined ||
+      answer === null ||
+      (typeof answer === "string" && answer === "") ||
+      (Array.isArray(answer) && answer.length === 0)
+    ) {
+      return false;
+    }
+
+    const question = fields.find((q) => q[1] === rule.questionId);
+    if (!question) return false;
+
+    try {
+      const answerSettings = JSON.parse(question[5] || "{}") as AnswerSettings;
+      const questionType = answerSettings.renderElement || "shortText";
+
+      // Get answer and rule value as strings for text comparisons
+      const answerStr = String(answer);
+      const ruleValueStr = String(rule.value);
+
+      // Handle different question types and operators
+      switch (questionType) {
+        case "checkboxes":
+          // For checkboxes, check if all required values are selected
+          const selectedValues = Array.isArray(answer) ? answer : [answer];
+          const requiredValues = Array.isArray(rule.value)
+            ? rule.value
+            : [rule.value];
+
+          if (rule.operator === "notEquals") {
+            // At least one required value is not selected
+            return !requiredValues.every((value) =>
+              selectedValues.includes(value)
+            );
+          }
+          // Default is "equals": all required values are selected
+          return requiredValues.every((value) =>
+            selectedValues.includes(value)
+          );
+
+        case "radioButton":
+        case "dropdown":
+          // For single-select questions
+          if (rule.operator === "notEquals") {
+            return answerStr !== ruleValueStr;
+          }
+          return answerStr === ruleValueStr;
+
+        case AnswerTypes.number:
+          // For numbers, apply the appropriate comparison operator
+          const numAnswer = Number(answer);
+          const numValue = Number(rule.value);
+
+          if (isNaN(numAnswer) || isNaN(numValue)) return false;
+
+          switch (rule.operator) {
+            case "notEquals":
+              return numAnswer !== numValue;
+            case "greaterThan":
+              return numAnswer > numValue;
+            case "lessThan":
+              return numAnswer < numValue;
+            case "greaterThanEqual":
+              return numAnswer >= numValue;
+            case "lessThanEqual":
+              return numAnswer <= numValue;
+            case "equals":
+            default:
+              return numAnswer === numValue;
+          }
+
+        case AnswerTypes.date:
+        case AnswerTypes.time:
+          if (rule.operator === "notEquals") {
+            return answerStr !== ruleValueStr;
+          }
+          return answerStr === ruleValueStr;
+
+        default:
+          // Handle text fields with various operators
+          switch (rule.operator) {
+            case "notEquals":
+              return answerStr !== ruleValueStr;
+            case "contains":
+              return answerStr.includes(ruleValueStr);
+            case "startsWith":
+              return answerStr.startsWith(ruleValueStr);
+            case "endsWith":
+              return answerStr.endsWith(ruleValueStr);
+            case "equals":
+            default:
+              return answerStr === ruleValueStr;
+          }
+      }
+    } catch (error) {
+      console.error("Error evaluating rule:", error);
+      return false;
+    }
+  };
+  const evaluateGroup = (
+    group: ConditionGroup,
+    answers: Record<string, string | string[]>,
+    fields: Field[]
+  ): boolean => {
+    if (!group.rules || group.rules.length === 0) {
+      return true;
+    }
+
+    let result = isConditionRule(group.rules[0])
+      ? evaluateRule(group.rules[0] as ConditionRule, answers, fields)
+      : evaluateGroup(group.rules[0] as ConditionGroup, answers, fields);
+
+    // Evaluate the rest of the rules, applying the appropriate logic operator
+    for (let i = 1; i < group.rules.length; i++) {
+      const prevRule = group.rules[i - 1];
+      const currentRule = group.rules[i];
+
+      // Get the logic type from the previous rule or default to group's logic type
+      const logicType = isConditionRule(prevRule)
+        ? (prevRule as ConditionRule).nextLogic
+        : (prevRule as ConditionGroup).nextLogic || "AND";
+      const currentResult = isConditionRule(currentRule)
+        ? evaluateRule(currentRule as ConditionRule, answers, fields)
+        : evaluateGroup(currentRule as ConditionGroup, answers, fields);
+
+      // Apply the logic operator
+      if (logicType === "AND") {
+        result = result && currentResult;
+      } else {
+        // OR
+        result = result || currentResult;
+      }
+    }
+
+    return result;
+  };
+
+  const shouldShowQuestion = (question: Field): boolean => {
+    try {
+      const answerSettings = JSON.parse(question[5] || "{}") as AnswerSettings;
+      const conditions = answerSettings.conditions;
+
+      if (!conditions || !conditions.rules || conditions.rules.length === 0) {
+        return true;
+      }
+
+      const fields =
+        (formTemplate?.filter((tag) => tag[0] === "field") as Field[]) || [];
+
+      return evaluateGroup(conditions, formAnswers, fields);
+    } catch (error) {
+      console.error("Error in shouldShowQuestion:", error);
+      return true;
+    }
   };
 
   const getResponseRelays = (formEvent: Event) => {
@@ -234,6 +442,7 @@ export const FormFiller: React.FC<FormFillerProps> = ({
       formTemplate.find((tag) => tag[0] === "settings")?.[1] || "{}"
     ) as IFormSettings;
     fields = formTemplate.filter((tag) => tag[0] === "field") as Field[];
+    const visibleFields = fields.filter(shouldShowQuestion);
 
     return (
       <FillerStyle $isPreview={isPreview}>
@@ -273,17 +482,18 @@ export const FormFiller: React.FC<FormFillerProps> = ({
               <CreatedUsingFormstr />
             </Link>
             {!isMobile() && (
-              <a
-                href="https://github.com/abhay-raizada/nostr-forms"
-                className="foss-link"
-              >
-                <Text className="text-style">
-                  Formstr is free and Open Source
-                </Text>
-              </a>
-            )}
+                <a
+                  href="https://github.com/abhay-raizada/nostr-forms"
+                  className="foss-link"
+                >
+                  <Text className="text-style">
+                    Formstr is free and Open Source
+                  </Text>
+                </a>
+              )}
+            </div>
           </div>
-        </div>
+        )}
         {embedded ? (
           formSubmitted && (
             <div className="embed-submitted">
@@ -293,10 +503,14 @@ export const FormFiller: React.FC<FormFillerProps> = ({
           )
         ) : (
           <ThankYouScreen
-            isOpen={formSubmitted}
+            isOpen={thankYouScreen}
             onClose={() => {
-              let navigationUrl = editKey ? `/r/${pubKey}/${formId}` : `/`;
-              navigate(navigationUrl);
+              if (!embedded) {
+                let navigationUrl = editKey ? `/r/${pubKey}/${formId}` : `/`;
+                navigate(navigationUrl);
+              } else {
+                setThankYouScreen(false);
+              }
             }}
           />
         )}

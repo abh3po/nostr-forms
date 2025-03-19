@@ -1,0 +1,12 @@
+.ant-modal-body {
+    padding: 16px;
+  }
+  
+  .ant-collapse-header {
+    font-weight: bold;
+    border-radius: 40px;
+  }
+  
+  .ant-collapse-content {
+    padding-left: 20px;
+  }

@@ -17,10 +17,19 @@ import { useProfileContext } from "../../hooks/useProfileContext";
 import { NostrAvatar } from "./NostrAvatar";
 import { ReactComponent as GeyserIcon } from "../../Images/Geyser.svg";
 import { color } from "framer-motion";
+import { useState } from "react";
+import FAQModal from "../FAQModal";
 
 export const NostrHeader = () => {
   const { Header } = Layout;
   const { pubkey, requestPubkey, logout } = useProfileContext();
+  const [isFAQModalVisible, setIsFAQModalVisible] = useState(false);
+
+  const onMenuClick: MenuProps["onClick"] = (e) => {
+    if (e.key === HEADER_MENU_KEYS.HELP) {
+      setIsFAQModalVisible(true); // Show the FAQ modal when Help is clicked
+    }
+  };
 
   const dropdownMenuItems: MenuProps["items"] = [
     ...[
@@ -110,10 +119,15 @@ export const NostrHeader = () => {
               defaultSelectedKeys={[]}
               overflowedIndicator={<MenuOutlined />}
               items={newHeaderMenu}
+              onClick={onMenuClick}
             />
           </Col>
         </Row>
       </Header>
+      <FAQModal
+        visible={isFAQModalVisible}
+        onClose={() => setIsFAQModalVisible(false)}
+      />
     </>
   );
 };

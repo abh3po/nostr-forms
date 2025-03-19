@@ -1,15 +1,25 @@
 import { Link } from "react-router-dom";
 import { Button } from "antd";
-import { SearchOutlined, UserOutlined, PlusOutlined } from "@ant-design/icons";
+import {
+  SearchOutlined,
+  PlusOutlined,
+  InfoCircleOutlined,
+} from "@ant-design/icons";
 import { ROUTES } from "../../constants/routes";
 
 export const HEADER_MENU_KEYS = {
   PUBLIC_FORMS: "PUBLIC_FORMS",
   USER: "USER",
   CREATE_FORMS: "CREATE_FORMS",
+  HELP: "HELP",
 };
 
 export const HEADER_MENU = [
+  {
+    key: HEADER_MENU_KEYS.HELP,
+    label: "Help",
+    icon: <InfoCircleOutlined />,
+  },
   {
     key: HEADER_MENU_KEYS.PUBLIC_FORMS,
     label: "Global Forms",

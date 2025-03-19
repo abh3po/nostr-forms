@@ -1,7 +1,11 @@
 // src/components/FAQModal.tsx
-import { Modal, Collapse, Typography } from "antd";
+import { Modal, Collapse, Typography, Spin, ConfigProvider } from "antd";
+import { useEffect, useState } from "react";
+import ReactMarkdown from "react-markdown";
+import { CaretRightOutlined } from "@ant-design/icons";
+import styled from "styled-components";
+import { useToken } from "antd/es/theme/internal";
 
-// Destructure to access CollapsePanel
 const { Panel } = Collapse;
 
 interface FAQModalProps {
@@ -9,60 +13,215 @@ interface FAQModalProps {
   onClose: () => void;
 }
 
+interface FAQItem {
+  question: string;
+  answer: string;
+}
+
+// Styled components with Antd theme tokens
+const ModalBody = styled.div<{ token: any }>`
+  padding: ${(props) => props.token.paddingLG}px;
+  background: ${(props) => props.token.colorBgContainerDisabled};
+  border-radius: ${(props) => props.token.borderRadiusLG}px;
+`;
+
+const ContentWrapper = styled.div`
+  min-height: 250px;
+`;
+
+const LoadingWrapper = styled.div<{ token: any }>`
+  text-align: center;
+  padding: ${(props) => props.token.paddingXL}px 0;
+`;
+
+const ErrorWrapper = styled.div<{ token: any }>`
+  padding: ${(props) => props.token.paddingMD}px;
+  background: ${(props) => props.token.colorErrorBg};
+  border-radius: ${(props) => props.token.borderRadiusMD}px;
+  box-shadow: 0 2px 8px ${(props) => props.token.boxShadowTertiary};
+
+  & h4 {
+    color: ${(props) => props.token.colorError};
+    margin-bottom: ${(props) => props.token.marginXS}px;
+  }
+  & p {
+    color: ${(props) => props.token.colorError};
+  }
+`;
+
+const EmptyWrapper = styled.div<{ token: any }>`
+  padding: ${(props) => props.token.paddingMD}px;
+  background: ${(props) => props.token.colorWarningBg};
+  border-radius: ${(props) => props.token.borderRadiusMD}px;
+  box-shadow: 0 2px 8px ${(props) => props.token.boxShadowTertiary};
+
+  & h4 {
+    color: ${(props) => props.token.colorWarning};
+    margin-bottom: ${(props) => props.token.marginXS}px;
+  }
+  & p {
+    color: ${(props) => props.token.colorWarning};
+  }
+`;
+
+const StyledCollapse = styled(Collapse)<{ token: any }>`
+  background: transparent;
+`;
+
+const StyledPanel = styled(Panel)<{ token: any }>`
+  background: ${(props) => props.token.colorBgContainer};
+  border-radius: ${(props) => props.token.borderRadiusMD}px;
+  margin-bottom: ${(props) => props.token.marginMD}px;
+  border: 1px solid ${(props) => props.token.colorBorderSecondary};
+  box-shadow: 0 2px 8px ${(props) => props.token.boxShadowTertiary};
+  overflow: hidden;
+`;
+
+const PanelHeader = styled.span<{ token: any }>`
+  font-size: ${(props) => props.token.fontSizeLG}px;
+  font-weight: 500;
+  color: ${(props) => props.token.colorPrimary};
+`;
+
+const PanelContent = styled(Typography.Paragraph)<{ token: any }>`
+  color: ${(props) => props.token.colorTextSecondary};
+`;
+
 const FAQModal: React.FC<FAQModalProps> = ({ visible, onClose }) => {
+  const [faqItems, setFaqItems] = useState<FAQItem[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  // Access Antd theme tokens
+  const [, token] = useToken();
+
+  useEffect(() => {
+    const fetchFAQContent = async () => {
+      setLoading(true);
+      setError(null);
+
+      try {
+        const response = await fetch("/docs/faq.md");
+        if (!response.ok) {
+          throw new Error(`Failed to fetch FAQ content: ${response.status}`);
+        }
+        const text = await response.text();
+
+        const lines = text.split("\n");
+        const items: FAQItem[] = [];
+        let currentQuestion = "";
+        let currentAnswer = "";
+
+        lines.forEach((line) => {
+          if (line.startsWith("## ")) {
+            if (currentQuestion) {
+              items.push({ question: currentQuestion, answer: currentAnswer.trim() });
+            }
+            currentQuestion = line.replace("## ", "").trim();
+            currentAnswer = "";
+          } else if (currentQuestion) {
+            currentAnswer += line + "\n";
+          }
+        });
+
+        if (currentQuestion && currentAnswer) {
+          items.push({ question: currentQuestion, answer: currentAnswer.trim() });
+        }
+
+        setFaqItems(items);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "An unknown error occurred");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchFAQContent();
+  }, []);
+
   return (
     <Modal
-      title="Frequently Asked Questions"
+      title={
+        <Typography.Title level={3} style={{ margin: 0, color: token.colorPrimary }}>
+          Frequently Asked Questions
+        </Typography.Title>
+      }
       visible={visible}
       onCancel={onClose}
       footer={null}
-      width={600}
+      width={700}
+      bodyStyle={{ padding: 0 }}
     >
-      <Collapse defaultActiveKey={["1"]}>
-        {/* Question 1: What is nostr? */}
-        <Panel header="What is nostr?" key="1">
-          <Typography.Paragraph>
-            NOSTR (Notes and Other Stuff Transmitted by Relays) is a
-            decentralized protocol for communication. It allows users to own
-            their private keys. Users can create events signed with their
-            private keys and share them with other users through relays. These
-            events are stored on any number of relays(servers) of the user's
-            choice.
-          </Typography.Paragraph>
-        </Panel>
+      <ModalBody token={token}>
+        <ContentWrapper>
+          {loading && (
+            <LoadingWrapper token={token}>
+              <Spin size="large" tip="Loading FAQ..." />
+            </LoadingWrapper>
+          )}
 
-        {/* Question 2: Where are my forms stored? */}
-        <Panel header="Where are my forms stored?" key="2">
-          <Typography.Paragraph>
-            Your forms are stored on relays. Each form event is signed by a new
-            private key to ensure privacy, and for ease of sharing with other
-            users (admins / participants). If you are not logged in to formstr
-            then the only copy of this private key is stored on your browsers
-            local storage. If you are logged in, then your form keys are also
-            encrypted and stored on nostr relays as a nostr list event. This
-            ensures that you can access your forms on any device as long as you
-            are logged into it.
-          </Typography.Paragraph>
-        </Panel>
+          {!loading && error && (
+            <ErrorWrapper token={token}>
+              <Typography.Title level={4}>Oops, Something Went Wrong</Typography.Title>
+              <Typography.Paragraph>{`Failed to load FAQ: ${error}`}</Typography.Paragraph>
+            </ErrorWrapper>
+          )}
 
-        {/* Question 3: How do I login? */}
-        <Panel header="Do I need to login to use Formstr?" key="3">
-          <Typography.Paragraph>
-            To log in, you need a public key (pubkey). If you don’t have one,
-            you can generate it by clicking the "Login" button. Once you have
-            your pubkey, you can log in and access your forms and settings.
-          </Typography.Paragraph>
-        </Panel>
-        <Panel header="How do I login?" key="3">
-          <Typography.Paragraph>
-            To log in, you need a public key (pubkey). If you don’t have one,
-            you can generate it by clicking the "Login" button. Once you have
-            your pubkey, you can log in and access your forms and settings.
-          </Typography.Paragraph>
-        </Panel>
-      </Collapse>
+          {!loading && !error && faqItems.length === 0 && (
+            <EmptyWrapper token={token}>
+              <Typography.Title level={4}>No FAQ Content Found</Typography.Title>
+              <Typography.Paragraph>
+                The FAQ file appears to be empty or incorrectly formatted.
+              </Typography.Paragraph>
+            </EmptyWrapper>
+          )}
+
+          {!loading && !error && faqItems.length > 0 && (
+            <StyledCollapse
+              bordered={false}
+              defaultActiveKey={["1"]}
+              expandIcon={({ isActive }) => (
+                <CaretRightOutlined
+                  rotate={isActive ? 90 : 0}
+                  style={{ color: token.colorPrimary }}
+                />
+              )}
+              token={token}
+            >
+              {faqItems.map((item, index) => (
+                <StyledPanel
+                  header={<PanelHeader token={token}>{item.question}</PanelHeader>}
+                  key={String(index + 1)}
+                  token={token}
+                >
+                  <ReactMarkdown
+                    components={{
+                      p: ({ children }) => <PanelContent token={token}>{children}</PanelContent>,
+                    }}
+                  >
+                    {item.answer}
+                  </ReactMarkdown>
+                </StyledPanel>
+              ))}
+            </StyledCollapse>
+          )}
+        </ContentWrapper>
+      </ModalBody>
     </Modal>
   );
 };
 
-export default FAQModal;
+// Export with ConfigProvider, passing props through
+const ThemedFAQModal: React.FC<FAQModalProps> = ({ visible, onClose }) => (
+  <ConfigProvider
+    theme={{
+      token: {
+        borderRadiusLG: 12, // Larger radius for modal
+      },
+    }}
+  >
+    <FAQModal visible={visible} onClose={onClose} />
+  </ConfigProvider>
+);
+
+export default ThemedFAQModal;

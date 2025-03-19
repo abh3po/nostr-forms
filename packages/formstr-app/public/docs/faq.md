@@ -10,7 +10,9 @@ You sign your actions with a private key, ensuring privacy and authenticity. You
 
 Your forms are stored as encrypted events on the Nostr relays and here’s the cool part: *you* decide which relays they go to! In Formstr, every form has a relay settings section where you can pick exactly which relays to publish to, giving you full control over where your data lives. 
 
-If you’re logged in via a NIP-07 extension (like Alby or nos2x), it’ll default to your preferred relays for convenience. Not logged in? No problem—Formstr uses a default set of relays to keep things running smoothly. Each form gets its own private key for privacy and sharing, stored locally in your browser. If logged in, those keys are encrypted and synced as a Nostr list event, so your forms are accessible from any device, on the relays you’ve chosen.
+Each form gets its own private key for privacy and sharing, they are stored locally in your browser. If logged in, those keys are ealso encrypted and synced in a Nostr list event, so your forms are accessible from any device, on the relays you’ve chosen.
+
+Formstr itself is only a UI, we store your forms on the relays of your chosing.
 
 ## Do I need to login to use Formstr?
 
@@ -18,4 +20,12 @@ You can explore Formstr and even create forms without logging in. But to save, m
 
 To log into Formstr, you’ll need a NIP-07 browser extension like Alby or nos2x installed. These extensions manage your Nostr identity, providing a public key (pubkey) and private key pair. Once you’ve got your extension set up, just click the "Login" button in Formstr—it’ll prompt your extension to authenticate you securely. After that, you’re in! Your forms and settings sync up via the Nostr network, ready for you to create and collaborate from any device with your extension active.
 
-On iOS you can use the "NoStore" app/extension, while on android browsers that support extensions (like Firefox) should be able to run regular extensions like Alby or nos2x.
+On iOS you can use the "NoStore" app/extension to login on safari, while on android browsers that support extensions (like Firefox) should be able to run regular extensions like Alby or nos2x.
+
+## Are responses private? 
+
+Yes! responses are encrypted with [NIP-44](https://github.com/nostr-protocol/nips/blob/master/44.md) such that only *you* and the creator of the form will have access to them, No one else can see your responses without your permission.
+
+## Are forms private?
+
+It's upto you, you can make a form private, public, accessible via link, or only accessible to a select few. You control who gets to access your forms.

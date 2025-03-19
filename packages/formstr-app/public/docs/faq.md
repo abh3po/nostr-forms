@@ -18,9 +18,11 @@ Formstr itself is only a UI, we store your forms on the relays of your chosing.
 
 You can explore Formstr and even create forms without logging in. But to save, manage, or share your forms securely across devices, you’ll need to log in.
 
-To log into Formstr, you’ll need a NIP-07 browser extension like Alby or nos2x installed. These extensions manage your Nostr identity, providing a public key (pubkey) and private key pair. Once you’ve got your extension set up, just click the "Login" button in Formstr—it’ll prompt your extension to authenticate you securely. After that, you’re in! Your forms and settings sync up via the Nostr network, ready for you to create and collaborate from any device with your extension active.
+To log into Formstr, you’ll need a NIP-07 browser extension like Alby or nos2x installed. These extensions manage your Nostr identity, and hold your private keys securely for you. 
 
-On iOS you can use the "NoStore" app/extension to login on safari, while on android browsers that support extensions (like Firefox) should be able to run regular extensions like Alby or nos2x.
+On iOS you can use the "NoStore" app/extension to login on safari, while on android, browsers that support extensions (like Firefox) should be able to run regular extensions like Alby or nos2x as well.
+
+[Here's a list of nostr extensions](https://github.com/aljazceru/awesome-nostr?tab=readme-ov-file#nip-07-browser-extensions)
 
 ## Are responses private? 
 

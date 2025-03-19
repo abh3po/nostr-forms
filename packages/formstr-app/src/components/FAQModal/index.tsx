@@ -1,6 +1,6 @@
 // src/components/FAQModal.tsx
 import { Modal, Collapse, Typography, Spin, ConfigProvider } from "antd";
-import { useEffect, useState } from "react";
+import { ReactPropTypes, useEffect, useState } from "react";
 import ReactMarkdown from "react-markdown";
 import { CaretRightOutlined } from "@ant-design/icons";
 import styled from "styled-components";
@@ -115,7 +115,10 @@ const FAQModal: React.FC<FAQModalProps> = ({ visible, onClose }) => {
         lines.forEach((line) => {
           if (line.startsWith("## ")) {
             if (currentQuestion) {
-              items.push({ question: currentQuestion, answer: currentAnswer.trim() });
+              items.push({
+                question: currentQuestion,
+                answer: currentAnswer.trim(),
+              });
             }
             currentQuestion = line.replace("## ", "").trim();
             currentAnswer = "";
@@ -125,12 +128,17 @@ const FAQModal: React.FC<FAQModalProps> = ({ visible, onClose }) => {
         });
 
         if (currentQuestion && currentAnswer) {
-          items.push({ question: currentQuestion, answer: currentAnswer.trim() });
+          items.push({
+            question: currentQuestion,
+            answer: currentAnswer.trim(),
+          });
         }
 
         setFaqItems(items);
       } catch (err) {
-        setError(err instanceof Error ? err.message : "An unknown error occurred");
+        setError(
+          err instanceof Error ? err.message : "An unknown error occurred"
+        );
       } finally {
         setLoading(false);
       }
@@ -142,15 +150,17 @@ const FAQModal: React.FC<FAQModalProps> = ({ visible, onClose }) => {
   return (
     <Modal
       title={
-        <Typography.Title level={3} style={{ margin: 0, color: token.colorPrimary }}>
+        <Typography.Title
+          level={3}
+          style={{ margin: 0, color: token.colorPrimary }}
+        >
           Frequently Asked Questions
         </Typography.Title>
       }
-      visible={visible}
+      open={visible}
       onCancel={onClose}
       footer={null}
       width={700}
-      bodyStyle={{ padding: 0 }}
     >
       <ModalBody token={token}>
         <ContentWrapper>
@@ -162,14 +172,18 @@ const FAQModal: React.FC<FAQModalProps> = ({ visible, onClose }) => {
 
           {!loading && error && (
             <ErrorWrapper token={token}>
-              <Typography.Title level={4}>Oops, Something Went Wrong</Typography.Title>
+              <Typography.Title level={4}>
+                Oops, Something Went Wrong
+              </Typography.Title>
               <Typography.Paragraph>{`Failed to load FAQ: ${error}`}</Typography.Paragraph>
             </ErrorWrapper>
           )}
 
           {!loading && !error && faqItems.length === 0 && (
             <EmptyWrapper token={token}>
-              <Typography.Title level={4}>No FAQ Content Found</Typography.Title>
+              <Typography.Title level={4}>
+                No FAQ Content Found
+              </Typography.Title>
               <Typography.Paragraph>
                 The FAQ file appears to be empty or incorrectly formatted.
               </Typography.Paragraph>
@@ -190,13 +204,22 @@ const FAQModal: React.FC<FAQModalProps> = ({ visible, onClose }) => {
             >
               {faqItems.map((item, index) => (
                 <StyledPanel
-                  header={<PanelHeader token={token}>{item.question}</PanelHeader>}
+                  header={
+                    <PanelHeader token={token}>{item.question}</PanelHeader>
+                  }
                   key={String(index + 1)}
                   token={token}
                 >
                   <ReactMarkdown
                     components={{
-                      p: ({ children }) => <PanelContent token={token}>{children}</PanelContent>,
+                      p: ({ children }) => (
+                        <PanelContent token={token}>{children}</PanelContent>
+                      ),
+                      a: ({ node, ...props }) => (
+                        <a {...props} target="_blank" rel="noopener noreferrer">
+                          {props.children}
+                        </a>
+                      ),
                     }}
                   >
                     {item.answer}
@@ -216,7 +239,7 @@ const ThemedFAQModal: React.FC<FAQModalProps> = ({ visible, onClose }) => (
   <ConfigProvider
     theme={{
       token: {
-        borderRadiusLG: 12, // Larger radius for modal
+        borderRadiusLG: 12,
       },
     }}
   >

@@ -12,14 +12,18 @@ export const V1DraftsController = () => {
   const navigate = useNavigate();
 
   let draft: string | null = null;
-  let parsedDraft: { formSpec: Tag[]; tempId: string } | null = null;
+  let parsedDraft: { spec: Tag[]; id: string } | null = null;
   if (encodedForm) {
     draft = window.decodeURIComponent(encodedForm);
-    parsedDraft = JSON.parse(decodeURIComponent(window.atob(draft)));
+    let draftJSON = JSON.parse(decodeURIComponent(window.atob(draft)));
+    parsedDraft = {
+      spec: draftJSON.formSpec,
+      id: draftJSON.tempId,
+    }
   }
   useEffect(() => {
     if (!parsedDraft) return;
-    initializeForm({ spec: parsedDraft.formSpec, id: parsedDraft.tempId });
+    initializeForm({ spec: parsedDraft.spec, id: parsedDraft.id });
     navigate(ROUTES.CREATE_FORMS_NEW, {
       state: parsedDraft,
     });

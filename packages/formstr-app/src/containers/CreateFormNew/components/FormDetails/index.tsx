@@ -1,6 +1,7 @@
 import { Button, Card, Checkbox, Divider, Modal, Spin, Typography } from "antd";
 import { ReactComponent as Success } from "../../../../Images/success.svg";
 import {
+  constructEmbeddedUrl,
   constructFormUrl,
   constructNewResponseUrl,
 } from "../../../../utils/formUtils";
@@ -203,30 +204,13 @@ export const FormDetails: React.FC<FormDetailsProps> = ({
     viewKey
   );
 
-  function constructEmbeddedUrl(
-    pubKey: string,
-    formId: string,
-    options: { [key: string]: boolean } = {}
-  ) {
-    let embeddedUrl = constructFormUrl(pubKey, formId, relay, viewKey);
-    if (options.hideTitleImage) {
-      embeddedUrl += "?hideTitleImage=true";
-    }
-
-    if (options.hideDescription) {
-      embeddedUrl += options.hideTitleImage
-        ? "&hideDescription=true"
-        : "?hideDescription=true";
-    }
-
-    return embeddedUrl;
-  }
-
   function getIframeContent() {
     return `<iframe src="${constructEmbeddedUrl(
       pubKey,
       formId,
-      embedOptions
+      embedOptions,
+      relay,
+      viewKey
     )}" height="700px" width="480px" frameborder="0" style="border-style:none;box-shadow:0px 0px 2px 2px rgba(0,0,0,0.2);" cellspacing="0" ></iframe>`;
   }
   const tabList = [
@@ -377,3 +361,4 @@ export const FormDetails: React.FC<FormDetailsProps> = ({
     </Modal>
   );
 };
+

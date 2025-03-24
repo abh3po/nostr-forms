@@ -46,6 +46,28 @@ export const fetchKeys = async (
   return keys;
 };
 
+export function constructEmbeddedUrl(
+  pubKey: string,
+  formId: string,
+  options: { [key: string]: boolean } = {},
+  relay: string,
+  viewKey?: string
+) {
+  let embeddedUrl = constructFormUrl(pubKey, formId, relay);
+
+  const params = new URLSearchParams();
+  if(viewKey)
+    params.append("viewKey", viewKey);
+  if (options.hideTitleImage) {
+    params.append("hideTitleImage", "true");
+  }
+  if (options.hideDescription) {
+    params.append("hideDescription", "true");
+  }
+  return params.toString() ? `${embeddedUrl}?${params.toString()}` : embeddedUrl;
+
+}
+
 export const getFormSpec = async (
   formEvent: Event,
   userPubKey?: string,

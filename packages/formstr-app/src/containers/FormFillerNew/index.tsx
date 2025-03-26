@@ -25,6 +25,13 @@ import { AddressPointer } from "nostr-tools/nip19";
 import { LoadingOutlined } from "@ant-design/icons";
 import { sendNotification } from "../../nostr/common";
 import { sendResponses } from "../../nostr/common";
+import { shouldShowQuestion } from "../CreateFormNew/components/AnswerSettings/Conditions/utils";
+import { ConditionGroup } from "../CreateFormNew/components/AnswerSettings/Conditions/types";
+
+interface AnswerSettings {
+  conditions?: ConditionGroup;
+  renderElement?: string;
+}
 
 const { Text } = Typography;
 
@@ -41,31 +48,41 @@ export const FormFiller: React.FC<FormFillerProps> = ({
   let isPreview = !!formSpec;
   if (!isPreview && !naddr)
     return <Text> Not enough data to render this url </Text>;
+  
   let decodedData;
   if (!isPreview) decodedData = nip19.decode(naddr!).data as AddressPointer;
-  let pubKey = decodedData?.pubkey;
-  let formId = decodedData?.identifier;
-  let relays = decodedData?.relays;
+  
+  const pubKey = decodedData?.pubkey;
+  const formId = decodedData?.identifier;
+  const relays = decodedData?.relays;
+  
   const { pubkey: userPubKey, requestPubkey } = useProfileContext();
-  const [formTemplate, setFormTemplate] = useState<Tag[] | null>(
-    formSpec || null
-  );
+  
+  const [formTemplate, setFormTemplate] = useState<Tag[] | null>(formSpec || null);
   const [form] = Form.useForm();
   const [formSubmitted, setFormSubmitted] = useState(false);
   const [noAccess, setNoAccess] = useState<boolean>(false);
   const [editKey, setEditKey] = useState<string | undefined | null>();
   const [allowedUsers, setAllowedUsers] = useState<string[]>([]);
+  const [thankYouScreen, setThankYouScreen] = useState(false);
   const [formEvent, setFormEvent] = useState<Event | undefined>();
   const [searchParams] = useSearchParams();
   const hideTitleImage = searchParams.get("hideTitleImage") === "true";
   const viewKeyParams = searchParams.get("viewKey");
   const hideDescription = searchParams.get("hideDescription") === "true";
+  const [formAnswers, setFormAnswers] = useState<Record<string, string | string[]>>({});
+  const [fields, setFields] = useState<Field[]>([]);
+  const [visibleFields, setVisibleFields] = useState<Field[]>([]);
+  const [settings, setSettings] = useState<IFormSettings>({});
+  const [formName, setFormName] = useState("");
+  
   const navigate = useNavigate();
 
   if (!formId && !formSpec) {
     return null;
   }
 
+  // Define functions
   const onKeysFetched = (keys: Tag[] | null) => {
     let editKey = keys?.find((k) => k[0] === "EditAccess")?.[1] || null;
     setEditKey(editKey);
@@ -79,36 +96,65 @@ export const FormFiller: React.FC<FormFillerProps> = ({
     if (!formEvent) {
       const form = await fetchFormTemplate(formAuthor, formId, relays);
       if (!form) return;
+      
       setFormEvent(form);
       setAllowedUsers(getAllowedUsers(form));
+      
       const formSpec = await getFormSpec(
         form,
         userPubKey,
         onKeysFetched,
         viewKeyParams
       );
-      if (!formSpec) setNoAccess(true);
+      
+      if (!formSpec) {
+        setNoAccess(true);
+        return;
+      }
+      
       setFormTemplate(formSpec);
+      
+      const name = formSpec.find((tag) => tag[0] === "name")?.[1] || "";
+      setFormName(name);
+      
+      const settingsData = JSON.parse(
+        formSpec.find((tag) => tag[0] === "settings")?.[1] || "{}"
+      ) as IFormSettings;
+      setSettings(settingsData);
+      
+      const extractedFields = formSpec.filter((tag) => tag[0] === "field") as Field[];
+      setFields(extractedFields);
     }
   };
 
-  useEffect(() => {
-    if (!(pubKey && formId)) {
-      return;
-    }
-    initialize(pubKey, formId, relays);
-  }, [formEvent, formTemplate, userPubKey]);
-
   const handleInput = (
     questionId: string,
-    answer: string,
+    answer: string | string[],
     message?: string
   ) => {
-    if (!answer || answer === "") {
+    if (
+      !answer ||
+      (typeof answer === "string" && answer === "") ||
+      (Array.isArray(answer) && answer.length === 0)
+    ) {
       form.setFieldValue(questionId, null);
+      setFormAnswers((prev) => ({
+        ...prev,
+        [questionId]: Array.isArray(answer) ? [] : "",
+      }));
       return;
     }
+    
     form.setFieldValue(questionId, [answer, message]);
+    setFormAnswers((prev) => ({ 
+      ...prev, 
+      [questionId]: answer 
+    }));
+    
+    console.log("Updated form answers:", {
+      ...formAnswers,
+      [questionId]: answer
+    });
   };
 
   const getResponseRelays = (formEvent: Event) => {
@@ -118,7 +164,34 @@ export const FormFiller: React.FC<FormFillerProps> = ({
     return Array.from(new Set([...(relays || []), ...(formRelays || [])]));
   };
 
-  const onSubmit = async () => {
+  const evaluateQuestionVisibility = (question: Field): boolean => {
+    try {
+      console.log("Evaluating question:", question[3]);
+      const answerSettings = JSON.parse(question[5] || "{}") as AnswerSettings;
+      const conditions = answerSettings.conditions;
+      console.log("Conditions:", conditions);
+      console.log("Current answers:", formAnswers);
+
+      // If no conditions defined, always show the question
+      if (!conditions || !conditions.rules || conditions.rules.length === 0) {
+        console.log("No conditions, showing question");
+        return true;
+      }
+
+      const result = shouldShowQuestion(question, formAnswers);
+      console.log(`Should show question ${question[3]}? ${result}`);
+      return result;
+    } catch (error) {
+      console.error("Error in evaluateQuestionVisibility:", error);
+      return true;
+    }
+  };
+
+  const onSubmit = async (anonymous: boolean = true) => {
+    if (!isPreview && (!formId || !pubKey)) {
+      throw "Can't submit to a form that has not been published";
+    }
+    
     let formResponses = form.getFieldsValue(true);
     const responses: Response[] = Object.keys(formResponses).map(
       (fieldId: string) => {
@@ -128,17 +201,33 @@ export const FormFiller: React.FC<FormFillerProps> = ({
         return ["response", fieldId, answer, JSON.stringify({ message })];
       }
     );
-    sendNotification(formTemplate!, responses);
-    setFormSubmitted(true);
+    
+    // If formEvent and relays exist (non-preview mode), use sendResponses
+    if (!isPreview && formEvent) {
+      const anonUser = anonymous ? generateSecretKey() : null;
+      sendResponses(pubKey!, formId!, responses, anonUser, true, relays).then(
+        (res: any) => {
+          console.log("Submitted!");
+          sendNotification(formTemplate!, responses);
+          setFormSubmitted(true);
+          setThankYouScreen(true);
+        }
+      );
+    } else {
+      // Handle preview mode
+      sendNotification(formTemplate!, responses);
+      setFormSubmitted(true);
+      setThankYouScreen(true);
+    }
   };
 
-  const renderSubmitButton = (settings: IFormSettings) => {
+  const renderSubmitButton = (settingsData: IFormSettings) => {
     if (isPreview) return null;
     if (!formEvent) return null;
     if (allowedUsers.length === 0) {
       return (
         <SubmitButton
-          selfSign={settings.disallowAnonymous}
+          selfSign={settingsData.disallowAnonymous}
           edit={false}
           onSubmit={onSubmit}
           form={form}
@@ -164,9 +253,42 @@ export const FormFiller: React.FC<FormFillerProps> = ({
     }
   };
 
+  // Effect to update fields when form template changes
+  useEffect(() => {
+    if (formTemplate) {
+      const name = formTemplate.find((tag) => tag[0] === "name")?.[1] || "";
+      const settingsData = JSON.parse(
+        formTemplate.find((tag) => tag[0] === "settings")?.[1] || "{}"
+      ) as IFormSettings;
+      const extractedFields = formTemplate.filter((tag) => tag[0] === "field") as Field[];
+      
+      setFormName(name);
+      setSettings(settingsData);
+      setFields(extractedFields);
+    }
+  }, [formTemplate]);
+
+  // Effect to filter visible fields when fields or answers change
+  useEffect(() => {
+    if (fields.length > 0) {
+      const filtered = fields.filter(evaluateQuestionVisibility);
+      console.log(`Filtering fields: ${fields.length} total, ${filtered.length} visible`);
+      setVisibleFields(filtered);
+    }
+  }, [fields, formAnswers]);
+
+  // Effect to initialize form
+  useEffect(() => {
+    if (!(pubKey && formId)) {
+      return;
+    }
+    initialize(pubKey, formId, relays);
+  }, [pubKey, formId]);
+
   if ((!pubKey || !formId) && !isPreview) {
     return <Text>INVALID FORM URL</Text>;
   }
+  
   if (!formEvent && !isPreview) {
     return (
       <div
@@ -198,12 +320,9 @@ export const FormFiller: React.FC<FormFillerProps> = ({
         </Text>
       </div>
     );
-  } else if (
-    !isPreview &&
-    formEvent?.content !== "" &&
-    !userPubKey &&
-    !viewKeyParams
-  ) {
+  } 
+  
+  if (!isPreview && formEvent?.content !== "" && !userPubKey && !viewKeyParams) {
     return (
       <>
         <Text>
@@ -219,6 +338,7 @@ export const FormFiller: React.FC<FormFillerProps> = ({
       </>
     );
   }
+  
   if (noAccess) {
     return (
       <>
@@ -227,16 +347,10 @@ export const FormFiller: React.FC<FormFillerProps> = ({
       </>
     );
   }
-  let name: string, settings: IFormSettings, fields: Field[];
-  if (formTemplate) {
-    name = formTemplate.find((tag) => tag[0] === "name")?.[1] || "";
-    settings = JSON.parse(
-      formTemplate.find((tag) => tag[0] === "settings")?.[1] || "{}"
-    ) as IFormSettings;
-    fields = formTemplate.filter((tag) => tag[0] === "field") as Field[];
 
-    return (
-      <FillerStyle $isPreview={isPreview}>
+  return (
+    <FillerStyle $isPreview={isPreview}>
+      {!formSubmitted && (
         <div className="filler-container">
           <div className="form-filler">
             {!hideTitleImage && (
@@ -244,7 +358,7 @@ export const FormFiller: React.FC<FormFillerProps> = ({
                 className="form-title"
                 edit={false}
                 imageUrl={settings?.titleImageUrl}
-                formTitle={name}
+                formTitle={formName}
               />
             )}
             {!hideDescription && (
@@ -263,7 +377,10 @@ export const FormFiller: React.FC<FormFillerProps> = ({
               }
             >
               <div>
-                <FormFields fields={fields} handleInput={handleInput} />
+                <FormFields
+                  fields={visibleFields}
+                  handleInput={handleInput}
+                />
                 <>{renderSubmitButton(settings)}</>
               </div>
             </Form>
@@ -284,23 +401,26 @@ export const FormFiller: React.FC<FormFillerProps> = ({
             )}
           </div>
         </div>
-        {embedded ? (
-          formSubmitted && (
-            <div className="embed-submitted">
-              {" "}
-              <Text>Response Submitted</Text>{" "}
-            </div>
-          )
-        ) : (
-          <ThankYouScreen
-            isOpen={formSubmitted}
-            onClose={() => {
+      )}
+      {embedded ? (
+        formSubmitted && (
+          <div className="embed-submitted">
+            <Text>Response Submitted</Text>
+          </div>
+        )
+      ) : (
+        <ThankYouScreen
+          isOpen={thankYouScreen}
+          onClose={() => {
+            if (!embedded) {
               let navigationUrl = editKey ? `/r/${pubKey}/${formId}` : `/`;
               navigate(navigationUrl);
-            }}
-          />
-        )}
-      </FillerStyle>
-    );
-  }
+            } else {
+              setThankYouScreen(false);
+            }
+          }}
+        />
+      )}
+    </FillerStyle>
+  );
 };

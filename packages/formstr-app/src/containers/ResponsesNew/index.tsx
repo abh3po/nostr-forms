@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { Event, getPublicKey, nip19, nip44 } from "nostr-tools";
 import { useParams, useSearchParams } from "react-router-dom";
-import { fetchFormResponses } from "@formstr/sdk/dist/formstr/nip101/fetchFormResponses";
 import SummaryStyle from "./summary.style";
 import { Button, Card, Divider, Table, Typography } from "antd";
 import ResponseWrapper from "./Responses.style";
@@ -12,6 +11,7 @@ import { hexToBytes } from "@noble/hashes/utils";
 import { fetchKeys, getAllowedUsers, getFormSpec } from "../../utils/formUtils";
 import { Export } from "./Export";
 import { Field, Tag } from "../../nostr/types";
+import { fetchFormResponses } from "../../nostr/fetchFormResponses";
 
 const { Text } = Typography;
 
@@ -48,6 +48,9 @@ export const Response = () => {
         setEditKey(editKey);
       }
     }
+    let formRelays = formEvent.tags
+      .filter((t) => t[0] === "relay")
+      .map((r) => r[1]);
     setFormEvent(formEvent);
     const formSpec = await getFormSpec(
       formEvent,
@@ -63,7 +66,7 @@ export const Response = () => {
       pubKey!,
       formId,
       allowedPubkeys,
-      relay ? [relay!] : undefined
+      formRelays
     );
     setResponses(responses);
   };

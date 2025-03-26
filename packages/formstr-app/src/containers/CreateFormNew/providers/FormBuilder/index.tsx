@@ -1,4 +1,4 @@
-import React, { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { AnswerSettings } from "@formstr/sdk/dist/interfaces";
 import { FormInitData, IFormBuilderContext } from "./typeDefs";
 import { generateQuestion } from "../../utils";
@@ -70,6 +70,8 @@ export default function FormBuilderProvider({
 }: {
   children: React.ReactNode;
 }) {
+  const { userRelays } = useProfileContext();
+
   const [questionsList, setQuestionsList] = useState<Array<Field>>([
     generateQuestion(),
   ]);
@@ -100,6 +102,16 @@ export default function FormBuilderProvider({
   );
   const [secretKey, setSecretKey] = useState<string | null>(null);
   const [viewKey, setViewKey] = useState<string | null | undefined>(null);
+
+  useEffect(() => {
+    if (userRelays.length) {
+      setRelayList(
+        userRelays.map((relay) => {
+          return { url: relay, tempId: makeTag(6) };
+        })
+      );
+    }
+  }, [userRelays]);
 
   const navigate = useNavigate();
 

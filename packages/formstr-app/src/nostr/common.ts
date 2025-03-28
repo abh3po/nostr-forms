@@ -15,6 +15,7 @@ import { bytesToHex } from "@noble/hashes/utils";
 import { normalizeURL } from "nostr-tools/utils";
 import { Field, Response, Tag } from "./types";
 import { IFormSettings } from "../containers/CreateFormNew/components/FormSettings/types";
+import { DEFAULT_RELAYS, NOSTR_KINDS, NOSTR_TAGS, TIMEOUTS, URLS } from "../constants/nostr";
 
 declare global {
   // TODO: make this better
@@ -36,19 +37,8 @@ declare global {
   }
 }
 
-const defaultRelays = [
-  "wss://relay.damus.io/",
-  "wss://relay.primal.net/",
-  "wss://nos.lol",
-  "wss://relay.nostr.wirednet.jp/",
-  "wss://nostr-01.yakihonne.com",
-  "wss://relay.snort.social",
-  "wss://relay.nostr.band",
-  "wss://nostr21.com",
-];
-
 export const getDefaultRelays = () => {
-  return defaultRelays;
+  return DEFAULT_RELAYS;
 };
 
 function checkWindowNostr() {
@@ -94,7 +84,7 @@ export const customPublish = (
 
     let relay: AbstractRelay | null = null;
     try {
-      relay = await ensureRelay(url, { connectionTimeout: 5000 });
+      relay = await ensureRelay(url, { connectionTimeout: TIMEOUTS.CONNECTION_TIMEOUT });
       return await Promise.race<string>([
         relay.publish(event).then((reason) => {
           // console.log("accepted relays", url);
@@ -102,7 +92,7 @@ export const customPublish = (
           return reason;
         }),
         new Promise<string>((_, reject) =>
-          setTimeout(() => reject("timeout"), 5000)
+          setTimeout(() => reject("timeout"), TIMEOUTS.PUBLISH_TIMEOUT)
         ),
       ]);
     } finally {
@@ -120,7 +110,7 @@ export const customPublish = (
 function createQuestionMap(form: Tag[]) {
   const questionMap: { [key: string]: Field } = {};
   form.forEach((field) => {
-    if (field[0] !== "field") return;
+    if (field[0] !== NOSTR_TAGS.FIELD) return;
     questionMap[field[1]] = field as Field;
   });
   return questionMap;
@@ -143,15 +133,15 @@ export const sendNotification = async (
   form: Tag[],
   response: Array<Response>
 ) => {
-  const name = form.filter((f) => f[0] === "name")?.[0][1];
+  const name = form.filter((f) => f[0] === NOSTR_TAGS.NAME)?.[0][1];
   let settings = JSON.parse(
-    form.filter((f) => f[0] === "settings")?.[0][1]
+    form.filter((f) => f[0] === NOSTR_TAGS.SETTINGS)?.[0][1]
   ) as IFormSettings;
   let message = 'New response for form: "' + name + '"';
   const questionMap = createQuestionMap(form);
   message += "\n" + "Answers: \n";
   response.forEach((response) => {
-    if (response[0] !== "response") return;
+    if (response[0] !== NOSTR_TAGS.RESPONSE) return;
     const question = questionMap[response[1]];
     message +=
       "\n" +
@@ -160,7 +150,7 @@ export const sendNotification = async (
       getDisplayAnswer(response[2], question) +
       "\n";
   });
-  message += "Visit https://formstr.app to view the responses.";
+  message += `Visit ${URLS.FORMSTR_APP} to view the responses.`;
   const newSk = generateSecretKey();
   const newPk = getPublicKey(newSk);
   const pool = new SimplePool();
@@ -168,18 +158,18 @@ export const sendNotification = async (
     const hexNpub = nip19.decode(npub).data.toString();
     const encryptedMessage = await nip04.encrypt(newSk, hexNpub, message);
     const baseKind4Event: Event = {
-      kind: 4,
+      kind: NOSTR_KINDS.DIRECT_MESSAGE,
       pubkey: newPk,
-      tags: [["p", hexNpub]],
+      tags: [[NOSTR_TAGS.P_TAG, hexNpub]],
       content: encryptedMessage,
       created_at: Math.floor(Date.now() / 1000),
       id: "",
       sig: "",
     };
     const kind4Event = finalizeEvent(baseKind4Event, newSk);
-    pool.publish(defaultRelays, kind4Event);
+    pool.publish(DEFAULT_RELAYS, kind4Event);
   });
-  pool.close(defaultRelays);
+  pool.close(DEFAULT_RELAYS);
 };
 
 export const ensureRelay = async (
@@ -220,7 +210,7 @@ export const sendResponses = async (
 ) => {
   let responderPub;
   responderPub = await getUserPublicKey(responderSecretKey);
-  let tags = [["a", `30168:${formAuthorPub}:${formId}`]];
+  let tags = [["a", `${NOSTR_KINDS.FORM_TEMPLATE}:${formAuthorPub}:${formId}`]];
   let content = "";
   if (!encryptResponses) {
     tags = [...tags, ...responses];
@@ -232,7 +222,7 @@ export const sendResponses = async (
     );
   }
   const baseEvent: UnsignedEvent = {
-    kind: 1069,
+    kind: NOSTR_KINDS.FORM_RESPONSE,
     pubkey: responderPub,
     tags: tags,
     content: content,
@@ -242,7 +232,7 @@ export const sendResponses = async (
   const fullEvent = await signEvent(baseEvent, responderSecretKey);
   let relayList = relays;
   if (relayList.length === 0) {
-    relayList = defaultRelays;
+    relayList = DEFAULT_RELAYS;
   }
   const messages = await Promise.allSettled(
     customPublish(relayList, fullEvent, onAcceptedRelays)

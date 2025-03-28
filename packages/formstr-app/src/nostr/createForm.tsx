@@ -4,8 +4,9 @@ import { IWrap, Tag } from "./types";
 import { nip44Encrypt } from "./utils";
 import { grantAccess, sendWraps } from "./accessControl";
 import { hexToBytes } from "@noble/hashes/utils";
+import { DEFAULT_RELAYS, NOSTR_KINDS, NOSTR_TAGS } from "../constants/nostr";
 
-const defaultRelays = getDefaultRelays();
+// Use DEFAULT_RELAYS directly from constants
 
 interface MergedNpub {
   pubkey: string;
@@ -41,7 +42,7 @@ const getMergedNpubs = (
 
 export const createForm = async (
   form: Array<Tag>,
-  relayList: Array<string> = defaultRelays,
+  relayList: Array<string> = DEFAULT_RELAYS,
   viewList: Set<string>,
   EditList: Set<string>,
   encryptContent?: boolean,
@@ -61,14 +62,14 @@ export const createForm = async (
   else viewKey = generateSecretKey();
 
   let tags: Tag[] = [];
-  let formId = form.find((tag: Tag) => tag[0] === "d")?.[1];
+  let formId = form.find((tag: Tag) => tag[0] === NOSTR_TAGS.D_TAG)?.[1];
   if (!formId) {
     throw Error("Invalid Form: No formId found");
   }
-  let name = form.find((tag: Tag) => tag[0] === "name")?.[1] || "";
+  let name = form.find((tag: Tag) => tag[0] === NOSTR_TAGS.NAME)?.[1] || "";
   let mergedNpubs = getMergedNpubs(viewList, EditList);
-  tags.push(["d", formId]);
-  tags.push(["name", name]);
+  tags.push([NOSTR_TAGS.D_TAG, formId]);
+  tags.push([NOSTR_TAGS.NAME, name]);
   let content = "";
   if (encryptContent)
     content = nip44Encrypt(
@@ -79,12 +80,12 @@ export const createForm = async (
   else {
     tags = [
       ...tags,
-      ...form.filter((tag: Tag) => !["d", "name"].includes(tag[0])),
+      ...form.filter((tag: Tag) => ![NOSTR_TAGS.D_TAG, NOSTR_TAGS.NAME].includes(tag[0])),
     ];
   }
-  relayList.forEach((r: string) => tags.push(["relay", r]));
+  relayList.forEach((r: string) => tags.push([NOSTR_TAGS.RELAY, r]));
   const baseTemplateEvent: UnsignedEvent = {
-    kind: 30168,
+    kind: NOSTR_KINDS.FORM_TEMPLATE,
     created_at: Math.floor(Date.now() / 1000),
     tags: tags,
     content: content,
@@ -102,9 +103,9 @@ export const createForm = async (
     );
     wraps.push(wrap);
     if (profile.isParticipant) {
-      baseFormEvent.tags.push(["allowed", profile.pubkey]);
+      baseFormEvent.tags.push([NOSTR_TAGS.ALLOWED, profile.pubkey]);
     }
-    baseFormEvent.tags.push(["p", profile.pubkey]);
+    baseFormEvent.tags.push([NOSTR_TAGS.P_TAG, profile.pubkey]);
   });
 
   const templateEvent = await signEvent(baseTemplateEvent, signingKey);

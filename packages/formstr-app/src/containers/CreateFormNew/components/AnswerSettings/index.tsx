@@ -86,13 +86,13 @@ function AnswerSettings() {
             </Text>
           </Dropdown>
         </div>
-        <div className="property-setting">
+        {answerType && (<div className="property-setting">
           <Text className="property-name">Required</Text>
           <Switch
             checked={answerSettings.required}
             onChange={updateIsRequired}
           />
-        </div>
+        </div>)}
       </div>
       <Divider className="divider" />
 

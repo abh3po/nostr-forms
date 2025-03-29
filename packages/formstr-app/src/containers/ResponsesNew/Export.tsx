@@ -7,17 +7,30 @@ export const Export: React.FC<{
   responsesData: Array<{ [key: string]: string }>;
   formName: string;
 }> = ({ responsesData, formName }) => {
+  const hasResponses = responsesData.length > 0;
+
   const onDownloadClick = async (type: "csv" | "excel") => {
+    if (!hasResponses) {
+      alert("No responses to export");
+      return;
+    }
+
+   try {
     const XLSX = await import("xlsx");
     const SheetName = `Responses for ${formName}`.substring(0, 16) + "...";
     const workSheet = XLSX.utils.json_to_sheet(responsesData);
     const workBook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workBook, workSheet, `${SheetName}`);
-    if (type === "excel") {
-      XLSX.writeFile(workBook, `${SheetName}.xlsx`);
-    } else {
-      XLSX.writeFile(workBook, `${SheetName}.csv`);
+
+    const fileExtension = type === "excel" ? ".xlsx" : ".csv";
+    XLSX.writeFile(workBook, `${SheetName}.${fileExtension}`);
+    
+   } catch (error) {
+      console.error("Error exporting data:", error);
+      alert("Error exporting data");
+      return;
     }
+
   };
 
   const items = [

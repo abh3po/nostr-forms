@@ -10,7 +10,7 @@ You sign your actions with a private key, ensuring privacy and authenticity. You
 
 Your forms are stored as encrypted events on the Nostr relays and here’s the cool part: *you* decide which relays they go to! In Formstr, every form has a relay settings section where you can pick exactly which relays to publish to, giving you full control over where your data lives. 
 
-Each form gets its own private key for privacy and sharing, they are stored locally in your browser. If logged in, those keys are ealso encrypted and synced in a Nostr list event, so your forms are accessible from any device, on the relays you’ve chosen.
+Each form gets its own private key for privacy and sharing, they are stored locally in your browser. If logged in, those keys are also encrypted and synced in a Nostr list event, so your forms are accessible from any device, on the relays you’ve chosen.
 
 Formstr itself is only a UI, we store your forms on the relays of your chosing.
 

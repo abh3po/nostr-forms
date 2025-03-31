@@ -276,7 +276,7 @@ export const Response = () => {
             <Divider />
             <div className="response-count-container">
               <Text className="response-count">
-                {responses ? getResponderCount() : "Searching for Response...s"}{" "}
+                {responses ? getResponderCount() : "Searching for Responses.."}{" "}
               </Text>
               <Text className="response-count-label">responder(s)</Text>
             </div>

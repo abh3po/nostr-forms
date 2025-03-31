@@ -249,7 +249,6 @@ export const sendResponses = async (
   if (relayList.length === 0) {
     relayList = defaultRelays;
   }
-  console.log("SUBMIT Event being sent out is", fullEvent)
   const messages = await Promise.allSettled(
     customPublish(relayList, fullEvent, onAcceptedRelays)
   );

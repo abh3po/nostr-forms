@@ -15,6 +15,7 @@ import { bytesToHex } from "@noble/hashes/utils";
 import { normalizeURL } from "nostr-tools/utils";
 import { Field, Response, Tag } from "./types";
 import { IFormSettings } from "../containers/CreateFormNew/components/FormSettings/types";
+import { Alert } from "antd";
 
 declare global {
   // TODO: make this better
@@ -218,6 +219,10 @@ export const sendResponses = async (
   relays: string[] = [],
   onAcceptedRelays?: (url: string) => void
 ) => {
+  if(!formId) {
+    alert("FORM ID NOT FOUND");
+    return;
+  }
   let responderPub;
   responderPub = await getUserPublicKey(responderSecretKey);
   let tags = [["a", `30168:${formAuthorPub}:${formId}`]];
@@ -244,6 +249,7 @@ export const sendResponses = async (
   if (relayList.length === 0) {
     relayList = defaultRelays;
   }
+  console.log("SUBMIT Event being sent out is", fullEvent)
   const messages = await Promise.allSettled(
     customPublish(relayList, fullEvent, onAcceptedRelays)
   );

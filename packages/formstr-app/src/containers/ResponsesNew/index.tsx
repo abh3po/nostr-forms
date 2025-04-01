@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Event, getPublicKey, nip19, nip44, SubCloser } from "nostr-tools";
 import { useParams, useSearchParams } from "react-router-dom";
+import { IFormSettings } from "../CreateFormNew/components/FormSettings/types";
 import { fetchFormResponses } from "../../nostr/responses"
 import SummaryStyle from "./summary.style";
 import { Button, Card, Divider, Table, Typography } from "antd";
@@ -120,6 +121,16 @@ export const Response = () => {
       [key: string]: string;
     }> = [];
     if (!formSpec || !responses) return;
+    
+    // Check if form has an expiry date
+    const settings = JSON.parse(
+      formSpec.find((tag: any) => tag[0] === "settings")?.[1] || "{}"
+    ) as IFormSettings;
+    
+    let expiryDate: Date | null = null;
+    if (settings.expiryDate) {
+      expiryDate = new Date(settings.expiryDate);
+    }
     let responsePerPubkey = new Map<string, Event[]>();
     responses.forEach((r: Event) => {
       let existingResponse = responsePerPubkey.get(r.pubkey);
@@ -133,6 +144,12 @@ export const Response = () => {
       let response = pubkeyResponses.sort(
         (a, b) => b.created_at - a.created_at
       )[0];
+      
+      // Skip responses after expiry date if an expiry date is set
+      if (expiryDate && new Date(response.created_at * 1000) > expiryDate) {
+        return;
+      }
+      
       let inputs = getInputs(response) as Tag[];
       if (inputs.length === 0) return;
       let answerObject: {
@@ -279,6 +296,23 @@ export const Response = () => {
                 {responses ? getResponderCount() : "Searching for Responses.."}{" "}
               </Text>
               <Text className="response-count-label">responder(s)</Text>
+              {formSpec && (() => {
+                const settings = JSON.parse(
+                  formSpec.find((tag: any) => tag[0] === "settings")?.[1] || "{}"
+                ) as IFormSettings;
+                
+                if (settings.expiryDate) {
+                  return (
+                    <div style={{ marginTop: '10px' }}>
+                      <Text style={{ color: '#ff4d4f' }}>
+                        Form expired on {new Date(settings.expiryDate).toLocaleDateString()}.
+                        Only showing responses before expiry date.
+                      </Text>
+                    </div>
+                  );
+                }
+                return null;
+              })()}
             </div>
           </Card>
         </div>

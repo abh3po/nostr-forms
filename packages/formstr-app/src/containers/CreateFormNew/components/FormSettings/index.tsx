@@ -1,4 +1,4 @@
-import { Divider, Switch, Tooltip, Typography } from "antd";
+import { DatePicker, Divider, Switch, Tooltip, Typography } from "antd";
 import StyleWrapper from "./style";
 import useFormBuilderContext from "../../hooks/useFormBuilderContext";
 import TitleImage from "./TitleImage";
@@ -91,6 +91,29 @@ function FormSettings() {
               {" "}
               nip-07 extension
             </a>
+          </Text>
+        )}
+      </div>
+      <Divider className="divider" />
+      <div className="form-setting">
+        <Text className="property-name">Form Expiry Date</Text>
+        <div className="property-setting">
+          <Text className="property-text">Set an expiry date for this form</Text>
+          <DatePicker
+            onChange={(date) => {
+              updateFormSetting({
+                expiryDate: date ? date.toISOString() : undefined,
+              });
+            }}
+            placeholder="Select expiry date"
+            disabledDate={(current) => {
+              return current && current.valueOf() < Date.now();
+            }}
+          />
+        </div>
+        {formSettings.expiryDate && (
+          <Text className="warning-text">
+            *After this date, no new submissions will be accepted and only responses before this date will be shown.
           </Text>
         )}
       </div>

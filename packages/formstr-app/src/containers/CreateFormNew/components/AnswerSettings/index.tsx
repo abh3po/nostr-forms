@@ -86,13 +86,15 @@ function AnswerSettings() {
             </Text>
           </Dropdown>
         </div>
-        <div className="property-setting">
-          <Text className="property-name">Required</Text>
-          <Switch
-            checked={answerSettings.required}
-            onChange={updateIsRequired}
-          />
-        </div>
+        {answerType && (
+          <div className="property-setting">
+            <Text className="property-name">Required</Text>
+            <Switch
+              checked={answerSettings.required}
+              onChange={updateIsRequired}
+            />
+          </div>
+        )}
       </div>
       <Divider className="divider" />
 
@@ -103,13 +105,13 @@ function AnswerSettings() {
         handleAnswerSettings={handleAnswerSettings}
       />
       <Divider className="divider" />
-      <RightAnswer
+      {answerType && <RightAnswer
         key={question[1] + "rightAnswer"}
         answerType={answerSettings.renderElement}
         answerSettings={answerSettings}
         choices={question[4]}
         onChange={handleRightAnswer}
-      />
+      />}
       <Divider className="divider" />
       <Button
         danger

@@ -241,9 +241,7 @@ export default function FormBuilderProvider({
     let settings = JSON.parse(
       form.spec.filter((f) => f[0] === "settings")?.[0]?.[1] || "{}"
     );
-    if (!settings.titleImageUrl) {
-      settings = { ...InitialFormSettings, ...settings };
-    }
+    settings = { ...InitialFormSettings, ...settings };
     let fields = form.spec.filter((f) => f[0] === "field") as Field[];
     setFormSettings((settings) => {
       return { ...settings, formId: form.id };

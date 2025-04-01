@@ -231,7 +231,7 @@ export default function FormBuilderProvider({
 
   const updateFormTitleImage = (e: React.FormEvent<HTMLInputElement>) => {
     const imageUrl = e.currentTarget.value;
-    if (imageUrl) {
+    if (imageUrl || imageUrl==="" ) {
       updateFormSetting({
         titleImageUrl: imageUrl,
       });

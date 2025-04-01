@@ -18,6 +18,8 @@ export const NpubList: React.FC<NpubListProps> = ({
 }) => {
   const [newNpub, setNewNpub] = useState<string>();
 
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
   const removeParticipant = (participant: string) => {
     const updatedList = new Set(NpubList);
     updatedList.delete(participant);
@@ -58,12 +60,12 @@ export const NpubList: React.FC<NpubListProps> = ({
         </Typography.Text>
         <Divider />
         {renderList()}
-        <Input
+        {!isModalOpen&&(<Input
           placeholder="Enter nostr npub"
           value={newNpub}
           onChange={(e) => setNewNpub(e.target.value)}
           className="npub-input"
-        />
+        />)}
         {newNpub && !isValidNpub(newNpub) && (
           <div>
             <Typography.Text className="error-npub">
@@ -71,20 +73,48 @@ export const NpubList: React.FC<NpubListProps> = ({
             </Typography.Text>
           </div>
         )}
-        <Button
+        {isModalOpen && (
+        <div >
+            <h2>Granting Access To</h2>
+             <p>{newNpub}</p>
+            <Button
+                type="primary"
+            className="add-button"
+              onClick={() => {
+                setNpubList(
+                  new Set(NpubList).add(nip19.decode(newNpub!).data as string)
+                );
+                setNewNpub("");
+                setIsModalOpen(false);
+              }}
+            >{" "}
+              Add{" "}
+            </Button>
+            <Button
+              onClick={()=>{
+                setNewNpub("");
+                setIsModalOpen(false);
+              }}
+            >{" "}
+              Cancel{" "}
+            </Button>
+        </div>
+      )}
+        {
+          !isModalOpen&&(
+            <Button
           type="primary"
           className="add-button"
           disabled={!isValidNpub(newNpub || "")}
           onClick={() => {
-            setNpubList(
-              new Set(NpubList).add(nip19.decode(newNpub!).data as string)
-            );
-            setNewNpub("");
+            setIsModalOpen(true);
           }}
         >
           {" "}
           Add{" "}
         </Button>
+          )
+        }
       </AddNpubStyle>
     </div>
   );

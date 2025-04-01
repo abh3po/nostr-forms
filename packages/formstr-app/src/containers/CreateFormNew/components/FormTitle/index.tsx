@@ -23,8 +23,7 @@ function FormTitle({
   const settings = {
     name: edit ? formName : formTitle,
     image:
-      (edit ? formSettings.titleImageUrl : imageUrl) ||
-      "",
+      (edit ? formSettings.titleImageUrl : imageUrl),
   };
 
   const handleTitleChange = (e: ChangeEvent<HTMLTextAreaElement>) => {

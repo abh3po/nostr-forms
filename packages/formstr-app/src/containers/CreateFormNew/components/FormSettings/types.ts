@@ -6,6 +6,7 @@ export interface IFormSettings {
   publicForm?: boolean;
   disallowAnonymous?: boolean;
   formId?: string;
-  encryptForm?: boolean
-  viewKeyInUrl?: boolean
+  encryptForm?: boolean;
+  viewKeyInUrl?: boolean;
+  expiryDate?: string;
 }

@@ -1,16 +1,19 @@
 import React from "react";
 import { Select, Input, InputNumber, DatePicker, TimePicker } from "antd";
-import { ConditionRule } from "./types";
+import { ConditionGroup } from "./types";
 import { getQuestionType, getQuestionChoices } from "./utils";
 import { AnswerTypes } from "@formstr/sdk/dist/interfaces";
 import { Field } from "../../../providers/FormBuilder";
 import dayjs from "dayjs";
 
 interface ConditionValueInputProps {
-  rule: ConditionRule;
+  rule: ConditionGroup;
   questionsList: Field[];
   availableQuestions: Field[];
-  onUpdate: (field: string, value: any) => void;
+  onUpdate: (
+    conditionType: "questionId" | "nextLogic" | "operator" | "value",
+    value: any
+  ) => void;
 }
 
 const ConditionValueInput: React.FC<ConditionValueInputProps> = ({
@@ -18,6 +21,7 @@ const ConditionValueInput: React.FC<ConditionValueInputProps> = ({
   availableQuestions,
   onUpdate,
 }) => {
+  if (!rule.questionId) return;
   const questionType = getQuestionType(rule.questionId, availableQuestions);
   const choices = getQuestionChoices(rule.questionId, availableQuestions);
 
@@ -151,9 +155,7 @@ const ConditionValueInput: React.FC<ConditionValueInputProps> = ({
           <DatePicker
             placeholder="Select expected date"
             value={dateValue ? dayjs(dateValue, "YYYY-MM-DD") : undefined}
-            onChange={(date) =>
-              onUpdate("value", date?.format("YYYY-MM-DD"))
-            }
+            onChange={(date) => onUpdate("value", date?.format("YYYY-MM-DD"))}
             style={{ width: "100%" }}
           />
         </div>
@@ -179,9 +181,7 @@ const ConditionValueInput: React.FC<ConditionValueInputProps> = ({
                 ? dayjs(rule.value, "HH:mm:ss")
                 : undefined
             }
-            onChange={(time) =>
-              onUpdate("value", time?.format("HH:mm:ss"))
-            }
+            onChange={(time) => onUpdate("value", time?.format("HH:mm:ss"))}
             style={{ width: "100%" }}
           />
         </div>

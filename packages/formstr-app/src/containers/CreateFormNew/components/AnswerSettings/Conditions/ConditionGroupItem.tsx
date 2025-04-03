@@ -1,9 +1,8 @@
 import React, { useMemo } from "react";
 import { Button, Typography, Card } from "antd";
 import { PlusOutlined, DeleteOutlined } from "@ant-design/icons";
-import { ConditionGroup, ConditionRule } from "./types";
+import { ConditionGroup } from "./types";
 import { Field } from "../../../providers/FormBuilder";
-import { isConditionRule } from "./utils";
 import ConditionRuleItem from "./ConditionRuleItem";
 import LogicSelector from "./LogicSelector";
 import { BADGE_STYLES, CARD_STYLES, LAYOUT_STYLES } from "./StyleWrapper";
@@ -49,8 +48,7 @@ const ConditionGroupItem: React.FC<ConditionGroupItemProps> = ({
   };
 
   const conditionRules = useMemo(
-    () =>
-      group.rules.filter((rule) => isConditionRule(rule)) as ConditionRule[],
+    () => group.rules?.filter((rule) => rule.rules) as ConditionGroup[],
     [group.rules]
   );
 

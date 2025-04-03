@@ -1,6 +1,7 @@
-export interface ConditionRule {
-  questionId: string;
-  value: string | string[];
+export interface ConditionGroup {
+  questionId?: string;
+  value?: string | string[];
+  rules?: ConditionGroup[];
   operator?:
     | "equals"
     | "notEquals"
@@ -14,14 +15,9 @@ export interface ConditionRule {
   nextLogic?: "AND" | "OR";
 }
 
-export interface ConditionGroup {
-  rules: ConditionRule[];
-  nextLogic?: "AND" | "OR";
-}
-
 export interface ConditionsProps {
   answerSettings: {
-    conditions?: {
+    displayIf?: {
       rules: ConditionGroup[];
     };
   };

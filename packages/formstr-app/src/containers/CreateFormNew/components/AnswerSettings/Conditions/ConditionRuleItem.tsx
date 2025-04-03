@@ -1,7 +1,7 @@
 import React from "react";
 import { Button, Select, Typography, Badge } from "antd";
 import { DeleteOutlined } from "@ant-design/icons";
-import { ConditionRule } from "./types";
+import { ConditionGroup } from "./types";
 import { Field } from "../../../providers/FormBuilder";
 import ConditionValueInput from "./ConditionValueInput";
 import LogicSelector from "./LogicSelector";
@@ -10,13 +10,18 @@ import { COLORS } from "./StyleWrapper";
 const { Text } = Typography;
 
 interface ConditionRuleItemProps {
-  rule: ConditionRule;
+  rule: ConditionGroup;
   index: number;
   isLastItem: boolean;
   questionsList: Field[];
   availableQuestions: Field[];
   groupIndex?: number;
-  onUpdate: (index: number, field: string, value: any, groupIndex?: number) => void;
+  onUpdate: (
+    index: number,
+    conditionType: "questionId" | "nextLogic" | "value" | "operator",
+    value: any,
+    groupIndex?: number
+  ) => void;
   onRemove: (index: number, groupIndex?: number) => void;
 }
 
@@ -30,8 +35,11 @@ const ConditionRuleItem: React.FC<ConditionRuleItemProps> = ({
   onUpdate,
   onRemove,
 }) => {
-  const handleUpdate = (field: string, value: any) => {
-    onUpdate(index, field, value, groupIndex);
+  const handleUpdate = (
+    conditionType: "questionId" | "nextLogic" | "value" | "operator",
+    value: any
+  ) => {
+    onUpdate(index, conditionType, value, groupIndex);
   };
 
   const handleLogicChange = (value: "AND" | "OR") => {
@@ -44,11 +52,10 @@ const ConditionRuleItem: React.FC<ConditionRuleItemProps> = ({
 
   return (
     <div className="rule-content">
-      <div style={{ marginBottom: '12px', display: 'flex', alignItems: 'center' }}>
-        <Badge 
-          color={COLORS.SUCCESS}
-          style={{ marginRight: '8px' }} 
-        />
+      <div
+        style={{ marginBottom: "12px", display: "flex", alignItems: "center" }}
+      >
+        <Badge color={COLORS.SUCCESS} style={{ marginRight: "8px" }} />
         <Text strong>Condition {index + 1}</Text>
       </div>
 

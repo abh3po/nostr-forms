@@ -95,7 +95,7 @@ function FormSettings() {
         )}
       </div>
       <Divider className="divider" />
-      <div className="form-setting">
+      <div className="form-setting form-expiry">
         <Text className="property-name">Form Expiry Date</Text>
         <div className="property-setting">
           <Text className="property-text">Set an expiry date for this form</Text>

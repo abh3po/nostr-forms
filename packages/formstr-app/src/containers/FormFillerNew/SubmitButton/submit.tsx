@@ -33,7 +33,7 @@ export const SubmitButton: React.FC<SubmitButtonProps> = ({
 
   const saveResponse = async (anonymous: boolean = true) => {
     let formId = formEvent.tags.find((t) => t[0] === "d")?.[1];
-    if(!formId) {
+    if (!formId) {
       alert("FORM ID NOT FOUND");
       return;
     }
@@ -75,6 +75,8 @@ export const SubmitButton: React.FC<SubmitButtonProps> = ({
         await saveResponse(anonymous);
       }
     } catch (err) {
+      setIsSubmitting(false);
+      setIsDisabled(false);
       console.log("Error in sending response", err);
     }
   };

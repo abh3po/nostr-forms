@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
-import { Event, getPublicKey, nip19, nip44 } from "nostr-tools";
+import { Event, getPublicKey, nip19, nip44, SubCloser } from "nostr-tools";
 import { useParams, useSearchParams } from "react-router-dom";
-import { fetchFormResponses } from "@formstr/sdk/dist/formstr/nip101/fetchFormResponses";
+import { fetchFormResponses } from "../../nostr/responses"
 import SummaryStyle from "./summary.style";
 import { Button, Card, Divider, Table, Typography } from "antd";
 import ResponseWrapper from "./Responses.style";
@@ -12,6 +12,7 @@ import { hexToBytes } from "@noble/hashes/utils";
 import { fetchKeys, getAllowedUsers, getFormSpec } from "../../utils/formUtils";
 import { Export } from "./Export";
 import { Field, Tag } from "../../nostr/types";
+import { useApplicationContext } from "../../hooks/useApplicationContext";
 
 const { Text } = Typography;
 
@@ -24,11 +25,18 @@ export const Response = () => {
   let [searchParams] = useSearchParams();
   const { pubkey: userPubkey, requestPubkey } = useProfileContext();
   const viewKeyParams = searchParams.get("viewKey");
+  const [responseCloser, setResponsesCloser] = useState<SubCloser | null>(null);
+  const handleResponseEvent = (event: Event) => {
+    setResponses((prev: Event[] | undefined) => [...(prev || []), event]);
+  };
+  let { poolRef } = useApplicationContext();
 
   const initialize = async () => {
     if (!formId) return;
 
     if (!(pubKey || secretKey)) return;
+
+    if(!poolRef) return
 
     if (secretKey) {
       setEditKey(secretKey);
@@ -59,18 +67,23 @@ export const Response = () => {
     let allowedPubkeys;
     let pubkeys = getAllowedUsers(formEvent);
     if (pubkeys.length !== 0) allowedPubkeys = pubkeys;
-    const responses = await fetchFormResponses(
+    let responseCloser =  fetchFormResponses(
       pubKey!,
       formId,
+      poolRef.current,
+      handleResponseEvent,
       allowedPubkeys,
-      relay ? [relay!] : undefined
-    );
-    setResponses(responses);
+      relay ? [relay!] : undefined,
+    )
+    setResponsesCloser(responseCloser);
   };
 
   useEffect(() => {
     if (!formEvent && !responses) initialize();
-  });
+    return () => {
+      if (responseCloser) responseCloser.close()
+      }
+  }, [poolRef]);
 
   const getResponderCount = () => {
     if (!responses) return 0;
@@ -263,7 +276,7 @@ export const Response = () => {
             <Divider />
             <div className="response-count-container">
               <Text className="response-count">
-                {responses ? getResponderCount() : "Loading..."}{" "}
+                {responses ? getResponderCount() : "Searching for Responses.."}{" "}
               </Text>
               <Text className="response-count-label">responder(s)</Text>
             </div>

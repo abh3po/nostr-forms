@@ -32,7 +32,11 @@ export const SubmitButton: React.FC<SubmitButtonProps> = ({
   const [acceptedRelays, setAcceptedRelays] = useState<string[]>([]);
 
   const saveResponse = async (anonymous: boolean = true) => {
-    let formId = formEvent.tags.find((t) => t[0] === "b")?.[1];
+    let formId = formEvent.tags.find((t) => t[0] === "d")?.[1];
+    if(!formId) {
+      alert("FORM ID NOT FOUND");
+      return;
+    }
     let pubKey = formEvent.pubkey;
     let formResponses = form.getFieldsValue(true);
     const responses: Response[] = Object.keys(formResponses).map(
@@ -49,7 +53,7 @@ export const SubmitButton: React.FC<SubmitButtonProps> = ({
     }
     sendResponses(
       pubKey,
-      formId!,
+      formId,
       responses,
       anonUser,
       true,

@@ -16,6 +16,7 @@ import { normalizeURL } from "nostr-tools/utils";
 import { Field, Response, Tag } from "./types";
 import { IFormSettings } from "../containers/CreateFormNew/components/FormSettings/types";
 import { DEFAULT_RELAYS, NOSTR_KINDS, NOSTR_TAGS, TIMEOUTS, URLS } from "../constants/nostr";
+import { Alert } from "antd";
 
 declare global {
   // TODO: make this better
@@ -208,6 +209,10 @@ export const sendResponses = async (
   relays: string[] = [],
   onAcceptedRelays?: (url: string) => void
 ) => {
+  if(!formId) {
+    alert("FORM ID NOT FOUND");
+    return;
+  }
   let responderPub;
   responderPub = await getUserPublicKey(responderSecretKey);
   let tags = [["a", `${NOSTR_KINDS.FORM_TEMPLATE}:${formAuthorPub}:${formId}`]];

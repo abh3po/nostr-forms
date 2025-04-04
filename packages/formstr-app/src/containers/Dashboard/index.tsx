@@ -15,6 +15,13 @@ import { DownOutlined } from "@ant-design/icons";
 import { MyForms } from "./FormCards/MyForms";
 import { Drafts } from "./FormCards/Drafts";
 import { LocalForms } from "./FormCards/LocalForms";
+import { useNavigate } from "react-router-dom"; 
+import { availableTemplates, FormTemplate } from "../../templates";
+import TemplateCard from "../../components/TemplateCard";
+import { ROUTES } from "../../constants/routes";
+import { makeTag } from "../../utils/utility";
+import { FormInitData } from "../CreateFormNew/providers/FormBuilder/typeDefs";
+import { Tag } from "../../nostr/types";
 const MENU_OPTIONS = {
   local: "On this device",
   shared: "Shared with me",
@@ -77,6 +84,28 @@ export const Dashboard = () => {
     };
   }, [pubkey]);
 
+  const navigate = useNavigate();
+
+  const handleTemplateClick = (template: FormTemplate) => {
+    const newFormInstanceId = makeTag(6);
+
+    const transformedQuestionsList = template.initialState.questionsList.map(field => {
+      const transformedField = [...field];
+      transformedField[0] = "field";
+      return transformedField;
+    }) as Tag[];
+    const spec: Tag[] = [
+      ["d", newFormInstanceId], 
+      ["name", template.initialState.formName],
+      ["settings", JSON.stringify(template.initialState.formSettings)],
+      ...transformedQuestionsList,
+    ];
+    const navigationState: FormInitData = {
+      spec: spec,
+      id: newFormInstanceId, 
+    };
+    navigate(ROUTES.CREATE_FORMS_NEW, { state: navigationState });
+  };  
   const renderForms = () => {
     if (filter === "local") {
       if (localForms.length == 0) return <EmptyScreen />;
@@ -133,6 +162,20 @@ export const Dashboard = () => {
   return (
     <DashboardStyleWrapper>
       <div className="dashboard-container">
+      <div style={{ padding: '20px 0', borderBottom: '1px solid #eee', marginBottom: '20px' }}>
+            <Typography.Title level={4} style={{ textAlign: 'center', marginBottom: '16px' }}>
+              Start a new form
+            </Typography.Title>
+            <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center' }}>
+              {availableTemplates.map((template) => (
+                <TemplateCard
+                  key={template.id}
+                  template={template}
+                  onClick={handleTemplateClick}
+                />
+              ))}
+            </div>
+          </div>
         <div style={{ margin: 10 }}>
           <Dropdown overlay={menu} trigger={["click"]} placement="bottomLeft">
             <div

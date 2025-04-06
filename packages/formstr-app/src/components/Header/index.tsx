@@ -35,7 +35,13 @@ export const NostrHeader = () => {
       label: (
         <span style={{ display: "flex", alignItems: "center" }}>
           <NostrAvatar pubkey={pubkey} />
-          <span style={{ marginLeft: 8 }}>{pubkey ? "Account" : "Guest"}</span>
+          <span style={{ marginLeft: 8 }}>
+            {pubkey
+              ? `${pubkey.substring(0, 6)}...${pubkey.substring(
+                  pubkey.length - 4
+                )}`
+              : "Guest"}
+          </span>
         </span>
       ),
       children: [

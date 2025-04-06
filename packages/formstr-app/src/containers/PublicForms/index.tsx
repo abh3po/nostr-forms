@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Button, Card, Divider, Table, Typography } from "antd";
+import { Button, Card, Divider, Table, Typography, Skeleton } from "antd";
 import { naddrUrl } from "../../utils/utility";
 import StyleWrapper from "./style";
 import { getPublicForms } from "../../nostr/publicForms";
@@ -14,18 +14,30 @@ function PublicForms() {
 
   const navigate = useNavigate();
   useEffect(() => {
-    (async () => {
-      setIsLoading(true);
-      getPublicForms(getDefaultRelays(), (event: Event) => {
-        setForms((events) => [...events, event]);
-      });
-      setIsLoading(false);
-    })();
+    const handleFormEvent = (event: Event) => {
+      setForms(prevForms => [...prevForms, event]);
+      setIsLoading(false);  
+    };
+  
+    setIsLoading(true);
+    getPublicForms(getDefaultRelays(), handleFormEvent);
+    
   }, []);
 
   return (
     <StyleWrapper>
-      {!!forms.length || isLoading ? (
+      {isLoading ? (
+        Array(3).fill(0).map((_, index) => (
+          <Card key={index} style={{ margin: 30 }}>
+            <Skeleton active title={{ width: '40%' }} paragraph={{ rows: 3 }} />
+            <Divider />
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <Skeleton.Button active style={{ width: 100 }} />
+              <Skeleton.Input active style={{ width: 120 }} />
+            </div>
+          </Card>
+        ))
+      ) : forms.length > 0 ? (
         forms.map((f: Event) => {
           if (f.content === "") {
             let name = f.tags.filter((t) => t[0] === "name")[0][1];
@@ -92,7 +104,7 @@ function PublicForms() {
           }
         })
       ) : (
-        <Typography.Text> No forms to show</Typography.Text>
+        <Typography.Text>No forms to show</Typography.Text>
       )}
     </StyleWrapper>
   );

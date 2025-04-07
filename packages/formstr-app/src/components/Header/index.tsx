@@ -9,6 +9,7 @@ import { NostrAvatar } from "./NostrAvatar";
 import { ReactComponent as GeyserIcon } from "../../Images/Geyser.svg";
 import { useState } from "react";
 import FAQModal from "../FAQModal";
+import { nip19 } from "nostr-tools";
 
 export const NostrHeader = () => {
   const { Header } = Layout;
@@ -29,16 +30,27 @@ export const NostrHeader = () => {
     setSelectedKey([e.key]);
   };
 
+  const decodedPubkey = pubkey
+    ? (() => {
+        try {
+          const { data } = nip19.decode(pubkey);
+          return typeof data === "string" ? data : pubkey;
+        } catch {
+          return pubkey;
+        }
+      })()
+    : "";
+
   const userMenuItems = [
     {
       key: HEADER_MENU_KEYS.USER,
       label: (
         <span style={{ display: "flex", alignItems: "center" }}>
-          <NostrAvatar pubkey={pubkey} />
+          <NostrAvatar pubkey={decodedPubkey} />
           <span style={{ marginLeft: 8 }}>
-            {pubkey
-              ? `${pubkey.substring(0, 6)}...${pubkey.substring(
-                  pubkey.length - 4
+            {decodedPubkey
+              ? `${decodedPubkey.substring(0, 6)}...${decodedPubkey.substring(
+                  decodedPubkey.length - 4
                 )}`
               : "Guest"}
           </span>

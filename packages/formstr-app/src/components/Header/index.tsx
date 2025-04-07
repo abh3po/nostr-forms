@@ -1,23 +1,15 @@
-import {
-  Layout,
-  Menu,
-  Row,
-  Col,
-  Button,
-  Dropdown,
-  MenuProps,
-  Typography,
-} from "antd";
+import { Layout, Menu, Row, Col, MenuProps } from "antd";
 import { Link } from "react-router-dom";
 import "./index.css";
 import { ReactComponent as Logo } from "../../Images/formstr.svg";
-import { DownOutlined, MenuOutlined, UserOutlined } from "@ant-design/icons";
+import { MenuOutlined } from "@ant-design/icons";
 import { HEADER_MENU, HEADER_MENU_KEYS } from "./configs";
 import { useProfileContext } from "../../hooks/useProfileContext";
 import { NostrAvatar } from "./NostrAvatar";
 import { ReactComponent as GeyserIcon } from "../../Images/Geyser.svg";
 import { useState } from "react";
 import FAQModal from "../FAQModal";
+import { nip19 } from "nostr-tools";
 
 export const NostrHeader = () => {
   const { Header } = Layout;
@@ -28,76 +20,79 @@ export const NostrHeader = () => {
   const onMenuClick: MenuProps["onClick"] = (e) => {
     if (e.key === HEADER_MENU_KEYS.HELP) {
       setIsFAQModalVisible(true);
+    } else if (e.key === "supportUs") {
+      window.open("https://geyser.fund/project/formstr", "_blank");
+    } else if (e.key === "login") {
+      requestPubkey();
+    } else if (e.key === "logout") {
+      logout();
     }
     setSelectedKey([e.key]);
   };
 
-  const dropdownMenuItems: MenuProps["items"] = [
-    ...[
-      pubkey
-        ? {
-            key: "logout",
-            label: <a onClick={logout}>Logout</a>,
-          }
-        : {
-            key: "login",
-            label: <a onClick={requestPubkey}>Login</a>,
-          },
-    ],
+  const decodedPubkey = pubkey
+    ? (() => {
+        try {
+          const { data } = nip19.decode(pubkey);
+          return typeof data === "string" ? data : pubkey;
+        } catch {
+          return pubkey;
+        }
+      })()
+    : "";
+
+  const userMenuItems = [
     {
-      key: "Support Us",
-      icon: (
-        <div
-          style={{
-            display: "flex",
-            flexDirection: "row",
-            justifyContent: "space-between",
-          }}
-        >
-          <GeyserIcon
-            style={{
-              color: "white",
-              strokeWidth: 20,
-              fill: "black",
-              stroke: "black",
-              maxHeight: 20,
-              maxWidth: 20,
-              backgroundColor: "black",
-              marginRight: 5,
-            }}
-          />
-          <Typography.Text style={{ marginTop: 2 }}>
-            {" "}
-            Support Us
-          </Typography.Text>
-        </div>
+      key: HEADER_MENU_KEYS.USER,
+      label: (
+        <span style={{ display: "flex", alignItems: "center" }}>
+          <NostrAvatar pubkey={decodedPubkey} />
+          <span style={{ marginLeft: 8 }}>
+            {decodedPubkey
+              ? `${decodedPubkey.substring(0, 6)}...${decodedPubkey.substring(
+                  decodedPubkey.length - 4
+                )}`
+              : "Guest"}
+          </span>
+        </span>
       ),
-      onClick: () => {
-        window.open("https://geyser.fund/project/formstr", "_blank");
-      },
+      children: [
+        pubkey
+          ? {
+              key: "logout",
+              label: "Logout",
+            }
+          : {
+              key: "login",
+              label: "Login",
+            },
+        {
+          key: "supportUs",
+          label: (
+            <span style={{ display: "flex", alignItems: "center" }}>
+              <GeyserIcon
+                style={{
+                  color: "white",
+                  strokeWidth: 20,
+                  fill: "black",
+                  stroke: "black",
+                  maxHeight: 20,
+                  maxWidth: 20,
+                  backgroundColor: "black",
+                  marginRight: 8,
+                }}
+              />
+              Support Us
+            </span>
+          ),
+        },
+      ],
     },
   ];
 
-  const User = {
-    key: HEADER_MENU_KEYS.USER,
-    icon: (
-      <div>
-        <Dropdown
-          menu={{
-            items: dropdownMenuItems,
-            overflowedIndicator: null,
-            style: { overflow: "auto" },
-          }}
-          trigger={["click"]}
-        >
-          <div onClick={(e) => e.preventDefault()}>
-            <NostrAvatar pubkey={pubkey} /> <DownOutlined />
-          </div>
-        </Dropdown>
-      </div>
-    ),
-  };
-  const newHeaderMenu = [...HEADER_MENU, User];
+  // Combine regular menu items with user menu items
+  const fullMenuItems = [...HEADER_MENU, ...userMenuItems];
+
   return (
     <>
       <Header
@@ -105,8 +100,7 @@ export const NostrHeader = () => {
         style={{
           background: "white",
           borderBottom: "1px solid #ddd",
-        }}
-      >
+        }}>
         <Row className="header-row" justify="space-between">
           <Col>
             <Link className="app-link" to="/">
@@ -120,7 +114,7 @@ export const NostrHeader = () => {
               defaultSelectedKeys={[]}
               selectedKeys={selectedKey}
               overflowedIndicator={<MenuOutlined />}
-              items={newHeaderMenu}
+              items={fullMenuItems}
               onClick={onMenuClick}
             />
           </Col>
@@ -128,7 +122,10 @@ export const NostrHeader = () => {
       </Header>
       <FAQModal
         visible={isFAQModalVisible}
-        onClose={() => { setIsFAQModalVisible(false); setSelectedKey([]); }}
+        onClose={() => {
+          setIsFAQModalVisible(false);
+          setSelectedKey([]);
+        }}
       />
     </>
   );

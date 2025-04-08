@@ -7,11 +7,13 @@ import { RelayList } from "./RelayList";
 import FormIdentifier from "./FormIdentifier";
 import { Notifications } from "./Notifications";
 import { isMobile } from "../../../../utils/utility";
+import DuplicateFormPopover from "../../../Dashboard/FormCards/DuplicateFormPopover";
 
 const { Text } = Typography;
 
 function FormSettings() {
-  const { formSettings, updateFormSetting } = useFormBuilderContext();
+  const { formSettings, updateFormSetting, getFormSpec } =
+    useFormBuilderContext();
 
   const handleAnonymousToggle = (checked: boolean) => {
     updateFormSetting({
@@ -24,12 +26,16 @@ function FormSettings() {
       encryptForm: !checked,
     });
   };
-
+  const tags = getFormSpec();
   return (
     <StyleWrapper>
       <div className="form-setting">
         <Text className="property-name">Form Identifier</Text>
         <FormIdentifier />
+      </div>
+      <div className="form-setting">
+        <Text className="property-name" style={{marginRight:"5px"}}>Duplicate Form</Text>
+        <DuplicateFormPopover tags={tags} />
       </div>
       <div className="form-setting">
         <TitleImage titleImageUrl={formSettings.titleImageUrl} />

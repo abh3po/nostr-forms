@@ -12,6 +12,7 @@ import {
 import ReactMarkdown from "react-markdown";
 import { EditOutlined } from "@ant-design/icons";
 import { useEffect, useState } from "react";
+import DuplicateFormPopover from "./DuplicateFormPopover";
 
 interface FormEventCardProps {
   event: Event;
@@ -65,12 +66,15 @@ export const FormEventCard: React.FC<FormEventCardProps> = ({
       extra={
         <div style={{ display: "flex", flexDirection: "row" }}>
           {secretKey ? (
-            <EditOutlined
-              style={{ color: "purple", marginBottom: 3 }}
-              onClick={() =>
-                navigate(editPath(secretKey, formId, relay, viewKey))
-              }
-            />
+            <>
+              <EditOutlined
+                style={{ color: "purple", marginBottom: 3, marginRight: 14 }}
+                onClick={() =>
+                  navigate(editPath(secretKey, formId, relay, viewKey))
+                }
+              />
+              <DuplicateFormPopover tags={tags} />
+            </>
           ) : null}
           {onDeleted ? (
             <DeleteFormTrigger formKey={formKey} onDeleted={onDeleted} />

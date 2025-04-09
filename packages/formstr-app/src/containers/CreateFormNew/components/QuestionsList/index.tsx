@@ -4,9 +4,10 @@ import FormTitle from "../FormTitle";
 import StyleWrapper from "./style";
 import DescriptionStyle from "./description.style";
 import useFormBuilderContext from "../../hooks/useFormBuilderContext";
-import { ChangeEvent, useState, useRef, useEffect } from "react";
-import { Reorder, motion, useDragControls } from "framer-motion";
+import React, { ChangeEvent, useRef, useState } from "react";
+import { Reorder, motion, useDragControls, DragControls } from "framer-motion";
 import { Field } from "../../../../nostr/types";
+import { isMobile } from "../../../../utils/utility";
 
 interface FloatingButtonProps {
   onClick: () => void;
@@ -43,6 +44,50 @@ const FloatingButton = ({ onClick, containerRef }: FloatingButtonProps) => {
         +
       </Button>
     </motion.div>
+  );
+};
+
+interface DraggableQuestionItemProps {
+  question: Field;
+  onEdit: (question: Field, tempId: string) => void;
+  onReorderKey: (keyType: "UP" | "DOWN", tempId: string) => void;
+  firstQuestion: boolean;
+  lastQuestion: boolean;
+}
+const DraggableQuestionItem: React.FC<DraggableQuestionItemProps> = ({
+  question,
+  onEdit,
+  onReorderKey,
+  firstQuestion,
+  lastQuestion,
+}) => {
+  const currentlyMobile = isMobile();
+  const dragControls = currentlyMobile ? useDragControls() : undefined;
+
+  return (
+    <Reorder.Item
+      value={question}
+      key={question[1]} 
+      dragListener={!currentlyMobile} 
+      dragControls={dragControls}
+
+      whileDrag={{
+        scale: 1.03,
+        boxShadow: "0px 5px 15px rgba(0, 0, 0, 0.2)", 
+        zIndex: 10, 
+        cursor: "grabbing", 
+      }}
+      style={{ cursor: "grab" }} 
+    >
+      <QuestionCard
+        question={question}
+        onEdit={onEdit}
+        onReorderKey={onReorderKey}
+        firstQuestion={firstQuestion}
+        lastQuestion={lastQuestion}
+        dragControls={dragControls} 
+      />
+    </Reorder.Item>
   );
 };
 
@@ -116,19 +161,14 @@ export const QuestionsList = () => {
       >
         <div>
           {questionsList.map((question, idx) => (
-            <Reorder.Item
-              value={question}
+            <DraggableQuestionItem
               key={question[1]}
-              dragListener={true}
-            >
-              <QuestionCard
-                question={question}
-                onEdit={editQuestion}
-                onReorderKey={onReorderKey}
-                firstQuestion={idx === 0}
-                lastQuestion={idx === questionsList.length - 1}
-              />
-            </Reorder.Item>
+              question={question}
+              onEdit={editQuestion}
+              onReorderKey={onReorderKey}
+              firstQuestion={idx === 0}
+              lastQuestion={idx === questionsList.length - 1}
+            />
           ))}
           <div ref={bottomElementRef}></div>
         </div>

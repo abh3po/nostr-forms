@@ -13,12 +13,4 @@ export const availableTemplates: FormTemplate[] = [
   eventRegistrationTemplate,
 ];
 
-// export {blankTemplate, 
-//         rsvpTemplate,
-//         contactInfoTemplate,
-//         partyInviteTemplate,
-//         eventRegistrationTemplate
-//       };
-
-
 export * from './types';

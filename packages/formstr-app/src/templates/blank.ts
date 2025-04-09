@@ -11,7 +11,7 @@ export const blankTemplate: FormTemplate = {
   initialState: {
     formName: 'Untitled Form',
     formSettings: {
-      description: 'escription here',
+      description: 'description here',
       thankYouPage: true,
       notifyNpubs: [],
       publicForm: true,

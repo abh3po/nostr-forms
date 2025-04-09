@@ -1,19 +1,15 @@
 import React, { useState } from "react";
-import { Popover } from "antd";
 import { CopyOutlined } from "@ant-design/icons";
-import { makeTag } from "../../../utils/utility";
+import { isMobile, makeTag } from "../../../utils/utility";
 import { constructDraftUrl } from "./Drafts";
 import { Tag } from "@formstr/sdk/dist/formstr/nip101";
+import { Tooltip } from "antd";
 
 type Props = {
   tags: Tag[];
 };
 
 const DuplicateFormPopover: React.FC<Props> = ({ tags }) => {
-  const [open, setOpen] = useState(false);
-  const handleOpenChange = (newOpen: boolean) => setOpen(newOpen);
-  const hide = () => setOpen(false);
-
   const saveAndOpen = (duplicatedTags: Tag[], newFormId: string) => {
     const duplicatedForm = {
       formSpec: duplicatedTags,
@@ -51,62 +47,20 @@ const DuplicateFormPopover: React.FC<Props> = ({ tags }) => {
       return [...tag];
     });
     saveAndOpen(duplicatedTags, newFormId);
-    hide();
-  };
-
-  const handleStructureDuplicate = () => {
-    const formFields = tags.filter((tag) => tag[0] === "field");
-    const nameTag = tags.find((tag) => tag[0] === "name");
-    const settingsTag = tags.find((tag) => tag[0] === "settings");
-
-    const cleanedFields = formFields.map((tag) => {
-      return [tag[0], tag[1], tag[2], "Untitled Question", "[]", tag[5]];
-    });
-
-    const newFormId = makeTag(6);
-    const duplicatedTags: Tag[] = [
-      ["d", newFormId],
-      ["name", nameTag?.[1] || "Untitled Form"],
-      [
-        "settings",
-        (() => {
-          let settingsObj = {};
-          try {
-            settingsObj = JSON.parse(settingsTag?.[1] || "{}");
-          } catch {}
-          return JSON.stringify({ ...settingsObj, formId: newFormId });
-        })(),
-      ],
-      ...cleanedFields,
-    ];
-    saveAndOpen(duplicatedTags, newFormId);
-    hide();
   };
 
   return (
-    <Popover
-      content={
-        <>
-          <div>
-            <a onClick={handleFullDuplicate}>Full Duplicate</a>
-          </div>
-          <div>
-            <a onClick={handleStructureDuplicate}>Structure Only</a>
-          </div>
-          <div>
-            <a onClick={hide}>Close</a>
-          </div>
-        </>
-      }
-      title="Duplicate Form"
-      trigger="click"
-      open={open}
-      onOpenChange={handleOpenChange}
-    >
+    <Tooltip title={"Duplicate Form"} trigger={isMobile() ? "click" : "hover"}>
       <CopyOutlined
-        style={{ color: "blue", marginBottom: 3, cursor: "pointer" }}
+        style={{
+          color: "purple",
+          borderColor: "purple",
+          marginBottom: 3,
+          cursor: "pointer",
+        }}
+        onClick={handleFullDuplicate}
       />
-    </Popover>
+    </Tooltip>
   );
 };
 

@@ -1,4 +1,14 @@
-This repository holds the forms implementation on the [nostr-protocol](https://github.com/nostr-protocol/nostr)
+# Formstr – Forms on Nostr Protocol
+
+**Formstr** is a decentralized form management application built on top of the [Nostr Protocol](https://github.com/nostr-protocol/nostr). It allows users to create, publish, and fill out forms using decentralized identity and event-based communication.
+
+## ✨ Features
+
+- Create forms via a UI or SDK
+- Store form metadata and responses on Nostr
+- Validate and manage form responses
+- Export responses as CSV
+- Fully decentralized – powered by Nostr and NIP-07
 
 ## Setup
 

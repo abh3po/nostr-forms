@@ -38,7 +38,10 @@ export interface IWrap {
   issuerPubkey: string;
 }
 
+import { NOSTR_KINDS } from "../constants/nostr";
+
+// Re-export the kinds for backward compatibility
 export const KINDS = {
-  myFormsList: 14083,
-  formTemplate: 30168,
+  myFormsList: NOSTR_KINDS.MY_FORMS_LIST,
+  formTemplate: NOSTR_KINDS.FORM_TEMPLATE,
 };

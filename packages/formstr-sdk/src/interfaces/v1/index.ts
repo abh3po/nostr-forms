@@ -139,6 +139,10 @@ export interface FormResponse {
 
 export interface IFormSettings {
   titleImageUrl?: string;
+  titleBackgroundType?: "image" | "color";
+  titleBackgroundColor?: string;
+  titleTextSize?: number;
+  titleTextColor?: string;
   description?: string;
   thankYouPage?: boolean;
   notifyNpubs?: Array<string>;

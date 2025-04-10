@@ -17,7 +17,20 @@ import {
   LOCAL_STORAGE_KEYS,
   setItem,
 } from "../../../../utils/localStorage";
-import { Field } from "../../../../nostr/types";
+
+interface ConditionRule {
+  questionId: string;
+  value: string;
+}
+
+export type Field = [
+  placeholder: string,
+  fieldId: string,
+  dataType: string,
+  label: string,
+  options: string,
+  config: string,
+];
 
 export const FormBuilderContext = React.createContext<IFormBuilderContext>({
   questionsList: [],
@@ -51,6 +64,9 @@ export const FormBuilderContext = React.createContext<IFormBuilderContext>({
   setEditList: (keys: Set<string>) => null,
   viewList: null,
   setViewList: (keys: Set<string>) => null,
+  formAnswers: {},
+  updateFormAnswer: (questionId: string, answer: string) => null,
+  shouldShowQuestion: (question: Field) => true
 });
 
 const InitialFormSettings: IFormSettings = {
@@ -76,6 +92,7 @@ export default function FormBuilderProvider({
   const [questionIdInFocus, setQuestionIdInFocus] = useState<
     string | undefined
   >();
+  const [formAnswers, setFormAnswers] = useState<Record<string, string>>({});
   const [formSettings, setFormSettings] =
     useState<IFormSettings>(InitialFormSettings);
 
@@ -256,6 +273,34 @@ export default function FormBuilderProvider({
     setSecretKey(form.secret || null);
     setViewKey(form.viewKey);
   };
+  const updateFormAnswer = (questionId: string, answer: string) => {
+    setFormAnswers(prev => ({
+      ...prev,
+      [questionId]: answer
+    }));
+  };
+
+
+  
+  const shouldShowQuestion = (question: Field): boolean => {
+    try {
+      const answerSettings = JSON.parse(question[5] || '{}');
+      const conditions = answerSettings.conditions as {
+        rules: ConditionRule[];
+      } | undefined;
+  
+      if (!conditions || !conditions.rules || conditions.rules.length === 0) {
+        return true;
+      }
+  
+      return conditions.rules.every((rule: ConditionRule) => {
+        const parentAnswer = formAnswers[rule.questionId];
+        return parentAnswer === rule.value;
+      });
+    } catch {
+      return true;
+    }
+  };
 
   return (
     <FormBuilderContext.Provider
@@ -291,6 +336,9 @@ export default function FormBuilderProvider({
         setEditList,
         viewList,
         setViewList,
+        formAnswers,
+        updateFormAnswer,
+        shouldShowQuestion,
       }}
     >
       {children}

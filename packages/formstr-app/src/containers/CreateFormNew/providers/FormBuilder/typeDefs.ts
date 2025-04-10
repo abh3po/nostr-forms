@@ -58,4 +58,7 @@ export interface IFormBuilderContext {
   setEditList: (keys: Set<string>) => void;
   viewList: Set<string> | null;
   setViewList: (keys: Set<string>) => void;
+  formAnswers: Record<string, string>;
+  updateFormAnswer: (questionId: string, answer: string) => void;
+  shouldShowQuestion: (question: Field) => boolean;
 }

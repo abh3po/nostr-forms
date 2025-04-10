@@ -11,6 +11,18 @@ export default styled.div`
     margin: 16px;
   }
 
+  .form-expiry {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.form-expiry .property-setting {
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+}
+
   .property-setting {
     display: flex;
     justify-content: space-between;

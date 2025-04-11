@@ -68,3 +68,7 @@ code {
   max-height: 250px;
   overflow-y: scroll;
 }
+
+.ant-dropdown-menu-item {
+  text-align: center;
+}

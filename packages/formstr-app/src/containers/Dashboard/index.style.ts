@@ -17,4 +17,20 @@ export default styled.div`
     width: 80%;
     margin: 10px;
   }
+
+  .filter-dropdown-container {
+    margin: 10px auto;
+    width: 80%;
+    display: flex;
+
+    .ant-dropdown-trigger {
+       width: 100%;
+    }
+
+    .ant-btn {
+      width: 100%;
+      display: flex;
+      justify-content: center;
+    }
+  }
 `;

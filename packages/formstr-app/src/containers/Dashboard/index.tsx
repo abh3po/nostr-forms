@@ -10,12 +10,12 @@ import EmptyScreen from "../../components/EmptyScreen";
 import { useApplicationContext } from "../../hooks/useApplicationContext";
 import { getItem, LOCAL_STORAGE_KEYS } from "../../utils/localStorage";
 import { ILocalForm } from "../CreateFormNew/providers/FormBuilder/typeDefs";
-import { Dropdown, Menu, Typography } from "antd";
+import { Dropdown, Menu, Typography, Button } from "antd";
 import { DownOutlined } from "@ant-design/icons";
 import { MyForms } from "./FormCards/MyForms";
 import { Drafts } from "./FormCards/Drafts";
 import { LocalForms } from "./FormCards/LocalForms";
-import { useNavigate } from "react-router-dom"; 
+import { useNavigate } from "react-router-dom";
 import { availableTemplates, FormTemplate } from "../../templates";
 import { ROUTES } from "../../constants/routes";
 import { FormInitData } from "../CreateFormNew/providers/FormBuilder/typeDefs";
@@ -94,7 +94,7 @@ export const Dashboard = () => {
 
   const renderForms = () => {
     if (filter === "local") {
-      if (localForms.length == 0){ 
+      if (localForms.length == 0){
         return (
           <EmptyScreen
             templates={availableTemplates}
@@ -158,21 +158,15 @@ export const Dashboard = () => {
   return (
     <DashboardStyleWrapper>
       <div className="dashboard-container">
-        <div style={{ margin: 10 }}>
-          <Dropdown overlay={menu} trigger={["click"]} placement="bottomLeft">
-            <div
-              style={{
-                color: "grey",
-                cursor: "pointer",
-                display: "flex",
-                alignItems: "center",
-              }}
-            >
-              <Typography.Text>{MENU_OPTIONS[filter]} </Typography.Text>
+      <div className="filter-dropdown-container">
+          <Dropdown overlay={menu} trigger={["click"]} placement="bottomLeft" overlayClassName="dashboard-filter-menu"
+>
+            <Button>
+              {MENU_OPTIONS[filter]}
               <DownOutlined
-                style={{ marginLeft: "8px", fontSize: "12px", marginTop: -5 }}
+                style={{ marginLeft: "8px", fontSize: "12px" }}
               />
-            </div>
+            </Button>
           </Dropdown>
         </div>
         <div className="form-cards-container">{renderForms()}</div>
@@ -180,7 +174,7 @@ export const Dashboard = () => {
           visible={isTemplateModalOpen}
           onClose={closeTemplateModal}
           onTemplateSelect={handleTemplateClick}
-        />      
+        />
         <>
           {state && (
             <FormDetails

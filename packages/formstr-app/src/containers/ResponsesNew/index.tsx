@@ -150,13 +150,31 @@ export const Response = () => {
         let question = questionField?.[3];
         const label = useLabels ? question || input[1] : input[1];
         let responseLabel = input[2];
+
+        // if (questionField && questionField[2] === "option") {
+        //   let choices = JSON.parse(questionField[4]) as Tag[];
+        //   let choiceField = choices.filter((choice) => {
+        //     return choice[0] === input[2];
+        //   })?.[0];
+        //   if (choiceField[1]) responseLabel = choiceField[1];
+        // }
+
+        /**
+         * Safely handle the case where choiceField is undefined:
+         */
+
         if (questionField && questionField[2] === "option") {
-          let choices = JSON.parse(questionField[4]) as Tag[];
-          let choiceField = choices.filter((choice) => {
-            return choice[0] === input[2];
-          })?.[0];
-          if (choiceField[1]) responseLabel = choiceField[1];
+          try {
+            let choices = JSON.parse(questionField[4]) as Tag[];
+            let choiceField = choices.find((choice) => choice[0] === input[2]);
+            if (choiceField && choiceField[1]) {
+              responseLabel = choiceField[1];
+            }
+          } catch (e) {
+            console.error("Invalid choices JSON or choice not found", e);
+          }
         }
+        
         answerObject[label] = responseLabel;
       });
       answers.push(answerObject);

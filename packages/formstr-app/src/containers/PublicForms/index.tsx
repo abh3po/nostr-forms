@@ -15,12 +15,24 @@ function PublicForms() {
   const navigate = useNavigate();
   useEffect(() => {
     const handleFormEvent = (event: Event) => {
-      setForms(prevForms => [...prevForms, event]);
-      setIsLoading(false);  
+      setForms(prevForms => {
+        if (prevForms.some(f => f.id === event.id)) {
+          return prevForms;
+        }
+        return [...prevForms, event];
+      });      setIsLoading(false);  
     };
+
+    const loadingTimeout = setTimeout(() => {
+      setIsLoading(false); 
+  }, 10000); 
   
     setIsLoading(true);
     getPublicForms(getDefaultRelays(), handleFormEvent);
+
+    return () => {
+      clearTimeout(loadingTimeout);
+    };
     
   }, []);
 
@@ -40,14 +52,35 @@ function PublicForms() {
       ) : forms.length > 0 ? (
         forms.map((f: Event) => {
           if (f.content === "") {
-            let name = f.tags.filter((t) => t[0] === "name")[0][1];
-            let formId = f.tags.filter((t) => t[0] === "d")[0][1];
-            let settings = JSON.parse(
-              f.tags.filter((t) => t[0] === "settings")[0][1]
-            );
+            const nameTag = f.tags.find((t) => t[0] === "name");
+            const formIdTag = f.tags.find((t) => t[0] === "d");
+            const settingsTag = f.tags.find((t) => t[0] === "settings");
+
+            const name = nameTag?.[1] ?? "[Untitled Form]";
+            const formId = formIdTag?.[1]; 
+
+            if (!formId) {
+              console.warn(`Skipping event without 'd' tag: ${f.id}`);
+              return null;
+            }
+
+            let settings: { description?: string } = {};
+            if (settingsTag?.[1]) {
+              try {
+                settings = JSON.parse(settingsTag[1]);
+              } catch (e) {
+                console.warn(`Failed to parse settings for event ${f.id}`, e);
+              }
+            }
+
+            const description = settings?.description ?? "";
+            const truncatedDescription = description.trim().substring(0, 200) + (description.length > 200 ? "..." : "");
+            
+
             return (
               <Card
-                title={name}
+                key={f.id} 
+                title={name} 
                 headStyle={{ marginTop: 10 }}
                 style={{
                   fontSize: 12,
@@ -60,10 +93,12 @@ function PublicForms() {
                   style={{
                     maxHeight: 100,
                     textOverflow: "ellipsis",
+                    overflow: "hidden", 
                   }}
                 >
                   <ReactMarkdown>
-                    {settings.description.trim().substring(0, 200) + "..."}
+                    {}
+                    {truncatedDescription}
                   </ReactMarkdown>
                 </div>
                 <Divider />
@@ -72,10 +107,12 @@ function PublicForms() {
                     display: "flex",
                     flexDirection: "row",
                     justifyContent: "space-between",
+                    alignItems: "center", 
                   }}
                 >
                   <Button
                     onClick={() => {
+                      
                       navigate(naddrUrl(f.pubkey, formId, getDefaultRelays()));
                     }}
                     style={{ color: "green", borderColor: "green" }}
@@ -86,25 +123,31 @@ function PublicForms() {
                   <Typography.Text
                     style={{ color: "grey", fontSize: 12, margin: 10 }}
                   >
-                    {new Date(f.created_at * 1000).toDateString().toString()}
+                    {}
+                    {new Date(f.created_at * 1000).toLocaleDateString()}
                   </Typography.Text>
                 </div>
               </Card>
             );
           } else {
+            
             return (
               <Card
+                key={f.id} 
                 title="Encrypted Content"
                 style={{ margin: 30, fontSize: 12, color: "grey" }}
               >
                 {" "}
-                {new Date(f.created_at * 1000).toDateString().toString()}
+                {new Date(f.created_at * 1000).toLocaleDateString()}
               </Card>
             );
           }
         })
       ) : (
-        <Typography.Text>No forms to show</Typography.Text>
+        
+        <Typography.Text style={{ display: 'block', textAlign: 'center', margin: '40px' }}>
+          No public forms found on the connected relays.
+        </Typography.Text>
       )}
     </StyleWrapper>
   );

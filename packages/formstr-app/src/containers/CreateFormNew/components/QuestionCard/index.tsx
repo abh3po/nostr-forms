@@ -1,5 +1,5 @@
 import { Card, Input } from "antd";
-import { ChangeEvent } from "react";
+import { ChangeEvent, useRef, PointerEvent as ReactPointerEvent } from "react";
 import useFormBuilderContext from "../../hooks/useFormBuilderContext";
 import CardHeader from "./CardHeader";
 import Inputs from "./Inputs";
@@ -10,6 +10,7 @@ import QuestionTextStyle from "./question.style";
 import { Choice } from "./InputElements/OptionTypes/types";
 import UploadImage from "./UploadImage";
 import { Field } from "../../../../nostr/types";
+import { DragControls } from "framer-motion";
 
 type QuestionCardProps = {
   question: Field;
@@ -17,6 +18,7 @@ type QuestionCardProps = {
   onReorderKey: (keyType: "UP" | "DOWN", tempId: string) => void;
   firstQuestion: boolean;
   lastQuestion: boolean;
+  dragControls: DragControls | undefined;
 };
 
 const QuestionCard: React.FC<QuestionCardProps> = ({
@@ -25,12 +27,14 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
   onReorderKey,
   firstQuestion,
   lastQuestion,
+  dragControls,
 }) => {
   let options = JSON.parse(question[4] || "[]") as Array<Choice>;
   const answerSettings = JSON.parse(
     question[5] || '{"renderElement": "shortText"}'
   );
   const { setQuestionIdInFocus } = useFormBuilderContext();
+  const dragTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const handleTextChange = (event: ChangeEvent<HTMLTextAreaElement>) => {
     event.stopPropagation();
@@ -63,10 +67,33 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
     onEdit(field, question[1]);
   };
 
+  const handlePointerDown = (event: ReactPointerEvent<HTMLDivElement>) => {
+    if (!dragControls) return;
+    const savedEvent = event;
+    if (dragTimeoutRef.current) {
+      clearTimeout(dragTimeoutRef.current);
+    }
+    dragTimeoutRef.current = setTimeout(() => {
+      dragControls.start(savedEvent);
+    }, 300);
+  };
+
+  const handlePointerUp = () => {
+    if (dragTimeoutRef.current) {
+      clearTimeout(dragTimeoutRef.current);
+      dragTimeoutRef.current = null;
+    }
+  };
+
   return (
     <StyledWrapper>
       <Card type="inner" className="question-card" onClick={onCardClick}>
-        <div className="drag-icon">
+        <div className="drag-icon"
+        onPointerDown={dragControls ? handlePointerDown : undefined} 
+        onPointerUp={dragControls ? handlePointerUp : undefined}
+        onPointerCancel={dragControls ? handlePointerUp : undefined}
+        style={{ touchAction: dragControls ? "none" : "auto" }}
+        >
           <SmallDashOutlined />
         </div>
         <CardHeader

@@ -128,6 +128,9 @@ export const FormFillerOld: React.FC<FormFillerProps> = ({
     titleBackgroundColor?: string;
     titleTextSize?: number;
     titleTextColor?: string;
+    titleTextXOffset?: number;
+    titleTextYOffset?: number;
+    showBanner?: boolean;
   }
   
   const extendedSettings = settings as ExtendedFormSettings;
@@ -147,6 +150,9 @@ export const FormFillerOld: React.FC<FormFillerProps> = ({
                 titleBackgroundColor={extendedSettings?.titleBackgroundColor}
                 titleTextSize={extendedSettings?.titleTextSize}
                 titleTextColor={extendedSettings?.titleTextColor}
+                titleTextXOffset={extendedSettings?.titleTextXOffset}
+                titleTextYOffset={extendedSettings?.titleTextYOffset}
+                showBanner={extendedSettings?.showBanner}
               />
             )}
             {!hideDescription && (

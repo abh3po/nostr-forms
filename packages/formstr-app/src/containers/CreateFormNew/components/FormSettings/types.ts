@@ -4,6 +4,9 @@ export interface IFormSettings {
   titleBackgroundColor?: string;
   titleTextSize?: number;
   titleTextColor?: string;
+  titleTextXOffset?: number;
+  titleTextYOffset?: number;
+  showBanner?: boolean;
   description?: string;
   thankYouPage?: boolean;
   notifyNpubs?: Array<string>;

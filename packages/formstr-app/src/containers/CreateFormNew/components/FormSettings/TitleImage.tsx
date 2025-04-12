@@ -30,6 +30,15 @@ function TitleImage({ titleImageUrl, titleBackgroundColor }: {
   const [titleTextColor, setTitleTextColor] = useState(
     formSettings.titleTextColor || "#ffffff"
   );
+  const [titleTextXOffset, setTitleTextXOffset] = useState<number>(
+    formSettings.titleTextXOffset !== undefined ? formSettings.titleTextXOffset : 16
+  );
+  const [titleTextYOffset, setTitleTextYOffset] = useState<number>(
+    formSettings.titleTextYOffset !== undefined ? formSettings.titleTextYOffset : 10
+  );
+  const [showBanner, setShowBanner] = useState<boolean>(
+    formSettings.showBanner !== false // Default to true unless explicitly set to false
+  );
   
   // Apply default settings if none exist
   useEffect(() => {
@@ -48,6 +57,17 @@ function TitleImage({ titleImageUrl, titleBackgroundColor }: {
         titleImageUrl: "https://images.pexels.com/photos/733857/pexels-photo-733857.jpeg"
       });
     }
+
+    // Initialize positioning and visibility if not set
+    if (formSettings.titleTextXOffset === undefined ||
+        formSettings.titleTextYOffset === undefined ||
+        formSettings.showBanner === undefined) {
+      updateFormSetting({
+        titleTextXOffset: formSettings.titleTextXOffset !== undefined ? formSettings.titleTextXOffset : 16,
+        titleTextYOffset: formSettings.titleTextYOffset !== undefined ? formSettings.titleTextYOffset : 10,
+        showBanner: formSettings.showBanner !== false
+      });
+    }
   }, []);
   
   // Keep local state in sync with context state
@@ -63,6 +83,15 @@ function TitleImage({ titleImageUrl, titleBackgroundColor }: {
     }
     if (formSettings.titleTextColor) {
       setTitleTextColor(formSettings.titleTextColor);
+    }
+    if (formSettings.titleTextXOffset !== undefined) {
+      setTitleTextXOffset(formSettings.titleTextXOffset);
+    }
+    if (formSettings.titleTextYOffset !== undefined) {
+      setTitleTextYOffset(formSettings.titleTextYOffset);
+    }
+    if (formSettings.showBanner !== undefined) {
+      setShowBanner(formSettings.showBanner);
     }
   }, [formSettings]);
   
@@ -120,12 +149,62 @@ function TitleImage({ titleImageUrl, titleBackgroundColor }: {
     });
   };
 
+  const handleTextXOffsetChange = (value: number | null) => {
+    const offset = value !== null ? value : 16; // Default to 16px if null
+    setTitleTextXOffset(offset);
+    updateFormSetting({
+      titleTextXOffset: offset
+    });
+  };
+
+  const handleTextYOffsetChange = (value: number | null) => {
+    const offset = value !== null ? value : 10; // Default to 10px if null
+    setTitleTextYOffset(offset);
+    updateFormSetting({
+      titleTextYOffset: offset
+    });
+  };
+
+  const handleShowBannerChange = (checked: boolean) => {
+    setShowBanner(checked);
+    updateFormSetting({
+      showBanner: checked
+    });
+  };
+
+  // If banner is hidden, only show the toggle to re-enable it
+  if (!showBanner) {
+    return (
+      <>
+        <div className="property-setting">
+          <Text className="property-name">Title banner</Text>
+        </div>
+        
+        <div style={{ display: "flex", alignItems: "center", margin: "10px 0" }}>
+          <Text style={{ marginRight: "10px" }}>Show banner</Text>
+          <Switch 
+            checked={showBanner}
+            onChange={handleShowBannerChange}
+          />
+        </div>
+      </>
+    );
+  }
+
   return (
     <>
       <div className="property-setting">
-        <Text className="property-name">Title background</Text>
+        <Text className="property-name">Title banner</Text>
       </div>
       
+      <div style={{ display: "flex", alignItems: "center", margin: "10px 0" }}>
+        <Text style={{ marginRight: "10px" }}>Show banner</Text>
+        <Switch 
+          checked={showBanner}
+          onChange={handleShowBannerChange}
+        />
+      </div>
+
       <div style={{ display: "flex", alignItems: "center", margin: "10px 0" }}>
         <Text style={{ marginRight: "10px" }}>Solid Color</Text>
         <Switch 
@@ -193,8 +272,33 @@ function TitleImage({ titleImageUrl, titleBackgroundColor }: {
               <InputNumber 
                 min={10} 
                 max={48} 
-                defaultValue={titleTextSize} 
+                value={titleTextSize} 
                 onChange={handleTextSizeChange}
+                addonAfter="px"
+                style={{ width: "100px" }}
+              />
+            </div>
+          </div>
+          
+          <div style={{ marginBottom: "15px" }}>
+            <div style={{ display: "flex", alignItems: "center", flexWrap: "nowrap" }}>
+              <Text style={{ width: "80px", whiteSpace: "nowrap" }}>Text color:</Text>
+              <ColorPicker
+                value={titleTextColor}
+                onChange={handleTextColorChange}
+                trigger="hover"
+              />
+            </div>
+          </div>
+          
+          <div style={{ marginBottom: "15px" }}>
+            <div style={{ display: "flex", alignItems: "center", flexWrap: "nowrap" }}>
+              <Text style={{ width: "80px", whiteSpace: "nowrap" }}>X position:</Text>
+              <InputNumber 
+                min={0} 
+                max={500} 
+                value={titleTextXOffset} 
+                onChange={handleTextXOffsetChange}
                 addonAfter="px"
                 style={{ width: "100px" }}
               />
@@ -203,11 +307,14 @@ function TitleImage({ titleImageUrl, titleBackgroundColor }: {
           
           <div>
             <div style={{ display: "flex", alignItems: "center", flexWrap: "nowrap" }}>
-              <Text style={{ width: "80px", whiteSpace: "nowrap" }}>Text color:</Text>
-              <ColorPicker
-                value={titleTextColor}
-                onChange={handleTextColorChange}
-                trigger="hover"
+              <Text style={{ width: "80px", whiteSpace: "nowrap" }}>Y position:</Text>
+              <InputNumber 
+                min={0} 
+                max={500} 
+                value={titleTextYOffset} 
+                onChange={handleTextYOffsetChange}
+                addonAfter="px"
+                style={{ width: "100px" }}
               />
             </div>
           </div>

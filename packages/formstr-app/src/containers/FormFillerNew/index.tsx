@@ -249,6 +249,9 @@ export const FormFiller: React.FC<FormFillerProps> = ({
                 titleBackgroundColor={settings?.titleBackgroundColor}
                 titleTextSize={settings?.titleTextSize}
                 titleTextColor={settings?.titleTextColor}
+                titleTextXOffset={settings?.titleTextXOffset}
+                titleTextYOffset={settings?.titleTextYOffset}
+                showBanner={settings?.showBanner}
               />
             )}
             {!hideDescription && (

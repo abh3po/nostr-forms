@@ -34,6 +34,9 @@ export const FormBuilderContext = React.createContext<IFormBuilderContext>({
     titleBackgroundColor: "#f17124", 
     titleTextSize: 24,
     titleTextColor: "#ffffff",
+    titleTextXOffset: 16,
+    titleTextYOffset: 10,
+    showBanner: true,
     formId: "" 
   },
   updateFormSetting: (settings: IFormSettings) => null,
@@ -69,6 +72,9 @@ const InitialFormSettings: IFormSettings = {
   titleBackgroundColor: "#f17124",
   titleTextSize: 24,
   titleTextColor: "#ffffff",
+  titleTextXOffset: 16,
+  titleTextYOffset: 10,
+  showBanner: true,
   description:
     "This is the description, you can use markdown while editing it!" +
     " tap anywhere on the form to edit, including this description.",
@@ -319,6 +325,16 @@ export default function FormBuilderProvider({
       }
     } else {
       settings.titleTextSize = 24;
+    }
+
+    if (settings.titleTextXOffset === undefined) {
+      settings.titleTextXOffset = 16;
+    }
+    if (settings.titleTextYOffset === undefined) {
+      settings.titleTextYOffset = 10;
+    }
+    if (settings.showBanner === undefined) {
+      settings.showBanner = true;
     }
     
     settings = { ...InitialFormSettings, ...settings };

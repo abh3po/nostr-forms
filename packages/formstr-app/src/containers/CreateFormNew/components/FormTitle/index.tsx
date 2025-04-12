@@ -15,6 +15,9 @@ function FormTitle({
   titleBackgroundColor,
   titleTextSize,
   titleTextColor,
+  titleTextXOffset,
+  titleTextYOffset,
+  showBanner = true,
 }: {
   className: string;
   edit?: boolean;
@@ -24,6 +27,9 @@ function FormTitle({
   titleBackgroundColor?: string;
   titleTextSize?: number;
   titleTextColor?: string;
+  titleTextXOffset?: number;
+  titleTextYOffset?: number;
+  showBanner?: boolean;
 }) {
   const { formSettings, formName, updateFormName, toggleSettingsWindow } =
     useFormBuilderContext();
@@ -34,7 +40,10 @@ function FormTitle({
       type: formSettings.titleBackgroundType,
       color: formSettings.titleBackgroundColor,
       textSize: formSettings.titleTextSize,
-      textColor: formSettings.titleTextColor
+      textColor: formSettings.titleTextColor,
+      textXOffset: formSettings.titleTextXOffset,
+      textYOffset: formSettings.titleTextYOffset,
+      showBanner: formSettings.showBanner
     });
   }, [formSettings]);
 
@@ -47,6 +56,11 @@ function FormTitle({
     const size = edit ? formSettings.titleTextSize : titleTextSize;
     return size ? `${size}px` : '24px'; // Default to 24px if not set
   };
+
+  // If showBanner is explicitly false, don't render the banner
+  if ((edit && formSettings.showBanner === false) || (!edit && showBanner === false)) {
+    return null;
+  }
 
   return (
     <StyleWrapper 
@@ -73,7 +87,9 @@ function FormTitle({
           className="title-text"
           style={{ 
             fontSize: getFontSize(),
-            color: titleTextColor || "#ffffff"
+            color: titleTextColor || "#ffffff",
+            bottom: titleTextYOffset !== undefined ? `${titleTextYOffset}px` : '10px',
+            left: titleTextXOffset !== undefined ? `${titleTextXOffset}px` : '16px',
           }}
         >
           {formTitle}
@@ -87,7 +103,9 @@ function FormTitle({
           autoSize={true}
           style={{ 
             fontSize: getFontSize(),
-            color: formSettings.titleTextColor || "#ffffff"
+            color: formSettings.titleTextColor || "#ffffff",
+            bottom: formSettings.titleTextYOffset !== undefined ? `${formSettings.titleTextYOffset}px` : '10px',
+            left: formSettings.titleTextXOffset !== undefined ? `${formSettings.titleTextXOffset}px` : '16px',
           }}
         />
       )}

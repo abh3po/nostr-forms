@@ -52,8 +52,6 @@ export default styled.div<{
       return "white";
     }};
     position: absolute;
-    bottom: 10px;
-    left: 16px;
     font-size: 24px;
     max-width: 95%;
   }

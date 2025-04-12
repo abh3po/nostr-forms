@@ -9,7 +9,7 @@ type Props = {
   tags: Tag[];
 };
 
-const DuplicateFormPopover: React.FC<Props> = ({ tags }) => {
+const DuplicateForm: React.FC<Props> = ({ tags }) => {
   const saveAndOpen = (duplicatedTags: Tag[], newFormId: string) => {
     const duplicatedForm = {
       formSpec: duplicatedTags,
@@ -64,4 +64,4 @@ const DuplicateFormPopover: React.FC<Props> = ({ tags }) => {
   );
 };
 
-export default DuplicateFormPopover;
+export default DuplicateForm;

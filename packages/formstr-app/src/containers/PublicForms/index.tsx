@@ -15,35 +15,47 @@ function PublicForms() {
   const navigate = useNavigate();
   useEffect(() => {
     const handleFormEvent = (event: Event) => {
-      setForms(prevForms => [...prevForms, event]);
-      setIsLoading(false);  
+      setForms((prevForms) => [...prevForms, event]);
+      setIsLoading(false);
     };
-  
+
     setIsLoading(true);
     getPublicForms(getDefaultRelays(), handleFormEvent);
-    
   }, []);
 
   return (
     <StyleWrapper>
       {isLoading ? (
-        Array(3).fill(0).map((_, index) => (
-          <Card key={index} style={{ margin: 30 }}>
-            <Skeleton active title={{ width: '40%' }} paragraph={{ rows: 3 }} />
-            <Divider />
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <Skeleton.Button active style={{ width: 100 }} />
-              <Skeleton.Input active style={{ width: 120 }} />
-            </div>
-          </Card>
-        ))
+        Array(3)
+          .fill(0)
+          .map((_, index) => (
+            <Card key={index} style={{ margin: 30 }}>
+              <Skeleton
+                active
+                title={{ width: "40%" }}
+                paragraph={{ rows: 3 }}
+              />
+              <Divider />
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                }}
+              >
+                <Skeleton.Button active style={{ width: 100 }} />
+                <Skeleton.Input active style={{ width: 120 }} />
+              </div>
+            </Card>
+          ))
       ) : forms.length > 0 ? (
         forms.map((f: Event) => {
           if (f.content === "") {
-            let name = f.tags.filter((t) => t[0] === "name")[0][1];
-            let formId = f.tags.filter((t) => t[0] === "d")[0][1];
+            let name = f.tags.filter((t) => t[0] === "name")?.[0]?.[1] || "";
+            let formId = f.tags.filter((t) => t[0] === "d")?.[0]?.[1];
+            if (!formId) return null;
             let settings = JSON.parse(
-              f.tags.filter((t) => t[0] === "settings")[0][1]
+              f.tags.filter((t) => t[0] === "settings")?.[0]?.[1] || "{}"
             );
             return (
               <Card
@@ -63,7 +75,8 @@ function PublicForms() {
                   }}
                 >
                   <ReactMarkdown>
-                    {settings.description.trim().substring(0, 200) + "..."}
+                    {(settings.description || "").trim().substring(0, 200) +
+                      "..."}
                   </ReactMarkdown>
                 </div>
                 <Divider />

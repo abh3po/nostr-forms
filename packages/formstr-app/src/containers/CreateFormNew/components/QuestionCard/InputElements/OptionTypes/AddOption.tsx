@@ -35,22 +35,6 @@ export const AddOption: React.FC<AddOptionProps> = ({
           addOption([makeTag(6), markdownUrl], choices, callback);
         }}
       />
-      {displayOther && (
-        <>
-          <div className="orText">
-            <Text disabled={disable}>{" or "}</Text>
-          </div>
-          <Button
-            type="dashed"
-            disabled={disable}
-            onClick={(e) => {
-              addOption([makeTag(6), "Option"], choices, callback);
-            }}
-          >
-            add other
-          </Button>
-        </>
-      )}
     </div>
   );
 };

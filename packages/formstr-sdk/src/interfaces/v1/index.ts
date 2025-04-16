@@ -27,6 +27,7 @@ export enum AnswerTypes {
   date = "date",
   label = "label",
   time = "time",
+  country = "country",
 }
 
 export interface Choice {

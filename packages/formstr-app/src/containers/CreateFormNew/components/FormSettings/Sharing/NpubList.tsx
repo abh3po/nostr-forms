@@ -76,11 +76,16 @@ export const NpubList: React.FC<NpubListProps> = ({
     if (!searchInput) return;
 
     setIsProcessing(true);
-    
+
     if (isValidNpub(searchInput)) {
       // Handle npub
       const pubkey = nip19.decode(searchInput).data as string;
-      setNpubList(new Set(NpubList).add(pubkey));
+      // @ts-ignore
+      setNpubList(prev => {
+        const updated = new Set(prev || new Set());
+        updated.add(pubkey);
+        return updated;
+      });
       setSearchInput("");
       message.success("User added successfully");
     } else if (isValidNip05Format(searchInput)) {
@@ -88,7 +93,12 @@ export const NpubList: React.FC<NpubListProps> = ({
       try {
         const pubkey = await resolveNip05(searchInput);
         if (pubkey) {
-          setNpubList(new Set(NpubList).add(pubkey));
+          // @ts-ignore
+          setNpubList(prev => {
+            const updated = new Set(prev || new Set());
+            updated.add(pubkey);
+            return updated;
+          });
           setSearchInput("");
           message.success("User added successfully");
         } else {
@@ -98,7 +108,7 @@ export const NpubList: React.FC<NpubListProps> = ({
         message.error("Error resolving NIP-05 identifier");
       }
     }
-    
+
     setIsProcessing(false);
     setShowResults(false);
   };
@@ -139,7 +149,12 @@ export const NpubList: React.FC<NpubListProps> = ({
   };
 
   const handleSelectUser = (pubkey: string) => {
-    setNpubList(new Set(NpubList).add(pubkey));
+    // @ts-ignore
+    setNpubList(prev => {
+      const updated = new Set(prev || new Set());
+      updated.add(pubkey);
+      return updated;
+    });
     setSearchInput("");
     setSearchResults([]);
     setShowResults(false);
@@ -164,7 +179,7 @@ export const NpubList: React.FC<NpubListProps> = ({
             suffix={isProcessing ? <LoadingOutlined /> : null}
             style={{ marginBottom: 10 }}
           />
-          
+
           {isValidIdentifier(searchInput) && (
             <Button
               type="primary"
@@ -198,7 +213,7 @@ export const NpubList: React.FC<NpubListProps> = ({
               )}
             />
           )}
-          
+
           {showResults && searchResults.length === 0 && !isProcessing && (
             <Typography.Text type="secondary">
               No results found. Try a different search term.

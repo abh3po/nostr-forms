@@ -53,19 +53,8 @@ export function buildSearchFilter(options: SearchOptions) {
   if (options.limit) {
     filter.limit = options.limit;
   }
-
-  // Build search query with extensions
-  let searchQuery = options.query;
-
-  if (options.domain) {
-    searchQuery += ` domain:${options.domain}`;
-  }
-
-  if (options.language) {
-    searchQuery += ` language:${options.language}`;
-  }
-
-  filter.search = searchQuery.trim();
+  
+  filter.search = options.query.trim();
 
   return filter;
 }

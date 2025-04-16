@@ -20,7 +20,7 @@ export const naddrUrl = (
   publicKey: string,
   formId: string,
   relaysEncode?: string[],
-  viewKey?: string
+  viewKey?: string,
 ) => {
   let formUrl = `/f/${nip19.naddrEncode({
     pubkey: publicKey,
@@ -34,20 +34,20 @@ export const naddrUrl = (
 
 export function constructFormUrl(
   publicKey: string,
-  formIdentifier: string | null = null
+  formIdentifier: string | null = null,
 ) {
   let hostname = window.location.host;
   if (hostname.includes("abhay-raizada")) {
     hostname += "/nostr-forms";
   }
-  if (!formIdentifier) `http://${hostname}/#/fill/${publicKey}/`;
+  if (!formIdentifier) `http://${hostname}/fill/${publicKey}/`;
   return !formIdentifier
-    ? `http://${hostname}/#/fill/${publicKey}`
-    : `http://${hostname}/#/f/${publicKey}/${formIdentifier}`;
+    ? `http://${hostname}/fill/${publicKey}`
+    : `http://${hostname}/f/${publicKey}/${formIdentifier}`;
 }
 
 export function constructDraftUrl(
-  draft: { formSpec: unknown; tempId: string } | null
+  draft: { formSpec: unknown; tempId: string } | null,
 ) {
   if (!draft) {
     return;
@@ -56,12 +56,12 @@ export function constructDraftUrl(
   draftHash = window.encodeURIComponent(draftHash);
   const hostname = window.location.host;
 
-  return `http://${hostname}/#/drafts/${draftHash}`;
+  return `http://${hostname}/drafts/${draftHash}`;
 }
 
 export function constructResponseUrl(privateKey: string | null) {
-  let hostname = window.location.host;
-  return `http://${hostname}/#/r/${privateKey}/responses`;
+  const hostname = window.location.host;
+  return `http://${hostname}/r/${privateKey}/responses`;
 }
 
 export function copyToClipBoard(str: string) {

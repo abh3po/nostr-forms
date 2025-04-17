@@ -91,6 +91,7 @@ export const INPUTS_MENU = [
       renderElement: AnswerTypes.time,
     },
   },
+ 
 ];
 
 export const PRE_BUILT_MENU = [
@@ -116,6 +117,17 @@ export const PRE_BUILT_MENU = [
         },
       },
     },
+
     primitive: "text",
   },
+  {
+    key: PRE_BUILT_MENU_KEYS.COUNTRY,
+    label: "Country",
+    icon: <InputIcon style={{ color: "#1e3f66.17", fill: "#1e3f66" }} />,
+    primitive: "text",
+    answerSettings: {
+      renderElement: AnswerTypes.country,
+    },
+  },
+
 ];

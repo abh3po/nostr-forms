@@ -27,7 +27,6 @@ export const DropdownCreator: React.FC<RadioButtonCreatorProps> = ({
 
   const getMenuItems = (): MenuProps["items"] => {
     return choices.map((choice) => {
-      console.log("Choice is", choice);
       let [choiceId, label, settingsString] = choice;
       let settings = JSON.parse(settingsString || "{}") as ChoiceSettings;
       return {

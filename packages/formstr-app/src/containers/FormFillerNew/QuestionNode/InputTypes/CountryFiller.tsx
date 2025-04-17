@@ -34,7 +34,7 @@ export const CountryFiller: React.FC<CountryFillerProps> = ({
         value={selectedCountry}
         onChange={handleChange}
         defaultOptionLabel="Select your country"
-        style={{ width: "30%", height: "30px" }}
+        style={{ width: "30%", height: "30px", backgroundColor: "white" }}
       />
     </>
   );

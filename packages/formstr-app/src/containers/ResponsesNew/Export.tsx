@@ -25,10 +25,32 @@ export const Export: React.FC<{
     const fileExtension = type === "excel" ? ".xlsx" : ".csv";
     XLSX.writeFile(workBook, `${SheetName}.${fileExtension}`);
     
-   } catch (error) {
-      console.error("Error exporting data:", error);
-      alert("Error exporting data");
-      return;
+   } catch (error : unknown) {
+      if (error instanceof Error) {
+        const errorMessage = error.message;
+
+        if (errorMessage.includes("Cannot find module 'xlsx'")) {
+          alert(
+            "XLSX module not found. Please install the required package."
+          );
+          console.error("Error exporting data:", error.message);
+        } else if (errorMessage.includes("json_to_sheet")) {
+          alert( 
+            "Failed to convert data to sheet. Please check the data format."
+          );
+        } else if (errorMessage.includes("writeFile")) {
+          alert(
+            "Failed to generate file. Please check your file system permissions."
+          );
+        } else {
+          console.error("Unhandled export error:", error);
+          alert(`Export failed: ${errorMessage}`);
+        }
+      }else {
+        console.error("Error exporting data:", error);
+        alert("An unknown error occurred. Please try again.");
+      }
+      
     }
 
   };

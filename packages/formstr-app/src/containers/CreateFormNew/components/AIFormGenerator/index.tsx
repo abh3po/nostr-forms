@@ -99,9 +99,9 @@ const AIFormGenerator: React.FC<AIFormGeneratorProps> = ({
 
     try {
       const isConnected = await ollamaService.testConnection();
-      setConnectionStatus(isConnected);
+      setConnectionStatus(isConnected.success);
 
-      if (isConnected) {
+      if (isConnected.success) {
         // Update available models after successful connection
         const models = ollamaService.getAvailableModels();
         setAvailableModels(models);
@@ -204,6 +204,7 @@ const AIFormGenerator: React.FC<AIFormGeneratorProps> = ({
               loading={loading}
               connectionStatus={connectionStatus}
               availableModels={availableModels}
+              error={error}
             />
           </Space>
         </>

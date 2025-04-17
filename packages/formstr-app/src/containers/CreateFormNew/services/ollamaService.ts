@@ -48,12 +48,12 @@ class OllamaService {
     return this.availableModels;
   }
 
-  async fetchAvailableModels(): Promise<OllamaModel[]> {
+    async fetchAvailableModels(): Promise<OllamaModel[]> {
     try {
       const response = await axios.get(`${this.config.baseUrl}/api/tags`);
       if (response.data && response.data.models) {
         this.availableModels = response.data.models;
-
+  
         // If current model isn't in the list, set to first available one
         if (this.availableModels.length > 0) {
           const modelNames = this.availableModels.map(model => model.name);
@@ -61,12 +61,15 @@ class OllamaService {
             this.config.model = this.availableModels[0].name;
           }
         }
-
+  
         return this.availableModels;
       }
       return [];
     } catch (error) {
       console.error("Failed to fetch Ollama models:", error);
+      if (error instanceof Error && error.message.includes('Network Error')) {
+        console.log("Network error - this might be a CORS issue if using a remote server");
+      }
       this.availableModels = [];
       return [];
     }
@@ -179,18 +182,28 @@ class OllamaService {
     }
   }
 
-  async testConnection(): Promise<boolean> {
+  async testConnection(): Promise<{ success: boolean, error?: string }> {
     try {
       const response = await axios.get(`${this.config.baseUrl}/api/version`);
       if (response.data) {
         // After successful connection, fetch available models
         await this.fetchAvailableModels();
-        return true;
+        return { success: true };
       }
-      return false;
+      return { success: false, error: "No data received from server" };
     } catch (error) {
       console.error("Ollama connection test failed:", error);
-      return false;
+      let errorMessage = "Unknown connection error";
+
+      if (error instanceof Error) {
+        if (error.message.includes('Network Error')) {
+          errorMessage = "Network error - verify the server address and ensure CORS is enabled if using a remote server";
+        } else {
+          errorMessage = error.message;
+        }
+      }
+
+      return { success: false, error: errorMessage };
     }
   }
 }

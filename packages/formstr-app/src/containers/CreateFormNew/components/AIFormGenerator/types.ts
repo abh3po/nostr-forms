@@ -27,6 +27,7 @@ export interface ConnectionStatusProps {
   loading: boolean;
   connectionStatus: boolean | null;
   availableModels: OllamaModel[];
+  error: string | null;
 }
 
 export interface FormGenerationPanelProps {

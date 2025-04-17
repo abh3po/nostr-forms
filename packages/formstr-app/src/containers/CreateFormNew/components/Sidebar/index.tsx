@@ -4,6 +4,7 @@ import BasicMenu from "../BasicMenu";
 import InputsMenu from "../InputsMenu";
 import PreBuiltMenu from "../PreBuiltMenu";
 import Sidebar from "../../../../components/Sidebar";
+import AIFormMenu from "../AIFormMenu";
 
 // TODO: remove usage of any here
 function SidebarMenu(_props: any, ref: any) {
@@ -14,6 +15,8 @@ function SidebarMenu(_props: any, ref: any) {
       <InputsMenu />
       <Divider className="menu-divider" />
       <PreBuiltMenu />
+      <Divider className="menu-divider" />
+      <AIFormMenu />
     </Sidebar>
   );
 }

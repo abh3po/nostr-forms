@@ -20,8 +20,6 @@ function Validation(props: IProps) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [answerType]);
 
-  // Fix: Safely check if ANSWER_TYPE_RULES_MENU has the answerType
-  // if (!selected.length && (!ANSWER_TYPE_RULES_MENU[answerType] || !ANSWER_TYPE_RULES_MENU[answerType].length))
   if (!selected.length && !ANSWER_TYPE_RULES_MENU[answerType].length)
     return null;
 

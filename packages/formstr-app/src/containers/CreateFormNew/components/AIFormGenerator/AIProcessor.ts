@@ -1,11 +1,11 @@
 import { GenerationResponse } from "../../services/ollamaService";
 import { AIProcessingProps } from "./types";
+import {generateQuestion}from "../../utils";
+import { INPUTS_TYPES } from "../../configs/constants";
 
 export const mapFieldTypeToFormType = (type: string = ''): string => {
-  // Convert to lowercase for case-insensitive matching
   const typeStr = type.toLowerCase();
 
-  // Exact matching for the specific types we instructed the LLM to use
   switch (typeStr) {
     case 'multiple_choice':
       return 'MULTIPLE_CHOICE';
@@ -66,29 +66,20 @@ export const processAIResponse = async (
   const { updateQuestionsList, updateFormName, formSettings, updateFormSetting } = props;
   
   if (response.success && response.fields) {
-    // Extract form name from the response or use a default based on the prompt
+
     const formName = response.fields[0]?.formName || 
                     response.formName || 
                     prompt.split(' ').slice(0, 3).join(' ') ||
                     'AI Generated Form';
 
-    // Extract form description if available
     const formDescription = response.description || 
                           response.fields[0]?.description || 
                           `Form generated from prompt: ${prompt}`;
-
-    // Convert the AI-generated fields to the format expected by Formstr
-    const { generateQuestion } = await import('../../utils');
-    const { INPUTS_TYPES } = await import('../../configs/constants');
     
     const convertedFields = response.fields?.map((field: any, index: number) => {
-      // Ensure field has an ID
-      const fieldId = field.id || `field_${index}`;
-      
-      // Map the AI field type to Formstr types
-      const formType = mapFieldTypeToFormType(field.type);
 
-      // Convert options to choices format if available
+      const fieldId = field.id || `field_${index}`;
+      const formType = mapFieldTypeToFormType(field.type);
       let choices: [string, string][] = [];
       
       // Handle options for choice-based fields
@@ -120,17 +111,15 @@ export const processAIResponse = async (
         primitive = 'number';
       }
 
-      // Map to correct renderElement
       const renderElement = mapTypeToRenderElement(formType);
 
-      // Additional settings for the field
       const settings = {
         required: !!field.required,
         renderElement,
         description: field.description || '',
         placeholder: field.placeholder || '',
         fieldId: fieldId,
-        defaultValue: undefined, // Add default property to the object
+        defaultValue: undefined,
       };
 
       // Add default answer for required fields if specified

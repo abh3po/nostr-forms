@@ -1,21 +1,38 @@
-import { TimePicker, TimePickerProps } from "antd";
+import { TimePicker } from "antd";
 import dayjs from "dayjs";
+import customParseFormat from "dayjs/plugin/customParseFormat";
+import { useEffect, useState } from "react";
+
+dayjs.extend(customParseFormat);
 
 interface TimeFillerProps {
-  onChange: (value: string) => void;
   defaultValue?: string;
+  onChange: (answer: string, message?: string) => void;
 }
 
 export const TimeFiller: React.FC<TimeFillerProps> = ({
-  onChange,
   defaultValue,
+  onChange,
 }) => {
-  const handleChange: TimePickerProps["onChange"] = (_, timeString) => {
-    onChange(timeString);
-  };
+  const [value, setValue] = useState<dayjs.Dayjs | null>(
+    defaultValue ? dayjs(defaultValue, "h:mm A") : null
+  );
+
+  useEffect(() => {
+    if (value) {
+      onChange(value.format("h:mm A"), "");
+    }
+  }, [value]);
+
   return (
     <>
-      <TimePicker onChange={handleChange} defaultValue={dayjs(defaultValue)} />
+      <TimePicker
+      use12Hours
+      format="h:mm A"
+      value={value}
+      onSelect={(val) => setValue(val)}
+      allowClear={false}
+    />
     </>
   );
 };

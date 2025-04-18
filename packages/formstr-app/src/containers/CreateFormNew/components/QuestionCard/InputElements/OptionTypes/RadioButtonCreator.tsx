@@ -5,7 +5,6 @@ import OptionsStyle from "./Options.style";
 import { AddOption } from "./AddOption";
 import { handleDelete, handleLabelChange, hasOtherOption } from "./utils";
 import { Choice, ChoiceSettings } from "./types";
-import { makeTag } from "../../../../../../utils/utility";
 
 interface RadioButtonCreatorProps {
   initialValues?: Array<Choice>;
@@ -26,15 +25,16 @@ export const RadioButtonCreator: React.FC<RadioButtonCreatorProps> = ({
   return (
     <OptionsStyle>
       {choices?.map((choice) => {
-        console.log("Choice is", choice);
         let [choiceId, label, settingsString] = choice;
         let settings = JSON.parse(settingsString || "{}") as ChoiceSettings;
+        const isOtherOption = settings.isOther;
+        
         return (
           <div className="radioButtonItem" key={choiceId}>
             <Radio disabled key={choiceId + "choice"} />
             <Input
               key={choiceId + "input"}
-              defaultValue={label}
+              defaultValue={isOtherOption ? "Other" : label}
               onChange={(e) => {
                 handleLabelChange(
                   e.target.value,
@@ -43,15 +43,23 @@ export const RadioButtonCreator: React.FC<RadioButtonCreatorProps> = ({
                   handleNewChoices
                 );
               }}
-              placeholder="Enter an option"
+              placeholder={isOtherOption ? "Other" : "Enter an option"}
               className="choice-input"
-              disabled={settings.isOther}
+              disabled={isOtherOption}
             />
+            {isOtherOption && (
+              <Input 
+                placeholder="Form filler will write here..."
+                disabled={true}
+                style={{ marginLeft: 8, width: '180px', opacity: 0.6 }}
+              />
+            )}
             {choices.length >= 2 && (
               <CloseOutlined
                 onClick={(e) => {
                   handleDelete(choiceId!, choices, handleNewChoices);
                 }}
+                style={{ marginLeft: 8 }}
               />
             )}
           </div>

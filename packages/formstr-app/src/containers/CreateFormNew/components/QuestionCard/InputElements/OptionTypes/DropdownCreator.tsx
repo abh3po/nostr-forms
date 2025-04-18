@@ -27,33 +27,42 @@ export const DropdownCreator: React.FC<RadioButtonCreatorProps> = ({
 
   const getMenuItems = (): MenuProps["items"] => {
     return choices.map((choice) => {
-      console.log("Choice is", choice);
       let [choiceId, label, settingsString] = choice;
       let settings = JSON.parse(settingsString || "{}") as ChoiceSettings;
+      const isOtherOption = settings.isOther;
+      
       return {
         label: (
           <div className="radioButtonItem" key={choiceId}>
             <Input
-              defaultValue={label}
+              defaultValue={isOtherOption ? "Other" : label}
               key={choiceId}
               onChange={(e) => {
                 handleLabelChange(
                   e.target.value,
-                  choiceId!,
+                  choiceId,
                   choices,
                   handleNewChoices
                 );
               }}
-              placeholder="Enter an option"
+              placeholder={isOtherOption ? "Other" : "Enter an option"}
               className="choice-input"
-              disabled={settings.isOther}
+              disabled={isOtherOption}
             />
+            {isOtherOption && (
+              <Input 
+                placeholder="Form filler will write here..."
+                disabled={true}
+                style={{ marginLeft: 8, width: '180px', opacity: 0.6 }}
+              />
+            )}
             <div>
               {choices.length >= 2 && (
                 <CloseOutlined
                   onClick={(e) => {
                     handleDelete(choiceId!, choices, handleNewChoices);
                   }}
+                  style={{ marginLeft: 8 }}
                 />
               )}
             </div>
@@ -63,6 +72,7 @@ export const DropdownCreator: React.FC<RadioButtonCreatorProps> = ({
       } as MenuItemType;
     });
   };
+  
   return (
     <OptionsStyle>
       <Dropdown

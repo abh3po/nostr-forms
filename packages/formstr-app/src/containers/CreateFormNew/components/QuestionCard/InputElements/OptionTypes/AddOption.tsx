@@ -47,7 +47,7 @@ export const AddOption: React.FC<AddOptionProps> = ({
               addOption([makeTag(6), "Option"], choices, callback);
             }}
           >
-            add other
+            Add "Other" Option
           </Button>
         </>
       )}

@@ -8,19 +8,21 @@
     "@testing-library/jest-dom": "^5.17.0",
     "@testing-library/react": "^13.4.0",
     "@testing-library/user-event": "^13.5.0",
-    "@types/jest": "^29.5.5",
+    "@types/jest": "^29.5.14",
     "@types/node": "^20.7.0",
     "@types/react": "^18.2.23",
     "@types/react-dom": "^18.2.8",
     "antd": "^5.11.2",
     "dayjs": "^1.11.10",
     "framer-motion": "^10.16.15",
+    "jest": "^29.7.0",
     "nostr-tools": "^2.3.2",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-markdown": "^9.0.1",
     "react-scripts": "5.0.1",
     "styled-components": "^6.1.1",
+    "ts-jest": "^29.3.2",
     "typescript": "^5.2.2",
     "url": "^0.11.3",
     "web-vitals": "^2.1.4",
@@ -33,7 +35,8 @@
     "start": "react-scripts start",
     "prebuild": "yarn workspace @formstr/sdk build",
     "build": "react-scripts build && cp -r \".well-known\" build/ && cp _config.yml build/ && cp .nojekyll build/",
-    "test": "react-scripts test",
+    "test": "jest",
+    "test:react": "react-scripts test",
     "eject": "react-scripts eject",
     "lint": "eslint src/",
     "lint:fix": "eslint src/ --fix"
@@ -49,7 +52,8 @@
     "@tsconfig/create-react-app": "^2.0.1",
     "@types/styled-components": "^5.1.34",
     "gh-pages": "^6.0.0",
-    "react-router-dom": "^6.15.0"
+    "react-router-dom": "^6.15.0",
+    "ws": "^8.18.1"
   },
   "browserslist": {
     "production": [

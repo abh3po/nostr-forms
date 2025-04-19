@@ -16,9 +16,10 @@ interface EmptyScreenProps {
   actionLabel?: string;
   templates?: FormTemplate[];
   onTemplateClick?: (template: FormTemplate) => void;
+  onOpenGalleryClick?: () => void;
 }
 
-function EmptyScreen({ message, action, actionLabel, templates, onTemplateClick }: EmptyScreenProps) {
+function EmptyScreen({ message, action, actionLabel, templates, onTemplateClick,onOpenGalleryClick }: EmptyScreenProps) {
   let navigate = useNavigate();
   console.log("message,", message, action, actionLabel);
   const showTemplates = templates && templates.length > 0 && onTemplateClick;
@@ -30,7 +31,7 @@ function EmptyScreen({ message, action, actionLabel, templates, onTemplateClick 
           <Typography.Title level={4} style={{ marginBottom: '20px', textAlign: 'center' }}>
             Start a new form
           </Typography.Title>
-          <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', maxHeight: 'calc(100vh - 300px)', overflowY: 'auto' }}>
+          <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', maxHeight: 'calc(100vh - 300px)', overflowY: 'auto', marginBottom: '20px' }}>
             {templates.map((template) => (
               <TemplateCard
                 key={template.id}
@@ -39,6 +40,16 @@ function EmptyScreen({ message, action, actionLabel, templates, onTemplateClick 
               />
             ))}
           </div>
+          {onOpenGalleryClick && (
+            <div style={{ textAlign: 'center', marginTop: '10px' }}>
+              <Button
+                type="link"
+                onClick={onOpenGalleryClick}
+              >
+                View Full Template Gallery
+              </Button>
+            </div>
+          )}
         </>
       ) : (
         <>

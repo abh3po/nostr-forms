@@ -16,11 +16,12 @@ import { MyForms } from "./FormCards/MyForms";
 import { Drafts } from "./FormCards/Drafts";
 import { LocalForms } from "./FormCards/LocalForms";
 import { useNavigate } from "react-router-dom"; 
-import { availableTemplates, FormTemplate } from "../../templates";
+import { initialTemplates, FormTemplate } from "../../templates";
 import { ROUTES } from "../../constants/routes";
 import { FormInitData } from "../CreateFormNew/providers/FormBuilder/typeDefs";
 import TemplateSelectorModal from "../../components/TemplateSelectorModal";
 import { createFormSpecFromTemplate } from "../../utils/formUtils";
+import FullTemplateGalleryModal from "../../components/FullTemplateGalleryModal";
 
 const MENU_OPTIONS = {
   local: "On this device",
@@ -45,6 +46,8 @@ export const Dashboard = () => {
 
   const { poolRef, isTemplateModalOpen, closeTemplateModal } = useApplicationContext();
 
+  const [isFullGalleryModalVisible, setIsFullGalleryModalVisible] = useState(false);
+  
   const subCloserRef = useRef<SubCloser | null>(null);
 
   const handleEvent = (event: Event) => {
@@ -91,15 +94,24 @@ export const Dashboard = () => {
     const navigationState: FormInitData = { spec, id };
     navigate(ROUTES.CREATE_FORMS_NEW, { state: navigationState });
   };
+  const openFullGalleryModal = () => {
+    setIsFullGalleryModalVisible(true);
+  };
+
+  const closeFullGalleryModal = () => {
+    setIsFullGalleryModalVisible(false);
+  };
 
   const renderForms = () => {
     if (filter === "local") {
       if (localForms.length == 0){ 
         return (
           <EmptyScreen
-            templates={availableTemplates}
+            templates={initialTemplates}
             onTemplateClick={handleTemplateClick}
             message="No forms found on this device. Start by choosing a template:"
+            onOpenGalleryClick={openFullGalleryModal}
+
           />
         );
       }
@@ -179,6 +191,12 @@ export const Dashboard = () => {
         <TemplateSelectorModal
           visible={isTemplateModalOpen}
           onClose={closeTemplateModal}
+          onTemplateSelect={handleTemplateClick}
+          onOpenGalleryClick={openFullGalleryModal}
+        />
+        <FullTemplateGalleryModal
+          visible={isFullGalleryModalVisible}
+          onClose={closeFullGalleryModal}
           onTemplateSelect={handleTemplateClick}
         />
         <>

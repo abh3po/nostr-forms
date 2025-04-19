@@ -1,18 +1,20 @@
 import React from 'react';
-import { Modal, Typography } from 'antd';
-import { availableTemplates, FormTemplate } from '../../templates'; 
+import { Modal, Typography, Button } from 'antd';
+import { initialTemplates, FormTemplate } from '../../templates'; 
 import TemplateCard from '../TemplateCard';
 
 interface TemplateSelectorModalProps {
   visible: boolean;
   onClose: () => void;
   onTemplateSelect: (template: FormTemplate) => void;
+  onOpenGalleryClick?: () => void;
 }
 
 const TemplateSelectorModal: React.FC<TemplateSelectorModalProps> = ({
   visible,
   onClose,
   onTemplateSelect,
+  onOpenGalleryClick
 }) => {
 
   const handleCardClick = (template: FormTemplate) => {
@@ -29,12 +31,26 @@ const TemplateSelectorModal: React.FC<TemplateSelectorModalProps> = ({
       }
       open={visible}
       onCancel={onClose}
-      footer={null}
+      footer={
+        <div style={{ textAlign: 'center', marginTop: '10px' }}>
+          {onOpenGalleryClick && ( 
+            <Button
+              type="link"
+              onClick={() => {
+                  onOpenGalleryClick();
+                  onClose();
+              }}
+            >
+              View Full Template Gallery
+            </Button>
+          )}
+        </div>
+      }
       width={600}
       centered 
     >
       <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', padding: '20px 0' }}>
-        {availableTemplates.map((template) => (
+        {initialTemplates.map((template) => (
           <TemplateCard
             key={template.id}
             template={template}

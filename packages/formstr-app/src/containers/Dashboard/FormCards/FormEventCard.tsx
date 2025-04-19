@@ -59,6 +59,52 @@ export const FormEventCard: React.FC<FormEventCardProps> = ({
     );
   }
 
+  const downloadForm = (url: string) => {
+    const iframe = document.createElement("iframe");
+    iframe.style.display = "none";
+    iframe.src = `${window.location.origin}/#${url}`;
+    document.body.appendChild(iframe);
+
+    setTimeout(() => {
+      try {
+        let content = iframe.contentDocument?.documentElement.innerHTML || "";
+
+        const isLocalhost = window.location.hostname === "localhost" || 
+                            window.location.hostname === "127.0.0.1";
+        const protocol = isLocalhost ? "http" : "https";
+        const baseHref = `${protocol}://${window.location.host}/`;
+
+        const baseTag = `<base href="${baseHref}">`;
+
+        const hashFixScript = `
+    <script>
+      // Store the original form URL hash
+      const formUrl = "${url}";
+      
+      // When the page loads, check if we need to restore the proper hash
+      window.addEventListener('DOMContentLoaded', function() {
+        // If the hash is empty or points to dashboard, restore the form hash
+        if (!window.location.hash || window.location.hash === '#/dashboard') {
+          window.location.hash = formUrl;
+        }
+      });
+    </script>`;
+
+        content = content.replace("<head>", `<head>\n  ${baseTag}\n  ${hashFixScript}`);
+
+        const blob = new Blob([`<!DOCTYPE html><html>${content}</html>`], { type: "text/html" });
+        const link = document.createElement("a");
+        link.href = URL.createObjectURL(blob);
+        link.download = `${name[1] || "form"}.html`;
+        link.click();
+      } catch (error) {
+        console.error("Error downloading form:", error);
+      } finally {
+        document.body.removeChild(iframe);
+      }
+    }, 3000);
+  };
+
   return (
     <Card
       title={name[1] || "Hidden Form"}
@@ -127,12 +173,12 @@ export const FormEventCard: React.FC<FormEventCardProps> = ({
             onClick={(e: any) => {
               e.stopPropagation();
               navigate(
-                naddrUrl(
-                  pubKey,
-                  formId,
-                  relays.length ? relays : ["wss://relay.damus.io"],
-                  viewKey
-                )
+          naddrUrl(
+            pubKey,
+            formId,
+            relays.length ? relays : ["wss://relay.damus.io"],
+            viewKey
+          )
               );
             }}
             style={{
@@ -143,6 +189,27 @@ export const FormEventCard: React.FC<FormEventCardProps> = ({
             type="dashed"
           >
             Open Form
+          </Button>
+          <Button
+            onClick={(e: any) => {
+              e.stopPropagation();
+              downloadForm(
+                naddrUrl(
+                  pubKey,
+                  formId,
+                  relays.length ? relays : ["wss://relay.damus.io"],
+                  viewKey
+                )
+              );
+            }}
+            style={{
+              marginLeft: "10px",
+              color: "blue",
+              borderColor: "blue",
+            }}
+            type="dashed"
+          >
+            Download Form
           </Button>
         </div>
         <div style={{ margin: 7 }}>

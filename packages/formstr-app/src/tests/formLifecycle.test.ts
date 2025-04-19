@@ -1,21 +1,44 @@
 import { Event, SimplePool, generateSecretKey, getPublicKey } from 'nostr-tools';
 import { bytesToHex } from '@noble/hashes/utils';
-import { createForm } from './nostr/createForm';
-import { sendResponses } from './nostr/common';
-import { fetchFormResponses } from './nostr/responses';
-import { Response, Tag } from './nostr/types';
+import { createForm } from '../nostr/createForm';
+import { sendResponses } from '../nostr/common';
+import { fetchFormResponses } from '../nostr/responses';
+import { Response, Tag } from '../nostr/types';
+import { spawn, ChildProcess } from 'child_process';
+import path from 'path';
 
-const TEST_RELAYS = ['wss://relay.damus.io/', 'wss://nos.lol'];
-// timeout for relay operations
-jest.setTimeout(30000); 
+const TEST_RELAYS = [`http://localhost:3000/`];
+
+jest.setTimeout(10000);
 
 describe('Form Lifecycle Behavioral Test', () => {
   let pool: SimplePool;
   let formSecretKey: string;
   let formPublicKey: string;
   let formId: string;
+  let relayProcess: ChildProcess;
 
-  beforeAll(() => {
+  beforeAll(async () => {
+    // Start the relay server as a child process
+    const relayDir = path.resolve(__dirname, 'simple-nostr-relay');
+    console.log('Starting relay server...');
+
+    // Run the relay server
+    relayProcess = spawn('pnpm', ['run', 'dev'], {
+      cwd: relayDir,
+      stdio: ['ignore', 'pipe', 'pipe']
+    });
+
+    // Log server output for debugging
+    relayProcess.stdout?.on('data', (data) => {
+      console.log(`Relay stdout: ${data}`);
+    });
+    relayProcess.stderr?.on('data', (data) => {
+      console.error(`Relay stderr: ${data}`);
+    });
+
+    await new Promise(resolve => setTimeout(resolve, 1000));
+
     pool = new SimplePool();
     const secretKeyBytes = generateSecretKey();
     formSecretKey = bytesToHex(secretKeyBytes);
@@ -23,10 +46,17 @@ describe('Form Lifecycle Behavioral Test', () => {
     formId = `test-form-${Date.now()}`;
   });
 
-  afterAll(() => {
+  afterAll(async () => {
     if (pool) {
       pool.close(TEST_RELAYS);
     }
+
+    if (relayProcess) {
+      console.log('Shutting down relay server...');
+      relayProcess.kill();
+    }
+
+    await new Promise(resolve => setTimeout(resolve, 1000));
   });
 
   test('should publish a form, fetch it, submit responses, and verify visibility', async () => {
@@ -42,9 +72,9 @@ describe('Form Lifecycle Behavioral Test', () => {
     const result = await createForm(
       formTags,
       TEST_RELAYS,
-      new Set<string>(), 
-      new Set<string>(), 
-      false, 
+      new Set<string>(),
+      new Set<string>(),
+      false,
       (url: string) => console.log(`Form accepted by relay: ${url}`),
       formSecretKey
     );
@@ -66,7 +96,7 @@ describe('Form Lifecycle Behavioral Test', () => {
         {
           onevent: (event) => {
             if (event.pubkey === formPublicKey &&
-                event.tags.some(tag => tag[0] === "d" && tag[1] === formId)) {
+              event.tags.some(tag => tag[0] === "d" && tag[1] === formId)) {
               formFound = true;
               sub.close();
               if (timeoutId) clearTimeout(timeoutId);
@@ -115,8 +145,8 @@ describe('Form Lifecycle Behavioral Test', () => {
         pool,
         (event: Event) => {
           if (event.tags.some(tag =>
-              tag[0] === "a" &&
-              tag[1] === `30168:${formPublicKey}:${formId}`)) {
+            tag[0] === "a" &&
+            tag[1] === `30168:${formPublicKey}:${formId}`)) {
             responseReceived = true;
             closer.close();
             if (timeoutId) clearTimeout(timeoutId);

@@ -1,0 +1,1 @@
+ALTER TABLE `events` ADD `replaced` integer NOT NULL;

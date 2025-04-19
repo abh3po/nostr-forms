@@ -31,7 +31,10 @@ function FormSettings() {
         <FormIdentifier />
       </div>
       <div className="form-setting">
-        <TitleImage titleImageUrl={formSettings.titleImageUrl} />
+        <TitleImage 
+          titleImageUrl={formSettings.titleImageUrl} 
+          titleBackgroundColor={formSettings.titleBackgroundColor} 
+        />
       </div>
       <Divider className="divider" />
       <div className="form-setting">

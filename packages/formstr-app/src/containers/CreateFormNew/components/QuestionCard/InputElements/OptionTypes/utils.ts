@@ -5,6 +5,11 @@ export const addOption = (
   choices: Array<Choice>,
   callback: (choices: Array<Choice>) => void
 ) => {
+  // If this is an "Other" option, add a special config
+  if (option[1] === "Option") {
+    option[2] = JSON.stringify({ isOther: true });
+  }
+  
   let newChoices = [...choices, option];
   callback(newChoices);
 };

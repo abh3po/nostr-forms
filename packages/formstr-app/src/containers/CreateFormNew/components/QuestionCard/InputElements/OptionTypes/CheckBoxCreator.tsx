@@ -1,3 +1,4 @@
+
 import { CloseOutlined } from "@ant-design/icons";
 import { Checkbox, Input } from "antd";
 import { useState } from "react";
@@ -27,30 +28,39 @@ export const CheckboxCreator: React.FC<CheckboxCreatorProps> = ({
       {choices?.map((choice) => {
         let [choiceId, label, settingsString] = choice;
         let settings = JSON.parse(settingsString || "{}") as ChoiceSettings;
+        const isOtherOption = settings.isOther;
+        
         return (
           <div className="radioButtonItem" key={choiceId}>
             <Checkbox disabled key={choiceId + "checkbox"} />
             <Input
               key={choiceId + "input"}
-              defaultValue={label}
+              defaultValue={isOtherOption ? "Other" : label}
               onChange={(e) => {
                 handleLabelChange(
                   e.target.value,
-                  choiceId!,
+                  choiceId,
                   choices,
                   handleNewChoices
                 );
               }}
-              placeholder="Enter an option"
+              placeholder={isOtherOption ? "Other" : "Enter an option"}
               className="choice-input"
-              disabled={settings.isOther}
+              disabled={isOtherOption}
             />
+            {isOtherOption && (
+              <Input 
+                placeholder="Form filler will write here..."
+                disabled={true}
+                style={{ marginLeft: 8, width: '180px', opacity: 0.6 }}
+              />
+            )}
             {choices.length >= 2 && (
               <CloseOutlined
                 onClick={(e) => {
                   handleDelete(choiceId!, choices, handleNewChoices);
                 }}
-                key={choiceId + "close"}
+                style={{ marginLeft: 8 }}
               />
             )}
           </div>

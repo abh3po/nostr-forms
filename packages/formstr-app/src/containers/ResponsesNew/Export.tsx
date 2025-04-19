@@ -7,7 +7,7 @@ export const Export: React.FC<{
   responsesData: Array<{ [key: string]: string }>;
   formName: string;
 }> = ({ responsesData, formName }) => {
-  const hasResponses = responsesData.length > 0;
+  const hasResponses = responsesData && responsesData.length > 0;
 
   const onDownloadClick = async (type: "csv" | "excel") => {
     if (!hasResponses) {
@@ -15,17 +15,17 @@ export const Export: React.FC<{
       return;
     }
 
-   try {
-    const XLSX = await import("xlsx");
-    const SheetName = `Responses for ${formName}`.substring(0, 16) + "...";
-    const workSheet = XLSX.utils.json_to_sheet(responsesData);
-    const workBook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workBook, workSheet, `${SheetName}`);
+    try {
+      const XLSX = await import("xlsx");
+      const SheetName = `Responses for ${formName}`.substring(0, 16) + "...";
+      const workSheet = XLSX.utils.json_to_sheet(responsesData);
+      const workBook = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(workBook, workSheet, `${SheetName}`);
 
-    const fileExtension = type === "excel" ? ".xlsx" : ".csv";
-    XLSX.writeFile(workBook, `${SheetName}.${fileExtension}`);
-    
-   } catch (error : unknown) {
+      const fileExtension = type === "excel" ? ".xlsx" : ".csv";
+      XLSX.writeFile(workBook, `${SheetName}.${fileExtension}`);
+      
+    } catch (error : unknown) {
       if (error instanceof Error) {
         const errorMessage = error.message;
 
@@ -46,13 +46,12 @@ export const Export: React.FC<{
           console.error("Unhandled export error:", error);
           alert(`Export failed: ${errorMessage}`);
         }
-      }else {
+      } else {
         console.error("Error exporting data:", error);
         alert("An unknown error occurred. Please try again.");
       }
       
     }
-
   };
 
   const items = [
@@ -86,6 +85,7 @@ export const Export: React.FC<{
       type="text"
       onClick={handleButtonClick}
       icon={<DownOutlined />}
+      disabled={!hasResponses}
     >
       Export as excel
     </Dropdown.Button>

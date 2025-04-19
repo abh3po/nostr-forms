@@ -7,11 +7,13 @@ function BasicMenu() {
 
   const onMenuClick = ({ key }: { key: string }) => {
     const selectedItem = BASIC_MENU.find((item) => item.key === key);
+    if (selectedItem) {
     addQuestion(
       selectedItem?.primitive,
       undefined,
       selectedItem?.answerSettings
     );
+  }
   };
 
   const items = [

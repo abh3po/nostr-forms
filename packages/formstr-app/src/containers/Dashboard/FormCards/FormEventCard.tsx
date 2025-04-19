@@ -1,5 +1,5 @@
 import { Tag } from "@formstr/sdk/dist/formstr/nip101";
-import { Button, Card, Divider } from "antd";
+import { Button, Card, Divider, message } from "antd";
 import { Event } from "nostr-tools";
 import { useNavigate } from "react-router-dom";
 import DeleteFormTrigger from "./DeleteForm";
@@ -10,7 +10,7 @@ import {
   responsePath,
 } from "../../../utils/formUtils";
 import ReactMarkdown from "react-markdown";
-import { EditOutlined } from "@ant-design/icons";
+import { DownloadOutlined, EditOutlined } from "@ant-design/icons";
 import { useEffect, useState } from "react";
 import DuplicateForm from "./DuplicateForm";
 
@@ -29,6 +29,7 @@ export const FormEventCard: React.FC<FormEventCardProps> = ({
   viewKey,
 }) => {
   const navigate = useNavigate();
+  const [loading, setLoading] = useState(false);
   const publicForm = event.content === "";
   const [tags, setTags] = useState<Tag[]>([]);
   useEffect(() => {
@@ -42,12 +43,14 @@ export const FormEventCard: React.FC<FormEventCardProps> = ({
     };
     initialize();
   }, []);
+
   const name = event.tags.find((tag: Tag) => tag[0] === "name") || [];
   const pubKey = event.pubkey;
   const formId = event.tags.find((tag: Tag) => tag[0] === "d")?.[1];
   const relays = event.tags
     .filter((tag: Tag) => tag[0] === "relay")
     .map((t) => t[1]);
+
   if (!formId) {
     return <Card title="Invalid Form Event">{JSON.stringify(event)}</Card>;
   }
@@ -58,6 +61,70 @@ export const FormEventCard: React.FC<FormEventCardProps> = ({
       tags.filter((t) => t[0] === "settings")?.[0]?.[1] || "{}"
     );
   }
+
+  const downloadForm = async (url: string) => {
+    setLoading(true);
+    try {
+
+      const formUrl = url.startsWith("/f/")
+        ? `${window.location.origin}${url}`
+        : `${window.location.origin}/form/${url}`;
+  
+      const response = await fetch(formUrl);
+      let html = await response.text();
+  
+      // Create a ID for the downloaded app as a whole
+      const appId = `downloaded-app-${Date.now()}`;
+      
+      
+      html = html
+        // Inject configuration before React loads
+        .replace(
+          '<script defer="defer" src="/static/js/main.',
+          `<script>
+            window.__STANDALONE_MODE__ = true;
+            window.__FORCE_ROUTE__ = "${url.startsWith('/f/') ? url : `/f/${url}`}";
+            window.__PUBLIC_URL__ = "${window.location.origin}";
+          </script>
+          <script defer="defer" src="/static/js/main.`
+        )
+        // Make all asset paths absolute
+        .replace(/(src|href)="\/([^"]*)"/g, (match, attr, value) => {
+          // Ignore absolute URLs and data URLs
+          if (value.startsWith('http') || value.startsWith('data:')) return match;
+          return `${attr}="${window.location.origin}/${value}"`;
+        })
+        
+        .replace(
+          /<head>/,
+          `<head>
+            <base href="${window.location.origin}/" />
+            <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+            <meta name="downloaded-app" content="${appId}">
+          `
+        );
+  
+      // Download the form as an HTML file
+      const blob = new Blob([html], { type: "text/html;charset=utf-8" });
+      const link = document.createElement("a");
+      link.href = URL.createObjectURL(blob);
+      link.download = `${name[1] || "form"}.html`;
+      document.body.appendChild(link);
+      link.click();
+      setTimeout(() => {
+        document.body.removeChild(link);
+        URL.revokeObjectURL(link.href);
+      }, 100);
+  
+      message.success("Form downloaded successfully!");
+    } catch (err) {
+      console.error("Download failed:", err);
+      message.error("Failed to download form.");
+    } finally {
+      setLoading(false);
+    }
+  };
+  
 
   return (
     <Card
@@ -127,12 +194,12 @@ export const FormEventCard: React.FC<FormEventCardProps> = ({
             onClick={(e: any) => {
               e.stopPropagation();
               navigate(
-                naddrUrl(
-                  pubKey,
-                  formId,
-                  relays.length ? relays : ["wss://relay.damus.io"],
-                  viewKey
-                )
+          naddrUrl(
+            pubKey,
+            formId,
+            relays.length ? relays : ["wss://relay.damus.io"],
+            viewKey
+          )
               );
             }}
             style={{
@@ -142,7 +209,30 @@ export const FormEventCard: React.FC<FormEventCardProps> = ({
             }}
             type="dashed"
           >
-            Open Form
+            Open Forms
+          </Button>
+          <Button
+            onClick={(e: any) => {
+              e.stopPropagation();
+              downloadForm(
+                naddrUrl(
+                  pubKey,
+                  formId,
+                  relays.length ? relays : ["wss://relay.damus.io"],
+                  viewKey
+                )
+              );
+            }}
+            icon ={<DownloadOutlined />}
+            loading={loading}
+            style={{
+              marginLeft: "10px",
+              color: "blue",
+              borderColor: "blue",
+            }}
+            type="dashed"
+          >
+            Download Form
           </Button>
         </div>
         <div style={{ margin: 7 }}>

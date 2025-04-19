@@ -3,6 +3,7 @@ import "./App.css";
 import Routing from "./components/Routing";
 import { ProfileProvider } from "./provider/ProfileProvider";
 import { ApplicationProvider } from "./provider/ApplicationProvider";
+import { ListProvider } from "./provider/ListProvider";
 
 function App() {
   return (
@@ -10,7 +11,9 @@ function App() {
       <div className="App">
         <ProfileProvider>
           <ApplicationProvider>
-            <Routing />
+            <ListProvider>
+              <Routing />
+            </ListProvider>
           </ApplicationProvider>
         </ProfileProvider>
       </div>

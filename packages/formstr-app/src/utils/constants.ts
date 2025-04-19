@@ -1,0 +1,1 @@
+export const DEFAULT_IMAGE_URL="https://upload.wikimedia.org/wikipedia/commons/thumb/e/e0/Anonymous.svg/200px-Anonymous.svg.png"

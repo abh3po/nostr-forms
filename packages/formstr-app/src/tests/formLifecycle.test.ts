@@ -4,12 +4,12 @@ import { createForm } from '../nostr/createForm';
 import { sendResponses } from '../nostr/common';
 import { fetchFormResponses } from '../nostr/responses';
 import { Response, Tag } from '../nostr/types';
-import { spawn, ChildProcess } from 'child_process';
+import { spawn, ChildProcess, execSync } from 'child_process';
 import path from 'path';
 
 const TEST_RELAYS = [`http://localhost:3000/`];
 
-jest.setTimeout(10000);
+jest.setTimeout(60000);
 
 describe('Form Lifecycle Behavioral Test', () => {
   let pool: SimplePool;
@@ -23,13 +23,30 @@ describe('Form Lifecycle Behavioral Test', () => {
     const relayDir = path.resolve(__dirname, 'simple-nostr-relay');
     console.log('Starting relay server...');
 
-    // Run the relay server
-    relayProcess = spawn('pnpm', ['run', 'dev'], {
-      cwd: relayDir,
-      stdio: ['ignore', 'pipe', 'pipe']
-    });
+    try {
+      console.log('Installing dependencies...');
+      execSync('pnpm install', {
+        cwd: relayDir,
+        stdio: 'inherit'
+      });
 
-    // Log server output for debugging
+      console.log('Running database migrations...');
+      execSync('pnpm migrate', {
+        cwd: relayDir,
+        stdio: 'inherit'
+      });
+
+      console.log('Starting relay server...');
+      relayProcess = spawn('pnpm', ['run', 'dev'], {
+        cwd: relayDir,
+        stdio: ['ignore', 'pipe', 'pipe']
+      });
+    } catch (error) {
+      console.error('Error setting up relay:', error);
+      throw error;
+    }
+
+    // Log server output
     relayProcess.stdout?.on('data', (data) => {
       console.log(`Relay stdout: ${data}`);
     });
@@ -37,7 +54,7 @@ describe('Form Lifecycle Behavioral Test', () => {
       console.error(`Relay stderr: ${data}`);
     });
 
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    await new Promise(resolve => setTimeout(resolve, 5000));
 
     pool = new SimplePool();
     const secretKeyBytes = generateSecretKey();

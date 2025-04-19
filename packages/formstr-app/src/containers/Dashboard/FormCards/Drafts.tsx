@@ -8,22 +8,22 @@ import { useNavigate } from "react-router-dom";
 
 export function constructDraftUrl(
   draft: { formSpec: unknown; tempId: string },
-  host: string
+  host: string,
 ) {
   if (!draft) return;
   let draftHash = window.btoa(encodeURIComponent(JSON.stringify(draft)));
   draftHash = window.encodeURIComponent(draftHash);
-  return `${host}/#/drafts/${draftHash}`;
+  return `${host}/drafts/${draftHash}`;
 }
 
 export const Drafts = () => {
   type Draft = { formSpec: Tag[]; tempId: string };
   const [drafts, setDrafts] = useState<Draft[]>(
-    (getItem(LOCAL_STORAGE_KEYS.DRAFT_FORMS) || []) as Draft[]
+    getItem(LOCAL_STORAGE_KEYS.DRAFT_FORMS) || [],
   );
 
   useEffect(() => {
-    setDrafts((getItem(LOCAL_STORAGE_KEYS.DRAFT_FORMS) || []) as Draft[]);
+    setDrafts(getItem(LOCAL_STORAGE_KEYS.DRAFT_FORMS) || []);
   }, []);
 
   return (
@@ -43,9 +43,7 @@ export const Drafts = () => {
               <DeleteOutlined
                 onClick={() => {
                   deleteDraft(d.tempId);
-                  setDrafts(
-                    (getItem(LOCAL_STORAGE_KEYS.DRAFT_FORMS) || []) as Draft[]
-                  );
+                  setDrafts(getItem(LOCAL_STORAGE_KEYS.DRAFT_FORMS) || []);
                 }}
               />
             }
@@ -54,7 +52,7 @@ export const Drafts = () => {
               onClick={() =>
                 window.open(
                   constructDraftUrl(d, window.location.origin),
-                  "_blank"
+                  "_blank",
                 )
               }
             >

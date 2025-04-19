@@ -74,7 +74,7 @@ If the userPrivateKey is not provided the sdk will attempt to use the `window.no
 ```json5
 [
   {
-    formLink: "https://formstr.app/#/forms/:form_id",
+    formLink: "https://formstr.app/forms/:form_id",
     formId: "sfwsafsaf",
     formSecret: "dsfsdfsafsdf...",
   },

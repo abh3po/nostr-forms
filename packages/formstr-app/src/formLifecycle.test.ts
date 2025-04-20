@@ -1,60 +1,60 @@
 import { Event, SimplePool, generateSecretKey, getPublicKey } from 'nostr-tools';
 import { bytesToHex } from '@noble/hashes/utils';
-import { createForm } from '../nostr/createForm';
-import { sendResponses } from '../nostr/common';
-import { fetchFormResponses } from '../nostr/responses';
-import { Response, Tag } from '../nostr/types';
-import { spawn, ChildProcess, execSync } from 'child_process';
-import path from 'path';
+import { createForm } from './nostr/createForm';
+import { sendResponses } from './nostr/common';
+import { fetchFormResponses } from './nostr/responses';
+import { Response, Tag } from './nostr/types';
+import { execSync } from 'child_process';
 
 const TEST_RELAYS = [`http://localhost:3000/`];
+const DOCKER_IMAGE_NAME = 'billa05/test-relay:latest';
 
-jest.setTimeout(60000);
+jest.setTimeout(200000);
 
 describe('Form Lifecycle Behavioral Test', () => {
   let pool: SimplePool;
   let formSecretKey: string;
   let formPublicKey: string;
   let formId: string;
-  let relayProcess: ChildProcess;
+  let containerId: string;
 
   beforeAll(async () => {
-    // Start the relay server as a child process
-    const relayDir = path.resolve(__dirname, 'simple-nostr-relay');
-    console.log('Starting relay server...');
+    console.log('Starting relay server with Docker...');
 
     try {
-      console.log('Installing dependencies...');
-      execSync('pnpm install', {
-        cwd: relayDir,
-        stdio: 'inherit'
-      });
+      console.log(`Pulling Docker image ${DOCKER_IMAGE_NAME}...`);
+      execSync(`docker pull ${DOCKER_IMAGE_NAME}`, { stdio: 'inherit' });
+      console.log(`Successfully pulled image: ${DOCKER_IMAGE_NAME}`);
 
-      console.log('Running database migrations...');
-      execSync('pnpm migrate', {
-        cwd: relayDir,
-        stdio: 'inherit'
-      });
+      const containerName = `nostr-relay-test-${Date.now()}`;
+      const startCmd = `docker run -d --name ${containerName} -p 3000:3000 ${DOCKER_IMAGE_NAME}`;
+      containerId = execSync(startCmd).toString().trim();
 
-      console.log('Starting relay server...');
-      relayProcess = spawn('pnpm', ['run', 'dev'], {
-        cwd: relayDir,
-        stdio: ['ignore', 'pipe', 'pipe']
-      });
+      console.log(`Started container with ID: ${containerId}`);
+
+      console.log('Waiting for relay server to be ready...');
+      let isReady = false;
+      let attempts = 0;
+
+      while (!isReady && attempts < 10) {
+        try {
+          execSync('curl -s http://localhost:3000/', { stdio: 'ignore' });
+          isReady = true;
+          console.log('Relay server is ready!');
+        } catch (error) {
+          attempts++;
+          console.log(`Waiting for relay server (attempt ${attempts}/10)...`);
+          await new Promise(resolve => setTimeout(resolve, 1000));
+        }
+      }
+
+      if (!isReady) {
+        console.log('Warning: Could not confirm if relay server is ready, proceeding anyway...');
+      }
     } catch (error) {
-      console.error('Error setting up relay:', error);
+      console.error('Error setting up relay with Docker:', error);
       throw error;
     }
-
-    // Log server output
-    relayProcess.stdout?.on('data', (data) => {
-      console.log(`Relay stdout: ${data}`);
-    });
-    relayProcess.stderr?.on('data', (data) => {
-      console.error(`Relay stderr: ${data}`);
-    });
-
-    await new Promise(resolve => setTimeout(resolve, 5000));
 
     pool = new SimplePool();
     const secretKeyBytes = generateSecretKey();
@@ -68,9 +68,14 @@ describe('Form Lifecycle Behavioral Test', () => {
       pool.close(TEST_RELAYS);
     }
 
-    if (relayProcess) {
-      console.log('Shutting down relay server...');
-      relayProcess.kill();
+    if (containerId) {
+      console.log('Stopping and removing Docker container...');
+      try {
+        execSync(`docker stop ${containerId}`);
+        execSync(`docker rm ${containerId}`);
+      } catch (error) {
+        console.error('Error cleaning up Docker container:', error);
+      }
     }
 
     await new Promise(resolve => setTimeout(resolve, 1000));
@@ -101,8 +106,7 @@ describe('Form Lifecycle Behavioral Test', () => {
     expect(Array.isArray(result.acceptedRelays)).toBe(true);
     expect(result.acceptedRelays.length).toBeGreaterThan(0);
 
-    // Wait for form to propagate
-    await new Promise(resolve => setTimeout(resolve, 2000));
+    await new Promise(resolve => setTimeout(resolve, 1000));
 
     // Verify we can find the published form
     let formFound = false;
@@ -150,8 +154,7 @@ describe('Form Lifecycle Behavioral Test', () => {
       (url: string) => console.log(`Response accepted by relay: ${url}`)
     );
 
-    // Allow time for response to propagate
-    await new Promise(resolve => setTimeout(resolve, 2000));
+    await new Promise(resolve => setTimeout(resolve, 1000));
 
     // Check for responses
     let responseReceived = false;

@@ -10,5 +10,8 @@
   ],
   "compilerOptions": {
     "jsx": "react-jsx"
-  }
+  },
+  "exclude": [
+    "src/tests/simple-nostr-relay",
+  ]
 }

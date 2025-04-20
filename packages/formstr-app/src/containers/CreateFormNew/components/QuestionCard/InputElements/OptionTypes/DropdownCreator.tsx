@@ -51,7 +51,7 @@ export const DropdownCreator: React.FC<RadioButtonCreatorProps> = ({
             />
             {isOtherOption && (
               <Input 
-                placeholder="Form filler will write here..."
+                placeholder="Specify other"
                 disabled={true}
                 style={{ marginLeft: 8, width: '180px', opacity: 0.6 }}
               />

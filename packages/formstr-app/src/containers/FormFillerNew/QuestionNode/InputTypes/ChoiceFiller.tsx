@@ -47,11 +47,7 @@ export const ChoiceFiller: React.FC<ChoiceFillerProps> = ({
     const selectedOption = options.find(opt => opt[0] === selectedValue);
     if (selectedOption) {
       const config = JSON.parse(selectedOption[2] || "{}") as { isOther?: boolean };
-      if (config.isOther) {
-        onChange(selectedValue, otherMessage);
-      } else {
-        onChange(selectedValue, "");
-      }
+      onChange(selectedValue, otherMessage);
     } else {
       onChange(selectedValue, "");
     }
@@ -60,10 +56,7 @@ export const ChoiceFiller: React.FC<ChoiceFillerProps> = ({
   function handleOtherInputChange(e: ChangeEvent<HTMLInputElement>) {
     const newMessage = e.target.value;
     setOtherMessage(newMessage);
-    
-    if (answerType === AnswerTypes.radioButton && selectedValues.length === 1) {
-      onChange(selectedValues[0], newMessage);
-    }
+    onChange(selectedValues[0], newMessage);
   }
 
   useEffect(() => {
@@ -119,7 +112,7 @@ export const ChoiceFiller: React.FC<ChoiceFillerProps> = ({
                 {showOtherInput && (
                   <div style={{ marginLeft: 24, marginTop: 4 }}>
                     <Input 
-                      placeholder="Please specify..."
+                      placeholder="Please specify"
                       onChange={handleOtherInputChange}
                       value={otherMessage}
                     />

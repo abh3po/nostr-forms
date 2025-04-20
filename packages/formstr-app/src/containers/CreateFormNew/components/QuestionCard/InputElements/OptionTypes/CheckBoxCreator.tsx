@@ -50,7 +50,7 @@ export const CheckboxCreator: React.FC<CheckboxCreatorProps> = ({
             />
             {isOtherOption && (
               <Input 
-                placeholder="Form filler will write here..."
+                placeholder="Specify other"
                 disabled={true}
                 style={{ marginLeft: 8, width: '180px', opacity: 0.6 }}
               />
@@ -60,6 +60,7 @@ export const CheckboxCreator: React.FC<CheckboxCreatorProps> = ({
                 onClick={(e) => {
                   handleDelete(choiceId!, choices, handleNewChoices);
                 }}
+                key={choiceId + "close"}
                 style={{ marginLeft: 8 }}
               />
             )}

@@ -185,7 +185,8 @@ export const Response = () => {
             let choices = JSON.parse(questionField[4]) as Tag[];
             let choiceField = choices.find(choice => choice[0] === responseValue);
             
-            if (choiceField && choiceField[1]) {              let isOtherOption = false;
+            if (choiceField && choiceField[1]) {              
+              let isOtherOption = false;
               if (choiceField[2]) {
                 try {
                   const config = JSON.parse(choiceField[2]);

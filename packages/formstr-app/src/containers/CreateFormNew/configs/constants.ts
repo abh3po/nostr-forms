@@ -3,6 +3,11 @@ export const BASIC_MENU_KEYS = {
   TITLE: "TITLE",
 };
 
+export const AI_MENU_KEYS = {
+  CREATE_FORM: "CREATE_FORM",
+  FILL_FORM: "FILL_FORM",
+}
+
 export const INPUTS_TYPES = {
   SHORT_ANSWER: "SHORT_ANSWER",
   PARAGRAPH: "PARAGRAPH",

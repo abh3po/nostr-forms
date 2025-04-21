@@ -2,6 +2,7 @@ import {
   BASIC_MENU_KEYS,
   INPUTS_TYPES,
   PRE_BUILT_MENU_KEYS,
+  AI_MENU_KEYS,
 } from "./constants";
 import { AnswerTypes } from "@formstr/sdk/dist/interfaces";
 import { ReactComponent as InputIcon } from "../../../Images/Frame.svg";
@@ -129,5 +130,22 @@ export const PRE_BUILT_MENU = [
       renderElement: AnswerTypes.country,
     },
   },
+
+];
+
+export const AI_MENU = [
+  {
+    key: AI_MENU_KEYS.CREATE_FORM,
+    label: "Built Form",
+    icon: <InputIcon style={{ color: "#1e3f66.17", fill: "#1e3f66" }} />,
+   
+  },
+  {
+    key: AI_MENU_KEYS.FILL_FORM,
+    label: "Fill Form",
+    icon: <InputIcon style={{ color: "#1e3f66.17", fill: "#1e3f66" }} />,
+    
+  },
+  
 
 ];

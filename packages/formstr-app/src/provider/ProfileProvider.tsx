@@ -10,7 +10,7 @@ import { LOCAL_STORAGE_KEYS, getItem, setItem } from "../utils/localStorage";
 import { Modal } from "antd";
 import { Filter } from "nostr-tools";
 import { useApplicationContext } from "../hooks/useApplicationContext";
-import { getDefaultRelays } from "@formstr/sdk";
+import { getDefaultRelays } from "../nostr/common";
 
 interface ProfileProviderProps {
   children?: ReactNode;

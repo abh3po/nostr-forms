@@ -8,11 +8,11 @@ function App() {
   return (
     <HashRouter>
       <div className="App">
-          <ApplicationProvider>
+        <ApplicationProvider>
           <ProfileProvider>
             <Routing />
-            </ProfileProvider>
-          </ApplicationProvider>
+          </ProfileProvider>
+        </ApplicationProvider>
       </div>
     </HashRouter>
   );

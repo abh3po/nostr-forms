@@ -13,7 +13,7 @@ import { fetchKeys, getAllowedUsers, getFormSpec } from "../../utils/formUtils";
 import { Export } from "./Export";
 import { Field, Tag } from "../../nostr/types";
 import { useApplicationContext } from "../../hooks/useApplicationContext";
-import { getDefaultRelays } from "@formstr/sdk";
+import { getDefaultRelays } from "../../nostr/common";
 
 const { Text } = Typography;
 

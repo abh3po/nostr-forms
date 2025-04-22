@@ -14,7 +14,7 @@ import { SubmitButton } from "./SubmitButton/submit";
 import { isMobile } from "../../utils/utility";
 import { ReactComponent as CreatedUsingFormstr } from "../../Images/created-using-formstr.svg";
 import Markdown from "react-markdown";
-import { Event, generateSecretKey, nip19 } from "nostr-tools";
+import { Event, nip19 } from "nostr-tools";
 import { FormFields } from "./FormFields";
 import { RequestAccess } from "./RequestAccess";
 import { fetchFormTemplate } from "@formstr/sdk/dist/formstr/nip101/fetchFormTemplate";
@@ -115,7 +115,8 @@ export const FormFiller: React.FC<FormFillerProps> = ({
     let formRelays = formEvent.tags
       .filter((r) => r[0] === "relay")
       ?.map((r) => r[1]);
-    return Array.from(new Set([...(relays || []), ...(formRelays || [])]));
+    let finalRelays = Array.from(new Set([...(relays || []), ...(formRelays || [])]));
+    return finalRelays
   };
 
   const onSubmit = async () => {

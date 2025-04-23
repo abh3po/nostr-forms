@@ -16,30 +16,30 @@ export function makeTag(length: number) {
 export function constructFormUrl(
   publicKey: string,
   host: string,
-  embedded = false
+  embedded = false,
 ) {
   if (!publicKey) {
     throw Error("public key is required");
   }
-  return `${host}/#/${embedded ? "embedded" : "fill"}/${publicKey}`;
+  return `${host}/${embedded ? "embedded" : "fill"}/${publicKey}`;
 }
 export function constructResponseUrl(
   privateKey: string,
   host: string,
-  formId: string
+  formId: string,
 ) {
   if (!privateKey) {
     throw Error("public key is required");
   }
   if (formId?.startsWith("nprofile")) {
-    return `${host}/#/response/${privateKey}?formId=${formId}`;
+    return `${host}/response/${privateKey}?formId=${formId}`;
   }
-  return `${host}/#/response/${privateKey}`;
+  return `${host}/response/${privateKey}`;
 }
 
 export function constructDraftUrl(
   draft: { formSpec: unknown; tempId: string } | null,
-  host: string
+  host: string,
 ) {
   if (!draft) {
     return;
@@ -47,7 +47,7 @@ export function constructDraftUrl(
   let draftHash = window.btoa(encodeURIComponent(JSON.stringify(draft)));
   draftHash = window.encodeURIComponent(draftHash);
 
-  return `${host}/#/drafts/${draftHash}`;
+  return `${host}/drafts/${draftHash}`;
 }
 
 export function detectFormVersion(form: FormSpec & V0FormSpec) {

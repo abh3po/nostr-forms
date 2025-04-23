@@ -7,9 +7,10 @@ export const HandleLegacyRoutes = ({ children }: PropsWithChildren) => {
   if (window.location.hash) {
     const hashValue = window.location.hash.replace("#", "");
     const [route, search] = hashValue.split("?");
+    const searchParams = search ? `?${search}` : undefined;
     navigateParams.current = {
       pathname: route,
-      search: `?${search}`,
+      search: searchParams,
       hash: "",
     };
   }

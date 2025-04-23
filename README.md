@@ -11,7 +11,7 @@ This repository holds the forms implementation on the [nostr-protocol](https://g
 ### Setup Instructions
 
 ```sh
-git clone https://github.com/abhay-raizada/nostr-forms.git
+git clone https://github.com/abh3po/nostr-forms.git
 
 cd nostr-forms
 

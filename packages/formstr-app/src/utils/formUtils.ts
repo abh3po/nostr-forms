@@ -7,7 +7,9 @@ import { bytesToHex } from "@noble/hashes/utils";
 import { sha256 } from "@noble/hashes/sha256";
 import { naddrUrl } from "./utility";
 
-export const createFormSpecFromTemplate = (template: FormTemplate): { spec: Tag[], id: string } => {
+export const createFormSpecFromTemplate = (
+  template: FormTemplate,
+): { spec: Tag[]; id: string } => {
   const newFormInstanceId = makeTag(6);
   const spec: Tag[] = [
     ["d", newFormInstanceId],
@@ -21,14 +23,14 @@ export const createFormSpecFromTemplate = (template: FormTemplate): { spec: Tag[
 export const fetchKeys = async (
   formAuthor: string,
   formId: string,
-  userPub: string
+  userPub: string,
 ) => {
   const pool = new SimplePool();
-  let defaultRelays = getDefaultRelays();
-  let aliasPubKey = bytesToHex(
-    sha256(`${30168}:${formAuthor}:${formId}:${userPub}`)
+  const defaultRelays = getDefaultRelays();
+  const aliasPubKey = bytesToHex(
+    sha256(`${30168}:${formAuthor}:${formId}:${userPub}`),
   );
-  let giftWrapsFilter = {
+  const giftWrapsFilter = {
     kinds: [1059],
     "#p": [aliasPubKey],
   };
@@ -41,20 +43,20 @@ export const fetchKeys = async (
       try {
         const sealString = await window.nostr.nip44.decrypt(
           keyEvent.pubkey,
-          keyEvent.content
+          keyEvent.content,
         );
         const seal = JSON.parse(sealString) as Event;
         const rumorString = await window.nostr.nip44.decrypt(
           seal.pubkey,
-          seal.content
+          seal.content,
         );
         const rumor = JSON.parse(rumorString) as UnsignedEvent;
-        let key = rumor.tags;
+        const key = rumor.tags;
         keys = key;
       } catch (e) {
         console.log("Error in decryption", e);
       }
-    })
+    }),
   );
   return keys;
 };
@@ -64,30 +66,30 @@ export function constructEmbeddedUrl(
   formId: string,
   options: { [key: string]: boolean } = {},
   relay: string,
-  viewKey?: string
+  viewKey?: string,
 ) {
-  let embeddedUrl = constructFormUrl(pubKey, formId, relay);
+  const embeddedUrl = constructFormUrl(pubKey, formId, relay);
 
   const params = new URLSearchParams();
-  if(viewKey)
-    params.append("viewKey", viewKey);
+  if (viewKey) params.append("viewKey", viewKey);
   if (options.hideTitleImage) {
     params.append("hideTitleImage", "true");
   }
   if (options.hideDescription) {
     params.append("hideDescription", "true");
   }
-  return params.toString() ? `${embeddedUrl}?${params.toString()}` : embeddedUrl;
-
+  return params.toString()
+    ? `${embeddedUrl}?${params.toString()}`
+    : embeddedUrl;
 }
 
 export const getFormSpec = async (
   formEvent: Event,
   userPubKey?: string,
   onKeysFetched?: null | ((keys: Tag[] | null) => void),
-  paramsViewKey?: string | null
+  paramsViewKey?: string | null,
 ): Promise<Tag[] | null> => {
-  let formId = formEvent.tags.find((t) => t[0] === "d")?.[1];
+  const formId = formEvent.tags.find((t) => t[0] === "d")?.[1];
   if (!formId) {
     throw Error("Invalid Form: Does not have Id");
   }
@@ -102,19 +104,19 @@ export const getFormSpec = async (
     if (userPubKey)
       keys = await fetchKeys(formEvent.pubkey, formId, userPubKey);
     if (keys && onKeysFetched) onKeysFetched(keys || null);
-    let viewKey = keys?.find((k) => k[0] === "ViewAccess")?.[1];
+    const viewKey = keys?.find((k) => k[0] === "ViewAccess")?.[1];
     if (!viewKey) return null;
     return getDecryptedForm(formEvent, viewKey);
   }
 };
 
 export const getDecryptedForm = (formEvent: Event, viewKey: string) => {
-  let conversationKey = nip44.v2.utils.getConversationKey(
+  const conversationKey = nip44.v2.utils.getConversationKey(
     viewKey,
-    formEvent.pubkey
+    formEvent.pubkey,
   );
-  let formSpecString = nip44.v2.decrypt(formEvent.content, conversationKey);
-  let FormTemplate = JSON.parse(formSpecString);
+  const formSpecString = nip44.v2.decrypt(formEvent.content, conversationKey);
+  const FormTemplate = JSON.parse(formSpecString);
   return FormTemplate;
 };
 
@@ -126,10 +128,10 @@ export const constructFormUrl = (
   pubkey: string,
   formId: string,
   relay: string,
-  viewKey?: string
+  viewKey?: string,
 ) => {
-  let naddr = naddrUrl(pubkey, formId, [relay], viewKey);
-  let baseUrl = `${window.location.origin}/#${naddr}`;
+  const naddr = naddrUrl(pubkey, formId, [relay], viewKey);
+  const baseUrl = `${window.location.origin}${naddr}`;
   return baseUrl;
 };
 
@@ -137,7 +139,7 @@ export const editPath = (
   scretKey: string,
   formId: string,
   relay?: string,
-  viewKey?: string
+  viewKey?: string,
 ) => {
   const baseUrl = `/edit/${scretKey}/${formId}`;
   const params = new URLSearchParams();
@@ -150,7 +152,7 @@ export const responsePath = (
   secretKey: string,
   formId: string,
   relay?: string,
-  viewKey?: string
+  viewKey?: string,
 ) => {
   const baseUrl = `/s/${secretKey}/${formId}`;
   const params = new URLSearchParams();
@@ -163,9 +165,9 @@ export const constructNewResponseUrl = (
   secretKey: string,
   formId: string,
   relay?: string,
-  viewKey?: string
+  viewKey?: string,
 ) => {
-  const baseUrl = `${window.location.origin}/#`;
+  const baseUrl = `${window.location.origin}`;
   const responsePart = responsePath(secretKey, formId, relay, viewKey);
   return `${baseUrl}${responsePart}`;
 };

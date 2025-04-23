@@ -72,7 +72,7 @@ function AiMenu() {
     };
   
     // Process all fields and create new questions
-    let choices: string[][] = [];
+   
     const newQuestions = fields.map((field: FormField) => {
       // Get the appropriate render element type
       const renderElement = getMatchingAnswerType(field.type);
@@ -97,23 +97,26 @@ function AiMenu() {
       let answerSettings: any = {
         renderElement: renderElement
       };
+      let choices: string[][] = [];
      
       // Add choices for option-based fields
       if (primitive === "option" && field.options && Array.isArray(field.options)) {
       
-        choices = field.options.map(option => ["", option]);
+        choices = field.options.map((option,index) => [index.toString(), option]);
       }
       
       console.log("primitive: " + primitive + ", label: " + field.label);
       console.log("answerSettings:", JSON.stringify(answerSettings, null, 2));
       
-      return { primitive, label: field.label, answerSettings };
+      return { primitive, label: field.label, answerSettings,choices:choices };
     });
   
     
     // Get current questions and generate new ones
+
+
     
-    const allNewQuestions = newQuestions.map(({ primitive, label, answerSettings }) => 
+    const allNewQuestions = newQuestions.map(({ primitive, label, answerSettings,choices }) => 
       generateQuestion(primitive, label, choices, answerSettings)
     );
     

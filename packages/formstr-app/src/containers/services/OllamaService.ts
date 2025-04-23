@@ -17,7 +17,7 @@ export const generateFormFromPrompt = async (prompt: string, model: string = 'ge
   }
 
   const instruction = `
-    Create a json response of a form like the following structure based on the prompt.\n
+    Create a json response for a form like the following structure based on the prompt.\n
     The types of inputs are <types>: shortText, paragraph, radioButton, checkboxes, date, dropdown, number, time, country
 
     Template:
@@ -42,6 +42,7 @@ export const generateFormFromPrompt = async (prompt: string, model: string = 'ge
     Strictly use only the type of inputs I have given \n
     Create all the objects in the fields based on the prompt given.\n
     Use options in the respected input type only if strictly given by the user,other don't give any.\n
+    Use radioButton for single choice options and checkboxes for multiple choice options. If and only if the user specifies it.\n
     Return only the json objects of fields.
   `;
   

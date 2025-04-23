@@ -1,5 +1,4 @@
 import axios from 'axios';
-import { AnyARecord } from 'node:dns';
 
 export interface FormField {
   type: string;
@@ -42,6 +41,7 @@ export const generateFormFromPrompt = async (prompt: string, model: string = 'ge
     Important instruction: \n
     Strictly use only the type of inputs I have given \n
     Create all the objects in the fields based on the prompt given.\n
+    Use options in the respected input type only if strictly given by the user,other don't give any.\n
     Return only the json objects of fields.
   `;
   

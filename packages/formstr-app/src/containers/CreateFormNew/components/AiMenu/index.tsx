@@ -9,7 +9,7 @@ import {generateQuestion} from "../../utils" ;
 
 
 function AiMenu() {
-  const { addQuestion,updateQuestionsList, questionsList } = useFormBuilderContext();
+  const { updateQuestionsList, questionsList } = useFormBuilderContext();
   const [isModalVisible, setIsModalVisible] = useState<boolean>(false);
   const [prompt, setPrompt] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(false);

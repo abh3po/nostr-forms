@@ -7,48 +7,6 @@ export interface ZapInfo {
   count: number;
 }
 
-export interface ProfileInfo {
-  lud16?: string;
-  name?: string;
-  picture?: string;
-  displayName?: string;
-}
-
-export const fetchProfiles = async (
-  pubkeys: string[],
-  pool: SimplePool,
-  relays: string[]
-): Promise<Map<string, ProfileInfo>> => {
-  const profiles = new Map<string, ProfileInfo>();
-  if (!pubkeys.length) return profiles;
-  
-  try {
-    const events = await pool.querySync(
-      relays,
-      { kinds: [0], authors: pubkeys },
-      { maxWait: 3000 }
-    );
-    
-    for (const event of events) {
-      try {
-        const content = JSON.parse(event.content);
-        profiles.set(event.pubkey, {
-          lud16: content.lud16 || content.lightning,
-          name: content.name,
-          picture: content.picture,
-          displayName: content.display_name || content.displayName
-        });
-      } catch (e) {
-        console.error("Failed to parse profile content", e);
-      }
-    }
-  } catch (error) {
-    console.error("Error fetching profiles:", error);
-  }
-  
-  return profiles;
-};
-
 export const fetchZapReceipts = async (
   eventIds: string[],
   pool: SimplePool,
@@ -100,12 +58,12 @@ export const createZapRequest = async (
   relays: string[]
 ): Promise<string | null> => {
   if (!lud16) return null;
-  
+
   try {
     if (!relays?.length) {
       relays = ["wss://relay.damus.io", "wss://nos.lol"];
     }
-    
+
     const unsignedZapRequest = nip57.makeZapRequest({
       profile: recipientPubkey,
       event: eventId,
@@ -114,10 +72,10 @@ export const createZapRequest = async (
       relays
     });
     unsignedZapRequest.tags.push(["e", formId, "", "root"]);
-    
+
     let signedZapRequest = unsignedZapRequest;
     const nostr = typeof window !== "undefined" ? (window as any).nostr : null;
-    
+
     if (nostr?.signEvent) {
       try {
         signedZapRequest = await nostr.signEvent(unsignedZapRequest);
@@ -129,7 +87,7 @@ export const createZapRequest = async (
       message.error("No Nostr extension (NIP-07) found. Please install Alby or another Nostr browser extension.");
       return null;
     }
-    
+
     // Get zap endpoint
     let zapEndpoint;
     if (lud16.includes('@')) {
@@ -154,41 +112,41 @@ export const createZapRequest = async (
             if (decoded?.data) {
               zapEndpoint = decoded.data.toString();
             }
-          } catch {}
+          } catch { }
         }
       }
     }
-    
+
     if (!zapEndpoint) return null;
-    
+
     // Make the zap request
     const zapRequestString = btoa(JSON.stringify(signedZapRequest));
     const callbackUrl = new URL(zapEndpoint);
     callbackUrl.searchParams.set("amount", (amount * 1000).toString());
     callbackUrl.searchParams.set("nostr", zapRequestString);
     if (comment) callbackUrl.searchParams.set("comment", comment);
-    
+
     const response = await fetch(callbackUrl.toString());
     if (!response.ok) return null;
-    
+
     const zapResponse = await response.json();
-    
+
     // Handle callback scenario
     if (zapResponse.callback) {
       const callbackUrl2 = new URL(zapResponse.callback);
       callbackUrl2.searchParams.set("amount", (amount * 1000).toString());
       callbackUrl2.searchParams.set("nostr", zapRequestString);
       if (comment) callbackUrl2.searchParams.set("comment", comment);
-      
+
       const invoiceResponse = await fetch(callbackUrl2.toString());
       if (!invoiceResponse.ok) return null;
-      
+
       const invoiceJson = await invoiceResponse.json();
       if (!invoiceJson.pr) return null;
-      
+
       return `lightning:${invoiceJson.pr}`;
     }
-    
+
     // Direct PR scenario
     if (!zapResponse.pr) return null;
     return `lightning:${zapResponse.pr}`;
@@ -203,3 +161,4 @@ export const formatCompact = (num: number): string => {
     maximumFractionDigits: 1
   }).format(num);
 };
+

@@ -13,12 +13,11 @@ import { fetchKeys, getAllowedUsers, getFormSpec } from "../../utils/formUtils";
 import { Export } from "./Export";
 import { Field, Tag } from "../../nostr/types";
 import { useApplicationContext } from "../../hooks/useApplicationContext";
+import { getDefaultRelays } from "../../nostr/common";
 import { ZapModal } from "./zapModal";
 import { ThunderboltFilled } from "@ant-design/icons";
-import { fetchProfiles, fetchZapReceipts, formatCompact, ProfileInfo, ZapInfo } from "../../utils/zapUtils";
-import { getDefaultRelays } from "../../nostr/common";
-
-
+import { fetchZapReceipts, formatCompact, ZapInfo } from "../../utils/zapUtils";
+import { fetchProfiles, ProfileInfo } from "../../utils/profileUtils";
 const { Text } = Typography;
 
 interface SelectedResponse {
@@ -33,7 +32,7 @@ export const Response = () => {
   const [formEvent, setFormEvent] = useState<Event | undefined>(undefined);
   const [formSpec, setFormSpec] = useState<Tag[] | null | undefined>(undefined);
   const [editKey, setEditKey] = useState<string | undefined | null>();
-  const [profiles, setProfiles] = useState<Map<string, ProfileInfo>>(new Map());
+  const { profiles, setProfiles, poolRef } = useApplicationContext();
   const [zapAmounts, setZapAmounts] = useState<Map<string, ZapInfo>>(new Map());
   const [zapModalVisible, setZapModalVisible] = useState<boolean>(false);
   const [selectedResponse, setSelectedResponse] = useState<SelectedResponse | null>(null);
@@ -46,7 +45,7 @@ export const Response = () => {
   const handleResponseEvent = (event: Event) => {
     setResponses((prev: Event[] | undefined) => [...(prev || []), event]);
   };
-  let { poolRef } = useApplicationContext();
+
   const relays = useMemo(() => getDefaultRelays(), []);
 
   useEffect(() => {
@@ -54,7 +53,7 @@ export const Response = () => {
       fetchProfilesAndZaps();
     }
   }, [responses, poolRef?.current]);
-  
+
   const initialize = async () => {
     if (!formId) return;
 
@@ -123,8 +122,19 @@ export const Response = () => {
     const pubkeys = Array.from(pubkeysSet);
     const responseIds = responses.map(r => r.id);
 
-    const profilesData = await fetchProfiles(pubkeys, poolRef.current, relays);
-    setProfiles(profilesData);
+    const missingPubkeys = pubkeys.filter(pubkey => !profiles.has(pubkey));
+    let newProfiles = new Map<string, ProfileInfo>();
+    if (missingPubkeys.length > 0) {
+      newProfiles = await fetchProfiles(missingPubkeys, poolRef.current, relays);
+    }
+
+    if (newProfiles.size > 0) {
+      const updatedProfiles = new Map(profiles);
+      newProfiles.forEach((profile, pubkey) => {
+        updatedProfiles.set(pubkey, profile);
+      });
+      setProfiles(updatedProfiles);
+    }
 
     const zapData = await fetchZapReceipts(responseIds, poolRef.current, relays);
     setZapAmounts(zapData);
@@ -420,3 +430,4 @@ export const Response = () => {
     </div>
   );
 };
+

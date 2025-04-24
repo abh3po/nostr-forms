@@ -1,15 +1,10 @@
-import { V1AnswerSettings, AnswerTypes } from "@formstr/sdk/dist/interfaces";
-import {
-  Checkbox,
-  Radio,
-  RadioChangeEvent,
-  RadioGroupProps,
-  Space,
-} from "antd";
-import { CheckboxGroupProps } from "antd/es/checkbox";
-import { CheckboxValueType } from "antd/es/checkbox/Group";
-import Markdown from "react-markdown";
-import ChoiceFillerStyle from "./choiceFiller.style";
+import { V1AnswerSettings, AnswerTypes } from '@formstr/sdk/dist/interfaces';
+import { Checkbox, Radio, RadioChangeEvent, RadioGroupProps, Space } from 'antd';
+import { CheckboxGroupProps } from 'antd/es/checkbox';
+import { CheckboxValueType } from 'antd/es/checkbox/Group';
+import Markdown from 'react-markdown';
+
+import ChoiceFillerStyle from './choiceFiller.style';
 
 interface ChoiceFillerProps {
   answerType: AnswerTypes.checkboxes | AnswerTypes.radioButton;
@@ -30,27 +25,29 @@ export const ChoiceFiller: React.FC<ChoiceFillerProps> = ({
 
   function handleChoiceChange(e: RadioChangeEvent | CheckboxValueType[]) {
     if (Array.isArray(e)) {
-      onChange(e.sort().join(";"));
+      onChange(e.sort().join(';'));
       return;
     }
     onChange(e.target.value);
   }
 
-  let ElementConfig: {
-    Element: typeof Radio,
-    defaultValue?: RadioGroupProps['defaultValue']
-  } | {
-    Element: typeof Checkbox,
-    defaultValue?: CheckboxGroupProps['defaultValue']
-  } = {
+  let ElementConfig:
+    | {
+        Element: typeof Radio;
+        defaultValue?: RadioGroupProps['defaultValue'];
+      }
+    | {
+        Element: typeof Checkbox;
+        defaultValue?: CheckboxGroupProps['defaultValue'];
+      } = {
     Element: Radio,
-    defaultValue: defaultValue
-  }
- if (answerType === AnswerTypes.checkboxes) {
-   ElementConfig = {
-     Element: Checkbox,
-     defaultValue: defaultValue?.split(";")
-   }
+    defaultValue: defaultValue,
+  };
+  if (answerType === AnswerTypes.checkboxes) {
+    ElementConfig = {
+      Element: Checkbox,
+      defaultValue: defaultValue?.split(';'),
+    };
   }
   return (
     //@ts-ignore

@@ -1,11 +1,11 @@
-import { CloseOutlined } from "@ant-design/icons";
-import { Input, Radio } from "antd";
-import { useState } from "react";
-import OptionsStyle from "./Options.style";
-import { AddOption } from "./AddOption";
-import { handleDelete, handleLabelChange, hasOtherOption } from "./utils";
-import { Choice, ChoiceSettings } from "./types";
-import { makeTag } from "../../../../../../utils/utility";
+import { CloseOutlined } from '@ant-design/icons';
+import { Input, Radio } from 'antd';
+import { useState } from 'react';
+
+import { AddOption } from './AddOption';
+import OptionsStyle from './Options.style';
+import { Choice, ChoiceSettings } from './types';
+import { handleDelete, handleLabelChange, hasOtherOption } from './utils';
 
 interface RadioButtonCreatorProps {
   initialValues?: Array<Choice>;
@@ -26,22 +26,17 @@ export const RadioButtonCreator: React.FC<RadioButtonCreatorProps> = ({
   return (
     <OptionsStyle>
       {choices?.map((choice) => {
-        console.log("Choice is", choice);
+        console.log('Choice is', choice);
         let [choiceId, label, settingsString] = choice;
-        let settings = JSON.parse(settingsString || "{}") as ChoiceSettings;
+        let settings = JSON.parse(settingsString || '{}') as ChoiceSettings;
         return (
           <div className="radioButtonItem" key={choiceId}>
-            <Radio disabled key={choiceId + "choice"} />
+            <Radio disabled key={choiceId + 'choice'} />
             <Input
-              key={choiceId + "input"}
+              key={choiceId + 'input'}
               defaultValue={label}
               onChange={(e) => {
-                handleLabelChange(
-                  e.target.value,
-                  choiceId,
-                  choices,
-                  handleNewChoices
-                );
+                handleLabelChange(e.target.value, choiceId, choices, handleNewChoices);
               }}
               placeholder="Enter an option"
               className="choice-input"
@@ -60,7 +55,7 @@ export const RadioButtonCreator: React.FC<RadioButtonCreatorProps> = ({
       <AddOption
         disable={choices.some((choice) => {
           let [choiceId, label, settingsString] = choice;
-          return label === "";
+          return label === '';
         })}
         choices={choices}
         callback={handleNewChoices}

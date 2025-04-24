@@ -1,9 +1,11 @@
-import { useEffect, useState } from "react";
-import { ValidationRuleTypes } from "@formstr/sdk/dist/interfaces";
-import { Typography, Select } from "antd";
-import { IProps } from "./validation.type";
-import { ANSWER_TYPE_RULES_MENU, RULE_CONFIG } from "../../configs/config";
-import StyleWrapper from "./validation.style";
+import { ValidationRuleTypes } from '@formstr/sdk/dist/interfaces';
+import { Typography, Select } from 'antd';
+import { useEffect, useState } from 'react';
+
+import { ANSWER_TYPE_RULES_MENU, RULE_CONFIG } from '../../configs/config';
+
+import StyleWrapper from './validation.style';
+import { IProps } from './validation.type';
 
 const { Text } = Typography;
 
@@ -12,16 +14,13 @@ function Validation(props: IProps) {
   const validationRules = answerSettings.validationRules ?? {};
   const defaultSelected = Object.keys(validationRules) as ValidationRuleTypes[];
 
-  const [selected, setSelected] =
-    useState<ValidationRuleTypes[]>(defaultSelected);
+  const [selected, setSelected] = useState<ValidationRuleTypes[]>(defaultSelected);
 
   useEffect(() => {
     setSelected(defaultSelected);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [answerType]);
 
-  if (!selected.length && !ANSWER_TYPE_RULES_MENU[answerType].length)
-    return null;
+  if (!selected.length && !ANSWER_TYPE_RULES_MENU[answerType].length) return null;
 
   const onRuleSelect = (val: any) => {
     const newSelected = [...selected, val];
@@ -34,9 +33,7 @@ function Validation(props: IProps) {
     });
   };
 
-  let rules = ANSWER_TYPE_RULES_MENU[answerType].filter(
-    (rule) => !selected.includes(rule.value)
-  );
+  let rules = ANSWER_TYPE_RULES_MENU[answerType].filter((rule) => !selected.includes(rule.value));
 
   return (
     <StyleWrapper className="input-property">
@@ -44,9 +41,7 @@ function Validation(props: IProps) {
         <div>
           <Text className="property-title">Validation</Text>
         </div>
-        {!!rules.length && (
-          <Select value="Select" options={rules} onChange={onRuleSelect} />
-        )}
+        {!!rules.length && <Select value="Select" options={rules} onChange={onRuleSelect} />}
       </div>
       {!!selected.length &&
         selected.map((ruleType) => {

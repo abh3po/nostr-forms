@@ -1,10 +1,11 @@
-import Sidebar from "./components/Sidebar";
-import { QuestionsList } from "./components/QuestionsList";
-import Settings from "./components/Settings";
-import StyledWrapper from "./index.style";
-import { useRef } from "react";
-import { useOutsideClickHandler } from "./hooks/useOutsideClickHandler";
-import useFormBuilderContext from "./hooks/useFormBuilderContext";
+import { useRef } from 'react';
+
+import { QuestionsList } from './components/QuestionsList';
+import Settings from './components/Settings';
+import Sidebar from './components/Sidebar';
+import useFormBuilderContext from './hooks/useFormBuilderContext';
+import { useOutsideClickHandler } from './hooks/useOutsideClickHandler';
+import StyledWrapper from './index.style';
 
 function FormBuilder() {
   const leftSidebarRef = useRef<HTMLInputElement>(null);
@@ -21,11 +22,8 @@ function FormBuilder() {
   useOutsideClickHandler(rightSidebarRef, closeSettingsOnOutsideClick);
 
   return (
-    <StyledWrapper
-      $isOpen={isLeftMenuOpen}
-      $isRightSettingsOpen={isRightSettingsOpen}
-    >
-      <div style={{ display: "flex", maxWidth: "100vw" }}>
+    <StyledWrapper $isOpen={isLeftMenuOpen} $isRightSettingsOpen={isRightSettingsOpen}>
+      <div style={{ display: 'flex', maxWidth: '100vw' }}>
         <Sidebar ref={leftSidebarRef} />
         <QuestionsList />
         <Settings ref={rightSidebarRef} />

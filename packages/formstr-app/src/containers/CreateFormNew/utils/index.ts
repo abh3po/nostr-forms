@@ -1,26 +1,26 @@
-import { AnswerTypes } from "@formstr/sdk/dist/interfaces";
-import { makeTag } from "../../../utils/utility";
-import { IAnswerSettings } from "../components/AnswerSettings/types";
-import { Field } from "../../../nostr/types";
+import { AnswerTypes } from '@formstr/sdk/dist/interfaces';
+
+import { Field } from '../../../nostr/types';
+import { makeTag } from '../../../utils/utility';
+import { IAnswerSettings } from '../components/AnswerSettings/types';
 
 export const generateQuestion = (
-  primitive: string = "text",
+  primitive: string = 'text',
   label: string | null = null,
   choices: string[][] = [],
-  answerSettings: IAnswerSettings = { renderElement: AnswerTypes.shortText }
+  answerSettings: IAnswerSettings = { renderElement: AnswerTypes.shortText },
 ): Field => {
   return [
-    "field",
+    'field',
     makeTag(6),
     primitive,
-    label || "Click here to edit",
-    JSON.stringify(choices) || "",
+    label || 'Click here to edit',
+    JSON.stringify(choices) || '',
     JSON.stringify(answerSettings),
   ];
 };
 
-export const websocketUrlPattern =
-  /^(wss?:\/\/)([^:@/]+(?::[^@/]+)?@)?([^:/]+)(?::(\d+))?(\/.*)?$/;
+export const websocketUrlPattern = /^(wss?:\/\/)([^:@/]+(?::[^@/]+)?@)?([^:/]+)(?::(\d+))?(\/.*)?$/;
 
 export function isValidWebSocketUrl(url: string): boolean {
   const match = url.match(websocketUrlPattern);
@@ -29,7 +29,7 @@ export function isValidWebSocketUrl(url: string): boolean {
   }
   const [, scheme, , , port] = match;
 
-  if (!scheme || (scheme !== "ws://" && scheme !== "wss://")) {
+  if (!scheme || (scheme !== 'ws://' && scheme !== 'wss://')) {
     return false;
   }
   if (port !== undefined) {
@@ -47,15 +47,13 @@ export const areArraysSame = (arr1: Array<string>, arr2: Array<string>) => {
   return arr1.every((element, index) => element === arr2[index]);
 };
 
-export const isGreaterThanOrEqual = (val: number, compareVal: number) =>
-  val >= compareVal;
+export const isGreaterThanOrEqual = (val: number, compareVal: number) => val >= compareVal;
 
-export const isLessThanOrEqual = (val: number, compareVal: number) =>
-  val <= compareVal;
+export const isLessThanOrEqual = (val: number, compareVal: number) => val <= compareVal;
 
 export const getNumValue = (val: string | number): number => {
   let newVal = val;
-  if (typeof newVal === "string") {
+  if (typeof newVal === 'string') {
     newVal = newVal.length;
   }
   return newVal;

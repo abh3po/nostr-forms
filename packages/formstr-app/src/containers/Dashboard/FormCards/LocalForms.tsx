@@ -1,24 +1,23 @@
-import { useEffect, useState } from "react";
-import { ILocalForm } from "../../CreateFormNew/providers/FormBuilder/typeDefs";
-import { LocalFormCard } from "./LocalFormCard";
-import { useApplicationContext } from "../../../hooks/useApplicationContext";
-import { getDefaultRelays } from "../../../nostr/common";
-import { Event, SubCloser } from "nostr-tools";
-import { FormEventCard } from "./FormEventCard";
+import { Event, SubCloser } from 'nostr-tools';
+import { useEffect, useState } from 'react';
+
+import { useApplicationContext } from '../../../hooks/useApplicationContext';
+import { getDefaultRelays } from '../../../nostr/common';
+import { ILocalForm } from '../../CreateFormNew/providers/FormBuilder/typeDefs';
+
+import { FormEventCard } from './FormEventCard';
+import { LocalFormCard } from './LocalFormCard';
 
 interface LocaLFormsProps {
   localForms: ILocalForm[];
   onDeleted: (localForm: ILocalForm) => void;
 }
 
-export const LocalForms: React.FC<LocaLFormsProps> = ({
-  localForms,
-  onDeleted,
-}) => {
+export const LocalForms: React.FC<LocaLFormsProps> = ({ localForms, onDeleted }) => {
   const { poolRef } = useApplicationContext();
   const [eventMap, setEventMap] = useState<Map<string, Event>>(new Map());
   const onFormEvent = (event: Event) => {
-    const dTag = event.tags.filter((t) => t[0] === "d")[0]?.[1];
+    const dTag = event.tags.filter((t) => t[0] === 'd')[0]?.[1];
     let key = `${event.pubkey}:${dTag}`;
     setEventMap((prevMap) => {
       const newMap = new Map(prevMap);
@@ -34,7 +33,7 @@ export const LocalForms: React.FC<LocaLFormsProps> = ({
       let dTags = localForms.map((f) => f.formId);
       let filter = {
         kinds: [30168],
-        "#d": dTags,
+        '#d': dTags,
         authors: pubkeys,
       };
       closer = poolRef.current.subscribeMany(getDefaultRelays(), [filter], {
@@ -52,13 +51,10 @@ export const LocalForms: React.FC<LocaLFormsProps> = ({
       {Array.from(localForms)
         .sort(
           (a, b) =>
-            Number(new Date(b.createdAt).getTime()) -
-            Number(new Date(a.createdAt).getTime())
+            Number(new Date(b.createdAt).getTime()) - Number(new Date(a.createdAt).getTime()),
         )
         .map((localForm: ILocalForm) => {
-          let formEvent = eventMap.get(
-            `${localForm.publicKey}:${localForm.formId}`
-          );
+          let formEvent = eventMap.get(`${localForm.publicKey}:${localForm.formId}`);
           if (formEvent)
             return (
               <FormEventCard

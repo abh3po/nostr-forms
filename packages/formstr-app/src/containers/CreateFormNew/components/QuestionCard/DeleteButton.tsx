@@ -1,6 +1,6 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { DeleteOutlined } from "@ant-design/icons";
+import { DeleteOutlined } from '@ant-design/icons';
 import { message } from 'antd';
+import React, { useState, useRef, useEffect } from 'react';
 
 interface DeleteButtonProps {
   onDelete: () => void;
@@ -13,27 +13,27 @@ const DeleteButton: React.FC<DeleteButtonProps> = ({ onDelete, className }) => {
   const timeoutRef = useRef<number>();
   const intervalRef = useRef<number>();
   const messageKeyRef = useRef<string>();
-  
+
   const handleDelete = () => {
     setShowUndoDelete(true);
     let count = 2;
-    
+
     messageKeyRef.current = `delete-${Date.now()}`;
-    messageApi.loading({ 
+    messageApi.loading({
       content: `Question will be deleted in ${count}s`,
       key: messageKeyRef.current,
-      duration: 0 
+      duration: 0,
     });
-    
+
     intervalRef.current = window.setInterval(() => {
       count -= 1;
-      messageApi.loading({ 
+      messageApi.loading({
         content: `Question will be deleted in ${count}s`,
         key: messageKeyRef.current,
-        duration: 0 
+        duration: 0,
       });
     }, 1000);
-    
+
     timeoutRef.current = window.setTimeout(() => {
       onDelete();
       setShowUndoDelete(false);
@@ -47,10 +47,10 @@ const DeleteButton: React.FC<DeleteButtonProps> = ({ onDelete, className }) => {
     window.clearInterval(intervalRef.current);
     setShowUndoDelete(false);
     if (messageKeyRef.current) {
-      messageApi.success({ 
+      messageApi.success({
         content: 'Deletion cancelled',
         key: messageKeyRef.current,
-        duration: 2 
+        duration: 2,
       });
     }
   };
@@ -67,9 +67,11 @@ const DeleteButton: React.FC<DeleteButtonProps> = ({ onDelete, className }) => {
     <>
       {contextHolder}
       {showUndoDelete ? (
-        <button className={className} style={{ color: "red" }} onClick={handleUndo}>↶</button>
+        <button className={className} style={{ color: 'red' }} onClick={handleUndo}>
+          ↶
+        </button>
       ) : (
-        <DeleteOutlined className={className} style={{ color: "red" }} onClick={handleDelete} />
+        <DeleteOutlined className={className} style={{ color: 'red' }} onClick={handleDelete} />
       )}
     </>
   );

@@ -1,9 +1,6 @@
-import { Event, SimplePool } from "nostr-tools";
+import { Event, SimplePool } from 'nostr-tools';
 
-export const getPublicForms = async (
-  relays: string[],
-  callback: (event: Event) => void
-) => {
+export const getPublicForms = async (relays: string[], callback: (event: Event) => void) => {
   let pool = new SimplePool();
   let filter = {
     kinds: [30168],

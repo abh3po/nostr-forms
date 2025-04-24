@@ -1,12 +1,14 @@
-import { Button, Divider, Dropdown, Switch, Typography, MenuProps } from "antd";
-import { DeleteOutlined, DownOutlined } from "@ant-design/icons";
-import Validation from "../Validation";
-import useFormBuilderContext from "../../hooks/useFormBuilderContext";
-import { INPUTS_MENU } from "../../configs/menuConfig";
-import StyleWrapper from "./style";
-import { RightAnswer } from "./RightAnswer";
-import { IAnswerSettings } from "./types";
-import { Field } from "../../../../nostr/types";
+import { DeleteOutlined, DownOutlined } from '@ant-design/icons';
+import { Button, Divider, Dropdown, Switch, Typography, MenuProps } from 'antd';
+
+import { Field } from '../../../../nostr/types';
+import { INPUTS_MENU } from '../../configs/menuConfig';
+import useFormBuilderContext from '../../hooks/useFormBuilderContext';
+import Validation from '../Validation';
+
+import { RightAnswer } from './RightAnswer';
+import StyleWrapper from './style';
+import { IAnswerSettings } from './types';
 
 const { Text } = Typography;
 
@@ -17,20 +19,15 @@ function AnswerSettings() {
   if (!questionIdInFocus) {
     return null;
   }
-  const questionIndex = questionsList.findIndex(
-    (field: Field) => field[1] === questionIdInFocus
-  );
+  const questionIndex = questionsList.findIndex((field: Field) => field[1] === questionIdInFocus);
   if (questionIndex === -1) {
     return null;
   }
   const question = questionsList[questionIndex];
-  const answerSettings = JSON.parse(
-    question[5] || '{ "renderElement": "shortText"}'
-  );
+  const answerSettings = JSON.parse(question[5] || '{ "renderElement": "shortText"}');
 
   const answerType = INPUTS_MENU.find(
-    (option) =>
-      option.answerSettings.renderElement === answerSettings.renderElement
+    (option) => option.answerSettings.renderElement === answerSettings.renderElement,
   );
 
   const handleRightAnswer = (rightAnswer: string | string[]) => {
@@ -46,7 +43,7 @@ function AnswerSettings() {
     editQuestion(field, field[1]);
   };
 
-  const updateAnswerType: MenuProps["onClick"] = ({ key }) => {
+  const updateAnswerType: MenuProps['onClick'] = ({ key }) => {
     const selectedItem = INPUTS_MENU.find((item) => item.key === key);
     if (!selectedItem) return;
     let field = question;
@@ -86,31 +83,30 @@ function AnswerSettings() {
             </Text>
           </Dropdown>
         </div>
-        {answerType && (<div className="property-setting">
-          <Text className="property-name">Required</Text>
-          <Switch
-            checked={answerSettings.required}
-            onChange={updateIsRequired}
-          />
-        </div>
+        {answerType && (
+          <div className="property-setting">
+            <Text className="property-name">Required</Text>
+            <Switch checked={answerSettings.required} onChange={updateIsRequired} />
+          </div>
         )}
       </div>
       <Divider className="divider" />
 
       <Validation
-        key={question[1] + "validation"}
+        key={question[1] + 'validation'}
         answerType={answerSettings.renderElement}
         answerSettings={answerSettings}
         handleAnswerSettings={handleAnswerSettings}
       />
       <Divider className="divider" />
-      {answerType && (<RightAnswer
-        key={question[1] + "rightAnswer"}
-        answerType={answerSettings.renderElement}
-        answerSettings={answerSettings}
-        choices={question[4]}
-        onChange={handleRightAnswer}
-      />
+      {answerType && (
+        <RightAnswer
+          key={question[1] + 'rightAnswer'}
+          answerType={answerSettings.renderElement}
+          answerSettings={answerSettings}
+          choices={question[4]}
+          onChange={handleRightAnswer}
+        />
       )}
       <Divider className="divider" />
       <Button

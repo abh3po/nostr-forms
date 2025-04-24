@@ -1,9 +1,10 @@
-import { UnsignedEvent, generateSecretKey, getPublicKey } from "nostr-tools";
-import { customPublish, getDefaultRelays, signEvent } from "./common";
-import { IWrap, Tag } from "./types";
-import { nip44Encrypt } from "./utils";
-import { grantAccess, sendWraps } from "./accessControl";
-import { hexToBytes } from "@noble/hashes/utils";
+import { hexToBytes } from '@noble/hashes/utils';
+import { UnsignedEvent, generateSecretKey, getPublicKey } from 'nostr-tools';
+
+import { grantAccess, sendWraps } from './accessControl';
+import { customPublish, getDefaultRelays, signEvent } from './common';
+import { IWrap, Tag } from './types';
+import { nip44Encrypt } from './utils';
 
 const defaultRelays = getDefaultRelays();
 
@@ -13,10 +14,7 @@ interface MergedNpub {
   isEditor?: boolean;
 }
 
-const getMergedNpubs = (
-  viewList: Set<string>,
-  editList: Set<string>
-): MergedNpub[] => {
+const getMergedNpubs = (viewList: Set<string>, editList: Set<string>): MergedNpub[] => {
   let ViewNpubs = Array.from(viewList).map((hexPub) => {
     return {
       pubkey: hexPub,
@@ -33,9 +31,7 @@ const getMergedNpubs = (
 
   const map = new Map();
   ViewNpubs.forEach((item) => map.set(item.pubkey, item));
-  EditNpubs.forEach((item) =>
-    map.set(item.pubkey, { ...map.get(item.pubkey), ...item })
-  );
+  EditNpubs.forEach((item) => map.set(item.pubkey, { ...map.get(item.pubkey), ...item }));
   return Array.from(map.values());
 };
 
@@ -47,7 +43,7 @@ export const createForm = async (
   encryptContent?: boolean,
   onRelayAccepted?: (url: string) => void,
   secretKey?: string | null,
-  viewKeyParams?: string | null
+  viewKeyParams?: string | null,
 ) => {
   let acceptedRelays: string[] = [];
   let signingKey: Uint8Array;
@@ -61,28 +57,21 @@ export const createForm = async (
   else viewKey = generateSecretKey();
 
   let tags: Tag[] = [];
-  let formId = form.find((tag: Tag) => tag[0] === "d")?.[1];
+  let formId = form.find((tag: Tag) => tag[0] === 'd')?.[1];
   if (!formId) {
-    throw Error("Invalid Form: No formId found");
+    throw Error('Invalid Form: No formId found');
   }
-  let name = form.find((tag: Tag) => tag[0] === "name")?.[1] || "";
+  let name = form.find((tag: Tag) => tag[0] === 'name')?.[1] || '';
   let mergedNpubs = getMergedNpubs(viewList, EditList);
-  tags.push(["d", formId]);
-  tags.push(["name", name]);
-  let content = "";
+  tags.push(['d', formId]);
+  tags.push(['name', name]);
+  let content = '';
   if (encryptContent)
-    content = nip44Encrypt(
-      signingKey,
-      getPublicKey(viewKey),
-      JSON.stringify(form)
-    );
+    content = nip44Encrypt(signingKey, getPublicKey(viewKey), JSON.stringify(form));
   else {
-    tags = [
-      ...tags,
-      ...form.filter((tag: Tag) => !["d", "name"].includes(tag[0])),
-    ];
+    tags = [...tags, ...form.filter((tag: Tag) => !['d', 'name'].includes(tag[0]))];
   }
-  relayList.forEach((r: string) => tags.push(["relay", r]));
+  relayList.forEach((r: string) => tags.push(['relay', r]));
   const baseTemplateEvent: UnsignedEvent = {
     kind: 30168,
     created_at: Math.floor(Date.now() / 1000),
@@ -93,18 +82,12 @@ export const createForm = async (
   let baseFormEvent = baseTemplateEvent;
   let wraps: IWrap[] = [];
   mergedNpubs.forEach((profile: MergedNpub) => {
-    let wrap = grantAccess(
-      baseFormEvent,
-      profile.pubkey,
-      signingKey,
-      viewKey,
-      profile.isEditor
-    );
+    let wrap = grantAccess(baseFormEvent, profile.pubkey, signingKey, viewKey, profile.isEditor);
     wraps.push(wrap);
     if (profile.isParticipant) {
-      baseFormEvent.tags.push(["allowed", profile.pubkey]);
+      baseFormEvent.tags.push(['allowed', profile.pubkey]);
     }
-    baseFormEvent.tags.push(["p", profile.pubkey]);
+    baseFormEvent.tags.push(['p', profile.pubkey]);
   });
 
   const templateEvent = await signEvent(baseTemplateEvent, signingKey);
@@ -113,9 +96,9 @@ export const createForm = async (
     customPublish(relayList, templateEvent, (url: string) => {
       acceptedRelays.push(url);
       onRelayAccepted?.(url);
-    })
+    }),
   );
-  console.log("Accepted by relays", acceptedRelays);
+  console.log('Accepted by relays', acceptedRelays);
   return {
     signingKey,
     viewKey,

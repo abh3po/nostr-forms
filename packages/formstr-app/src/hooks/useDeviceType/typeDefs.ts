@@ -1,4 +1,4 @@
-import { DEVICE_TYPE } from "../../constants/index";
+import { DEVICE_TYPE } from '../../constants/index';
 
 type DEVICE_TYPE_KEYS = keyof typeof DEVICE_TYPE;
 type DEVICE_TYPE_VALUES = (typeof DEVICE_TYPE)[DEVICE_TYPE_KEYS];

@@ -1,24 +1,16 @@
-import { bytesToHex } from "@noble/hashes/utils";
-import { nip44 } from "nostr-tools";
+import { bytesToHex } from '@noble/hashes/utils';
+import { nip44 } from 'nostr-tools';
 
-export const nip44Encrypt = (
-  privKey: Uint8Array,
-  pubkey: string,
-  message: string,
-) => {
-  console.log("secret, pub", privKey, pubkey);
-  const conversationKey = nip44.v2.utils.getConversationKey(
-    bytesToHex(privKey),
-    pubkey,
-  );
+export const nip44Encrypt = (privKey: Uint8Array, pubkey: string, message: string) => {
+  console.log('secret, pub', privKey, pubkey);
+  const conversationKey = nip44.v2.utils.getConversationKey(bytesToHex(privKey), pubkey);
   const cipherText = nip44.v2.encrypt(message, conversationKey);
   return cipherText;
 };
 
 export function makeTag(length: number) {
-  let result = "";
-  const characters =
-    "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+  let result = '';
+  const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
   const charactersLength = characters.length;
   let counter = 0;
   while (counter < length) {
@@ -28,25 +20,17 @@ export function makeTag(length: number) {
   return result;
 }
 
-export function constructFormUrl(
-  publicKey: string,
-  host: string,
-  embedded = false,
-) {
+export function constructFormUrl(publicKey: string, host: string, embedded = false) {
   if (!publicKey) {
-    throw Error("public key is required");
+    throw Error('public key is required');
   }
-  return `${host}/${embedded ? "embedded" : "fill"}/${publicKey}`;
+  return `${host}/${embedded ? 'embedded' : 'fill'}/${publicKey}`;
 }
-export function constructResponseUrl(
-  privateKey: string,
-  host: string,
-  formId: string,
-) {
+export function constructResponseUrl(privateKey: string, host: string, formId: string) {
   if (!privateKey) {
-    throw Error("public key is required");
+    throw Error('public key is required');
   }
-  if (formId?.startsWith("nprofile")) {
+  if (formId?.startsWith('nprofile')) {
     return `${host}/response/${privateKey}?formId=${formId}`;
   }
   return `${host}/response/${privateKey}`;

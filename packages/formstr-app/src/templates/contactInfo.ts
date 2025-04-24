@@ -1,10 +1,11 @@
-import { FormTemplate } from './types';
 import { Field } from '../nostr/types';
+
+import { FormTemplate } from './types';
 
 let fieldCounter = 0;
 const generateFieldId = (): string => `template_field_${Date.now()}_${fieldCounter++}`;
 
-const emailRegex = "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$";
+const emailRegex = '^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$';
 
 export const contactInfoTemplate: FormTemplate = {
   id: 'contactInfo',
@@ -24,7 +25,7 @@ export const contactInfoTemplate: FormTemplate = {
     questionsList: [
       // Field 1: Name (Required, Short Text)
       [
-        'field', 
+        'field',
         generateFieldId(),
         'text', // dataType
         'Name', // label
@@ -34,26 +35,27 @@ export const contactInfoTemplate: FormTemplate = {
 
       // Field 2: Email (Required, Short Text, with validation)
       [
-        'field', 
+        'field',
         generateFieldId(),
         'text', // dataType
         'Email', // label
         '[]', // options
-        JSON.stringify({ // Stringify the config object
-          renderElement: "shortText",
+        JSON.stringify({
+          // Stringify the config object
+          renderElement: 'shortText',
           required: true,
           validationRules: {
             regex: {
               pattern: emailRegex,
-              errorMessage: "Please enter a valid email address."
-            }
-          }
+              errorMessage: 'Please enter a valid email address.',
+            },
+          },
         }), // config
       ] as Field,
 
       // Field 3: Address (Required, Paragraph)
       [
-        'field', 
+        'field',
         generateFieldId(),
         'text', // dataType
         'Address', // label
@@ -63,7 +65,7 @@ export const contactInfoTemplate: FormTemplate = {
 
       // Field 4: Phone number (Not Required, Short Text)
       [
-        'field', 
+        'field',
         generateFieldId(),
         'text', // dataType
         'Phone number', // label
@@ -71,9 +73,9 @@ export const contactInfoTemplate: FormTemplate = {
         '{"renderElement": "shortText", "required": false}', // config
       ] as Field,
 
-       // Field 5: Comments (Not Required, Paragraph)
-       [
-        'field', 
+      // Field 5: Comments (Not Required, Paragraph)
+      [
+        'field',
         generateFieldId(),
         'text', // dataType
         'Comments', // label

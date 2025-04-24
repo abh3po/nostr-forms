@@ -1,5 +1,6 @@
-import { Typography } from "antd";
-import useFormBuilderContext from "../../hooks/useFormBuilderContext";
+import { Typography } from 'antd';
+
+import useFormBuilderContext from '../../hooks/useFormBuilderContext';
 
 const { Text } = Typography;
 

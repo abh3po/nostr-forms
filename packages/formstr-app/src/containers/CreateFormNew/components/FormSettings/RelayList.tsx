@@ -1,15 +1,11 @@
-import { Button, Collapse, Input, Typography } from "antd";
-import { getDefaultRelays } from "@formstr/sdk";
-import { makeTag } from "@formstr/sdk/dist/utils/utils";
-import {
-  CloseOutlined,
-  DeleteOutlined,
-  EditOutlined,
-  SaveOutlined,
-} from "@ant-design/icons";
-import { useState } from "react";
-import useFormBuilderContext from "../../hooks/useFormBuilderContext";
-import { isValidWebSocketUrl } from "../../utils";
+import { CloseOutlined, DeleteOutlined, EditOutlined, SaveOutlined } from '@ant-design/icons';
+import { getDefaultRelays } from '@formstr/sdk';
+import { makeTag } from '@formstr/sdk/dist/utils/utils';
+import { Button, Collapse, Input, Typography } from 'antd';
+import { useState } from 'react';
+
+import useFormBuilderContext from '../../hooks/useFormBuilderContext';
+import { isValidWebSocketUrl } from '../../utils';
 
 const { Text } = Typography;
 
@@ -22,7 +18,7 @@ const RelayEdit = ({
   onClose: () => void;
   defaultRelay?: string;
 }) => {
-  const [newRelay, setNewRelay] = useState(defaultRelay || "");
+  const [newRelay, setNewRelay] = useState(defaultRelay || '');
   const [isError, setIsError] = useState(false);
 
   const handleSave = () => {
@@ -55,9 +51,7 @@ const RelayEdit = ({
           onClick={handleSave}
         />
       </div>
-      <div>
-        {isError && <Text type="danger"> Not a valid websocket url</Text>}
-      </div>
+      <div>{isError && <Text type="danger"> Not a valid websocket url</Text>}</div>
     </>
   );
 };
@@ -102,11 +96,7 @@ const RelayListItem = ({
         )}
       </div>
       {edit && (
-        <RelayEdit
-          onSave={onEditRelay}
-          onClose={() => setEdit(false)}
-          defaultRelay={relay.url}
-        />
+        <RelayEdit onSave={onEditRelay} onClose={() => setEdit(false)} defaultRelay={relay.url} />
       )}
     </>
   );
@@ -162,12 +152,7 @@ const RelayListItems = () => {
         )}
       </div>
       {relayList.map((relay) => (
-        <RelayListItem
-          relay={relay}
-          onEdit={onEdit}
-          onDelete={onDelete}
-          key={relay.tempId}
-        />
+        <RelayListItem relay={relay} onEdit={onEdit} onDelete={onDelete} key={relay.tempId} />
       ))}
     </>
   );
@@ -178,8 +163,8 @@ export const RelayList = () => {
     <Collapse
       items={[
         {
-          key: "Relays",
-          label: "Relays",
+          key: 'Relays',
+          label: 'Relays',
           children: RelayListItems(),
         },
       ]}

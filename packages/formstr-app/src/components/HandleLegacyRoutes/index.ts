@@ -1,1 +1,1 @@
-export * from "./HandleLegacyRoutes";
+export * from './HandleLegacyRoutes';

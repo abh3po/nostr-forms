@@ -1,8 +1,6 @@
-import { Typography } from "antd";
-import useFormBuilderContext from "../../hooks/useFormBuilderContext";
-import { ChangeEvent, useState } from "react";
+import { ChangeEvent } from 'react';
 
-const { Text } = Typography;
+import useFormBuilderContext from '../../hooks/useFormBuilderContext';
 
 function FormIdentifier() {
   const { updateFormSetting, formSettings } = useFormBuilderContext();

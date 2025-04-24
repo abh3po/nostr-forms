@@ -1,8 +1,10 @@
-import { V1Field } from "@formstr/sdk/dist/interfaces";
-import { Card, Divider } from "antd";
-import { InputFiller } from "./InputFiller";
-import Markdown from "react-markdown";
-import { AnswerTypes } from "../../../../constants";
+import { V1Field } from '@formstr/sdk/dist/interfaces';
+import { Card, Divider } from 'antd';
+import Markdown from 'react-markdown';
+
+import { AnswerTypes } from '../../../../constants';
+
+import { InputFiller } from './InputFiller';
 
 interface QuestionProps {
   field: V1Field;
@@ -10,11 +12,7 @@ interface QuestionProps {
   required: boolean;
 }
 
-export const QuestionNode: React.FC<QuestionProps> = ({
-  field,
-  inputHandler,
-  required,
-}) => {
+export const QuestionNode: React.FC<QuestionProps> = ({ field, inputHandler, required }) => {
   const answerHandler = (questionId: string) => {
     return (answer: string, message?: string) => {
       return inputHandler(questionId, answer, message);
@@ -23,7 +21,7 @@ export const QuestionNode: React.FC<QuestionProps> = ({
 
   return (
     <Card type="inner" className="filler-question">
-      {required && <span style={{ color: "#ea8dea" }}>* &nbsp;</span>}
+      {required && <span style={{ color: '#ea8dea' }}>* &nbsp;</span>}
       <div className="question-text">
         <Markdown>{field.question}</Markdown>
       </div>

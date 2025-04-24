@@ -1,5 +1,5 @@
-import { Option } from "@formstr/sdk/dist/formstr/nip101";
-import { Select } from "antd";
+import { Option } from '@formstr/sdk/dist/formstr/nip101';
+import { Select } from 'antd';
 
 interface DropdownFillerProps {
   options: Option[];

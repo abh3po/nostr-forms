@@ -1,12 +1,12 @@
-import { constructFormUrl as constructFormUrlSDK } from "@formstr/sdk";
-import { DEVICE_TYPE, DEVICE_WIDTH } from "../constants/index";
-import { getItem, LOCAL_STORAGE_KEYS, setItem } from "./localStorage";
-import { nip19 } from "nostr-tools";
+import { nip19 } from 'nostr-tools';
+
+import { DEVICE_TYPE, DEVICE_WIDTH } from '../constants/index';
+
+import { getItem, LOCAL_STORAGE_KEYS, setItem } from './localStorage';
 
 export function makeTag(length: number) {
-  let result = "";
-  const characters =
-    "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+  let result = '';
+  const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
   const charactersLength = characters.length;
   let counter = 0;
   while (counter < length) {
@@ -25,20 +25,17 @@ export const naddrUrl = (
   let formUrl = `/f/${nip19.naddrEncode({
     pubkey: publicKey,
     identifier: formId,
-    relays: relaysEncode || ["wss://relay.damus.io"],
+    relays: relaysEncode || ['wss://relay.damus.io'],
     kind: 30168,
   })}`;
   if (viewKey) formUrl = formUrl + `?viewKey=${viewKey}`;
   return formUrl;
 };
 
-export function constructFormUrl(
-  publicKey: string,
-  formIdentifier: string | null = null,
-) {
+export function constructFormUrl(publicKey: string, formIdentifier: string | null = null) {
   let hostname = window.location.host;
-  if (hostname.includes("abhay-raizada")) {
-    hostname += "/nostr-forms";
+  if (hostname.includes('abhay-raizada')) {
+    hostname += '/nostr-forms';
   }
   if (!formIdentifier) `http://${hostname}/fill/${publicKey}/`;
   return !formIdentifier
@@ -46,9 +43,7 @@ export function constructFormUrl(
     : `http://${hostname}/f/${publicKey}/${formIdentifier}`;
 }
 
-export function constructDraftUrl(
-  draft: { formSpec: unknown; tempId: string } | null,
-) {
+export function constructDraftUrl(draft: { formSpec: unknown; tempId: string } | null) {
   if (!draft) {
     return;
   }
@@ -85,23 +80,23 @@ export const isDesktop = () => getDeviceType() === DEVICE_TYPE.DESKTOP;
 
 export function appendClass(class1: string, class2: string) {
   if (class1) {
-    return class1 + " " + class2;
+    return class1 + ' ' + class2;
   }
   return class1 + class2;
 }
 
 export function classNames(...classNames: any) {
-  let classes = "";
+  let classes = '';
   for (let i = 0; i < classNames.length; i++) {
     const arg = arguments[i];
     if (arg) {
-      if (typeof arg === "string") {
+      if (typeof arg === 'string') {
         classes = appendClass(classes, arg);
       }
-      if (typeof arg !== "object") {
+      if (typeof arg !== 'object') {
         continue;
       }
-      // eslint-disable-next-line no-loop-func
+
       Object.keys(arg).forEach((v) => {
         if (arg[v]) {
           classes = appendClass(classes, v);

@@ -1,21 +1,23 @@
-import { Card, Input } from "antd";
-import { ChangeEvent, useRef, PointerEvent as ReactPointerEvent } from "react";
-import useFormBuilderContext from "../../hooks/useFormBuilderContext";
-import CardHeader from "./CardHeader";
-import Inputs from "./Inputs";
-import { AnswerSettings } from "@formstr/sdk/dist/interfaces";
-import StyledWrapper from "./index.style";
-import { SmallDashOutlined } from "@ant-design/icons";
-import QuestionTextStyle from "./question.style";
-import { Choice } from "./InputElements/OptionTypes/types";
-import UploadImage from "./UploadImage";
-import { Field } from "../../../../nostr/types";
-import { DragControls } from "framer-motion";
+import { SmallDashOutlined } from '@ant-design/icons';
+import { AnswerSettings } from '@formstr/sdk/dist/interfaces';
+import { Card, Input } from 'antd';
+import { DragControls } from 'framer-motion';
+import { ChangeEvent, useRef, PointerEvent as ReactPointerEvent } from 'react';
+
+import { Field } from '../../../../nostr/types';
+import useFormBuilderContext from '../../hooks/useFormBuilderContext';
+
+import CardHeader from './CardHeader';
+import { Choice } from './InputElements/OptionTypes/types';
+import Inputs from './Inputs';
+import UploadImage from './UploadImage';
+import StyledWrapper from './index.style';
+import QuestionTextStyle from './question.style';
 
 type QuestionCardProps = {
   question: Field;
   onEdit: (question: Field, tempId: string) => void;
-  onReorderKey: (keyType: "UP" | "DOWN", tempId: string) => void;
+  onReorderKey: (keyType: 'UP' | 'DOWN', tempId: string) => void;
   firstQuestion: boolean;
   lastQuestion: boolean;
   dragControls: DragControls | undefined;
@@ -29,10 +31,8 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
   lastQuestion,
   dragControls,
 }) => {
-  let options = JSON.parse(question[4] || "[]") as Array<Choice>;
-  const answerSettings = JSON.parse(
-    question[5] || '{"renderElement": "shortText"}'
-  );
+  let options = JSON.parse(question[4] || '[]') as Array<Choice>;
+  const answerSettings = JSON.parse(question[5] || '{"renderElement": "shortText"}');
   const { setQuestionIdInFocus } = useFormBuilderContext();
   const dragTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -88,11 +88,12 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
   return (
     <StyledWrapper>
       <Card type="inner" className="question-card" onClick={onCardClick}>
-        <div className="drag-icon"
-        onPointerDown={dragControls ? handlePointerDown : undefined} 
-        onPointerUp={dragControls ? handlePointerUp : undefined}
-        onPointerCancel={dragControls ? handlePointerUp : undefined}
-        style={{ touchAction: dragControls ? "none" : "auto" }}
+        <div
+          className="drag-icon"
+          onPointerDown={dragControls ? handlePointerDown : undefined}
+          onPointerUp={dragControls ? handlePointerUp : undefined}
+          onPointerCancel={dragControls ? handlePointerUp : undefined}
+          style={{ touchAction: dragControls ? 'none' : 'auto' }}
         >
           <SmallDashOutlined />
         </div>
@@ -104,18 +105,15 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
           firstQuestion={firstQuestion}
           lastQuestion={lastQuestion}
         />
-        <div
-          className="question-text"
-          style={{ justifyContent: "space-between", display: "flex" }}
-        >
-          <QuestionTextStyle style={{ width: "100%" }}>
+        <div className="question-text" style={{ justifyContent: 'space-between', display: 'flex' }}>
+          <QuestionTextStyle style={{ width: '100%' }}>
             <label>
               <Input.TextArea
                 key={question[1]}
                 className="question-input"
                 onChange={handleTextChange}
-                defaultValue={"Click to edit"}
-                value={question[3] || ""}
+                defaultValue={'Click to edit'}
+                value={question[3] || ''}
                 placeholder="Enter a Question"
                 autoSize
               />
@@ -123,7 +121,7 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
           </QuestionTextStyle>
           <UploadImage
             onImageUpload={(markdownUrl) => {
-              const currentDisplay = question[3] || "";
+              const currentDisplay = question[3] || '';
               const newDisplay = currentDisplay
                 ? `${currentDisplay}\n\n${markdownUrl}`
                 : markdownUrl;

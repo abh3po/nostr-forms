@@ -1,13 +1,15 @@
-import { Layout, Menu, Row, Col, Typography, MenuProps } from "antd";
-import { Link } from "react-router-dom";
-import { ArrowLeftOutlined, MenuOutlined } from "@ant-design/icons";
-import { HEADER_MENU, HEADER_MENU_KEYS } from "./config";
-import { Button } from "antd";
-import useFormBuilderContext from "../../hooks/useFormBuilderContext";
-import StyleWrapper from "./Header.style";
-import { useState } from "react";
-import { normalizeURL } from "nostr-tools/utils";
-import { RelayPublishModal } from "../../../../components/RelayPublishModal/RelaysPublishModal";
+import { ArrowLeftOutlined, MenuOutlined } from '@ant-design/icons';
+import { Layout, Menu, Row, Col, Typography, MenuProps } from 'antd';
+import { Button } from 'antd';
+import { normalizeURL } from 'nostr-tools/utils';
+import { useState } from 'react';
+import { Link } from 'react-router-dom';
+
+import { RelayPublishModal } from '../../../../components/RelayPublishModal/RelaysPublishModal';
+import useFormBuilderContext from '../../hooks/useFormBuilderContext';
+
+import StyleWrapper from './Header.style';
+import { HEADER_MENU, HEADER_MENU_KEYS } from './config';
 
 export const CreateFormHeader: React.FC = () => {
   const [isPostPublishModalOpen, setIsPostPublishModalOpen] = useState(false);
@@ -15,16 +17,15 @@ export const CreateFormHeader: React.FC = () => {
 
   const { Header } = Layout;
   const { Text } = Typography;
-  const { saveForm, setSelectedTab, formSettings, relayList } =
-    useFormBuilderContext();
+  const { saveForm, setSelectedTab, formSettings, relayList } = useFormBuilderContext();
 
-  const onClickHandler: MenuProps["onClick"] = (e) => {
+  const onClickHandler: MenuProps['onClick'] = (e) => {
     setSelectedTab(e.key);
   };
 
   const handlePublishClick = async () => {
     if (!formSettings?.formId) {
-      alert("Form ID is required");
+      alert('Form ID is required');
       return;
     }
 
@@ -37,7 +38,7 @@ export const CreateFormHeader: React.FC = () => {
         setAcceptedRelays((prev) => [...prev, normalizedUrl]);
       });
     } catch (error) {
-      console.error("Failed to publish the form", error);
+      console.error('Failed to publish the form', error);
     }
   };
 
@@ -47,9 +48,7 @@ export const CreateFormHeader: React.FC = () => {
         <Row className="header-row" justify="space-between">
           <Col>
             <Row className="header-row" justify="space-between">
-              <Col
-                style={{ paddingRight: 10, paddingBottom: 4, color: "black" }}
-              >
+              <Col style={{ paddingRight: 10, paddingBottom: 4, color: 'black' }}>
                 <Link className="app-link" to="/">
                   <ArrowLeftOutlined />
                 </Link>

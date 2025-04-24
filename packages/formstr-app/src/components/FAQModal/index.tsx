@@ -1,10 +1,10 @@
 // src/components/FAQModal.tsx
-import { Modal, Collapse, Typography, Spin, ConfigProvider } from "antd";
-import { ReactPropTypes, useEffect, useState } from "react";
-import ReactMarkdown from "react-markdown";
-import { CaretRightOutlined } from "@ant-design/icons";
-import styled from "styled-components";
-import { useToken } from "antd/es/theme/internal";
+import { CaretRightOutlined } from '@ant-design/icons';
+import { Modal, Collapse, Typography, Spin, ConfigProvider } from 'antd';
+import { useToken } from 'antd/es/theme/internal';
+import { useEffect, useState } from 'react';
+import ReactMarkdown from 'react-markdown';
+import styled from 'styled-components';
 
 const { Panel } = Collapse;
 
@@ -101,29 +101,29 @@ const FAQModal: React.FC<FAQModalProps> = ({ visible, onClose }) => {
       setError(null);
 
       try {
-        const response = await fetch("/docs/faq.md");
+        const response = await fetch('/docs/faq.md');
         if (!response.ok) {
           throw new Error(`Failed to fetch FAQ content: ${response.status}`);
         }
         const text = await response.text();
 
-        const lines = text.split("\n");
+        const lines = text.split('\n');
         const items: FAQItem[] = [];
-        let currentQuestion = "";
-        let currentAnswer = "";
+        let currentQuestion = '';
+        let currentAnswer = '';
 
         lines.forEach((line) => {
-          if (line.startsWith("## ")) {
+          if (line.startsWith('## ')) {
             if (currentQuestion) {
               items.push({
                 question: currentQuestion,
                 answer: currentAnswer.trim(),
               });
             }
-            currentQuestion = line.replace("## ", "").trim();
-            currentAnswer = "";
+            currentQuestion = line.replace('## ', '').trim();
+            currentAnswer = '';
           } else if (currentQuestion) {
-            currentAnswer += line + "\n";
+            currentAnswer += line + '\n';
           }
         });
 
@@ -136,9 +136,7 @@ const FAQModal: React.FC<FAQModalProps> = ({ visible, onClose }) => {
 
         setFaqItems(items);
       } catch (err) {
-        setError(
-          err instanceof Error ? err.message : "An unknown error occurred"
-        );
+        setError(err instanceof Error ? err.message : 'An unknown error occurred');
       } finally {
         setLoading(false);
       }
@@ -150,10 +148,7 @@ const FAQModal: React.FC<FAQModalProps> = ({ visible, onClose }) => {
   return (
     <Modal
       title={
-        <Typography.Title
-          level={3}
-          style={{ margin: 0, color: token.colorPrimary }}
-        >
+        <Typography.Title level={3} style={{ margin: 0, color: token.colorPrimary }}>
           Frequently Asked Questions
         </Typography.Title>
       }
@@ -172,18 +167,14 @@ const FAQModal: React.FC<FAQModalProps> = ({ visible, onClose }) => {
 
           {!loading && error && (
             <ErrorWrapper token={token}>
-              <Typography.Title level={4}>
-                Oops, Something Went Wrong
-              </Typography.Title>
+              <Typography.Title level={4}>Oops, Something Went Wrong</Typography.Title>
               <Typography.Paragraph>{`Failed to load FAQ: ${error}`}</Typography.Paragraph>
             </ErrorWrapper>
           )}
 
           {!loading && !error && faqItems.length === 0 && (
             <EmptyWrapper token={token}>
-              <Typography.Title level={4}>
-                No FAQ Content Found
-              </Typography.Title>
+              <Typography.Title level={4}>No FAQ Content Found</Typography.Title>
               <Typography.Paragraph>
                 The FAQ file appears to be empty or incorrectly formatted.
               </Typography.Paragraph>
@@ -193,7 +184,7 @@ const FAQModal: React.FC<FAQModalProps> = ({ visible, onClose }) => {
           {!loading && !error && faqItems.length > 0 && (
             <StyledCollapse
               bordered={false}
-              defaultActiveKey={["1"]}
+              defaultActiveKey={['1']}
               expandIcon={({ isActive }) => (
                 <CaretRightOutlined
                   rotate={isActive ? 90 : 0}
@@ -204,17 +195,13 @@ const FAQModal: React.FC<FAQModalProps> = ({ visible, onClose }) => {
             >
               {faqItems.map((item, index) => (
                 <StyledPanel
-                  header={
-                    <PanelHeader token={token}>{item.question}</PanelHeader>
-                  }
+                  header={<PanelHeader token={token}>{item.question}</PanelHeader>}
                   key={String(index + 1)}
                   token={token}
                 >
                   <ReactMarkdown
                     components={{
-                      p: ({ children }) => (
-                        <PanelContent token={token}>{children}</PanelContent>
-                      ),
+                      p: ({ children }) => <PanelContent token={token}>{children}</PanelContent>,
                       a: ({ node, ...props }) => (
                         <a {...props} target="_blank" rel="noopener noreferrer">
                           {props.children}

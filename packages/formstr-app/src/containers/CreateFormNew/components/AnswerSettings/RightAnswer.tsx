@@ -1,6 +1,7 @@
-import { AnswerSettings, AnswerTypes } from "@formstr/sdk/dist/interfaces";
-import { InputFiller } from "../../../../old/containers/FormFiller/QuestionNode/InputFiller";
-import { Tooltip, Typography } from "antd";
+import { AnswerSettings, AnswerTypes } from '@formstr/sdk/dist/interfaces';
+import { Tooltip, Typography } from 'antd';
+
+import { InputFiller } from '../../../../old/containers/FormFiller/QuestionNode/InputFiller';
 
 const { Text } = Typography;
 
@@ -11,7 +12,7 @@ interface RightAnswerProps {
   onChange: (answer: string | string[]) => void;
 }
 
-export const RightAnswer: React.FC<RightAnswerProps> = ({ 
+export const RightAnswer: React.FC<RightAnswerProps> = ({
   answerType,
   answerSettings,
   choices,
@@ -19,24 +20,22 @@ export const RightAnswer: React.FC<RightAnswerProps> = ({
 }) => {
   const processedAnswerSettings = {
     ...answerSettings,
-    choices: choices 
+    choices: choices
       ? JSON.parse(choices).map(([choiceId, label]: [string, string]) => ({
           choiceId,
-          label
+          label,
         }))
-      : []
+      : [],
   };
 
   const isMultipleChoice = answerType === AnswerTypes.checkboxes;
 
   return (
-    <Tooltip title={
-      `Select the correct answer${isMultipleChoice ? 's' : ''} for this quiz question`
-    }>
+    <Tooltip
+      title={`Select the correct answer${isMultipleChoice ? 's' : ''} for this quiz question`}
+    >
       <div className="right-answer">
-        <Text className="property-name">
-          Right answer{isMultipleChoice ? 's' : ''}
-        </Text>
+        <Text className="property-name">Right answer{isMultipleChoice ? 's' : ''}</Text>
         <InputFiller
           defaultValue={answerSettings?.validationRules?.match?.answer}
           answerType={answerType}

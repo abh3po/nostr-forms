@@ -1,7 +1,8 @@
-import { AnswerSettings } from "@formstr/sdk/dist/interfaces";
-import { IFormSettings } from "../../components/FormSettings/types";
-import { Tag } from "@formstr/sdk/dist/formstr/nip101";
-import { Field } from "../../../../nostr/types";
+import { Tag } from '@formstr/sdk/dist/formstr/nip101';
+import { AnswerSettings } from '@formstr/sdk/dist/interfaces';
+
+import { Field } from '../../../../nostr/types';
+import { IFormSettings } from '../../components/FormSettings/types';
 
 export interface ILocalForm {
   key: string;
@@ -29,11 +30,7 @@ export interface IFormBuilderContext {
   closeSettingsOnOutsideClick: () => void;
   closeMenuOnOutsideClick: () => void;
   editQuestion: (question: Field, tempId: string) => void;
-  addQuestion: (
-    primitive?: string,
-    label?: string,
-    answerSettings?: AnswerSettings
-  ) => void;
+  addQuestion: (primitive?: string, label?: string, answerSettings?: AnswerSettings) => void;
   deleteQuestion: (tempId: string) => void;
   questionIdInFocus?: string;
   setQuestionIdInFocus: (tempId?: string) => void;

@@ -1,4 +1,4 @@
-import styled from "styled-components";
+import styled from 'styled-components';
 
 export default styled.div`
   .form-cards-container {
@@ -24,7 +24,7 @@ export default styled.div`
     display: flex;
 
     .ant-dropdown-trigger {
-       width: 100%;
+      width: 100%;
     }
 
     .ant-btn {
@@ -37,14 +37,14 @@ export default styled.div`
       box-shadow: none;
       color: inherit;
 
-  &:hover,
-  &:focus,
-  &:active {
-    background: rgba(0, 0, 0, 0.08);
-    color: inherit;
-    border: none;
-    box-shadow: none;
-  }
+      &:hover,
+      &:focus,
+      &:active {
+        background: rgba(0, 0, 0, 0.08);
+        color: inherit;
+        border: none;
+        box-shadow: none;
+      }
     }
     .anticon-down {
       position: relative;

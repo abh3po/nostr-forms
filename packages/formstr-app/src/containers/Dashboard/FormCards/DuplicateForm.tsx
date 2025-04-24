@@ -1,9 +1,11 @@
-import React, { useState } from "react";
-import { CopyOutlined } from "@ant-design/icons";
-import { isMobile, makeTag } from "../../../utils/utility";
-import { constructDraftUrl } from "./Drafts";
-import { Tag } from "@formstr/sdk/dist/formstr/nip101";
-import { Tooltip } from "antd";
+import { CopyOutlined } from '@ant-design/icons';
+import { Tag } from '@formstr/sdk/dist/formstr/nip101';
+import { Tooltip } from 'antd';
+import React from 'react';
+
+import { isMobile, makeTag } from '../../../utils/utility';
+
+import { constructDraftUrl } from './Drafts';
 
 type Props = {
   tags: Tag[];
@@ -16,30 +18,24 @@ const DuplicateForm: React.FC<Props> = ({ tags }) => {
       tempId: newFormId,
     };
 
-    const existingDrafts = localStorage.getItem("formstr:draftForms");
+    const existingDrafts = localStorage.getItem('formstr:draftForms');
     let updatedDrafts = existingDrafts ? JSON.parse(existingDrafts) : [];
 
     updatedDrafts = [duplicatedForm, ...updatedDrafts];
 
-    localStorage.setItem("formstr:draftForms", JSON.stringify(updatedDrafts));
+    localStorage.setItem('formstr:draftForms', JSON.stringify(updatedDrafts));
 
-    window.open(
-      constructDraftUrl(duplicatedForm, window.location.origin),
-      "_blank"
-    );
+    window.open(constructDraftUrl(duplicatedForm, window.location.origin), '_blank');
   };
 
   const handleFullDuplicate = () => {
     const newFormId = makeTag(6);
     const duplicatedTags = tags.map((tag) => {
-      if (tag[0] === "d") return ["d", newFormId];
-      if (tag[0] === "settings") {
+      if (tag[0] === 'd') return ['d', newFormId];
+      if (tag[0] === 'settings') {
         try {
           const settings = JSON.parse(tag[1]);
-          return [
-            "settings",
-            JSON.stringify({ ...settings, formId: newFormId }),
-          ];
+          return ['settings', JSON.stringify({ ...settings, formId: newFormId })];
         } catch {
           return tag;
         }
@@ -50,13 +46,13 @@ const DuplicateForm: React.FC<Props> = ({ tags }) => {
   };
 
   return (
-    <Tooltip title={"Duplicate Form"} trigger={isMobile() ? "click" : "hover"}>
+    <Tooltip title={'Duplicate Form'} trigger={isMobile() ? 'click' : 'hover'}>
       <CopyOutlined
         style={{
-          color: "purple",
-          borderColor: "purple",
+          color: 'purple',
+          borderColor: 'purple',
           marginBottom: 3,
-          cursor: "pointer",
+          cursor: 'pointer',
         }}
         onClick={handleFullDuplicate}
       />

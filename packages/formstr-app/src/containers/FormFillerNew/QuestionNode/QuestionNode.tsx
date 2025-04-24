@@ -1,14 +1,16 @@
-import { Card, Divider } from "antd";
-import { InputFiller } from "./InputFiller";
-import Markdown from "react-markdown";
-import { AnswerTypes } from "../../../constants";
-import { Field, Option } from "@formstr/sdk/dist/formstr/nip101";
+import { Option } from '@formstr/sdk/dist/formstr/nip101';
+import { Card, Divider } from 'antd';
+import Markdown from 'react-markdown';
+
+import { AnswerTypes } from '../../../constants';
+
+import { InputFiller } from './InputFiller';
 
 interface QuestionProps {
   label: string;
   fieldConfig: any;
   fieldId: string;
-  options: Option[]
+  options: Option[];
   inputHandler: (questionId: string, answer: string, message?: string) => void;
   required: boolean;
 }
@@ -29,16 +31,12 @@ export const QuestionNode: React.FC<QuestionProps> = ({
 
   return (
     <Card type="inner" className="filler-question">
-      {required && <span style={{ color: "#ea8dea" }}>* &nbsp;</span>}
+      {required && <span style={{ color: '#ea8dea' }}>* &nbsp;</span>}
       <div className="question-text">
         <Markdown>{label}</Markdown>
       </div>
       {fieldConfig.renderElement === AnswerTypes.label ? null : <Divider />}
-      <InputFiller
-        fieldConfig={fieldConfig}
-        options={options}
-        onChange={answerHandler(fieldId)}
-      />
+      <InputFiller fieldConfig={fieldConfig} options={options} onChange={answerHandler(fieldId)} />
     </Card>
   );
 };

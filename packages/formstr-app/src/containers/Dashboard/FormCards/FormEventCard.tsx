@@ -1,18 +1,16 @@
-import { Tag } from "@formstr/sdk/dist/formstr/nip101";
-import { Button, Card, Divider } from "antd";
-import { Event } from "nostr-tools";
-import { useNavigate } from "react-router-dom";
-import DeleteFormTrigger from "./DeleteForm";
-import { naddrUrl } from "../../../utils/utility";
-import {
-  editPath,
-  getDecryptedForm,
-  responsePath,
-} from "../../../utils/formUtils";
-import ReactMarkdown from "react-markdown";
-import { EditOutlined } from "@ant-design/icons";
-import { useEffect, useState } from "react";
-import DuplicateForm from "./DuplicateForm";
+import { EditOutlined } from '@ant-design/icons';
+import { Tag } from '@formstr/sdk/dist/formstr/nip101';
+import { Button, Card, Divider } from 'antd';
+import { Event } from 'nostr-tools';
+import { useEffect, useState } from 'react';
+import ReactMarkdown from 'react-markdown';
+import { useNavigate } from 'react-router-dom';
+
+import { editPath, getDecryptedForm, responsePath } from '../../../utils/formUtils';
+import { naddrUrl } from '../../../utils/utility';
+
+import DeleteFormTrigger from './DeleteForm';
+import DuplicateForm from './DuplicateForm';
 
 interface FormEventCardProps {
   event: Event;
@@ -29,11 +27,11 @@ export const FormEventCard: React.FC<FormEventCardProps> = ({
   viewKey,
 }) => {
   const navigate = useNavigate();
-  const publicForm = event.content === "";
+  const publicForm = event.content === '';
   const [tags, setTags] = useState<Tag[]>([]);
   useEffect(() => {
     const initialize = async () => {
-      if (event.content === "") {
+      if (event.content === '') {
         setTags(event.tags);
         return;
       } else if (viewKey) {
@@ -42,70 +40,62 @@ export const FormEventCard: React.FC<FormEventCardProps> = ({
     };
     initialize();
   }, []);
-  const name = event.tags.find((tag: Tag) => tag[0] === "name") || [];
+  const name = event.tags.find((tag: Tag) => tag[0] === 'name') || [];
   const pubKey = event.pubkey;
-  const formId = event.tags.find((tag: Tag) => tag[0] === "d")?.[1];
-  const relays = event.tags
-    .filter((tag: Tag) => tag[0] === "relay")
-    .map((t) => t[1]);
+  const formId = event.tags.find((tag: Tag) => tag[0] === 'd')?.[1];
+  const relays = event.tags.filter((tag: Tag) => tag[0] === 'relay').map((t) => t[1]);
   if (!formId) {
     return <Card title="Invalid Form Event">{JSON.stringify(event)}</Card>;
   }
   const formKey = `${pubKey}:${formId}`;
   let settings: { description?: string } = {};
   if (publicForm || viewKey) {
-    settings = JSON.parse(
-      tags.filter((t) => t[0] === "settings")?.[0]?.[1] || "{}"
-    );
+    settings = JSON.parse(tags.filter((t) => t[0] === 'settings')?.[0]?.[1] || '{}');
   }
 
   return (
     <Card
-      title={name[1] || "Hidden Form"}
+      title={name[1] || 'Hidden Form'}
       className="form-card"
       extra={
-        <div style={{ display: "flex", flexDirection: "row" }}>
+        <div style={{ display: 'flex', flexDirection: 'row' }}>
           {secretKey ? (
             <>
               <EditOutlined
-                style={{ color: "purple", marginBottom: 3, marginRight: 14 }}
-                onClick={() =>
-                  navigate(editPath(secretKey, formId, relay, viewKey))
-                }
+                style={{ color: 'purple', marginBottom: 3, marginRight: 14 }}
+                onClick={() => navigate(editPath(secretKey, formId, relay, viewKey))}
               />
               <DuplicateForm tags={tags} />
             </>
           ) : null}
-          {onDeleted ? (
-            <DeleteFormTrigger formKey={formKey} onDeleted={onDeleted} />
-          ) : null}
+          {onDeleted ? <DeleteFormTrigger formKey={formKey} onDeleted={onDeleted} /> : null}
         </div>
       }
       style={{
         fontSize: 12,
-        color: "grey",
-        overflow: "clip",
+        color: 'grey',
+        overflow: 'clip',
       }}
     >
       <div
         style={{
           maxHeight: 100,
-          textOverflow: "ellipsis",
+          textOverflow: 'ellipsis',
           marginBottom: 30,
         }}
       >
         <ReactMarkdown>
           {settings.description
-            ? settings.description?.trim().substring(0, 200) + "..."
-            : "Encrypted Content"}
+            ? settings.description?.trim().substring(0, 200) + '...'
+            : 'Encrypted Content'}
         </ReactMarkdown>
       </div>
       <Divider />
       <div
         style={{
-          display: "flex",
-          flexDirection: "row",
-          justifyContent: "space-between",
+          display: 'flex',
+          flexDirection: 'row',
+          justifyContent: 'space-between',
         }}
       >
         <div>
@@ -117,8 +107,8 @@ export const FormEventCard: React.FC<FormEventCardProps> = ({
             }}
             type="dashed"
             style={{
-              color: "purple",
-              borderColor: "purple",
+              color: 'purple',
+              borderColor: 'purple',
             }}
           >
             View Responses
@@ -130,24 +120,22 @@ export const FormEventCard: React.FC<FormEventCardProps> = ({
                 naddrUrl(
                   pubKey,
                   formId,
-                  relays.length ? relays : ["wss://relay.damus.io"],
-                  viewKey
-                )
+                  relays.length ? relays : ['wss://relay.damus.io'],
+                  viewKey,
+                ),
               );
             }}
             style={{
-              marginLeft: "10px",
-              color: "green",
-              borderColor: "green",
+              marginLeft: '10px',
+              color: 'green',
+              borderColor: 'green',
             }}
             type="dashed"
           >
             Open Form
           </Button>
         </div>
-        <div style={{ margin: 7 }}>
-          {new Date(event.created_at * 1000).toDateString()}
-        </div>
+        <div style={{ margin: 7 }}>{new Date(event.created_at * 1000).toDateString()}</div>
       </div>
     </Card>
   );

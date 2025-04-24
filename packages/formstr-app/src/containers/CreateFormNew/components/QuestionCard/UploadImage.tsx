@@ -1,6 +1,6 @@
-import { PictureOutlined } from "@ant-design/icons";
-import { Button, Modal, Input, Tabs, Alert, Typography } from "antd";
-import React, { useState, ChangeEvent, useRef } from "react";
+import { PictureOutlined } from '@ant-design/icons';
+import { Button, Modal, Input, Tabs, Alert, Typography } from 'antd';
+import React, { useState, ChangeEvent, useRef } from 'react';
 const { Text } = Typography;
 
 interface Props {
@@ -9,28 +9,34 @@ interface Props {
 
 const UploadImage: React.FC<Props> = ({ onImageUpload }) => {
   const [uploading, setUploading] = useState(false);
-  const [imageUrl, setImageUrl] = useState<string>("");
-  const [urlInput, setUrlInput] = useState("");
+  const [imageUrl, setImageUrl] = useState<string>('');
+  const [urlInput, setUrlInput] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [previewError, setPreviewError] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const modalRef = useRef<HTMLDivElement>(null);
 
   const formatImageUrl = (url: string, customName?: string) => {
-    const fileName = (customName || url.split('/').pop()?.replace(/\.[^/.]+$/, '') || 'image')
-      .slice(0, 5);
+    const fileName = (
+      customName ||
+      url
+        .split('/')
+        .pop()
+        ?.replace(/\.[^/.]+$/, '') ||
+      'image'
+    ).slice(0, 5);
     return `![${fileName}](${url})`;
   };
 
   const showModal = () => {
     setIsModalOpen(true);
     setPreviewError(false);
-    setUrlInput("");
+    setUrlInput('');
   };
 
   const handleCancel = () => {
     setIsModalOpen(false);
-    setUrlInput("");
+    setUrlInput('');
     setPreviewError(false);
   };
 
@@ -42,7 +48,7 @@ const UploadImage: React.FC<Props> = ({ onImageUpload }) => {
     if (urlInput && !previewError) {
       onImageUpload?.(formatImageUrl(urlInput));
       setIsModalOpen(false);
-      setUrlInput("");
+      setUrlInput('');
       setPreviewError(false);
     }
   };
@@ -67,15 +73,12 @@ const UploadImage: React.FC<Props> = ({ onImageUpload }) => {
     try {
       setUploading(true);
       const formData = new FormData();
-      formData.append("image", file);
+      formData.append('image', file);
 
-      const response = await fetch(
-        "https://api.imgbb.com/1/upload?key=apikey",
-        {
-          method: "POST",
-          body: formData,
-        }
-      );
+      const response = await fetch('https://api.imgbb.com/1/upload?key=apikey', {
+        method: 'POST',
+        body: formData,
+      });
 
       if (!response.ok) {
         throw new Error(`Upload failed: ${response.statusText}`);
@@ -87,8 +90,8 @@ const UploadImage: React.FC<Props> = ({ onImageUpload }) => {
         setIsModalOpen(false);
       }
     } catch (error) {
-      console.error("Error uploading image:", error);
-      alert("Upload failed. Please try again.");
+      console.error('Error uploading image:', error);
+      alert('Upload failed. Please try again.');
     } finally {
       setUploading(false);
     }
@@ -118,12 +121,15 @@ const UploadImage: React.FC<Props> = ({ onImageUpload }) => {
                   style={{ marginBottom: 16 }}
                 />
               ) : (
-                <div className="image-preview-container" style={{
-                  border: '1px solid #d9d9d9',
-                  borderRadius: '8px',
-                  padding: '8px',
-                  marginBottom: '16px'
-                }}>
+                <div
+                  className="image-preview-container"
+                  style={{
+                    border: '1px solid #d9d9d9',
+                    borderRadius: '8px',
+                    padding: '8px',
+                    marginBottom: '16px',
+                  }}
+                >
                   <Text>Preview:</Text>
                   <img
                     src={urlInput}
@@ -134,15 +140,15 @@ const UploadImage: React.FC<Props> = ({ onImageUpload }) => {
                       maxHeight: '200px',
                       objectFit: 'contain',
                       display: 'block',
-                      margin: '0 auto'
+                      margin: '0 auto',
                     }}
                   />
                 </div>
               )}
             </div>
           )}
-          <Button 
-            type="primary" 
+          <Button
+            type="primary"
             onClick={handleUrlSubmit}
             disabled={!urlInput || previewError}
             style={{ width: '100%' }}
@@ -165,9 +171,9 @@ const UploadImage: React.FC<Props> = ({ onImageUpload }) => {
         <PictureOutlined />
       </Button>
 
-      <Modal 
-        title="Upload Image" 
-        open={isModalOpen} 
+      <Modal
+        title="Upload Image"
+        open={isModalOpen}
         onCancel={handleCancel}
         footer={null}
         width={480}
@@ -177,18 +183,19 @@ const UploadImage: React.FC<Props> = ({ onImageUpload }) => {
           </div>
         )}
       >
-        <Tabs 
-          defaultActiveKey="2" 
-          items={items}
-          centered
-        />
+        <Tabs defaultActiveKey="2" items={items} centered />
       </Modal>
 
       {imageUrl && (
-        <img 
-          src={imageUrl} 
-          alt="Uploaded" 
-          style={{ maxWidth: '100%', marginTop: '16px', padding: '10px', border: '1px solid #ccc' }}
+        <img
+          src={imageUrl}
+          alt="Uploaded"
+          style={{
+            maxWidth: '100%',
+            marginTop: '16px',
+            padding: '10px',
+            border: '1px solid #ccc',
+          }}
         />
       )}
     </div>

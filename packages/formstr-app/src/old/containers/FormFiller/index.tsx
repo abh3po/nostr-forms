@@ -1,28 +1,20 @@
-import { FormSpec, V1FormSpec } from "@formstr/sdk/dist/interfaces";
-import FillerStyle from "./formFiller.style";
-import FormTitle from "../../../containers/CreateFormNew/components/FormTitle";
-import {
-  Link,
-  useNavigate,
-  useParams,
-  useSearchParams,
-} from "react-router-dom";
-import { useEffect, useState } from "react";
-import { getFormTemplate, sendResponses, sendNotification } from "@formstr/sdk";
-import { Form, Typography } from "antd";
-import { QuestionNode } from "./QuestionNode/QuestionNode";
-import { ThankYouScreen } from "./ThankYouScreen";
-import { getValidationRules } from "./validations";
-import { SubmitButton } from "./SubmitButton/submit";
-import { isMobile, makeTag } from "../../../utils/utility";
-import { ReactComponent as CreatedUsingFormstr } from "../../../Images/created-using-formstr.svg";
-import {
-  LOCAL_STORAGE_KEYS,
-  getItem,
-  setItem,
-} from "../../../utils/localStorage";
-import { ROUTES as GLOBAL_ROUTES } from "../../../constants/routes";
-import Markdown from "react-markdown";
+import { getFormTemplate, sendResponses, sendNotification } from '@formstr/sdk';
+import { FormSpec, V1FormSpec } from '@formstr/sdk/dist/interfaces';
+import { Form, Typography } from 'antd';
+import { useEffect, useState } from 'react';
+import Markdown from 'react-markdown';
+import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom';
+
+import { ReactComponent as CreatedUsingFormstr } from '../../../Images/created-using-formstr.svg';
+import { ROUTES as GLOBAL_ROUTES } from '../../../constants/routes';
+import FormTitle from '../../../containers/CreateFormNew/components/FormTitle';
+import { isMobile, makeTag } from '../../../utils/utility';
+
+import { QuestionNode } from './QuestionNode/QuestionNode';
+import { SubmitButton } from './SubmitButton/submit';
+import { ThankYouScreen } from './ThankYouScreen';
+import FillerStyle from './formFiller.style';
+import { getValidationRules } from './validations';
 
 const { Text } = Typography;
 
@@ -31,18 +23,15 @@ interface FormFillerProps {
   embedded?: boolean;
 }
 
-export const FormFillerOld: React.FC<FormFillerProps> = ({
-  formSpec,
-  embedded,
-}) => {
+export const FormFillerOld: React.FC<FormFillerProps> = ({ formSpec, embedded }) => {
   const { formId } = useParams();
   const [formTemplate, setFormTemplate] = useState<V1FormSpec | null>(null);
   const [form] = Form.useForm();
   const [formSubmitted, setFormSubmitted] = useState(false);
   const [thankYouScreen, setThankYouScreen] = useState(false);
   const [searchParams] = useSearchParams();
-  const hideTitleImage = searchParams.get("hideTitleImage") === "true";
-  const hideDescription = searchParams.get("hideDescription") === "true";
+  const hideTitleImage = searchParams.get('hideTitleImage') === 'true';
+  const hideDescription = searchParams.get('hideDescription') === 'true';
   const navigate = useNavigate();
 
   const isPreview = !!formSpec;
@@ -55,7 +44,7 @@ export const FormFillerOld: React.FC<FormFillerProps> = ({
       };
     });
     return {
-      schemaVersion: "v1",
+      schemaVersion: 'v1',
       name: formSpec.name,
       settings: formSpec.settings,
       fields,
@@ -66,7 +55,7 @@ export const FormFillerOld: React.FC<FormFillerProps> = ({
     async function getForm() {
       if (!formTemplate) {
         if (!formId && !formSpec) {
-          throw Error("Form Id not provided");
+          throw Error('Form Id not provided');
         }
         let form = null;
         if (formId) form = await getFormTemplate(formId);
@@ -83,12 +72,8 @@ export const FormFillerOld: React.FC<FormFillerProps> = ({
     return null;
   }
 
-  const handleInput = (
-    questionId: string,
-    answer: string,
-    message?: string
-  ) => {
-    if (!answer || answer === "") {
+  const handleInput = (questionId: string, answer: string, message?: string) => {
+    if (!answer || answer === '') {
       form.setFieldValue(questionId, null);
       return;
     }
@@ -146,28 +131,19 @@ export const FormFillerOld: React.FC<FormFillerProps> = ({
             <Form
               form={form}
               onFinish={() => {}}
-              className={
-                hideDescription ? "hidden-description" : "with-description"
-              }
+              className={hideDescription ? 'hidden-description' : 'with-description'}
             >
               <div>
                 {fields?.map((field) => {
                   let rules = [
                     {
                       required: field.answerSettings.required,
-                      message: "This is a required question",
+                      message: 'This is a required question',
                     },
-                    ...getValidationRules(
-                      field.answerType,
-                      field.answerSettings
-                    ),
+                    ...getValidationRules(field.answerType, field.answerSettings),
                   ];
                   return (
-                    <Form.Item
-                      key={field.questionId}
-                      rules={rules}
-                      name={field.questionId}
-                    >
+                    <Form.Item key={field.questionId} rules={rules} name={field.questionId}>
                       <QuestionNode
                         required={field.answerSettings.required || false}
                         field={field}
@@ -191,13 +167,8 @@ export const FormFillerOld: React.FC<FormFillerProps> = ({
               <CreatedUsingFormstr />
             </Link>
             {!isMobile() && (
-              <a
-                href="https://github.com/abhay-raizada/nostr-forms"
-                className="foss-link"
-              >
-                <Text className="text-style">
-                  Formstr is free and Open Source
-                </Text>
+              <a href="https://github.com/abhay-raizada/nostr-forms" className="foss-link">
+                <Text className="text-style">Formstr is free and Open Source</Text>
               </a>
             )}
           </div>
@@ -206,8 +177,8 @@ export const FormFillerOld: React.FC<FormFillerProps> = ({
       {embedded ? (
         formSubmitted && (
           <div className="embed-submitted">
-            {" "}
-            <Text>Response Submitted</Text>{" "}
+            {' '}
+            <Text>Response Submitted</Text>{' '}
           </div>
         )
       ) : (

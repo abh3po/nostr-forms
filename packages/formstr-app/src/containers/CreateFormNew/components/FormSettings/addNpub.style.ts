@@ -1,11 +1,11 @@
-import styled from "styled-components";
+import styled from 'styled-components';
 
 export default styled.div`
   .modal-container {
-    display: "flex";
-    margin: "10px";
-    flex-direction: "column";
-    align-items: "center";
+    display: 'flex';
+    margin: '10px';
+    flex-direction: 'column';
+    align-items: 'center';
   }
 
   .npub-input {

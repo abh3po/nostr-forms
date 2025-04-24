@@ -1,5 +1,6 @@
-import styled from "styled-components";
-import { MEDIA_QUERY_MOBILE } from "../../../../utils/css";
+import styled from 'styled-components';
+
+import { MEDIA_QUERY_MOBILE } from '../../../../utils/css';
 
 export default styled.div`
   .create-form-header {

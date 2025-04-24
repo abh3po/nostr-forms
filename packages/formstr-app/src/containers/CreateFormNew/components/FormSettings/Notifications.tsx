@@ -1,15 +1,17 @@
-import { Button, Input, Modal, Tooltip, Typography } from "antd";
-import { isMobile } from "../../../../utils/utility";
-import useFormBuilderContext from "../../hooks/useFormBuilderContext";
-import { PlusOutlined } from "@ant-design/icons";
-import { useState } from "react";
-import AddNpubStyle from "./addNpub.style";
+import { PlusOutlined } from '@ant-design/icons';
+import { Button, Input, Modal, Tooltip, Typography } from 'antd';
+import { useState } from 'react';
+
+import { isMobile } from '../../../../utils/utility';
+import useFormBuilderContext from '../../hooks/useFormBuilderContext';
+
+import AddNpubStyle from './addNpub.style';
 
 const { Text } = Typography;
 export const Notifications = () => {
   const { updateFormSetting, formSettings } = useFormBuilderContext();
   const [isNewNpub, SetIsNewNpub] = useState<boolean>(false);
-  const [newNpub, setNewNpub] = useState<string>("");
+  const [newNpub, setNewNpub] = useState<string>('');
 
   const addNewNpub = () => {
     SetIsNewNpub(true);
@@ -21,18 +23,18 @@ export const Notifications = () => {
     updateFormSetting({
       notifyNpubs: Array.from(newNpubList),
     });
-    setNewNpub("");
+    setNewNpub('');
     SetIsNewNpub(false);
   };
   const isValidNpub = () => {
-    return newNpub.length === 63 && newNpub.startsWith("npub1");
+    return newNpub.length === 63 && newNpub.startsWith('npub1');
   };
 
   return (
     <>
       <Tooltip
         title="Notify the given nostr profiles when a response is submitted"
-        trigger={isMobile() ? "click" : "hover"}
+        trigger={isMobile() ? 'click' : 'hover'}
       >
         <div className="property-setting">
           <Text>Add nostr npub</Text>
@@ -42,9 +44,7 @@ export const Notifications = () => {
           {formSettings.notifyNpubs?.map((npub: string) => {
             return (
               <li>
-                <Text className="npub-list-text">
-                  {npub.substring(0, 10) + "..."}
-                </Text>
+                <Text className="npub-list-text">{npub.substring(0, 10) + '...'}</Text>
               </li>
             );
           })}
@@ -76,8 +76,8 @@ export const Notifications = () => {
             disabled={!isValidNpub()}
             onClick={addToNpubList}
           >
-            {" "}
-            Add{" "}
+            {' '}
+            Add{' '}
           </Button>
         </AddNpubStyle>
       </Modal>

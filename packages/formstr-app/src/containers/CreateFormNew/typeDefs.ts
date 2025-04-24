@@ -1,5 +1,5 @@
-import { Field } from "@formstr/sdk/dist/interfaces";
+import { Field } from '@formstr/sdk/dist/interfaces';
 
 export interface IQuestion extends Field {
-	tempId: string;
+  tempId: string;
 }

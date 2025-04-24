@@ -1,7 +1,7 @@
-import { CheckCircleOutlined } from "@ant-design/icons";
-import { Button, Modal, Row, Spin, Typography } from "antd";
-import { normalizeURL } from "nostr-tools/utils";
-import { useEffect, useState } from "react";
+import { CheckCircleOutlined } from '@ant-design/icons';
+import { Button, Modal, Row, Spin, Typography } from 'antd';
+import { normalizeURL } from 'nostr-tools/utils';
+import { useEffect, useState } from 'react';
 
 interface RelayPublishModal {
   relays: string[];
@@ -37,9 +37,9 @@ export const RelayPublishModal: React.FC<RelayPublishModal> = ({
           {isAccepted ? (
             <CheckCircleOutlined
               style={{
-                color: "#52c41a",
+                color: '#52c41a',
                 marginRight: 8,
-                fontSize: "16px",
+                fontSize: '16px',
               }}
             />
           ) : (
@@ -67,8 +67,8 @@ export const RelayPublishModal: React.FC<RelayPublishModal> = ({
       onCancel={() => setIsModalOpen(false)}
     >
       <div>
-        <Text strong style={{ display: "block", marginBottom: 16 }}>
-          Relays {allRelaysAccepted && "(Complete)"}
+        <Text strong style={{ display: 'block', marginBottom: 16 }}>
+          Relays {allRelaysAccepted && '(Complete)'}
         </Text>
         {renderRelays()}
       </div>

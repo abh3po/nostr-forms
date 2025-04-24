@@ -1,17 +1,17 @@
-import React, { PropsWithChildren } from "react";
-import { To, useNavigate } from "react-router-dom";
+import React, { PropsWithChildren } from 'react';
+import { To, useNavigate } from 'react-router-dom';
 
 export const HandleLegacyRoutes = ({ children }: PropsWithChildren) => {
   const navigate = useNavigate();
   const navigateParams = React.useRef<To | null>(null);
   if (window.location.hash) {
-    const hashValue = window.location.hash.replace("#", "");
-    const [route, search] = hashValue.split("?");
+    const hashValue = window.location.hash.replace('#', '');
+    const [route, search] = hashValue.split('?');
     const searchParams = search ? `?${search}` : undefined;
     navigateParams.current = {
       pathname: route,
       search: searchParams,
-      hash: "",
+      hash: '',
     };
   }
   React.useEffect(() => {

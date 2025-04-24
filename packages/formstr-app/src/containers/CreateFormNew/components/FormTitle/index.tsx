@@ -1,8 +1,10 @@
-import { Input, Typography } from "antd";
-import { SettingOutlined } from "@ant-design/icons";
-import useFormBuilderContext from "../../hooks/useFormBuilderContext";
-import StyleWrapper from "./style";
-import { ChangeEvent } from "react";
+import { SettingOutlined } from '@ant-design/icons';
+import { Input, Typography } from 'antd';
+import { ChangeEvent } from 'react';
+
+import useFormBuilderContext from '../../hooks/useFormBuilderContext';
+
+import StyleWrapper from './style';
 
 const { Text } = Typography;
 
@@ -17,8 +19,7 @@ function FormTitle({
   imageUrl?: string;
   formTitle?: string;
 }) {
-  const { formSettings, formName, updateFormName, toggleSettingsWindow } =
-    useFormBuilderContext();
+  const { formSettings, formName, updateFormName, toggleSettingsWindow } = useFormBuilderContext();
 
   const settings = {
     name: edit ? formName : formTitle,
@@ -34,11 +35,7 @@ function FormTitle({
       <div className="image-utils">
         {edit && (
           <>
-            <div
-              className="icon-util"
-              title="Form settings"
-              onClick={toggleSettingsWindow}
-            >
+            <div className="icon-util" title="Form settings" onClick={toggleSettingsWindow}>
               <SettingOutlined />
             </div>
           </>

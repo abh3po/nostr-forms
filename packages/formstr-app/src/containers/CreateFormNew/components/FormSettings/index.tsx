@@ -1,12 +1,14 @@
-import { Divider, Switch, Tooltip, Typography } from "antd";
-import StyleWrapper from "./style";
-import useFormBuilderContext from "../../hooks/useFormBuilderContext";
-import TitleImage from "./TitleImage";
-import { Sharing } from "./Sharing";
-import { RelayList } from "./RelayList";
-import FormIdentifier from "./FormIdentifier";
-import { Notifications } from "./Notifications";
-import { isMobile } from "../../../../utils/utility";
+import { Divider, Switch, Tooltip, Typography } from 'antd';
+
+import { isMobile } from '../../../../utils/utility';
+import useFormBuilderContext from '../../hooks/useFormBuilderContext';
+
+import FormIdentifier from './FormIdentifier';
+import { Notifications } from './Notifications';
+import { RelayList } from './RelayList';
+import { Sharing } from './Sharing';
+import TitleImage from './TitleImage';
+import StyleWrapper from './style';
 
 const { Text } = Typography;
 
@@ -38,14 +40,11 @@ function FormSettings() {
         <Text className="property-name">Form Access Settings</Text>
         <Tooltip
           title="This toggle will leave the form un-encrypted and allow anyone to view the form."
-          trigger={isMobile() ? "click" : "hover"}
+          trigger={isMobile() ? 'click' : 'hover'}
         >
           <div className="property-setting">
             <Text className="property-text">Make Form Public</Text>
-            <Switch
-              defaultChecked={!formSettings.encryptForm}
-              onChange={handlePublicForm}
-            />
+            <Switch defaultChecked={!formSettings.encryptForm} onChange={handlePublicForm} />
           </div>
         </Tooltip>
         <Sharing />
@@ -63,8 +62,8 @@ function FormSettings() {
               target="_blank"
               rel="noreferrer"
             >
-              {" "}
-              nip-04{" "}
+              {' '}
+              nip-04{' '}
             </a>
             encrypted notifications.
           </Text>
@@ -87,7 +86,7 @@ function FormSettings() {
               target="_blank"
               rel="noreferrer"
             >
-              {" "}
+              {' '}
               nip-07 extension
             </a>
           </Text>

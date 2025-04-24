@@ -1,9 +1,11 @@
-import { PlusOutlined } from "@ant-design/icons";
-import { Button, Typography } from "antd";
-import { makeTag } from "../../../../../../utils/utility";
-import { addOption } from "./utils";
-import { Choice } from "./types";
-import UploadImage from "../../UploadImage";
+import { PlusOutlined } from '@ant-design/icons';
+import { Button, Typography } from 'antd';
+
+import { makeTag } from '../../../../../../utils/utility';
+import UploadImage from '../../UploadImage';
+
+import { Choice } from './types';
+import { addOption } from './utils';
 const { Text } = Typography;
 
 interface AddOptionProps {
@@ -24,13 +26,13 @@ export const AddOption: React.FC<AddOptionProps> = ({
         disabled={disable}
         type="dashed"
         onClick={(e) => {
-          addOption([makeTag(6), "Add option"], choices, callback);
+          addOption([makeTag(6), 'Add option'], choices, callback);
         }}
         icon={<PlusOutlined />}
       >
         Add Option
       </Button>
-      <UploadImage 
+      <UploadImage
         onImageUpload={(markdownUrl) => {
           addOption([makeTag(6), markdownUrl], choices, callback);
         }}
@@ -38,13 +40,13 @@ export const AddOption: React.FC<AddOptionProps> = ({
       {displayOther && (
         <>
           <div className="orText">
-            <Text disabled={disable}>{" or "}</Text>
+            <Text disabled={disable}>{' or '}</Text>
           </div>
           <Button
             type="dashed"
             disabled={disable}
             onClick={(e) => {
-              addOption([makeTag(6), "Option"], choices, callback);
+              addOption([makeTag(6), 'Option'], choices, callback);
             }}
           >
             add other

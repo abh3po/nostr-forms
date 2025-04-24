@@ -1,24 +1,17 @@
-import {
-  Layout,
-  Menu,
-  Row,
-  Col,
-  Button,
-  Dropdown,
-  MenuProps,
-  Typography,
-} from "antd";
-import { Link } from "react-router-dom";
-import "./index.css";
-import { ReactComponent as Logo } from "../../Images/formstr.svg";
-import { DownOutlined, MenuOutlined, UserOutlined } from "@ant-design/icons";
-import { HEADER_MENU, HEADER_MENU_KEYS } from "./configs";
-import { useProfileContext } from "../../hooks/useProfileContext";
-import { NostrAvatar } from "./NostrAvatar";
-import { ReactComponent as GeyserIcon } from "../../Images/Geyser.svg";
-import { useState } from "react";
-import FAQModal from "../FAQModal";
+import { DownOutlined, MenuOutlined } from '@ant-design/icons';
+import { Layout, Menu, Row, Col, Dropdown, MenuProps, Typography } from 'antd';
+import { useState } from 'react';
+import { Link } from 'react-router-dom';
+
+import './index.css';
+import { ReactComponent as GeyserIcon } from '../../Images/Geyser.svg';
+import { ReactComponent as Logo } from '../../Images/formstr.svg';
 import { useApplicationContext } from '../../hooks/useApplicationContext';
+import { useProfileContext } from '../../hooks/useProfileContext';
+import FAQModal from '../FAQModal';
+
+import { NostrAvatar } from './NostrAvatar';
+import { HEADER_MENU, HEADER_MENU_KEYS } from './configs';
 
 export const NostrHeader = () => {
   const { Header } = Layout;
@@ -27,11 +20,11 @@ export const NostrHeader = () => {
   const [selectedKey, setSelectedKey] = useState<string[]>([]);
   const { openTemplateModal } = useApplicationContext();
 
-  const onMenuClick: MenuProps["onClick"] = (e) => {
+  const onMenuClick: MenuProps['onClick'] = (e) => {
     if (e.key === HEADER_MENU_KEYS.HELP) {
       setIsFAQModalVisible(true);
       setSelectedKey([e.key]);
-      return; 
+      return;
     }
     if (e.key === HEADER_MENU_KEYS.CREATE_FORMS) {
       openTemplateModal();
@@ -40,48 +33,45 @@ export const NostrHeader = () => {
     setSelectedKey([e.key]);
   };
 
-  const dropdownMenuItems: MenuProps["items"] = [
+  const dropdownMenuItems: MenuProps['items'] = [
     ...[
       pubkey
         ? {
-            key: "logout",
+            key: 'logout',
             label: <a onClick={logout}>Logout</a>,
           }
         : {
-            key: "login",
+            key: 'login',
             label: <a onClick={requestPubkey}>Login</a>,
           },
     ],
     {
-      key: "Support Us",
+      key: 'Support Us',
       icon: (
         <div
           style={{
-            display: "flex",
-            flexDirection: "row",
-            justifyContent: "space-between",
+            display: 'flex',
+            flexDirection: 'row',
+            justifyContent: 'space-between',
           }}
         >
           <GeyserIcon
             style={{
-              color: "white",
+              color: 'white',
               strokeWidth: 20,
-              fill: "black",
-              stroke: "black",
+              fill: 'black',
+              stroke: 'black',
               maxHeight: 20,
               maxWidth: 20,
-              backgroundColor: "black",
+              backgroundColor: 'black',
               marginRight: 5,
             }}
           />
-          <Typography.Text style={{ marginTop: 2 }}>
-            {" "}
-            Support Us
-          </Typography.Text>
+          <Typography.Text style={{ marginTop: 2 }}> Support Us</Typography.Text>
         </div>
       ),
       onClick: () => {
-        window.open("https://geyser.fund/project/formstr", "_blank");
+        window.open('https://geyser.fund/project/formstr', '_blank');
       },
     },
   ];
@@ -94,9 +84,9 @@ export const NostrHeader = () => {
           menu={{
             items: dropdownMenuItems,
             overflowedIndicator: null,
-            style: { overflow: "auto" },
+            style: { overflow: 'auto' },
           }}
-          trigger={["click"]}
+          trigger={['click']}
         >
           <div onClick={(e) => e.preventDefault()}>
             <NostrAvatar pubkey={pubkey} /> <DownOutlined />
@@ -111,8 +101,8 @@ export const NostrHeader = () => {
       <Header
         className="header-style"
         style={{
-          background: "white",
-          borderBottom: "1px solid #ddd",
+          background: 'white',
+          borderBottom: '1px solid #ddd',
         }}
       >
         <Row className="header-row" justify="space-between">
@@ -136,7 +126,10 @@ export const NostrHeader = () => {
       </Header>
       <FAQModal
         visible={isFAQModalVisible}
-        onClose={() => { setIsFAQModalVisible(false); setSelectedKey([]); }}
+        onClose={() => {
+          setIsFAQModalVisible(false);
+          setSelectedKey([]);
+        }}
       />
     </>
   );

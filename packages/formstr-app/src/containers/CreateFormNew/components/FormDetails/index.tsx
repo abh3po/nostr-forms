@@ -1,23 +1,21 @@
-import { Button, Card, Checkbox, Divider, Modal, Spin, Typography } from "antd";
-import { ReactComponent as Success } from "../../../../Images/success.svg";
+import { getDefaultRelays } from '@formstr/sdk';
+import { Button, Card, Checkbox, Divider, Modal, Spin, Typography } from 'antd';
+import { SimplePool, UnsignedEvent } from 'nostr-tools';
+import { useEffect, useState } from 'react';
+
+import { ReactComponent as Success } from '../../../../Images/success.svg';
+import { CopyButton } from '../../../../components/CopyButton';
+import { useProfileContext } from '../../../../hooks/useProfileContext';
+import { KINDS, Tag } from '../../../../nostr/types';
 import {
   constructEmbeddedUrl,
   constructFormUrl,
   constructNewResponseUrl,
-} from "../../../../utils/formUtils";
-import FormDetailsStyle from "./FormDetails.style";
-import { useEffect, useState } from "react";
-import { CopyButton } from "../../../../components/CopyButton";
-import { ILocalForm } from "../../providers/FormBuilder/typeDefs";
-import {
-  getItem,
-  LOCAL_STORAGE_KEYS,
-  setItem,
-} from "../../../../utils/localStorage";
-import { useProfileContext } from "../../../../hooks/useProfileContext";
-import { SimplePool, UnsignedEvent } from "nostr-tools";
-import { getDefaultRelays } from "@formstr/sdk";
-import { KINDS, Tag } from "../../../../nostr/types";
+} from '../../../../utils/formUtils';
+import { getItem, LOCAL_STORAGE_KEYS, setItem } from '../../../../utils/localStorage';
+import { ILocalForm } from '../../providers/FormBuilder/typeDefs';
+
+import FormDetailsStyle from './FormDetails.style';
 
 const { Text } = Typography;
 interface FormDetailsProps {
@@ -42,9 +40,7 @@ export const FormDetails: React.FC<FormDetailsProps> = ({
   relay,
 }) => {
   const [savedLocally, setSavedLocally] = useState(false);
-  const [savedOnNostr, setSavedOnNostr] = useState<null | "saving" | "saved">(
-    null
-  );
+  const [savedOnNostr, setSavedOnNostr] = useState<null | 'saving' | 'saved'>(null);
 
   const { pubkey: userPub, requestPubkey } = useProfileContext();
   const saveToDevice = (
@@ -53,7 +49,7 @@ export const FormDetails: React.FC<FormDetailsProps> = ({
     formId: string,
     name: string,
     relay: string,
-    viewKey?: string
+    viewKey?: string,
   ) => {
     let saveObject: ILocalForm = {
       key: `${formAuthorPub}:${formId}`,
@@ -65,8 +61,7 @@ export const FormDetails: React.FC<FormDetailsProps> = ({
       createdAt: new Date().toString(),
     };
     if (viewKey) saveObject.viewKey = viewKey;
-    let forms =
-      getItem<Array<ILocalForm>>(LOCAL_STORAGE_KEYS.LOCAL_FORMS) || [];
+    let forms = getItem<Array<ILocalForm>>(LOCAL_STORAGE_KEYS.LOCAL_FORMS) || [];
     const existingKeys = forms.map((form) => form.key);
     if (existingKeys.includes(saveObject.key)) {
       setSavedLocally(true);
@@ -78,7 +73,7 @@ export const FormDetails: React.FC<FormDetailsProps> = ({
   };
 
   type SetupResult = {
-    status: "exists" | "ready";
+    status: 'exists' | 'ready';
     forms: Tag[];
   };
 
@@ -87,23 +82,23 @@ export const FormDetails: React.FC<FormDetailsProps> = ({
     formAuthorSecret: string,
     formId: string,
     relay: string,
-    viewKey?: string
+    viewKey?: string,
   ) => {
     if (!userPub) return;
 
-    setSavedOnNostr("saving");
+    setSavedOnNostr('saving');
     const pool = new SimplePool();
     const relays = getDefaultRelays();
 
     try {
       if (!window.nostr) {
-        throw new Error("Nostr client not available");
+        throw new Error('Nostr client not available');
       }
 
       const setupWithTimeout = async (): Promise<SetupResult> => {
         return new Promise(async (resolve, reject) => {
           const timeoutId = setTimeout(() => {
-            reject(new Error("Setup timed out after 15s"));
+            reject(new Error('Setup timed out after 15s'));
           }, 10000);
 
           try {
@@ -116,21 +111,21 @@ export const FormDetails: React.FC<FormDetailsProps> = ({
             if (existingList[0]) {
               const formsString = await window.nostr.nip44.decrypt(
                 userPub,
-                existingList[0].content
+                existingList[0].content,
               );
               forms = JSON.parse(formsString);
             }
 
             const key = `${formAuthorPub}:${formId}`;
             if (forms.map((f) => f[1]).includes(key)) {
-              console.log("Form already exists in your saved forms");
+              console.log('Form already exists in your saved forms');
               clearTimeout(timeoutId);
-              resolve({ status: "exists", forms });
+              resolve({ status: 'exists', forms });
               return;
             }
 
             clearTimeout(timeoutId);
-            resolve({ status: "ready", forms });
+            resolve({ status: 'ready', forms });
           } catch (error) {
             clearTimeout(timeoutId);
             reject(error);
@@ -140,8 +135,8 @@ export const FormDetails: React.FC<FormDetailsProps> = ({
 
       const setupResult = await setupWithTimeout();
 
-      if (setupResult.status === "exists") {
-        setSavedOnNostr("saved");
+      if (setupResult.status === 'exists') {
+        setSavedOnNostr('saved');
         return;
       }
 
@@ -149,12 +144,9 @@ export const FormDetails: React.FC<FormDetailsProps> = ({
       if (viewKey) secrets = `${secrets}:${viewKey}`;
 
       const forms = setupResult.forms;
-      forms.push(["f", `${formAuthorPub}:${formId}`, relay, secrets]);
+      forms.push(['f', `${formAuthorPub}:${formId}`, relay, secrets]);
 
-      const encryptedString = await window.nostr.nip44.encrypt(
-        userPub,
-        JSON.stringify(forms)
-      );
+      const encryptedString = await window.nostr.nip44.encrypt(userPub, JSON.stringify(forms));
 
       const myFormEvent: UnsignedEvent = {
         kind: KINDS.myFormsList,
@@ -167,9 +159,9 @@ export const FormDetails: React.FC<FormDetailsProps> = ({
       const signedEvent = await window.nostr.signEvent(myFormEvent);
       await Promise.allSettled(pool.publish(relays, signedEvent));
 
-      setSavedOnNostr("saved");
+      setSavedOnNostr('saved');
     } catch (error) {
-      console.error("Failed to save to nostr:", error);
+      console.error('Failed to save to nostr:', error);
       setSavedOnNostr(null);
     } finally {
       pool.close(relays);
@@ -181,9 +173,9 @@ export const FormDetails: React.FC<FormDetailsProps> = ({
     if (userPub) saveToMyForms(pubKey, secretKey, formId, relay, viewKey);
   }, [userPub]);
 
-  type TabKeyType = "share" | "embed";
-  type OptionType = "hideTitleImage" | "hideDescription";
-  const [activeTab, setActiveTab] = useState<TabKeyType>("share");
+  type TabKeyType = 'share' | 'embed';
+  type OptionType = 'hideTitleImage' | 'hideDescription';
+  const [activeTab, setActiveTab] = useState<TabKeyType>('share');
   const [embedOptions, setEmbedOptions] = useState<{
     hideTitleImage?: boolean;
     hideDescription?: boolean;
@@ -197,12 +189,7 @@ export const FormDetails: React.FC<FormDetailsProps> = ({
   };
 
   const formUrl = constructFormUrl(pubKey, formId, relay, viewKey);
-  const responsesUrl = constructNewResponseUrl(
-    secretKey,
-    formId,
-    relay,
-    viewKey
-  );
+  const responsesUrl = constructNewResponseUrl(secretKey, formId, relay, viewKey);
 
   function getIframeContent() {
     return `<iframe src="${constructEmbeddedUrl(
@@ -210,17 +197,17 @@ export const FormDetails: React.FC<FormDetailsProps> = ({
       formId,
       embedOptions,
       relay,
-      viewKey
+      viewKey,
     )}" height="700px" width="480px" frameborder="0" style="border-style:none;box-shadow:0px 0px 2px 2px rgba(0,0,0,0.2);" cellspacing="0" ></iframe>`;
   }
   const tabList = [
     {
-      key: "share",
-      label: "Share",
+      key: 'share',
+      label: 'Share',
     },
     {
-      key: "embed",
-      tab: "Embed",
+      key: 'embed',
+      tab: 'Embed',
     },
   ];
 
@@ -232,15 +219,15 @@ export const FormDetails: React.FC<FormDetailsProps> = ({
         </div>
         <div
           style={{
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
           }}
         >
           <div>
             <Text> Your form is now live at the below url! </Text>
           </div>
-          <div style={{ display: "flex", flexDirection: "row" }}>
+          <div style={{ display: 'flex', flexDirection: 'row' }}>
             <a href={formUrl}>{formUrl}</a>
             <CopyButton
               getText={() => {
@@ -255,18 +242,15 @@ export const FormDetails: React.FC<FormDetailsProps> = ({
         {responsesUrl && (
           <div
             style={{
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
             }}
           >
             <div>
-              <Text>
-                {" "}
-                You can see responses for this form at the below url{" "}
-              </Text>
+              <Text> You can see responses for this form at the below url </Text>
             </div>
-            <div style={{ display: "flex", flexDirection: "row" }}>
+            <div style={{ display: 'flex', flexDirection: 'row' }}>
               <a href={responsesUrl}>{responsesUrl}</a>
               <CopyButton
                 getText={() => {
@@ -286,14 +270,14 @@ export const FormDetails: React.FC<FormDetailsProps> = ({
           <label className="settings-item">Embed Settings:</label>
           <Checkbox
             checked={embedOptions.hideTitleImage}
-            onChange={() => handleCheckboxChange("hideTitleImage")}
+            onChange={() => handleCheckboxChange('hideTitleImage')}
             className="settings-item"
           >
             Hide Title Image
           </Checkbox>
           <Checkbox
             checked={embedOptions.hideDescription}
-            onChange={() => handleCheckboxChange("hideDescription")}
+            onChange={() => handleCheckboxChange('hideDescription')}
             className="settings-item"
           >
             Hide Description
@@ -312,18 +296,16 @@ export const FormDetails: React.FC<FormDetailsProps> = ({
   const SaveStatus = () => {
     return (
       <div className="save-status">
-        <div>Saved Locally? {savedLocally ? "✅" : "❌"}</div>
+        <div>Saved Locally? {savedLocally ? '✅' : '❌'}</div>
         {userPub ? (
           <div className="nostr-save-status">
-            {savedOnNostr === "saving" ? (
+            {savedOnNostr === 'saving' ? (
               <div className="saving-indicator">
                 <Text>Saving to nostr profile...</Text>
                 <Spin size="small" style={{ marginLeft: 4 }} />
               </div>
             ) : (
-              <div>
-                Saved To Profile? {savedOnNostr === "saved" ? "✅" : "❌"}
-              </div>
+              <div>Saved To Profile? {savedOnNostr === 'saved' ? '✅' : '❌'}</div>
             )}
           </div>
         ) : (
@@ -339,13 +321,7 @@ export const FormDetails: React.FC<FormDetailsProps> = ({
   };
 
   return (
-    <Modal
-      open={isOpen}
-      onCancel={onClose}
-      footer={null}
-      closable={false}
-      width="auto"
-    >
+    <Modal open={isOpen} onCancel={onClose} footer={null} closable={false} width="auto">
       <FormDetailsStyle className="form-details">
         <Card
           bordered={false}
@@ -361,4 +337,3 @@ export const FormDetails: React.FC<FormDetailsProps> = ({
     </Modal>
   );
 };
-

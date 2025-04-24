@@ -1,4 +1,4 @@
-import styled from "styled-components";
+import styled from 'styled-components';
 
 export default styled.div`
   .form-details {
@@ -51,10 +51,7 @@ export default styled.div`
   .embed-container {
     padding: 10px;
     background: rgb(0, 0, 0);
-    background: radial-gradient(
-      rgba(199, 199, 199, 1) 0%,
-      rgba(255, 255, 255, 1) 100%
-    );
+    background: radial-gradient(rgba(199, 199, 199, 1) 0%, rgba(255, 255, 255, 1) 100%);
     margin-bottom: 10px;
     width: 60%;
   }

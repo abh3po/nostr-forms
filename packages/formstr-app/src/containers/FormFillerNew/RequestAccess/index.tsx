@@ -1,12 +1,10 @@
-import { Button, Input, Modal, Typography } from "antd";
-import { Event, SimplePool, UnsignedEvent } from "nostr-tools";
-import { FC, useState } from "react";
-import {
-  Actions,
-  NIP07Interactions,
-} from "../../../components/NIP07Interactions";
-import { useProfileContext } from "../../../hooks/useProfileContext";
-import { getDefaultRelays } from "@formstr/sdk";
+import { getDefaultRelays } from '@formstr/sdk';
+import { Button, Input, Modal, Typography } from 'antd';
+import { Event, SimplePool, UnsignedEvent } from 'nostr-tools';
+import { FC, useState } from 'react';
+
+import { Actions, NIP07Interactions } from '../../../components/NIP07Interactions';
+import { useProfileContext } from '../../../hooks/useProfileContext';
 
 const { Text } = Typography;
 
@@ -16,7 +14,7 @@ interface RequestAccessProps {
 }
 
 export const RequestAccess: FC<RequestAccessProps> = ({ pubkey, formId }) => {
-  const [message, setMessage] = useState("");
+  const [message, setMessage] = useState('');
   const [showMessageModal, setShowMessageModal] = useState(false);
 
   const { pubkey: userPubkey, requestPubkey } = useProfileContext();
@@ -26,8 +24,8 @@ export const RequestAccess: FC<RequestAccessProps> = ({ pubkey, formId }) => {
       kind: 202,
       content: message,
       tags: [
-        ["a", `30168:${pubkey}:${formId}`],
-        ["accessType", "vote"],
+        ['a', `30168:${pubkey}:${formId}`],
+        ['accessType', 'vote'],
       ],
       created_at: Math.floor(Date.now() / 1000),
       pubkey: userPubkey,
@@ -39,9 +37,9 @@ export const RequestAccess: FC<RequestAccessProps> = ({ pubkey, formId }) => {
   }
   const publishEvent = async (event: Event) => {
     const pool = new SimplePool();
-    let relays = getDefaultRelays()
+    let relays = getDefaultRelays();
     await Promise.allSettled(pool.publish(relays, event));
-    pool.close(relays)
+    pool.close(relays);
   };
 
   return (
@@ -70,7 +68,7 @@ export const RequestAccess: FC<RequestAccessProps> = ({ pubkey, formId }) => {
         <NIP07Interactions
           action={Actions.SIGN_EVENT}
           event={createRequestEvent(userPubkey)}
-          ModalMessage={""}
+          ModalMessage={''}
           callback={function (event: string | Event): void {
             setShowMessageModal(false);
             publishEvent(event as Event);

@@ -4,13 +4,14 @@ import {
   MinRule,
   MaxRule,
   AnswerTypes,
-} from "@formstr/sdk/dist/interfaces";
-import { isGreaterThanOrEqual, isLessThanOrEqual, getNumValue } from "../utils";
-import RangeComponent from "../components/Validation/Range";
-import MaxComponent from "../components/Validation/Max";
-import MinComponent from "../components/Validation/Min";
-import RegexComponent from "../components/Validation/Regex";
-import MatchComponent from "../components/Validation/Match";
+} from '@formstr/sdk/dist/interfaces';
+
+import MatchComponent from '../components/Validation/Match';
+import MaxComponent from '../components/Validation/Max';
+import MinComponent from '../components/Validation/Min';
+import RangeComponent from '../components/Validation/Range';
+import RegexComponent from '../components/Validation/Regex';
+import { isGreaterThanOrEqual, isLessThanOrEqual, getNumValue } from '../utils';
 
 export const RULE_CONFIG = {
   [ValidationRuleTypes.range]: {
@@ -18,10 +19,7 @@ export const RULE_CONFIG = {
     component: RangeComponent,
     validator: (val: number | string, rule: RangeRule) => {
       let newVal = getNumValue(val);
-      return (
-        isGreaterThanOrEqual(newVal, rule.min) &&
-        isLessThanOrEqual(newVal, rule.max)
-      );
+      return isGreaterThanOrEqual(newVal, rule.min) && isLessThanOrEqual(newVal, rule.max);
     },
   },
   [ValidationRuleTypes.min]: {
@@ -57,25 +55,25 @@ export const RULE_CONFIG = {
 const REGEX_RULE_ITEM = {
   key: ValidationRuleTypes.regex,
   value: ValidationRuleTypes.regex,
-  label: "Pattern",
+  label: 'Pattern',
 };
 
 const RANGE_RULE_ITEM = {
   key: ValidationRuleTypes.range,
   value: ValidationRuleTypes.range,
-  label: "Range",
+  label: 'Range',
 };
 
 const MIN_RULE_ITEM = {
   key: ValidationRuleTypes.min,
   value: ValidationRuleTypes.min,
-  label: "Min",
+  label: 'Min',
 };
 
 const MAX_RULE_ITEM = {
   key: ValidationRuleTypes.max,
   value: ValidationRuleTypes.max,
-  label: "Max",
+  label: 'Max',
 };
 
 type ANSWER_TYPE_RULES_MENU_TYPE = { [key in AnswerTypes]: any[] };

@@ -1,5 +1,6 @@
+import { Field } from '../nostr/types';
+
 import { FormTemplate } from './types';
-import { Field } from '../nostr/types'; 
 
 let fieldCounter = 0;
 const generateFieldId = (): string => `template_field_${Date.now()}_${fieldCounter++}`;
@@ -20,8 +21,8 @@ export const blankTemplate: FormTemplate = {
       viewKeyInUrl: true,
     },
     questionsList: [
-       [
-        'field', 
+      [
+        'field',
         generateFieldId(), // Use generated ID
         'text', // dataType (primitive type)
         'Untitled Question', // label

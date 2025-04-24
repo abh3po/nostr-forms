@@ -1,18 +1,12 @@
-import { AnswerTypes } from "@formstr/sdk/dist/interfaces";
-import { Option } from "@formstr/sdk/dist/formstr/nip101";
-import {
-  Checkbox,
-  Input,
-  Radio,
-  RadioChangeEvent,
-  RadioGroupProps,
-  Space,
-} from "antd";
-import { CheckboxGroupProps } from "antd/es/checkbox";
-import { CheckboxValueType } from "antd/es/checkbox/Group";
-import Markdown from "react-markdown";
-import ChoiceFillerStyle from "./choiceFiller.style";
-import { ChangeEvent, useState } from "react";
+import { Option } from '@formstr/sdk/dist/formstr/nip101';
+import { AnswerTypes } from '@formstr/sdk/dist/interfaces';
+import { Checkbox, Input, Radio, RadioChangeEvent, RadioGroupProps, Space } from 'antd';
+import { CheckboxGroupProps } from 'antd/es/checkbox';
+import { CheckboxValueType } from 'antd/es/checkbox/Group';
+import { ChangeEvent, useState } from 'react';
+import Markdown from 'react-markdown';
+
+import ChoiceFillerStyle from './choiceFiller.style';
 
 interface ChoiceFillerProps {
   answerType: AnswerTypes.checkboxes | AnswerTypes.radioButton;
@@ -27,39 +21,41 @@ export const ChoiceFiller: React.FC<ChoiceFillerProps> = ({
   onChange,
   defaultValue,
 }) => {
-  const [otherMessage, setOtherMessage] = useState("");
-  
+  const [otherMessage, setOtherMessage] = useState('');
+
   function handleChoiceChange(e: RadioChangeEvent): void;
 
   function handleChoiceChange(checkedValues: CheckboxValueType[]): void;
 
   function handleChoiceChange(e: RadioChangeEvent | CheckboxValueType[]) {
     if (Array.isArray(e)) {
-      onChange(e.sort().join(";"), otherMessage);
+      onChange(e.sort().join(';'), otherMessage);
       return;
     }
     onChange(e.target.value, otherMessage);
   }
 
-  function handleMessage(e: ChangeEvent<HTMLInputElement>){
-    setOtherMessage(e.target.value)
+  function handleMessage(e: ChangeEvent<HTMLInputElement>) {
+    setOtherMessage(e.target.value);
   }
 
-  let ElementConfig: {
-    Element: typeof Radio,
-    defaultValue?: RadioGroupProps['defaultValue']
-  } | {
-    Element: typeof Checkbox,
-    defaultValue?: CheckboxGroupProps['defaultValue']
-  } = {
+  let ElementConfig:
+    | {
+        Element: typeof Radio;
+        defaultValue?: RadioGroupProps['defaultValue'];
+      }
+    | {
+        Element: typeof Checkbox;
+        defaultValue?: CheckboxGroupProps['defaultValue'];
+      } = {
     Element: Radio,
-    defaultValue: defaultValue
-  }
- if (answerType === AnswerTypes.checkboxes) {
-   ElementConfig = {
-     Element: Checkbox,
-     defaultValue: defaultValue?.split(";")
-   }
+    defaultValue: defaultValue,
+  };
+  if (answerType === AnswerTypes.checkboxes) {
+    ElementConfig = {
+      Element: Checkbox,
+      defaultValue: defaultValue?.split(';'),
+    };
   }
   return (
     //@ts-ignore
@@ -71,11 +67,13 @@ export const ChoiceFiller: React.FC<ChoiceFillerProps> = ({
         <Space direction="vertical">
           {options.map((choice) => {
             let [choiceId, label, configString] = choice;
-            let config = JSON.parse(configString || "{}")
+            let config = JSON.parse(configString || '{}');
             return (
               <ElementConfig.Element key={choiceId} value={choiceId}>
                 <Markdown>{label}</Markdown>
-                {config.isOther && <Input placeholder="Add an optional message..." onInput={handleMessage}/>}
+                {config.isOther && (
+                  <Input placeholder="Add an optional message..." onInput={handleMessage} />
+                )}
               </ElementConfig.Element>
             );
           })}

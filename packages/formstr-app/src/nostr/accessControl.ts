@@ -1,18 +1,18 @@
+import { sha256 } from '@noble/hashes/sha256';
+import { bytesToHex, hexToBytes } from '@noble/hashes/utils';
 import {
   Event,
-  Filter,
   SimplePool,
   UnsignedEvent,
   finalizeEvent,
   generateSecretKey,
   getEventHash,
   getPublicKey,
-} from "nostr-tools";
-import { AccessRequest, IWrap } from "./types";
-import { nip44Encrypt } from "./utils";
-import { bytesToHex, hexToBytes } from "@noble/hashes/utils";
-import { getDefaultRelays } from "./common";
-import { sha256 } from "@noble/hashes/sha256";
+} from 'nostr-tools';
+
+import { getDefaultRelays } from './common';
+import { AccessRequest, IWrap } from './types';
+import { nip44Encrypt } from './utils';
 
 const now = () => Math.round(Date.now() / 1000);
 
@@ -23,7 +23,7 @@ const defaultRelays = getDefaultRelays();
 const createRumor = (event: Partial<UnsignedEvent>, privateKey: Uint8Array) => {
   const rumor = {
     created_at: now(),
-    content: "",
+    content: '',
     tags: [],
     ...event,
     pubkey: getPublicKey(privateKey),
@@ -34,23 +34,15 @@ const createRumor = (event: Partial<UnsignedEvent>, privateKey: Uint8Array) => {
   return rumor as Rumor;
 };
 
-const createSeal = (
-  rumor: Rumor,
-  privateKey: Uint8Array,
-  recipientPublicKey: string
-) => {
+const createSeal = (rumor: Rumor, privateKey: Uint8Array, recipientPublicKey: string) => {
   return finalizeEvent(
     {
       kind: 13,
-      content: nip44Encrypt(
-        privateKey,
-        recipientPublicKey,
-        JSON.stringify(rumor)
-      ),
+      content: nip44Encrypt(privateKey, recipientPublicKey, JSON.stringify(rumor)),
       created_at: now(),
       tags: [],
     },
-    privateKey
+    privateKey,
   ) as Event;
 };
 
@@ -58,25 +50,19 @@ const createWrap = (
   event: Event,
   recipientPublicKey: string,
   eventAuthor: string,
-  d_tag: string
+  d_tag: string,
 ) => {
   const randomKey = generateSecretKey();
-  let aliasPubKey = bytesToHex(
-    sha256(`${30168}:${eventAuthor}:${d_tag}:${recipientPublicKey}`)
-  );
+  let aliasPubKey = bytesToHex(sha256(`${30168}:${eventAuthor}:${d_tag}:${recipientPublicKey}`));
   // console.log("Alias pubkey created is", aliasPubKey);
   return finalizeEvent(
     {
       kind: 1059,
-      content: nip44Encrypt(
-        randomKey,
-        recipientPublicKey,
-        JSON.stringify(event)
-      ),
+      content: nip44Encrypt(randomKey, recipientPublicKey, JSON.stringify(event)),
       created_at: now(),
-      tags: [["p", aliasPubKey]],
+      tags: [['p', aliasPubKey]],
     },
-    randomKey
+    randomKey,
   ) as Event;
 };
 
@@ -95,24 +81,20 @@ export const sendWraps = async (wraps: IWrap[]) => {
     if (wrap.senderWrapEvent) {
       sendToUserRelays(wrap.senderWrapEvent, wrap.issuerPubkey);
     }
-    console.log("Published gift wrap for", wrap.receiverPubkey);
+    console.log('Published gift wrap for', wrap.receiverPubkey);
   });
 };
 
-const createTag = (
-  signingKey?: Uint8Array,
-  voterKey?: Uint8Array,
-  viewKey?: Uint8Array
-) => {
+const createTag = (signingKey?: Uint8Array, voterKey?: Uint8Array, viewKey?: Uint8Array) => {
   let tags: string[][] = [];
   if (signingKey) {
-    tags.push(["EditAccess", bytesToHex(signingKey)]);
+    tags.push(['EditAccess', bytesToHex(signingKey)]);
   }
   if (viewKey) {
-    tags.push(["ViewAccess", bytesToHex(viewKey)]);
+    tags.push(['ViewAccess', bytesToHex(viewKey)]);
   }
   if (voterKey) {
-    tags.push(["SubmitAccess", bytesToHex(voterKey)]);
+    tags.push(['SubmitAccess', bytesToHex(voterKey)]);
   }
   return tags;
 };
@@ -122,25 +104,21 @@ export const grantAccess = (
   pubkey: string,
   signingKey: Uint8Array,
   viewKey?: Uint8Array,
-  isEditor?: boolean
+  isEditor?: boolean,
 ): IWrap => {
   const issuerPubkey = getPublicKey(signingKey);
-  const formId = formEvent.tags.find((t) => t[0] === "d")?.[1];
-  if (!formId) throw "Cannot grant access to a form without an Id";
+  const formId = formEvent.tags.find((t) => t[0] === 'd')?.[1];
+  if (!formId) throw 'Cannot grant access to a form without an Id';
 
   const rumor = createRumor(
     {
       kind: 18,
       pubkey: issuerPubkey,
       tags: [
-        ...createTag(
-          isEditor ? signingKey : undefined,
-          undefined,
-          viewKey ? viewKey : undefined
-        ),
+        ...createTag(isEditor ? signingKey : undefined, undefined, viewKey ? viewKey : undefined),
       ],
     },
-    signingKey
+    signingKey,
   );
   const seal = createSeal(rumor, signingKey, pubkey);
   const receiverWrap = createWrap(seal, pubkey, issuerPubkey, formId);
@@ -156,25 +134,21 @@ export const grantAccess = (
 export const acceptAccessRequests = async (
   requests: AccessRequest[],
   signingKey: string,
-  formEvent: Event
+  formEvent: Event,
 ) => {
   let newFormEvent: Event | UnsignedEvent = formEvent;
   let wraps: IWrap[] = [];
   requests.forEach((request) => {
-    let wrap = grantAccess(
-      newFormEvent,
-      request.pubkey,
-      hexToBytes(signingKey)
-    );
+    let wrap = grantAccess(newFormEvent, request.pubkey, hexToBytes(signingKey));
     wraps.push(wrap);
-    newFormEvent.tags.push(["p", request.pubkey]);
+    newFormEvent.tags.push(['p', request.pubkey]);
   });
   newFormEvent.created_at = Math.floor(Date.now() / 1000);
   let finalEvent = finalizeEvent(newFormEvent, hexToBytes(signingKey));
-  console.log("FINAL EDITED EVENT IS", finalEvent);
+  console.log('FINAL EDITED EVENT IS', finalEvent);
   const pool = new SimplePool();
   let a = await Promise.allSettled(pool.publish(defaultRelays, finalEvent));
-  console.log("Published!!!", a);
+  console.log('Published!!!', a);
   pool.close(defaultRelays);
   await sendWraps(wraps);
 };

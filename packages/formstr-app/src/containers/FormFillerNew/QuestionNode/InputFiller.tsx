@@ -1,12 +1,13 @@
-import { Input, InputNumber } from "antd";
-import TextArea from "antd/es/input/TextArea";
-import { ChangeEvent } from "react";
-import { ChoiceFiller } from "./InputTypes/ChoiceFiller";
-import { DropdownFiller } from "./InputTypes/DropdownFiller";
-import { DateFiller } from "./InputTypes/DateFiller";
-import { TimeFiller } from "./InputTypes/TimeFiller";
-import { Option } from "@formstr/sdk/dist/formstr/nip101";
-import { AnswerTypes } from "@formstr/sdk/dist/interfaces";
+import { Option } from '@formstr/sdk/dist/formstr/nip101';
+import { AnswerTypes } from '@formstr/sdk/dist/interfaces';
+import { Input, InputNumber } from 'antd';
+import TextArea from 'antd/es/input/TextArea';
+import { ChangeEvent } from 'react';
+
+import { ChoiceFiller } from './InputTypes/ChoiceFiller';
+import { DateFiller } from './InputTypes/DateFiller';
+import { DropdownFiller } from './InputTypes/DropdownFiller';
+import { TimeFiller } from './InputTypes/TimeFiller';
 
 interface InputFillerProps {
   fieldConfig: any;
@@ -21,9 +22,7 @@ export const InputFiller: React.FC<InputFillerProps> = ({
   onChange,
   defaultValue,
 }) => {
-  const handleInputChange = (
-    e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-  ) => {
+  const handleInputChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     onChange(e.target.value);
   };
 
@@ -32,10 +31,7 @@ export const InputFiller: React.FC<InputFillerProps> = ({
     onChange(value, message);
   };
 
-  const getInput = (
-    answerType: AnswerTypes,
-    answerSettings: any
-  ) => {
+  const getInput = (answerType: AnswerTypes, answerSettings: any) => {
     const INPUT_TYPE_COMPONENT_MAP: { [key in AnswerTypes]?: JSX.Element } = {
       [AnswerTypes.label]: <></>,
       [AnswerTypes.shortText]: (
@@ -56,7 +52,7 @@ export const InputFiller: React.FC<InputFillerProps> = ({
         <InputNumber
           defaultValue={defaultValue as string}
           onChange={handleValueChange}
-          style={{ width: "100%" }}
+          style={{ width: '100%' }}
           placeholder="Please enter your response"
         />
       ),
@@ -84,16 +80,10 @@ export const InputFiller: React.FC<InputFillerProps> = ({
         />
       ),
       [AnswerTypes.date]: (
-        <DateFiller
-          defaultValue={defaultValue as string}
-          onChange={handleValueChange}
-        />
+        <DateFiller defaultValue={defaultValue as string} onChange={handleValueChange} />
       ),
       [AnswerTypes.time]: (
-        <TimeFiller
-          defaultValue={defaultValue as string}
-          onChange={handleValueChange}
-        />
+        <TimeFiller defaultValue={defaultValue as string} onChange={handleValueChange} />
       ),
     };
 

@@ -1,6 +1,7 @@
-import { forwardRef } from "react";
-import { Layout } from "antd";
-import StyledWrapper from "./style";
+import { Layout } from 'antd';
+import { forwardRef } from 'react';
+
+import StyledWrapper from './style';
 
 function Sidebar(
   {
@@ -12,7 +13,7 @@ function Sidebar(
     width: number;
     children: React.ReactNode;
   },
-  ref: any
+  ref: any,
 ) {
   return (
     <StyledWrapper ref={ref} className={className}>

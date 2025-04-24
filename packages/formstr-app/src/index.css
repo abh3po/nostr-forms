@@ -24,17 +24,16 @@ body {
 }
 
 code {
-  font-family: source-code-pro, Menlo, Monaco, Consolas, "Courier New",
-    monospace;
+  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New', monospace;
 }
 
-.ant-btn{
+.ant-btn {
   padding: 5.5px 15px;
 }
 
 .ant-btn-primary {
   padding: 5.5px 15px;
-  background: linear-gradient(180deg, #FF6B00 0%, #FF2E00 60.92%);
+  background: linear-gradient(180deg, #ff6b00 0%, #ff2e00 60.92%);
   transition: 0.3s;
 
   &:hover {
@@ -45,7 +44,6 @@ code {
     background-image: none;
   }
 }
-
 
 .ant-card-head-title {
   text-overflow: unset !important;
@@ -64,7 +62,7 @@ code {
   backdrop-filter: blur(30px);
 }
 
-.ant-dropdown-menu {  
+.ant-dropdown-menu {
   max-height: 250px;
   overflow-y: scroll;
 }

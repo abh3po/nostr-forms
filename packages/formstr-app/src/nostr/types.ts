@@ -1,4 +1,4 @@
-import { Event } from "nostr-tools";
+import { Event } from 'nostr-tools';
 
 export type Field = [
   placeholder: string,
@@ -11,20 +11,11 @@ export type Field = [
 
 export type Tag = string[];
 
-export type Option = [
-  optionId: string,
-  optionLabeL: string,
-  optionConfig?: string,
-];
+export type Option = [optionId: string, optionLabeL: string, optionConfig?: string];
 
-export type Response = [
-  placeholder: string,
-  fieldId: string,
-  response: string,
-  metadata: string,
-];
+export type Response = [placeholder: string, fieldId: string, response: string, metadata: string];
 
-export type AccesType = "vote" | "view" | "edit";
+export type AccesType = 'vote' | 'view' | 'edit';
 
 export interface AccessRequest {
   pubkey: string;

@@ -1,14 +1,15 @@
-import { useLocation } from "react-router-dom";
-import FormBuilder from "./FormBuilder";
-import useFormBuilderContext from "./hooks/useFormBuilderContext";
-import { useEffect, useState } from "react";
-import { HEADER_MENU_KEYS } from "./components/Header/config";
-import { FormFiller } from "../FormFillerNew";
+import { useEffect, useState } from 'react';
+import { useLocation } from 'react-router-dom';
+
+import { FormFiller } from '../FormFillerNew';
+
+import FormBuilder from './FormBuilder';
+import { HEADER_MENU_KEYS } from './components/Header/config';
+import useFormBuilderContext from './hooks/useFormBuilderContext';
 
 function CreateForm() {
   const { state } = useLocation();
-  const { initializeForm, saveDraft, selectedTab, getFormSpec } =
-    useFormBuilderContext();
+  const { initializeForm, saveDraft, selectedTab, getFormSpec } = useFormBuilderContext();
   const [initialized, setInitialized] = useState(false);
 
   useEffect(() => {

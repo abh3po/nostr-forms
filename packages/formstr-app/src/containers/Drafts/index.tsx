@@ -1,9 +1,10 @@
-import { useNavigate, useParams } from "react-router";
-import { Typography } from "antd";
-import { ROUTES } from "../../constants/routes";
-import useFormBuilderContext from "../CreateFormNew/hooks/useFormBuilderContext";
-import { useEffect } from "react";
-import { Tag } from "../../nostr/types";
+import { Typography } from 'antd';
+import { useEffect } from 'react';
+import { useNavigate, useParams } from 'react-router';
+
+import { ROUTES } from '../../constants/routes';
+import { Tag } from '../../nostr/types';
+import useFormBuilderContext from '../CreateFormNew/hooks/useFormBuilderContext';
 const { Text } = Typography;
 
 export const V1DraftsController = () => {
@@ -19,7 +20,7 @@ export const V1DraftsController = () => {
     parsedDraft = {
       spec: draftJSON.formSpec,
       id: draftJSON.tempId,
-    }
+    };
   }
   useEffect(() => {
     if (!parsedDraft) return;

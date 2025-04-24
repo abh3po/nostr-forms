@@ -1,7 +1,9 @@
-import { useState, useEffect } from "react";
-import { initialState, MEDIA_QUERY_LIST } from "./configs";
-import { DEVICE_TYPE } from "../../constants/index";
-import { IDeviceInfo } from "./typeDefs";
+import { useState, useEffect } from 'react';
+
+import { DEVICE_TYPE } from '../../constants/index';
+
+import { initialState, MEDIA_QUERY_LIST } from './configs';
+import { IDeviceInfo } from './typeDefs';
 
 function useDeviceType() {
   let [deviceInfo, setDeviceInfo] = useState<IDeviceInfo>(initialState);
@@ -25,12 +27,12 @@ function useDeviceType() {
 
     onMediaQuery(); // to set state on the first run
     MEDIA_QUERY_LIST.forEach(({ mediaQuery }) =>
-      mediaQuery.addEventListener("change", onMediaQuery)
+      mediaQuery.addEventListener('change', onMediaQuery),
     );
 
     return () => {
       MEDIA_QUERY_LIST.forEach(({ mediaQuery }) =>
-        mediaQuery.removeEventListener("change", onMediaQuery)
+        mediaQuery.removeEventListener('change', onMediaQuery),
       );
     };
   }, []);

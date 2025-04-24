@@ -1,21 +1,19 @@
-import { Button, Card, Typography } from "antd";
-import { ILocalForm } from "../../CreateFormNew/providers/FormBuilder/typeDefs";
-import { useNavigate } from "react-router-dom";
-import DeleteFormTrigger from "./DeleteForm";
-import { naddrUrl } from "../../../utils/utility";
-import { editPath, responsePath } from "../../../utils/formUtils";
-import EditOutlined from "@ant-design/icons/lib/icons/EditOutlined";
+import EditOutlined from '@ant-design/icons/lib/icons/EditOutlined';
+import { Button, Card } from 'antd';
+import { useNavigate } from 'react-router-dom';
+
+import { editPath, responsePath } from '../../../utils/formUtils';
+import { naddrUrl } from '../../../utils/utility';
+import { ILocalForm } from '../../CreateFormNew/providers/FormBuilder/typeDefs';
+
+import DeleteFormTrigger from './DeleteForm';
 
 interface LocalFormCardProps {
   form: ILocalForm;
   onDeleted: () => void;
 }
 
-const { Text } = Typography;
-export const LocalFormCard: React.FC<LocalFormCardProps> = ({
-  form,
-  onDeleted,
-}) => {
+export const LocalFormCard: React.FC<LocalFormCardProps> = ({ form, onDeleted }) => {
   const navigate = useNavigate();
   let responseUrl = form.formId
     ? responsePath(form.privateKey, form.formId, form.relay, form.viewKey)
@@ -31,11 +29,9 @@ export const LocalFormCard: React.FC<LocalFormCardProps> = ({
       extra={
         <div>
           <EditOutlined
-            style={{ color: "purple", marginBottom: 3 }}
+            style={{ color: 'purple', marginBottom: 3 }}
             onClick={() =>
-              navigate(
-                editPath(form.privateKey, form.formId, form.relay, form.viewKey)
-              )
+              navigate(editPath(form.privateKey, form.formId, form.relay, form.viewKey))
             }
           />
           <DeleteFormTrigger formKey={form.key} onDeleted={onDeleted} />
@@ -55,7 +51,7 @@ export const LocalFormCard: React.FC<LocalFormCardProps> = ({
           navigate(formUrl);
         }}
         style={{
-          marginLeft: "10px",
+          marginLeft: '10px',
         }}
       >
         Open Form

@@ -1,13 +1,15 @@
-import QuestionCard from "../QuestionCard";
-import { Button, Input } from "antd";
-import FormTitle from "../FormTitle";
-import StyleWrapper from "./style";
-import DescriptionStyle from "./description.style";
-import useFormBuilderContext from "../../hooks/useFormBuilderContext";
-import React, { ChangeEvent, useRef, useState } from "react";
-import { Reorder, motion, useDragControls, DragControls } from "framer-motion";
-import { Field } from "../../../../nostr/types";
-import { isMobile } from "../../../../utils/utility";
+import { Button, Input } from 'antd';
+import { Reorder, motion, useDragControls } from 'framer-motion';
+import React, { ChangeEvent, useRef, useState } from 'react';
+
+import { Field } from '../../../../nostr/types';
+import { isMobile } from '../../../../utils/utility';
+import useFormBuilderContext from '../../hooks/useFormBuilderContext';
+import FormTitle from '../FormTitle';
+import QuestionCard from '../QuestionCard';
+
+import DescriptionStyle from './description.style';
+import StyleWrapper from './style';
 
 interface FloatingButtonProps {
   onClick: () => void;
@@ -50,7 +52,7 @@ const FloatingButton = ({ onClick, containerRef }: FloatingButtonProps) => {
 interface DraggableQuestionItemProps {
   question: Field;
   onEdit: (question: Field, tempId: string) => void;
-  onReorderKey: (keyType: "UP" | "DOWN", tempId: string) => void;
+  onReorderKey: (keyType: 'UP' | 'DOWN', tempId: string) => void;
   firstQuestion: boolean;
   lastQuestion: boolean;
 }
@@ -67,17 +69,16 @@ const DraggableQuestionItem: React.FC<DraggableQuestionItemProps> = ({
   return (
     <Reorder.Item
       value={question}
-      key={question[1]} 
-      dragListener={!currentlyMobile} 
+      key={question[1]}
+      dragListener={!currentlyMobile}
       dragControls={dragControls}
-
       whileDrag={{
         scale: 1.03,
-        boxShadow: "0px 5px 15px rgba(0, 0, 0, 0.2)", 
-        zIndex: 10, 
-        cursor: "grabbing", 
+        boxShadow: '0px 5px 15px rgba(0, 0, 0, 0.2)',
+        zIndex: 10,
+        cursor: 'grabbing',
       }}
-      style={{ cursor: "grab" }} 
+      style={{ cursor: 'grab' }}
     >
       <QuestionCard
         question={question}
@@ -85,7 +86,7 @@ const DraggableQuestionItem: React.FC<DraggableQuestionItemProps> = ({
         onReorderKey={onReorderKey}
         firstQuestion={firstQuestion}
         lastQuestion={lastQuestion}
-        dragControls={dragControls} 
+        dragControls={dragControls}
       />
     </Reorder.Item>
   );
@@ -109,22 +110,19 @@ export const QuestionsList = () => {
     updateFormSetting({ description: e.target.value });
   };
 
-  const onReorderKey = (keyType: "UP" | "DOWN", tempId: string) => {
+  const onReorderKey = (keyType: 'UP' | 'DOWN', tempId: string) => {
     const questions = [...questionsList];
-    const selectedQuestionIndex = questions.findIndex(
-      (question: Field) => question[1] === tempId
-    );
+    const selectedQuestionIndex = questions.findIndex((question: Field) => question[1] === tempId);
     if (
-      (selectedQuestionIndex === 0 && keyType === "UP") ||
-      (selectedQuestionIndex === questions.length - 1 && keyType === "DOWN")
+      (selectedQuestionIndex === 0 && keyType === 'UP') ||
+      (selectedQuestionIndex === questions.length - 1 && keyType === 'DOWN')
     ) {
       return;
     }
-    const order = keyType === "UP" ? -1 : +1;
+    const order = keyType === 'UP' ? -1 : +1;
     if (selectedQuestionIndex !== -1) {
       const replaceQuestion = questions[selectedQuestionIndex + order];
-      questions[selectedQuestionIndex + order] =
-        questions[selectedQuestionIndex];
+      questions[selectedQuestionIndex + order] = questions[selectedQuestionIndex];
       questions[selectedQuestionIndex] = replaceQuestion;
     }
     updateQuestionsList(questions);
@@ -139,7 +137,7 @@ export const QuestionsList = () => {
       className="main-content"
       onClick={() => setQuestionIdInFocus()}
       ref={containerRef}
-      style={{ position: "relative" }}
+      style={{ position: 'relative' }}
     >
       <div>
         <FormTitle className="form-title" />
@@ -174,10 +172,7 @@ export const QuestionsList = () => {
         </div>
       </Reorder.Group>
       <div className="mobile-add-btn">
-        <FloatingButton
-          onClick={onPlusButtonClick}
-          containerRef={containerRef}
-        />
+        <FloatingButton onClick={onPlusButtonClick} containerRef={containerRef} />
       </div>
     </StyleWrapper>
   );

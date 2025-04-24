@@ -1,17 +1,12 @@
-import { Tooltip, Typography } from "antd";
-import { isMobile } from "../../../../../utils/utility";
-import useFormBuilderContext from "../../../hooks/useFormBuilderContext";
-import { EditOutlined } from "@ant-design/icons";
-import { useState } from "react";
-import AddNpubStyle from "../addNpub.style";
-import { Editors } from "./Editors";
-import { Participants } from "./Participants";
-import { useProfileContext } from "../../../../../hooks/useProfileContext";
+import { EditOutlined } from '@ant-design/icons';
+import { Tooltip, Typography } from 'antd';
+import { useState } from 'react';
 
-enum ROLE {
-  VIEW,
-  EDIT,
-}
+import { useProfileContext } from '../../../../../hooks/useProfileContext';
+import { isMobile } from '../../../../../utils/utility';
+
+import { Editors } from './Editors';
+import { Participants } from './Participants';
 
 const { Text } = Typography;
 export const Sharing = () => {
@@ -22,7 +17,7 @@ export const Sharing = () => {
     <>
       <Tooltip
         title="Configure who can access this form and how?"
-        trigger={isMobile() ? "click" : "hover"}
+        trigger={isMobile() ? 'click' : 'hover'}
       >
         <div className="sharing-settings">
           <div className="property-setting">
@@ -37,14 +32,8 @@ export const Sharing = () => {
             <Text>Participants & Visibility</Text>
             <EditOutlined onClick={() => setIsViewListOpen(true)} />
           </div>
-          <Editors
-            open={isEditListOpen}
-            onCancel={() => setIsEditListOpen(false)}
-          />
-          <Participants
-            open={isViewListOpen}
-            onCancel={() => setIsViewListOpen(false)}
-          />
+          <Editors open={isEditListOpen} onCancel={() => setIsEditListOpen(false)} />
+          <Participants open={isViewListOpen} onCancel={() => setIsViewListOpen(false)} />
         </div>
       </Tooltip>
     </>

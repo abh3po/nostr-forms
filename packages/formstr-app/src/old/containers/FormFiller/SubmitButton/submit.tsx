@@ -1,6 +1,6 @@
-import { CheckCircleTwoTone, DownOutlined } from "@ant-design/icons";
-import { Dropdown, Modal, Spin, MenuProps, FormInstance } from "antd";
-import React, { useState } from "react";
+import { CheckCircleTwoTone, DownOutlined } from '@ant-design/icons';
+import { Dropdown, Modal, Spin, MenuProps, FormInstance } from 'antd';
+import React, { useState } from 'react';
 
 interface SubmitButtonProps {
   selfSign: boolean | undefined;
@@ -46,8 +46,8 @@ export const SubmitButton: React.FC<SubmitButtonProps> = ({
     setIsModalOpen(false);
   }
 
-  const handleMenuClick: MenuProps["onClick"] = (e) => {
-    if (e.key === "signSubmition") {
+  const handleMenuClick: MenuProps['onClick'] = (e) => {
+    if (e.key === 'signSubmition') {
       showModal();
     } else {
       submitForm();
@@ -63,13 +63,13 @@ export const SubmitButton: React.FC<SubmitButtonProps> = ({
   };
   const items = [
     {
-      label: "Submit Anonymously",
-      key: "submit",
+      label: 'Submit Anonymously',
+      key: 'submit',
       disabled: selfSign,
     },
     {
-      label: edit ? "Update Response" : "Submit As Yourself",
-      key: "signSubmition",
+      label: edit ? 'Update Response' : 'Submit As Yourself',
+      key: 'signSubmition',
     },
   ];
 
@@ -88,7 +88,7 @@ export const SubmitButton: React.FC<SubmitButtonProps> = ({
         disabled={disabled}
         className="submit-button"
       >
-        {selfSign ? (edit ? "Update Response" : items[1].label) : "Submit"}
+        {selfSign ? (edit ? 'Update Response' : items[1].label) : 'Submit'}
       </Dropdown.Button>
       <Modal
         open={isModalOpen}
@@ -98,21 +98,20 @@ export const SubmitButton: React.FC<SubmitButtonProps> = ({
       >
         {!isSigning && (
           <div>
-            {" "}
+            {' '}
             <CheckCircleTwoTone /> Access granted
           </div>
         )}
         {isSigning && (
           <div>
-            <Spin size="small" /> Waiting for you to finish signing your
-            response. Click{" "}
+            <Spin size="small" /> Waiting for you to finish signing your response. Click{' '}
             <a
               href="https://nostrcheck.me/register/browser-extension.php"
               target="_blank"
               rel="noreferrer"
             >
               here
-            </a>{" "}
+            </a>{' '}
             to read more about nip-07 signing.
           </div>
         )}

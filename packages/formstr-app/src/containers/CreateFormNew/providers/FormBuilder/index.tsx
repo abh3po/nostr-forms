@@ -1,23 +1,21 @@
-import React, { useEffect, useRef, useState } from "react";
-import { AnswerSettings } from "@formstr/sdk/dist/interfaces";
-import { FormInitData, IFormBuilderContext } from "./typeDefs";
-import { generateQuestion } from "../../utils";
-import { getDefaultRelays } from "@formstr/sdk";
-import { makeTag } from "../../../../utils/utility";
-import { HEADER_MENU_KEYS } from "../../components/Header/config";
-import { IFormSettings } from "../../components/FormSettings/types";
-import { Tag } from "@formstr/sdk/dist/formstr/nip101";
-import { bytesToHex } from "@noble/hashes/utils";
-import { getPublicKey } from "nostr-tools";
-import { useNavigate } from "react-router-dom";
-import { useProfileContext } from "../../../../hooks/useProfileContext";
-import { createForm } from "../../../../nostr/createForm";
-import {
-  getItem,
-  LOCAL_STORAGE_KEYS,
-  setItem,
-} from "../../../../utils/localStorage";
-import { Field } from "../../../../nostr/types";
+import { getDefaultRelays } from '@formstr/sdk';
+import { Tag } from '@formstr/sdk/dist/formstr/nip101';
+import { AnswerSettings } from '@formstr/sdk/dist/interfaces';
+import { bytesToHex } from '@noble/hashes/utils';
+import { getPublicKey } from 'nostr-tools';
+import React, { useEffect, useRef, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+
+import { useProfileContext } from '../../../../hooks/useProfileContext';
+import { createForm } from '../../../../nostr/createForm';
+import { Field } from '../../../../nostr/types';
+import { getItem, LOCAL_STORAGE_KEYS, setItem } from '../../../../utils/localStorage';
+import { makeTag } from '../../../../utils/utility';
+import { IFormSettings } from '../../components/FormSettings/types';
+import { HEADER_MENU_KEYS } from '../../components/Header/config';
+import { generateQuestion } from '../../utils';
+
+import { FormInitData, IFormBuilderContext } from './typeDefs';
 
 export const FormBuilderContext = React.createContext<IFormBuilderContext>({
   questionsList: [],
@@ -28,7 +26,7 @@ export const FormBuilderContext = React.createContext<IFormBuilderContext>({
   deleteQuestion: (tempId: string) => null,
   questionIdInFocus: undefined,
   setQuestionIdInFocus: (tempId?: string) => null,
-  formSettings: { titleImageUrl: "", formId: "" },
+  formSettings: { titleImageUrl: '', formId: '' },
   updateFormSetting: (settings: IFormSettings) => null,
   updateFormTitleImage: (e: React.FormEvent<HTMLInputElement>) => null,
   closeSettingsOnOutsideClick: () => null,
@@ -37,13 +35,13 @@ export const FormBuilderContext = React.createContext<IFormBuilderContext>({
   isLeftMenuOpen: false,
   setIsLeftMenuOpen: (open: boolean) => null,
   toggleSettingsWindow: () => null,
-  formName: "",
+  formName: '',
   updateFormName: (name: string) => null,
   updateQuestionsList: (list: Field[]) => null,
   getFormSpec: () => [],
   saveDraft: () => null,
   selectedTab: HEADER_MENU_KEYS.BUILDER,
-  setSelectedTab: (tab: string) => "",
+  setSelectedTab: (tab: string) => '',
   bottomElementRef: null,
   relayList: [],
   setRelayList: (relayList: { url: string; tempId: string }[]) => null,
@@ -54,52 +52,36 @@ export const FormBuilderContext = React.createContext<IFormBuilderContext>({
 });
 
 const InitialFormSettings: IFormSettings = {
-  titleImageUrl:
-    "https://images.pexels.com/photos/733857/pexels-photo-733857.jpeg",
+  titleImageUrl: 'https://images.pexels.com/photos/733857/pexels-photo-733857.jpeg',
   description:
-    "This is the description, you can use markdown while editing it!" +
-    " tap anywhere on the form to edit, including this description.",
+    'This is the description, you can use markdown while editing it!' +
+    ' tap anywhere on the form to edit, including this description.',
   thankYouPage: true,
   formId: makeTag(6),
   encryptForm: true,
   viewKeyInUrl: true,
 };
 
-export default function FormBuilderProvider({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function FormBuilderProvider({ children }: { children: React.ReactNode }) {
   const { userRelays } = useProfileContext();
 
-  const [questionsList, setQuestionsList] = useState<Array<Field>>([
-    generateQuestion(),
-  ]);
-  const [questionIdInFocus, setQuestionIdInFocus] = useState<
-    string | undefined
-  >();
-  const [formSettings, setFormSettings] =
-    useState<IFormSettings>(InitialFormSettings);
+  const [questionsList, setQuestionsList] = useState<Array<Field>>([generateQuestion()]);
+  const [questionIdInFocus, setQuestionIdInFocus] = useState<string | undefined>();
+  const [formSettings, setFormSettings] = useState<IFormSettings>(InitialFormSettings);
 
   const [isRightSettingsOpen, setIsRightSettingsOpen] = useState(false);
   const [isLeftMenuOpen, setIsLeftMenuOpen] = useState(false);
-  const [formName, setFormName] = useState<string>(
-    "This is the title of your form! Tap to edit."
-  );
+  const [formName, setFormName] = useState<string>('This is the title of your form! Tap to edit.');
   const bottomElement = useRef<HTMLDivElement>(null);
   const [relayList, setRelayList] = useState(
     getDefaultRelays().map((relay) => {
       return { url: relay, tempId: makeTag(6) };
-    })
+    }),
   );
   const { pubkey: userPubkey, requestPubkey } = useProfileContext();
-  const [editList, setEditList] = useState<Set<string>>(
-    new Set(userPubkey ? [userPubkey] : [])
-  );
+  const [editList, setEditList] = useState<Set<string>>(new Set(userPubkey ? [userPubkey] : []));
   const [viewList, setViewList] = useState<Set<string>>(new Set([]));
-  const [selectedTab, setSelectedTab] = useState<string>(
-    HEADER_MENU_KEYS.BUILDER
-  );
+  const [selectedTab, setSelectedTab] = useState<string>(HEADER_MENU_KEYS.BUILDER);
   const [secretKey, setSecretKey] = useState<string | null>(null);
   const [viewKey, setViewKey] = useState<string | null | undefined>(null);
 
@@ -108,7 +90,7 @@ export default function FormBuilderProvider({
       setRelayList(
         userRelays.map((relay) => {
           return { url: relay, tempId: makeTag(6) };
-        })
+        }),
       );
     }
   }, [userRelays]);
@@ -131,9 +113,9 @@ export default function FormBuilderProvider({
 
   const getFormSpec = (): Tag[] => {
     let formSpec: Tag[] = [];
-    formSpec.push(["d", formSettings.formId || ""]);
-    formSpec.push(["name", formName]);
-    formSpec.push(["settings", JSON.stringify(formSettings)]);
+    formSpec.push(['d', formSettings.formId || '']);
+    formSpec.push(['name', formName]);
+    formSpec.push(['settings', JSON.stringify(formSettings)]);
     formSpec = [...formSpec, ...questionsList];
     return formSpec;
   };
@@ -141,7 +123,7 @@ export default function FormBuilderProvider({
   const saveForm = async (onRelayAccepted?: (url: string) => void) => {
     const formToSave = getFormSpec();
     if (!formSettings.formId) {
-      alert("Form ID is required");
+      alert('Form ID is required');
       return;
     }
     const relayUrls = relayList.map((relay) => relay.url);
@@ -153,15 +135,11 @@ export default function FormBuilderProvider({
       formSettings.encryptForm,
       onRelayAccepted,
       secretKey,
-      viewKey
+      viewKey,
     ).then(
-      (artifacts: {
-        signingKey: Uint8Array;
-        viewKey: Uint8Array;
-        acceptedRelays: string[];
-      }) => {
+      (artifacts: { signingKey: Uint8Array; viewKey: Uint8Array; acceptedRelays: string[] }) => {
         const { signingKey, viewKey, acceptedRelays } = artifacts;
-        navigate("/dashboard", {
+        navigate('/dashboard', {
           state: {
             pubKey: getPublicKey(signingKey),
             formId: formSettings.formId,
@@ -173,14 +151,14 @@ export default function FormBuilderProvider({
         });
       },
       (error) => {
-        console.log("Error creating form", error);
-        alert("error creating the form: " + error);
-      }
+        console.log('Error creating form', error);
+        alert('error creating the form: ' + error);
+      },
     );
   };
 
   const saveDraft = () => {
-    if (formSettings.formId === "") return;
+    if (formSettings.formId === '') return;
     type Draft = { formSpec: Tag[]; tempId: string };
     const formSpec = getFormSpec();
     const draftObject = { formSpec, tempId: formSettings.formId! };
@@ -209,18 +187,11 @@ export default function FormBuilderProvider({
     setQuestionsList(editedList);
   };
 
-  const addQuestion = (
-    primitive?: string,
-    label?: string,
-    answerSettings?: AnswerSettings
-  ) => {
+  const addQuestion = (primitive?: string, label?: string, answerSettings?: AnswerSettings) => {
     setIsLeftMenuOpen(false);
-    setQuestionsList([
-      ...questionsList,
-      generateQuestion(primitive, label, [], answerSettings),
-    ]);
+    setQuestionsList([...questionsList, generateQuestion(primitive, label, [], answerSettings)]);
     setTimeout(() => {
-      bottomElement?.current?.scrollIntoView({ behavior: "smooth" });
+      bottomElement?.current?.scrollIntoView({ behavior: 'smooth' });
     }, 200);
   };
 
@@ -244,22 +215,20 @@ export default function FormBuilderProvider({
   const updateFormTitleImage = (e: React.FormEvent<HTMLInputElement>) => {
     const imageUrl = e.currentTarget.value;
     updateFormSetting({
-      titleImageUrl: imageUrl || "",
+      titleImageUrl: imageUrl || '',
     });
   };
 
   const initializeForm = (form: FormInitData) => {
-    setFormName(form.spec.filter((f) => f[0] === "name")?.[0]?.[1] || "");
-    let settings = JSON.parse(
-      form.spec.filter((f) => f[0] === "settings")?.[0]?.[1] || "{}"
-    );
+    setFormName(form.spec.filter((f) => f[0] === 'name')?.[0]?.[1] || '');
+    let settings = JSON.parse(form.spec.filter((f) => f[0] === 'settings')?.[0]?.[1] || '{}');
     settings = { ...InitialFormSettings, ...settings };
-    let fields = form.spec.filter((f) => f[0] === "field") as Field[];
+    let fields = form.spec.filter((f) => f[0] === 'field') as Field[];
     setFormSettings((settings) => {
       return { ...settings, formId: form.id };
     });
-    let viewList = form.spec.filter((f) => f[0] === "allowed").map((t) => t[1]);
-    let allKeys = form.spec.filter((f) => f[0] === "p").map((t) => t[1]);
+    let viewList = form.spec.filter((f) => f[0] === 'allowed').map((t) => t[1]);
+    let allKeys = form.spec.filter((f) => f[0] === 'p').map((t) => t[1]);
     let editList: string[] = allKeys.filter((p) => !viewList.includes(p));
     setViewList(new Set(viewList));
     setEditList(new Set(editList));

@@ -32,7 +32,7 @@
     "prestart": "yarn workspace @formstr/sdk build",
     "start": "react-scripts start",
     "prebuild": "yarn workspace @formstr/sdk build",
-    "build": "react-scripts build && cp -r \".well-known\" build/ && cp _config.yml build/ && cp .nojekyll build/",
+    "build": "yarn run lint && react-scripts build && cp -r \".well-known\" build/ && cp _config.yml build/ && cp .nojekyll build/",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
     "lint": "eslint src/",

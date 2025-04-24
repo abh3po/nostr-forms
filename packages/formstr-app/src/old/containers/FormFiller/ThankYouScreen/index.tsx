@@ -1,13 +1,8 @@
-import { Modal } from "antd";
-import ThankYouStyle from "./thankyou.style";
+import { Modal } from 'antd';
 
-export const ThankYouScreen = ({
-  isOpen,
-  onClose,
-}: {
-  isOpen: boolean;
-  onClose: () => void;
-}) => {
+import ThankYouStyle from './thankyou.style';
+
+export const ThankYouScreen = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) => {
   return (
     <Modal open={isOpen} onCancel={onClose} closable={false} footer={null}>
       <ThankYouStyle>

@@ -1,39 +1,39 @@
 // TODO: this should be an enum
 const CreateFormTab = {
-  addQuestion: "addQuestion",
-  settings: "Settings",
+  addQuestion: 'addQuestion',
+  settings: 'Settings',
 };
 
 const ResponseFilters = {
-  allResponses: "allResponses",
-  selfSignedResponses: "selfSignedResponses",
+  allResponses: 'allResponses',
+  selfSignedResponses: 'selfSignedResponses',
 };
 
 const AnswerTypes = {
-  string: "string",
-  text: "text",
-  singleChoice: "singleChoice",
-  multipleChoice: "multipleChoice",
-  number: "number",
-  date: "date",
-  label: "label",
+  string: 'string',
+  text: 'text',
+  singleChoice: 'singleChoice',
+  multipleChoice: 'multipleChoice',
+  number: 'number',
+  date: 'date',
+  label: 'label',
 };
 
 const tabList = [
   {
     key: CreateFormTab.addQuestion,
-    label: "Add Questions",
+    label: 'Add Questions',
   },
   {
     key: CreateFormTab.settings,
-    label: "Settings",
+    label: 'Settings',
   },
 ];
 
 const DEVICE_TYPE = {
-  MOBILE: "MOBILE",
-  TABLET: "TABLET",
-  DESKTOP: "DESKTOP",
+  MOBILE: 'MOBILE',
+  TABLET: 'TABLET',
+  DESKTOP: 'DESKTOP',
 };
 
 const DEVICE_WIDTH = {

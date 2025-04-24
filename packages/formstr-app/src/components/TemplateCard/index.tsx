@@ -1,6 +1,7 @@
-import React from 'react';
 import { Card, Typography } from 'antd';
+import React from 'react';
 import styled from 'styled-components';
+
 import { FormTemplate } from '../../templates';
 
 const { Text, Paragraph } = Typography;
@@ -10,7 +11,9 @@ const StyledCard = styled(Card)`
   height: 120px; // Adjust height as needed
   margin: 8px;
   cursor: pointer;
-  transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+  transition:
+    transform 0.2s ease-in-out,
+    box-shadow 0.2s ease-in-out;
   display: flex;
   flex-direction: column;
   justify-content: center; /* Center content vertically */
@@ -42,7 +45,11 @@ const TemplateCard: React.FC<TemplateCardProps> = ({ template, onClick }) => {
     <StyledCard hoverable onClick={() => onClick(template)}>
       <Text strong>{template.name}</Text>
       {template.description && (
-        <Paragraph type="secondary" style={{ marginTop: '4px', marginBottom: 0 }} ellipsis={{ rows: 2 }}>
+        <Paragraph
+          type="secondary"
+          style={{ marginTop: '4px', marginBottom: 0 }}
+          ellipsis={{ rows: 2 }}
+        >
           {template.description}
         </Paragraph>
       )}

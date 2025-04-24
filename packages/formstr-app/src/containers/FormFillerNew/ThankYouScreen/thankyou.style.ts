@@ -1,4 +1,4 @@
-import styled from "styled-components";
+import styled from 'styled-components';
 
 export default styled.div`
   .thank-you-image {
@@ -11,7 +11,7 @@ export default styled.div`
     text-align: center;
     align-items: center;
     align-content: center;
-    display: "flex";
-    flex-direction: "column";
+    display: 'flex';
+    flex-direction: 'column';
   }
 `;

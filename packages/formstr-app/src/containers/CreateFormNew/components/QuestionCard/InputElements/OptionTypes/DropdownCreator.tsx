@@ -1,11 +1,12 @@
-import { CaretDownOutlined, CloseOutlined } from "@ant-design/icons";
-import { Button, Dropdown, Input, MenuProps } from "antd";
-import { useState } from "react";
-import OptionsStyle from "./Options.style";
-import { AddOption } from "./AddOption";
-import { handleDelete, handleLabelChange } from "./utils";
-import { MenuItemType } from "antd/es/menu/hooks/useItems";
-import { Choice, ChoiceSettings } from "./types";
+import { CaretDownOutlined, CloseOutlined } from '@ant-design/icons';
+import { Button, Dropdown, Input, MenuProps } from 'antd';
+import { MenuItemType } from 'antd/es/menu/hooks/useItems';
+import { useState } from 'react';
+
+import { AddOption } from './AddOption';
+import OptionsStyle from './Options.style';
+import { Choice, ChoiceSettings } from './types';
+import { handleDelete, handleLabelChange } from './utils';
 
 interface RadioButtonCreatorProps {
   initialValues?: Array<Choice>;
@@ -25,10 +26,10 @@ export const DropdownCreator: React.FC<RadioButtonCreatorProps> = ({
     setIsOpen(true);
   };
 
-  const getMenuItems = (): MenuProps["items"] => {
+  const getMenuItems = (): MenuProps['items'] => {
     return choices.map((choice) => {
       let [choiceId, label, settingsString] = choice;
-      let settings = JSON.parse(settingsString || "{}") as ChoiceSettings;
+      let settings = JSON.parse(settingsString || '{}') as ChoiceSettings;
       return {
         label: (
           <div className="radioButtonItem" key={choiceId}>
@@ -36,12 +37,7 @@ export const DropdownCreator: React.FC<RadioButtonCreatorProps> = ({
               defaultValue={label}
               key={choiceId}
               onChange={(e) => {
-                handleLabelChange(
-                  e.target.value,
-                  choiceId!,
-                  choices,
-                  handleNewChoices
-                );
+                handleLabelChange(e.target.value, choiceId!, choices, handleNewChoices);
               }}
               placeholder="Enter an option"
               className="choice-input"
@@ -69,18 +65,18 @@ export const DropdownCreator: React.FC<RadioButtonCreatorProps> = ({
         open={isOpen}
         className="dropdown"
         onOpenChange={(nextOpen, info) => {
-          if (info.source === "trigger") setIsOpen(nextOpen);
+          if (info.source === 'trigger') setIsOpen(nextOpen);
         }}
       >
         <Button onClick={(e) => e.preventDefault()}>
-          Options {"( "}
-          {choices.length} {" )"} <CaretDownOutlined />
+          Options {'( '}
+          {choices.length} {' )'} <CaretDownOutlined />
         </Button>
       </Dropdown>
       <AddOption
         disable={choices.some((choice) => {
           let [choiceId, label, settingsString] = choice;
-          return label === "";
+          return label === '';
         })}
         choices={choices}
         callback={handleNewChoices}

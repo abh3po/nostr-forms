@@ -1,8 +1,10 @@
-import { ValidationRuleTypes, RegexRule } from "@formstr/sdk/dist/interfaces";
-import { Tooltip, Typography } from "antd";
-import { InputStyle } from "./validation.style";
-import { ChangeEvent, useState } from "react";
-import { isMobile } from "../../../../utils/utility";
+import { ValidationRuleTypes, RegexRule } from '@formstr/sdk/dist/interfaces';
+import { Tooltip, Typography } from 'antd';
+import { ChangeEvent, useState } from 'react';
+
+import { isMobile } from '../../../../utils/utility';
+
+import { InputStyle } from './validation.style';
 
 const { Text } = Typography;
 
@@ -17,12 +19,12 @@ function isValidRegex(input: string): boolean {
 
 function Regex({ rule, onChange }: { rule?: RegexRule; onChange: Function }) {
   const [patternError, setPatternError] = useState<string | null>(null);
-  const [tempPattern, setTempPattern] = useState<string>(rule?.pattern || "");
+  const [tempPattern, setTempPattern] = useState<string>(rule?.pattern || '');
 
   function handlePatternChange(e: ChangeEvent<HTMLInputElement>) {
     setTempPattern(e.target.value);
     if (!isValidRegex(e.target.value)) {
-      setPatternError("Invalid regex pattern");
+      setPatternError('Invalid regex pattern');
       return;
     }
     setPatternError(null);
@@ -34,7 +36,7 @@ function Regex({ rule, onChange }: { rule?: RegexRule; onChange: Function }) {
 
   function handleErrorMessageChange(e: ChangeEvent<HTMLInputElement>) {
     if (!rule?.pattern) {
-      setPatternError("Pattern is required");
+      setPatternError('Pattern is required');
       return;
     }
     onChange(ValidationRuleTypes.regex, {
@@ -47,15 +49,11 @@ function Regex({ rule, onChange }: { rule?: RegexRule; onChange: Function }) {
     <>
       <Tooltip
         title="Enter a regex pattern to match against the response"
-        trigger={isMobile() ? "click" : "hover"}
+        trigger={isMobile() ? 'click' : 'hover'}
       >
         <InputStyle>
           <Text className="property-name">Pattern:</Text>
-          <input
-            className="number-input"
-            value={tempPattern}
-            onChange={handlePatternChange}
-          />
+          <input className="number-input" value={tempPattern} onChange={handlePatternChange} />
         </InputStyle>
       </Tooltip>
       {patternError && <Text type="danger">{patternError}</Text>}

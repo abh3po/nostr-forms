@@ -1,6 +1,7 @@
-import React from 'react';
 import { Modal, Typography } from 'antd';
-import { availableTemplates, FormTemplate } from '../../templates'; 
+import React from 'react';
+
+import { availableTemplates, FormTemplate } from '../../templates';
 import TemplateCard from '../TemplateCard';
 
 interface TemplateSelectorModalProps {
@@ -14,7 +15,6 @@ const TemplateSelectorModal: React.FC<TemplateSelectorModalProps> = ({
   onClose,
   onTemplateSelect,
 }) => {
-
   const handleCardClick = (template: FormTemplate) => {
     onTemplateSelect(template);
     onClose();
@@ -31,15 +31,13 @@ const TemplateSelectorModal: React.FC<TemplateSelectorModalProps> = ({
       onCancel={onClose}
       footer={null}
       width={600}
-      centered 
+      centered
     >
-      <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', padding: '20px 0' }}>
+      <div
+        style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', padding: '20px 0' }}
+      >
         {availableTemplates.map((template) => (
-          <TemplateCard
-            key={template.id}
-            template={template}
-            onClick={handleCardClick} 
-          />
+          <TemplateCard key={template.id} template={template} onClick={handleCardClick} />
         ))}
       </div>
     </Modal>

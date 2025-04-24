@@ -1,6 +1,6 @@
-import React from "react";
-import { Form, Input, Row, Tooltip, InputRef } from "antd";
-import { NumberConstraint } from "@formstr/sdk/dist/interfaces";
+import { NumberConstraint } from '@formstr/sdk/dist/interfaces';
+import { Form, Input, Row, Tooltip, InputRef } from 'antd';
+import React from 'react';
 
 interface Constraints {
   max?: number;
@@ -26,11 +26,7 @@ export const NumberConstraints: React.FC<NumberConstraintsProps> = ({
     const minValue = minRef.current?.input?.value
       ? Number(minRef.current?.input?.value)
       : undefined;
-    if (
-      maxValue !== undefined &&
-      minValue !== undefined &&
-      maxValue < minValue
-    ) {
+    if (maxValue !== undefined && minValue !== undefined && maxValue < minValue) {
       showError(true);
       onConstraintsChange(null);
     } else {
@@ -42,14 +38,14 @@ export const NumberConstraints: React.FC<NumberConstraintsProps> = ({
     }
   };
   return (
-    <Row justify={"space-between"}>
-      <Tooltip open={error} title={"Max value should be more than min value"}>
+    <Row justify={'space-between'}>
+      <Tooltip open={error} title={'Max value should be more than min value'}>
         <Row>
-          <Form.Item label={"Enter the minimum allowed number(optional)"}>
+          <Form.Item label={'Enter the minimum allowed number(optional)'}>
             <Input
               defaultValue={numberConstraints?.min}
               ref={(elem) => (minRef.current = elem)}
-              type={"number"}
+              type={'number'}
               onChange={() => {
                 handleOnChange();
               }}
@@ -57,11 +53,11 @@ export const NumberConstraints: React.FC<NumberConstraintsProps> = ({
           </Form.Item>
         </Row>
         <Row>
-          <Form.Item label={"Enter the maximum allowed number(optional)"}>
+          <Form.Item label={'Enter the maximum allowed number(optional)'}>
             <Input
               defaultValue={numberConstraints?.max}
               ref={(elem) => (maxRef.current = elem)}
-              type={"number"}
+              type={'number'}
               onChange={() => {
                 handleOnChange();
               }}

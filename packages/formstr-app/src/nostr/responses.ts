@@ -1,5 +1,6 @@
-import { Event, Filter, SimplePool, SubCloser, getEventHash, utils } from "nostr-tools";
-import { getDefaultRelays } from "./common"
+import { Event, Filter, SimplePool, SubCloser } from 'nostr-tools';
+
+import { getDefaultRelays } from './common';
 
 export const fetchFormResponses = (
   pubKey: string,
@@ -12,11 +13,11 @@ export const fetchFormResponses = (
   let relayList = [...(relays || []), ...getDefaultRelays()];
   const filter: Filter = {
     kinds: [1069],
-    "#a": [`30168:${pubKey}:${formId}`],
+    '#a': [`30168:${pubKey}:${formId}`],
   };
   if (allowedPubkeys) filter.authors = allowedPubkeys;
-  let closer = pool.subscribeMany(relayList, [filter],  {
-    onevent: handleResponseEvent
-  })
+  let closer = pool.subscribeMany(relayList, [filter], {
+    onevent: handleResponseEvent,
+  });
   return closer;
 };

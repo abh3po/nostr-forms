@@ -1,6 +1,7 @@
-import { ValidationRuleTypes, RangeRule } from "@formstr/sdk/dist/interfaces";
-import { Typography } from "antd";
-import { InputStyle } from "./validation.style";
+import { ValidationRuleTypes, RangeRule } from '@formstr/sdk/dist/interfaces';
+import { Typography } from 'antd';
+
+import { InputStyle } from './validation.style';
 
 const { Text } = Typography;
 

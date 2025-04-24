@@ -1,30 +1,26 @@
-import { Field, Tag, Option, Response } from "@formstr/sdk/dist/formstr/nip101";
-import FillerStyle from "./formFiller.style";
-import FormTitle from "../CreateFormNew/components/FormTitle";
-import {
-  Link,
-  useNavigate,
-  useParams,
-  useSearchParams,
-} from "react-router-dom";
-import { useEffect, useState } from "react";
-import { Button, Form, Spin, Typography } from "antd";
-import { ThankYouScreen } from "./ThankYouScreen";
-import { SubmitButton } from "./SubmitButton/submit";
-import { isMobile } from "../../utils/utility";
-import { ReactComponent as CreatedUsingFormstr } from "../../Images/created-using-formstr.svg";
-import Markdown from "react-markdown";
-import { Event, nip19 } from "nostr-tools";
-import { FormFields } from "./FormFields";
-import { RequestAccess } from "./RequestAccess";
-import { fetchFormTemplate } from "@formstr/sdk/dist/formstr/nip101/fetchFormTemplate";
-import { useProfileContext } from "../../hooks/useProfileContext";
-import { getAllowedUsers, getFormSpec } from "../../utils/formUtils";
-import { IFormSettings } from "../CreateFormNew/components/FormSettings/types";
-import { AddressPointer } from "nostr-tools/nip19";
-import { LoadingOutlined } from "@ant-design/icons";
-import { sendNotification } from "../../nostr/common";
-import { sendResponses } from "../../nostr/common";
+import { LoadingOutlined } from '@ant-design/icons';
+import { Field, Tag, Response } from '@formstr/sdk/dist/formstr/nip101';
+import { fetchFormTemplate } from '@formstr/sdk/dist/formstr/nip101/fetchFormTemplate';
+import { Button, Form, Spin, Typography } from 'antd';
+import { Event, nip19 } from 'nostr-tools';
+import { AddressPointer } from 'nostr-tools/nip19';
+import { useEffect, useState } from 'react';
+import Markdown from 'react-markdown';
+import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom';
+
+import { ReactComponent as CreatedUsingFormstr } from '../../Images/created-using-formstr.svg';
+import { useProfileContext } from '../../hooks/useProfileContext';
+import { sendNotification } from '../../nostr/common';
+import { getAllowedUsers, getFormSpec } from '../../utils/formUtils';
+import { isMobile } from '../../utils/utility';
+import { IFormSettings } from '../CreateFormNew/components/FormSettings/types';
+import FormTitle from '../CreateFormNew/components/FormTitle';
+
+import { FormFields } from './FormFields';
+import { RequestAccess } from './RequestAccess';
+import { SubmitButton } from './SubmitButton/submit';
+import { ThankYouScreen } from './ThankYouScreen';
+import FillerStyle from './formFiller.style';
 
 const { Text } = Typography;
 
@@ -33,23 +29,17 @@ interface FormFillerProps {
   embedded?: boolean;
 }
 
-export const FormFiller: React.FC<FormFillerProps> = ({
-  formSpec,
-  embedded,
-}) => {
+export const FormFiller: React.FC<FormFillerProps> = ({ formSpec, embedded }) => {
   const { naddr } = useParams();
   let isPreview = !!formSpec;
-  if (!isPreview && !naddr)
-    return <Text> Not enough data to render this url </Text>;
+  if (!isPreview && !naddr) return <Text> Not enough data to render this url </Text>;
   let decodedData;
   if (!isPreview) decodedData = nip19.decode(naddr!).data as AddressPointer;
   let pubKey = decodedData?.pubkey;
   let formId = decodedData?.identifier;
   let relays = decodedData?.relays;
   const { pubkey: userPubKey, requestPubkey } = useProfileContext();
-  const [formTemplate, setFormTemplate] = useState<Tag[] | null>(
-    formSpec || null
-  );
+  const [formTemplate, setFormTemplate] = useState<Tag[] | null>(formSpec || null);
   const [form] = Form.useForm();
   const [formSubmitted, setFormSubmitted] = useState(false);
   const [noAccess, setNoAccess] = useState<boolean>(false);
@@ -57,9 +47,9 @@ export const FormFiller: React.FC<FormFillerProps> = ({
   const [allowedUsers, setAllowedUsers] = useState<string[]>([]);
   const [formEvent, setFormEvent] = useState<Event | undefined>();
   const [searchParams] = useSearchParams();
-  const hideTitleImage = searchParams.get("hideTitleImage") === "true";
-  const viewKeyParams = searchParams.get("viewKey");
-  const hideDescription = searchParams.get("hideDescription") === "true";
+  const hideTitleImage = searchParams.get('hideTitleImage') === 'true';
+  const viewKeyParams = searchParams.get('viewKey');
+  const hideDescription = searchParams.get('hideDescription') === 'true';
   const navigate = useNavigate();
 
   if (!formId && !formSpec) {
@@ -67,26 +57,17 @@ export const FormFiller: React.FC<FormFillerProps> = ({
   }
 
   const onKeysFetched = (keys: Tag[] | null) => {
-    let editKey = keys?.find((k) => k[0] === "EditAccess")?.[1] || null;
+    let editKey = keys?.find((k) => k[0] === 'EditAccess')?.[1] || null;
     setEditKey(editKey);
   };
 
-  const initialize = async (
-    formAuthor: string,
-    formId: string,
-    relays?: string[]
-  ) => {
+  const initialize = async (formAuthor: string, formId: string, relays?: string[]) => {
     if (!formEvent) {
       const form = await fetchFormTemplate(formAuthor, formId, relays);
       if (!form) return;
       setFormEvent(form);
       setAllowedUsers(getAllowedUsers(form));
-      const formSpec = await getFormSpec(
-        form,
-        userPubKey,
-        onKeysFetched,
-        viewKeyParams
-      );
+      const formSpec = await getFormSpec(form, userPubKey, onKeysFetched, viewKeyParams);
       if (!formSpec) setNoAccess(true);
       setFormTemplate(formSpec);
     }
@@ -99,12 +80,8 @@ export const FormFiller: React.FC<FormFillerProps> = ({
     initialize(pubKey, formId, relays);
   }, [formEvent, formTemplate, userPubKey]);
 
-  const handleInput = (
-    questionId: string,
-    answer: string,
-    message?: string
-  ) => {
-    if (!answer || answer === "") {
+  const handleInput = (questionId: string, answer: string, message?: string) => {
+    if (!answer || answer === '') {
       form.setFieldValue(questionId, null);
       return;
     }
@@ -112,23 +89,19 @@ export const FormFiller: React.FC<FormFillerProps> = ({
   };
 
   const getResponseRelays = (formEvent: Event) => {
-    let formRelays = formEvent.tags
-      .filter((r) => r[0] === "relay")
-      ?.map((r) => r[1]);
+    let formRelays = formEvent.tags.filter((r) => r[0] === 'relay')?.map((r) => r[1]);
     let finalRelays = Array.from(new Set([...(relays || []), ...(formRelays || [])]));
-    return finalRelays
+    return finalRelays;
   };
 
   const onSubmit = async () => {
     let formResponses = form.getFieldsValue(true);
-    const responses: Response[] = Object.keys(formResponses).map(
-      (fieldId: string) => {
-        let answer = null;
-        let message = null;
-        if (formResponses[fieldId]) [answer, message] = formResponses[fieldId];
-        return ["response", fieldId, answer, JSON.stringify({ message })];
-      }
-    );
+    const responses: Response[] = Object.keys(formResponses).map((fieldId: string) => {
+      let answer = null;
+      let message = null;
+      if (formResponses[fieldId]) [answer, message] = formResponses[fieldId];
+      return ['response', fieldId, answer, JSON.stringify({ message })];
+    });
     sendNotification(formTemplate!, responses);
     setFormSubmitted(true);
   };
@@ -172,44 +145,30 @@ export const FormFiller: React.FC<FormFillerProps> = ({
     return (
       <div
         style={{
-          position: "fixed",
-          top: "50%",
-          left: "50%",
-          transform: "translate(-50%, -50%)",
-          width: "100%",
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
+          position: 'fixed',
+          top: '50%',
+          left: '50%',
+          transform: 'translate(-50%, -50%)',
+          width: '100%',
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
         }}
       >
         <Text
           style={{
-            textAlign: "center",
-            display: "block",
+            textAlign: 'center',
+            display: 'block',
           }}
         >
-          <Spin
-            indicator={
-              <LoadingOutlined
-                style={{ fontSize: 48, color: "#F7931A" }}
-                spin
-              />
-            }
-          />
+          <Spin indicator={<LoadingOutlined style={{ fontSize: 48, color: '#F7931A' }} spin />} />
         </Text>
       </div>
     );
-  } else if (
-    !isPreview &&
-    formEvent?.content !== "" &&
-    !userPubKey &&
-    !viewKeyParams
-  ) {
+  } else if (!isPreview && formEvent?.content !== '' && !userPubKey && !viewKeyParams) {
     return (
       <>
-        <Text>
-          This form is access controlled and requires login to continue
-        </Text>
+        <Text>This form is access controlled and requires login to continue</Text>
         <Button
           onClick={() => {
             requestPubkey();
@@ -230,11 +189,11 @@ export const FormFiller: React.FC<FormFillerProps> = ({
   }
   let name: string, settings: IFormSettings, fields: Field[];
   if (formTemplate) {
-    name = formTemplate.find((tag) => tag[0] === "name")?.[1] || "";
+    name = formTemplate.find((tag) => tag[0] === 'name')?.[1] || '';
     settings = JSON.parse(
-      formTemplate.find((tag) => tag[0] === "settings")?.[1] || "{}"
+      formTemplate.find((tag) => tag[0] === 'settings')?.[1] || '{}',
     ) as IFormSettings;
-    fields = formTemplate.filter((tag) => tag[0] === "field") as Field[];
+    fields = formTemplate.filter((tag) => tag[0] === 'field') as Field[];
 
     return (
       <FillerStyle $isPreview={isPreview}>
@@ -259,9 +218,7 @@ export const FormFiller: React.FC<FormFillerProps> = ({
             <Form
               form={form}
               onFinish={() => {}}
-              className={
-                hideDescription ? "hidden-description" : "with-description"
-              }
+              className={hideDescription ? 'hidden-description' : 'with-description'}
             >
               <div>
                 <FormFields fields={fields} handleInput={handleInput} />
@@ -274,13 +231,8 @@ export const FormFiller: React.FC<FormFillerProps> = ({
               <CreatedUsingFormstr />
             </Link>
             {!isMobile() && (
-              <a
-                href="https://github.com/abhay-raizada/nostr-forms"
-                className="foss-link"
-              >
-                <Text className="text-style">
-                  Formstr is free and Open Source
-                </Text>
+              <a href="https://github.com/abhay-raizada/nostr-forms" className="foss-link">
+                <Text className="text-style">Formstr is free and Open Source</Text>
               </a>
             )}
           </div>
@@ -288,8 +240,8 @@ export const FormFiller: React.FC<FormFillerProps> = ({
         {embedded ? (
           formSubmitted && (
             <div className="embed-submitted">
-              {" "}
-              <Text>Response Submitted</Text>{" "}
+              {' '}
+              <Text>Response Submitted</Text>{' '}
             </div>
           )
         ) : (

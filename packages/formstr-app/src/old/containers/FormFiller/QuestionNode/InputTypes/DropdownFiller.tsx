@@ -1,5 +1,5 @@
-import { V1AnswerSettings } from "@formstr/sdk/dist/interfaces";
-import { Select } from "antd";
+import { V1AnswerSettings } from '@formstr/sdk/dist/interfaces';
+import { Select } from 'antd';
 
 interface DropdownFillerProps {
   answerSettings: V1AnswerSettings;

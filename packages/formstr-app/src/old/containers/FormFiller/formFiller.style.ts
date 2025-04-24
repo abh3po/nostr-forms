@@ -1,5 +1,6 @@
-import styled from "styled-components";
-import { MEDIA_QUERY_MOBILE } from "../../../utils/css";
+import styled from 'styled-components';
+
+import { MEDIA_QUERY_MOBILE } from '../../../utils/css';
 export default styled.div<{
   $isPreview?: boolean;
 }>`
@@ -56,9 +57,9 @@ export default styled.div<{
   }
 
   .filler-question {
-    max-width: "100%";
-    margin: "5px";
-    text-align: "left";
+    max-width: '100%';
+    margin: '5px';
+    text-align: 'left';
   }
 
   .form-description {

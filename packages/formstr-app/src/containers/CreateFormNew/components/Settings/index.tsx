@@ -1,8 +1,10 @@
-import useFormBuilderContext from "../../hooks/useFormBuilderContext";
-import FormSettings from "../FormSettings";
-import AnswerSettings from "../AnswerSettings";
-import StyleWrapper from "./style";
-import { forwardRef } from "react";
+import { forwardRef } from 'react';
+
+import useFormBuilderContext from '../../hooks/useFormBuilderContext';
+import AnswerSettings from '../AnswerSettings';
+import FormSettings from '../FormSettings';
+
+import StyleWrapper from './style';
 
 // TODO: remove usage of any here
 function Settings(_props: any, ref: any) {

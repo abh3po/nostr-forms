@@ -1,9 +1,10 @@
-import { forwardRef } from "react";
-import { Divider } from "antd";
-import BasicMenu from "../BasicMenu";
-import InputsMenu from "../InputsMenu";
-import PreBuiltMenu from "../PreBuiltMenu";
-import Sidebar from "../../../../components/Sidebar";
+import { Divider } from 'antd';
+import { forwardRef } from 'react';
+
+import Sidebar from '../../../../components/Sidebar';
+import BasicMenu from '../BasicMenu';
+import InputsMenu from '../InputsMenu';
+import PreBuiltMenu from '../PreBuiltMenu';
 
 // TODO: remove usage of any here
 function SidebarMenu(_props: any, ref: any) {

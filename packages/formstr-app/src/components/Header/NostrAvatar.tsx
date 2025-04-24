@@ -1,8 +1,8 @@
-import { UserOutlined } from "@ant-design/icons";
-import { getDefaultRelays } from "@formstr/sdk";
-import { Avatar } from "antd";
-import { SimplePool } from "nostr-tools";
-import { FC, useEffect, useState } from "react";
+import { UserOutlined } from '@ant-design/icons';
+import { getDefaultRelays } from '@formstr/sdk';
+import { Avatar } from 'antd';
+import { SimplePool } from 'nostr-tools';
+import { FC, useEffect, useState } from 'react';
 
 const defaultRelays = getDefaultRelays();
 
@@ -31,7 +31,7 @@ export const NostrAvatar: FC<NostrAvatarProps> = ({ pubkey }) => {
   });
   return (
     <Avatar
-      src={profile?.picture || <UserOutlined style={{ color: "black" }} />}
+      src={profile?.picture || <UserOutlined style={{ color: 'black' }} />}
       alt={profile?.name}
     />
   );

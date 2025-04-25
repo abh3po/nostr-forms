@@ -161,8 +161,15 @@ export const MyForms = () => {
 
   useEffect(() => {
     if (userPub) {
+      // Reset state and fetch forms on mount
+      setFormEvents(new Map()); // Clear previous forms
+      setRefreshing(true); // Show loading spinner
       fetchMyForms();
     }
+    // Cleanup on unmount
+    return () => {
+      setRefreshing(false); // Reset refreshing state
+    };
   }, [userPub]);
 
   return (

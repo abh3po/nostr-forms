@@ -31,6 +31,11 @@ const MENU_OPTIONS = {
 
 const defaultRelays = getDefaultRelays();
 
+type FilterType = "local" | "shared" | "myForms" | "drafts";
+const SESSION_STORAGE_KEYS = {
+  DASHBOARD_FILTER: "dashboard_filter",
+};
+
 export const Dashboard = () => {
   const { state } = useLocation();
   const { pubkey } = useProfileContext();
@@ -39,9 +44,19 @@ export const Dashboard = () => {
     getItem(LOCAL_STORAGE_KEYS.LOCAL_FORMS) || []
   );
   const [nostrForms, setNostrForms] = useState<Map<string, Event>>(new Map());
-  const [filter, setFilter] = useState<
-    "local" | "shared" | "myForms" | "drafts"
-  >("local");
+  //const [filter, setFilter] = useState<"local" | "shared" | "myForms" | "drafts">("local");
+  const [filter, setFilter] = useState<FilterType>(() => {
+  
+    const storedFilter = sessionStorage.getItem(SESSION_STORAGE_KEYS.DASHBOARD_FILTER);
+   
+    const validFilters: FilterType[] = ["local", "shared", "myForms", "drafts"];
+    return storedFilter && validFilters.includes(storedFilter as FilterType)
+      ? (storedFilter as FilterType)
+      : "local"; // Default to "local" if invalid or not found
+  });
+  useEffect(() => {
+    sessionStorage.setItem(SESSION_STORAGE_KEYS.DASHBOARD_FILTER, filter);
+  },[filter])
 
   const { poolRef, isTemplateModalOpen, closeTemplateModal } = useApplicationContext();
 

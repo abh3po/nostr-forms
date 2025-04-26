@@ -131,30 +131,40 @@ export const Dashboard = () => {
   };
 
   const menu = (
-    <Menu
-    style={{ textAlign: "center"}}>
-      <Menu.Item 
-        key="local" 
-        onClick={() => setFilter("local")}
+    <Menu style={{ textAlign: "center" }}>
+      <Menu.Item key="local"
+      onClick={() => {
+        navigate(`${ROUTES.DASHBOARD_LOCAL}`);
+        setFilter("local");
+      }}
       >
         {MENU_OPTIONS.local}
       </Menu.Item>
       <Menu.Item
         key="shared"
-        onClick={() => setFilter("shared")}
+        onClick={() => {
+          navigate(`${ROUTES.DASHBOARD_SHARED}`); 
+          setFilter("shared")
+        }}
         disabled={!pubkey}
       >
         {MENU_OPTIONS.shared}
       </Menu.Item>
       <Menu.Item
         key="myForms"
-        onClick={() => setFilter("myForms")}
+        onClick={() => {
+          navigate(`${ROUTES.DASHBOARD_MY_FORMS}`);
+          setFilter("myForms");
+          }}
         disabled={!pubkey}
       >
         {MENU_OPTIONS.myForms}
       </Menu.Item>
-      <Menu.Item key="drafts" 
-      onClick={() => setFilter("drafts")}
+      <Menu.Item key="drafts"
+      onClick={() => {
+        navigate(`${ROUTES.DASHBOARD_DRAFTS}`);
+        setFilter("drafts");
+      }}
       >
         {MENU_OPTIONS.drafts}
       </Menu.Item>

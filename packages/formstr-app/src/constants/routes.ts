@@ -14,4 +14,8 @@ export const ROUTES = {
   RESPONSES_SECRET: "/s/:secretKey/:formId",
   DRAFT: "/drafts/:encodedForm",
   EMBEDDED: "/embedded/:formId",
+  DASHBOARD_LOCAL: "/dashboard/local",
+  DASHBOARD_SHARED: "/dashboard/shared",
+  DASHBOARD_MY_FORMS: "/dashboard/my-forms",
+  DASHBOARD_DRAFTS: "/dashboard/drafts",
 };

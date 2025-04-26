@@ -77,7 +77,7 @@ function Routing() {
       />
       <Route path={`${ROUTES.FORM_FILLER_NEW}/*`} element={<FormFiller />} />
       <Route
-        path={`${ROUTES.DASHBOARD}/*`}
+        path={`${ROUTES.DASHBOARD}/:filterType?`}
         element={withNostrHeaderWrapper(Dashboard)}
       />
     </Routes>

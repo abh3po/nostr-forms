@@ -1,6 +1,6 @@
-import { Button, Divider, Input, Typography, message, List, Avatar, Spin } from "antd";
+import { Button, Divider, Input, Typography, message, List, Avatar } from "antd";
 import AddNpubStyle from "../addNpub.style";
-import { ReactNode, useState, useEffect } from "react";
+import { ReactNode, useState, useRef} from "react";
 import { isValidNpub, isValidNip05Format, resolveNip05, isValidIdentifier, performNip50Search } from "./utils";
 import { nip19 } from "nostr-tools";
 import { CloseCircleOutlined, LoadingOutlined, SearchOutlined, UserOutlined } from "@ant-design/icons";
@@ -30,19 +30,25 @@ export const NpubList: React.FC<NpubListProps> = ({
   const [searchResults, setSearchResults] = useState<UserResult[]>([]);
   const [showResults, setShowResults] = useState<boolean>(false);
 
-  // Handle input changes and decide what to do with the input
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      if (searchInput && searchInput.length >= 3 && !isValidIdentifier(searchInput)) {
+  const debounceTimer = useRef<NodeJS.Timeout | null>(null);
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setSearchInput(value);
+
+    if (debounceTimer.current) {
+      clearTimeout(debounceTimer.current);
+    }
+
+    debounceTimer.current = setTimeout(() => {
+      if (value && value.length >= 3 && !isValidIdentifier(value)) {
         performUserSearch();
       } else {
         setSearchResults([]);
         setShowResults(false);
       }
     }, 500);
-
-    return () => clearTimeout(timer);
-  }, [searchInput]);
+  };
 
   const removeParticipant = (participant: string) => {
     const updatedList = new Set(NpubList);
@@ -174,7 +180,7 @@ export const NpubList: React.FC<NpubListProps> = ({
           <Input
             placeholder="Enter npub, NIP-05 (name@domain.com) or search by username"
             value={searchInput}
-            onChange={(e) => setSearchInput(e.target.value)}
+            onChange={handleInputChange}
             prefix={<SearchOutlined />}
             suffix={isProcessing ? <LoadingOutlined /> : null}
             style={{ marginBottom: 10 }}

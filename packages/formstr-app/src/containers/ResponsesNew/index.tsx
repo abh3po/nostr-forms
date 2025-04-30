@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Event, getPublicKey, nip19, nip44, SubCloser } from "nostr-tools";
 import { useParams, useSearchParams } from "react-router-dom";
 import { fetchFormResponses } from "../../nostr/responses"
@@ -14,14 +14,29 @@ import { Export } from "./Export";
 import { Field, Tag } from "../../nostr/types";
 import { useApplicationContext } from "../../hooks/useApplicationContext";
 import { getDefaultRelays } from "../../nostr/common";
-
+import { ZapModal } from "./zapModal";
+import { ThunderboltFilled } from "@ant-design/icons";
+import { fetchZapReceipts, formatCompact, ZapInfo } from "../../utils/zapUtils";
+import { fetchProfiles, ProfileInfo } from "../../utils/profileUtils";
 const { Text } = Typography;
+
+interface SelectedResponse {
+  pubkey: string;
+  lud16?: string;
+  name?: string;
+  eventId: string;
+}
 
 export const Response = () => {
   const [responses, setResponses] = useState<Event[] | undefined>(undefined);
   const [formEvent, setFormEvent] = useState<Event | undefined>(undefined);
   const [formSpec, setFormSpec] = useState<Tag[] | null | undefined>(undefined);
   const [editKey, setEditKey] = useState<string | undefined | null>();
+  const { profiles, setProfiles, poolRef } = useApplicationContext();
+  const [zapAmounts, setZapAmounts] = useState<Map<string, ZapInfo>>(new Map());
+  const [zapModalVisible, setZapModalVisible] = useState<boolean>(false);
+  const [selectedResponse, setSelectedResponse] = useState<SelectedResponse | null>(null);
+
   let { pubKey, formId, secretKey } = useParams();
   let [searchParams] = useSearchParams();
   const { pubkey: userPubkey, requestPubkey } = useProfileContext();
@@ -30,14 +45,21 @@ export const Response = () => {
   const handleResponseEvent = (event: Event) => {
     setResponses((prev: Event[] | undefined) => [...(prev || []), event]);
   };
-  let { poolRef } = useApplicationContext();
+
+  const relays = useMemo(() => getDefaultRelays(), []);
+
+  useEffect(() => {
+    if (responses?.length && poolRef?.current) {
+      fetchProfilesAndZaps();
+    }
+  }, [responses, poolRef?.current]);
 
   const initialize = async () => {
     if (!formId) return;
 
     if (!(pubKey || secretKey)) return;
 
-    if(!poolRef) return
+    if (!poolRef) return
 
     if (secretKey) {
       setEditKey(secretKey);
@@ -72,7 +94,7 @@ export const Response = () => {
     let allowedPubkeys;
     let pubkeys = getAllowedUsers(formEvent);
     if (pubkeys.length !== 0) allowedPubkeys = pubkeys;
-    let responseCloser =  fetchFormResponses(
+    let responseCloser = fetchFormResponses(
       pubKey!,
       formId,
       poolRef.current,
@@ -89,8 +111,53 @@ export const Response = () => {
     if (!formEvent && !responses) initialize();
     return () => {
       if (responseCloser) responseCloser.close()
-      }
+    }
   }, [poolRef]);
+
+
+  const fetchProfilesAndZaps = async () => {
+    if (!responses || !poolRef?.current) return;
+
+    const pubkeysSet = new Set(responses.map(r => r.pubkey));
+    const pubkeys = Array.from(pubkeysSet);
+    const responseIds = responses.map(r => r.id);
+
+    const missingPubkeys = pubkeys.filter(pubkey => !profiles.has(pubkey));
+    let newProfiles = new Map<string, ProfileInfo>();
+    if (missingPubkeys.length > 0) {
+      newProfiles = await fetchProfiles(missingPubkeys, poolRef.current, relays);
+    }
+
+    if (newProfiles.size > 0) {
+      const updatedProfiles = new Map(profiles);
+      newProfiles.forEach((profile, pubkey) => {
+        updatedProfiles.set(pubkey, profile);
+      });
+      setProfiles(updatedProfiles);
+    }
+
+    const zapData = await fetchZapReceipts(responseIds, poolRef.current, relays);
+    setZapAmounts(zapData);
+  };
+
+  const handleZapClick = (responseEvent: Event) => {
+    const pubkey = responseEvent.pubkey;
+    const profile = profiles.get(pubkey);
+
+    if (!profile?.lud16) {
+      console.log("No lightning address found for this user");
+      return;
+    }
+
+    setSelectedResponse({
+      pubkey,
+      lud16: profile.lud16,
+      name: profile.displayName || profile.name,
+      eventId: responseEvent.id
+    });
+
+    setZapModalVisible(true);
+  };
 
   const getResponderCount = () => {
     if (!responses) return 0;
@@ -146,6 +213,7 @@ export const Response = () => {
         [key: string]: string;
       } = {
         key: response.pubkey,
+        eventId: response.id,
         createdAt: new Date(response.created_at * 1000).toDateString(),
         authorPubkey: nip19.npubEncode(response.pubkey),
         responsesCount: pubkeyResponses.length.toString(),
@@ -186,31 +254,73 @@ export const Response = () => {
       dataIndex: string;
       fixed?: "left" | "right";
       width?: number;
-      render?: (data: string) => JSX.Element;
+      render?: (data: string, record: any) => JSX.Element;
     }> = [
-      {
-        key: "author",
-        title: "Author",
-        fixed: "left",
-        dataIndex: "authorPubkey",
-        width: 1.2,
-        render: (data: string) => (
-          <a
-            href={`https://njump.me/${data}`}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            {data}
-          </a>
-        ),
-      },
-      {
-        key: "responsesCount",
-        title: "Submissions",
-        dataIndex: "responsesCount",
-        width: 1.2,
-      },
-    ];
+        {
+          key: "author",
+          title: "Author",
+          fixed: "left",
+          dataIndex: "authorPubkey",
+          width: 1,
+          render: (data: string, record: any) => {
+            const pubkey = record.key;
+            const eventId = record.eventId;
+            const profile = profiles.get(pubkey);
+            const zapInfo = zapAmounts.get(eventId);
+            const hasLud16 = profile && profile.lud16;
+            const truncatedNpub = data.length > 14
+              ? `${data.substring(0, 8)}...${data.substring(data.length - 6)}`
+              : data;
+
+            return (
+              <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '8px' }}>
+                <a
+                  href={`https://njump.me/${data}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  title={data}
+                >
+                  {profile?.name || truncatedNpub}
+                </a>
+
+                <div style={{ display: 'flex', alignItems: 'center' }}>
+                  {hasLud16 && (
+                    <Button
+                      type="text"
+                      size="small"
+                      icon={<ThunderboltFilled style={{ color: '#f5a623' }} />}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleZapClick({
+                          id: eventId,
+                          pubkey,
+                          content: '',
+                          tags: [],
+                          created_at: 0,
+                          kind: 0,
+                          sig: ''
+                        } as Event);
+                      }}
+                    />
+                  )}
+
+                  {zapInfo && (
+                    <span style={{ fontSize: '0.85rem', color: '#f5a623' }}>
+                      {formatCompact(zapInfo.amount)} ({zapInfo.count})
+                    </span>
+                  )}
+                </div>
+              </div>
+            );
+          },
+        },
+        {
+          key: "responsesCount",
+          title: "Submissions",
+          dataIndex: "responsesCount",
+          width: 1.2,
+        },
+      ];
     const rightColumns: Array<{
       key: string;
       title: string;
@@ -219,13 +329,13 @@ export const Response = () => {
       width?: number;
       render?: (data: string) => JSX.Element;
     }> = [
-      {
-        key: "createdAt",
-        title: "Created At",
-        dataIndex: "createdAt",
-        width: 1,
-      },
-    ];
+        {
+          key: "createdAt",
+          title: "Created At",
+          dataIndex: "createdAt",
+          width: 1,
+        },
+      ];
     let uniqueQuestionIds: Set<string> = new Set();
     responses?.forEach((response: Event) => {
       let responseTags = getInputs(response);
@@ -304,7 +414,20 @@ export const Response = () => {
             scroll={{ x: isMobile() ? 900 : 1500, y: "calc(65% - 400px)" }}
           />
         </div>
+        {selectedResponse && (
+          <ZapModal
+            visible={zapModalVisible}
+            onCancel={() => setZapModalVisible(false)}
+            recipientPubkey={selectedResponse.pubkey}
+            lud16={selectedResponse.lud16 || ''}
+            responseId={selectedResponse.eventId}
+            formId={formId || ''}
+            recipientName={selectedResponse.name}
+            relays={relays}
+          />
+        )}
       </ResponseWrapper>
     </div>
   );
 };
+

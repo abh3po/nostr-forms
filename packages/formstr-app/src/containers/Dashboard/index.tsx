@@ -29,23 +29,47 @@ const MENU_OPTIONS = {
   drafts: "Drafts",
 };
 
+type FilterType = "local" | "shared" | "myForms" | "drafts";
+
+type RouteMapType = {
+  [key: string]: FilterType;
+};
+
+const ROUTE_TO_FILTER_MAP: RouteMapType = {
+  [ROUTES.DASHBOARD_LOCAL]: "local",
+  [ROUTES.DASHBOARD_SHARED]: "shared",
+  [ROUTES.DASHBOARD_MY_FORMS]: "myForms",
+  [ROUTES.DASHBOARD_DRAFTS]: "drafts",
+  [ROUTES.DASHBOARD]: "local",
+};
+
 const defaultRelays = getDefaultRelays();
 
 export const Dashboard = () => {
   const { state } = useLocation();
+  const location = useLocation();
   const { pubkey } = useProfileContext();
   const [showFormDetails, setShowFormDetails] = useState<boolean>(!!state);
   const [localForms, setLocalForms] = useState<ILocalForm[]>(
     getItem(LOCAL_STORAGE_KEYS.LOCAL_FORMS) || []
   );
   const [nostrForms, setNostrForms] = useState<Map<string, Event>>(new Map());
-  const [filter, setFilter] = useState<
-    "local" | "shared" | "myForms" | "drafts"
-  >("local");
+  
+  const getCurrentFilterFromPath = (): FilterType => {
+    const path = location.pathname;
+    return ROUTE_TO_FILTER_MAP[path] || "local";
+  };
+  
+  const [filter, setFilter] = useState<FilterType>(getCurrentFilterFromPath());
 
   const { poolRef, isTemplateModalOpen, closeTemplateModal } = useApplicationContext();
 
   const subCloserRef = useRef<SubCloser | null>(null);
+
+  useEffect(() => {
+    const currentFilter = getCurrentFilterFromPath();
+    setFilter(currentFilter);
+  }, [location.pathname]);
 
   const handleEvent = (event: Event) => {
     setNostrForms((prevMap) => {
@@ -130,41 +154,42 @@ export const Dashboard = () => {
     return null;
   };
 
+  const handleFilterChange = (selectedFilter: FilterType) => {
+    const routeMap = {
+      local: ROUTES.DASHBOARD_LOCAL,
+      shared: ROUTES.DASHBOARD_SHARED,
+      myForms: ROUTES.DASHBOARD_MY_FORMS,
+      drafts: ROUTES.DASHBOARD_DRAFTS
+    };
+    
+    navigate(routeMap[selectedFilter]);
+  };
+
   const menu = (
     <Menu style={{ textAlign: "center" }}>
-      <Menu.Item key="local"
-      onClick={() => {
-        navigate(`${ROUTES.DASHBOARD_LOCAL}`);
-        setFilter("local");
-      }}
+      <Menu.Item 
+        key="local"
+        onClick={() => handleFilterChange("local")}
       >
         {MENU_OPTIONS.local}
       </Menu.Item>
       <Menu.Item
         key="shared"
-        onClick={() => {
-          navigate(`${ROUTES.DASHBOARD_SHARED}`); 
-          setFilter("shared")
-        }}
+        onClick={() => handleFilterChange("shared")}
         disabled={!pubkey}
       >
         {MENU_OPTIONS.shared}
       </Menu.Item>
       <Menu.Item
         key="myForms"
-        onClick={() => {
-          navigate(`${ROUTES.DASHBOARD_MY_FORMS}`);
-          setFilter("myForms");
-          }}
+        onClick={() => handleFilterChange("myForms")}
         disabled={!pubkey}
       >
         {MENU_OPTIONS.myForms}
       </Menu.Item>
-      <Menu.Item key="drafts"
-      onClick={() => {
-        navigate(`${ROUTES.DASHBOARD_DRAFTS}`);
-        setFilter("drafts");
-      }}
+      <Menu.Item 
+        key="drafts"
+        onClick={() => handleFilterChange("drafts")}
       >
         {MENU_OPTIONS.drafts}
       </Menu.Item>

@@ -1,5 +1,6 @@
 import { Routes, Route, Navigate } from "react-router-dom";
 import PublicForms from "../../containers/PublicForms";
+import PublicPolls from "../../containers/PublicPolls";
 import { ROUTES } from "../../constants/routes";
 import { FormFillerOld } from "../../old/containers/FormFiller";
 import { FormFiller } from "../../containers/FormFillerNew";
@@ -53,6 +54,7 @@ function Routing() {
         path={`${ROUTES.PUBLIC_FORMS}/*`}
         element={withNostrHeaderWrapper(PublicForms)}
       />
+      <Route path={`${ROUTES.PUBLIC_POLLS}/*`} element={withNostrHeaderWrapper(PublicPolls)} />
       <Route path={`${ROUTES.FORM_FILLER}/*`} element={<FormFillerOld />} />
       <Route path={`${ROUTES.FORM_FILLER_OLD}/*`} element={<FormFillerOld />} />
       <Route

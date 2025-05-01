@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Button, Card, Divider, Table, Typography, Skeleton } from "antd";
+import { Button, Card, Divider, Typography, Skeleton, Select } from "antd";
 import { naddrUrl } from "../../utils/utility";
 import StyleWrapper from "./style";
 import { getPublicForms } from "../../nostr/publicForms";
@@ -7,12 +7,15 @@ import { Event } from "nostr-tools";
 import { getDefaultRelays } from "../../nostr/common";
 import { useNavigate } from "react-router-dom";
 import ReactMarkdown from "react-markdown";
+import { ROUTES } from "../../constants/routes";
+
+const { Option } = Select;
 
 function PublicForms() {
   const [isLoading, setIsLoading] = useState(false);
   const [forms, setForms] = useState<Event[]>([]);
-
   const navigate = useNavigate();
+  
   useEffect(() => {
     const handleFormEvent = (event: Event) => {
       setForms(prevForms => {
@@ -20,12 +23,13 @@ function PublicForms() {
           return prevForms;
         }
         return [...prevForms, event];
-      });      setIsLoading(false);  
+      });      
+      setIsLoading(false);  
     };
 
     const loadingTimeout = setTimeout(() => {
       setIsLoading(false); 
-  }, 10000); 
+    }, 10000); 
   
     setIsLoading(true);
     getPublicForms(getDefaultRelays(), handleFormEvent);
@@ -36,8 +40,25 @@ function PublicForms() {
     
   }, []);
 
+  const handleGlobalChange = (value: string) => {
+    if (value === 'polls') {
+      navigate(ROUTES.PUBLIC_POLLS);
+    }
+  };
+
   return (
     <StyleWrapper>
+      <div style={{ textAlign: 'center', marginTop: 20, marginBottom: 20 }}>
+        <Select
+          style={{ width: 240 }}
+          defaultValue="forms"
+          onChange={handleGlobalChange}
+        >
+          <Option value="forms">Global Forms</Option>
+          <Option value="polls">Global Polls</Option>
+        </Select>
+      </div>
+      
       {isLoading ? (
         Array(3).fill(0).map((_, index) => (
           <Card key={index} style={{ margin: 30 }}>
@@ -76,7 +97,6 @@ function PublicForms() {
             const description = settings?.description ?? "";
             const truncatedDescription = description.trim().substring(0, 200) + (description.length > 200 ? "..." : "");
             
-
             return (
               <Card
                 key={f.id} 
@@ -97,7 +117,6 @@ function PublicForms() {
                   }}
                 >
                   <ReactMarkdown>
-                    {}
                     {truncatedDescription}
                   </ReactMarkdown>
                 </div>
@@ -112,7 +131,6 @@ function PublicForms() {
                 >
                   <Button
                     onClick={() => {
-                      
                       navigate(naddrUrl(f.pubkey, formId, getDefaultRelays()));
                     }}
                     style={{ color: "green", borderColor: "green" }}
@@ -123,28 +141,24 @@ function PublicForms() {
                   <Typography.Text
                     style={{ color: "grey", fontSize: 12, margin: 10 }}
                   >
-                    {}
                     {new Date(f.created_at * 1000).toLocaleDateString()}
                   </Typography.Text>
                 </div>
               </Card>
             );
           } else {
-            
             return (
               <Card
                 key={f.id} 
                 title="Encrypted Content"
                 style={{ margin: 30, fontSize: 12, color: "grey" }}
               >
-                {" "}
                 {new Date(f.created_at * 1000).toLocaleDateString()}
               </Card>
             );
           }
         })
       ) : (
-        
         <Typography.Text style={{ display: 'block', textAlign: 'center', margin: '40px' }}>
           No public forms found on the connected relays.
         </Typography.Text>

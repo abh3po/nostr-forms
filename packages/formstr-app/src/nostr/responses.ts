@@ -1,4 +1,4 @@
-import { Event, Filter, SimplePool, SubCloser, getEventHash, utils } from "nostr-tools";
+import { Event, Filter, SimplePool, SubCloser } from "nostr-tools";
 import { getDefaultRelays } from "./common"
 
 export const fetchFormResponses = (

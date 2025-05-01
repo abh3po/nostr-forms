@@ -68,18 +68,22 @@ export const ProfileProvider: FC<ProfileProviderProps> = ({ children }) => {
   };
 
   const requestPubkey = async () => {
-    setUsingNip07(true);
-    let publicKey = await window.nostr.getPublicKey();
-    setPubkey(publicKey);
-    setItem(LOCAL_STORAGE_KEYS.PROFILE, { pubkey: publicKey });
-    setUsingNip07(false);
-    return pubkey;
+    try{
+      setUsingNip07(true);
+      let publicKey = await window.nostr.getPublicKey();
+      setPubkey(publicKey);
+      setItem(LOCAL_STORAGE_KEYS.PROFILE, { pubkey: publicKey });
+      return pubkey;
+    } catch (error) {
+      console.error("Error getting public key:", error);
+      return undefined;
+    } finally {
+      setUsingNip07(false);
+    }
   };
 
   return (
-    <ProfileContext.Provider
-      value={{ pubkey, requestPubkey, logout, userRelays }}
-    >
+    <ProfileContext.Provider value={{ pubkey, requestPubkey, logout , userRelays}}>
       {children}
       <Modal
         open={usingNip07}

@@ -42,3 +42,9 @@ export const KINDS = {
   myFormsList: 14083,
   formTemplate: 30168,
 };
+
+export type Profile = {
+  event: Event;
+  picture: string;
+  [key: string]: any;
+};

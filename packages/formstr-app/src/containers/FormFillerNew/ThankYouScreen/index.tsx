@@ -1,12 +1,16 @@
 import { Modal } from "antd";
 import ThankYouStyle from "./thankyou.style";
-
+import { CopyButton } from "../../../components/CopyButton";
 export const ThankYouScreen = ({
   isOpen,
   onClose,
+  submittedAs,
+  tempNsec,
 }: {
   isOpen: boolean;
   onClose: () => void;
+  submittedAs: string;
+  tempNsec: string;
 }) => {
   return (
     <Modal open={isOpen} onCancel={onClose} closable={true} footer={null}>
@@ -17,6 +21,30 @@ export const ThankYouScreen = ({
             className="thank-you-image"
             alt="Thank you"
           />
+          <div>
+            <div>
+              <p>
+                <strong>Submitted as:</strong>
+                <br />
+                <span>{submittedAs}</span>
+                <CopyButton 
+                  getText={() => submittedAs} 
+                  textBefore="" 
+                  textAfter="" 
+                />
+              </p>
+              <p>
+                <strong>Temporary nsec:</strong> 
+                <br />
+                <span>{tempNsec}</span>
+                <CopyButton 
+                  getText={() => tempNsec} 
+                  textBefore="" 
+                  textAfter="" 
+                />
+              </p>
+            </div>
+          </div>
         </div>
       </ThankYouStyle>
     </Modal>

@@ -3,7 +3,7 @@ import { Button, FormInstance, Dropdown, MenuProps } from "antd";
 import React, { useState } from "react";
 import { sendResponses } from "../../../nostr/common";
 import { RelayPublishModal } from "../../../components/RelayPublishModal/RelaysPublishModal";
-import { Event, generateSecretKey } from "nostr-tools";
+import { Event, generateSecretKey, getPublicKey, nip19 } from "nostr-tools";
 import { Response } from "../../../nostr/types";
 
 interface SubmitButtonProps {
@@ -11,7 +11,7 @@ interface SubmitButtonProps {
   edit: boolean;
   form: FormInstance;
   formEvent: Event;
-  onSubmit: () => Promise<void>;
+  onSubmit: (submittedAs: string, tempNsec: string) => Promise<void>;
   disabled?: boolean;
   disabledMessage?: string;
   relays: string[];
@@ -48,8 +48,43 @@ export const SubmitButton: React.FC<SubmitButtonProps> = ({
       }
     );
     let anonUser = null;
+    let submittedAsValue = '';
+    let tempNsecValue = '';
     if (anonymous) {
       anonUser = generateSecretKey();
+      const anonPubkey = getPublicKey(anonUser);
+      submittedAsValue = nip19.npubEncode(anonPubkey);
+      tempNsecValue = nip19.nsecEncode(anonUser);
+    } else {
+      if (!window.nostr) {
+        console.error('NIP-07 extension not detected');
+        return;
+      }
+      
+      try {
+        const userPubkey = await window.nostr.getPublicKey();
+        if (!userPubkey) {
+          console.error('No public key found');
+          return;
+        }
+        
+        submittedAsValue = nip19.npubEncode(userPubkey);
+
+        const unsignedEvent = {
+          kind: 1,
+          created_at: Math.floor(Date.now() / 1000),
+          tags: [["r", formId]],
+          content: "Form submission reference",
+          pubkey: userPubkey
+        };
+        
+        const signedEvent = await window.nostr.signEvent(unsignedEvent);
+        
+        tempNsecValue = signedEvent.sig;
+      } catch (error) {
+        console.error('Failed to sign event:', error);
+        return;
+      }
     }
     sendResponses(
       pubKey,
@@ -61,7 +96,7 @@ export const SubmitButton: React.FC<SubmitButtonProps> = ({
       (url: string) => setAcceptedRelays((prev) => [...prev, url])
     ).then((res: any) => {
       setIsSubmitting(false);
-      onSubmit();
+      onSubmit(submittedAsValue, tempNsecValue);
     });
   };
 

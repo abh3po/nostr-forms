@@ -56,6 +56,8 @@ export const FormFiller: React.FC<FormFillerProps> = ({
   const [editKey, setEditKey] = useState<string | undefined | null>();
   const [allowedUsers, setAllowedUsers] = useState<string[]>([]);
   const [formEvent, setFormEvent] = useState<Event | undefined>();
+  const [submittedAs, setSubmittedAs] = useState<string>('');
+  const [tempNsec, setTempNsec] = useState<string>('');
   const [searchParams] = useSearchParams();
   const hideTitleImage = searchParams.get("hideTitleImage") === "true";
   const viewKeyParams = searchParams.get("viewKey");
@@ -119,7 +121,7 @@ export const FormFiller: React.FC<FormFillerProps> = ({
     return finalRelays
   };
 
-  const onSubmit = async () => {
+  const onSubmit = async (submittedAsValue: string, tempNsecValue: string) => {
     let formResponses = form.getFieldsValue(true);
     const responses: Response[] = Object.keys(formResponses).map(
       (fieldId: string) => {
@@ -129,6 +131,8 @@ export const FormFiller: React.FC<FormFillerProps> = ({
         return ["response", fieldId, answer, JSON.stringify({ message })];
       }
     );
+    setSubmittedAs(submittedAsValue);
+    setTempNsec(tempNsecValue);
     sendNotification(formTemplate!, responses);
     setFormSubmitted(true);
   };
@@ -299,6 +303,8 @@ export const FormFiller: React.FC<FormFillerProps> = ({
               let navigationUrl = editKey ? `/r/${pubKey}/${formId}` : `/`;
               navigate(navigationUrl);
             }}
+            submittedAs={submittedAs}
+            tempNsec={tempNsec}
           />
         )}
       </FillerStyle>

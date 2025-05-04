@@ -1,59 +1,74 @@
+import React, { ChangeEvent, useRef, useState } from "react";
 import QuestionCard from "../QuestionCard";
-import { Button, Input } from "antd";
+import { Button, Input, message , Typography} from "antd"; 
 import FormTitle from "../FormTitle";
 import StyleWrapper from "./style";
 import DescriptionStyle from "./description.style";
 import useFormBuilderContext from "../../hooks/useFormBuilderContext";
-import React, { ChangeEvent, useRef, useState } from "react";
 import { Reorder, motion, useDragControls, DragControls } from "framer-motion";
 import { Field } from "../../../../nostr/types";
 import { isMobile } from "../../../../utils/utility";
+import AIFormGeneratorModal from "../AIFormGeneratorModal";
+import { ProcessedFormData } from "../../../../utils/aiProcessor";
 
+const { Text } = Typography;
 interface FloatingButtonProps {
   onClick: () => void;
   containerRef: React.RefObject<HTMLDivElement>;
 }
-
 const FloatingButton = ({ onClick, containerRef }: FloatingButtonProps) => {
   const dragControls = useDragControls();
   const [isDragging, setIsDragging] = useState(false);
-  const [position, setPosition] = useState({ x: 0, y: 0 });
 
   return (
     <motion.div
       drag
       dragControls={dragControls}
       dragMomentum={false}
-      dragElastic={0}
+      dragElastic={0.1}
       dragConstraints={containerRef}
       onDragStart={() => setIsDragging(true)}
-      onDragEnd={() => {
-        setIsDragging(false);
+      onDragEnd={() => setIsDragging(false)}
+      style={{
+        position: "fixed",
+        right: "30px",
+        bottom: "30px",
+        zIndex: 1000,
+        cursor: "grab",
       }}
-      animate={position}
+      whileTap={{ cursor: "grabbing" }}
       whileDrag={{ scale: 1.1 }}
       whileHover={{ scale: 1.05 }}
     >
       <Button
         type="primary"
+        shape="circle"
         size="large"
+        icon={<span style={{ fontSize: "24px", lineHeight: "0" }}>+</span>}
         onClick={() => {
           if (!isDragging) onClick();
         }}
-      >
-        +
-      </Button>
+        style={{
+          width: 56,
+          height: 56,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
+        }}
+      />
     </motion.div>
   );
 };
-
 interface DraggableQuestionItemProps {
   question: Field;
   onEdit: (question: Field, tempId: string) => void;
   onReorderKey: (keyType: "UP" | "DOWN", tempId: string) => void;
   firstQuestion: boolean;
   lastQuestion: boolean;
+  dragControls?: DragControls;
 }
+
 const DraggableQuestionItem: React.FC<DraggableQuestionItemProps> = ({
   question,
   onEdit,
@@ -67,17 +82,16 @@ const DraggableQuestionItem: React.FC<DraggableQuestionItemProps> = ({
   return (
     <Reorder.Item
       value={question}
-      key={question[1]} 
-      dragListener={!currentlyMobile} 
+      key={question[1]}
+      dragListener={!currentlyMobile}
       dragControls={dragControls}
-
       whileDrag={{
         scale: 1.03,
-        boxShadow: "0px 5px 15px rgba(0, 0, 0, 0.2)", 
-        zIndex: 10, 
-        cursor: "grabbing", 
+        boxShadow: "0px 5px 15px rgba(0, 0, 0, 0.2)",
+        zIndex: 10,
+        cursor: "grabbing",
       }}
-      style={{ cursor: "grab" }} 
+      style={{ cursor: "grab" }}
     >
       <QuestionCard
         question={question}
@@ -85,15 +99,15 @@ const DraggableQuestionItem: React.FC<DraggableQuestionItemProps> = ({
         onReorderKey={onReorderKey}
         firstQuestion={firstQuestion}
         lastQuestion={lastQuestion}
-        dragControls={dragControls} 
+        dragControls={dragControls}
       />
     </Reorder.Item>
   );
 };
 
 export const QuestionsList = () => {
+  const [isAiModalOpen, setIsAiModalOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
-
   const {
     formSettings,
     questionsList,
@@ -103,6 +117,7 @@ export const QuestionsList = () => {
     updateQuestionsList,
     setIsLeftMenuOpen,
     bottomElementRef,
+    updateFormName,
   } = useFormBuilderContext();
 
   const handleDescriptionChange = (e: ChangeEvent<HTMLTextAreaElement>) => {
@@ -114,25 +129,38 @@ export const QuestionsList = () => {
     const selectedQuestionIndex = questions.findIndex(
       (question: Field) => question[1] === tempId
     );
-    if (
-      (selectedQuestionIndex === 0 && keyType === "UP") ||
-      (selectedQuestionIndex === questions.length - 1 && keyType === "DOWN")
-    ) {
-      return;
-    }
-    const order = keyType === "UP" ? -1 : +1;
-    if (selectedQuestionIndex !== -1) {
-      const replaceQuestion = questions[selectedQuestionIndex + order];
-      questions[selectedQuestionIndex + order] =
-        questions[selectedQuestionIndex];
-      questions[selectedQuestionIndex] = replaceQuestion;
-    }
+    const targetIndex = keyType === "UP" ? selectedQuestionIndex - 1 : selectedQuestionIndex + 1;
+    if (targetIndex < 0 || targetIndex >= questions.length) return;
+    [questions[selectedQuestionIndex], questions[targetIndex]] = [
+      questions[targetIndex],
+      questions[selectedQuestionIndex],
+    ];
     updateQuestionsList(questions);
   };
-
   const onPlusButtonClick = () => {
     setIsLeftMenuOpen(true);
   };
+    const handleAIFormGenerated = (processedData: ProcessedFormData) => {
+        try {
+            console.log("Applying processed AI data:", processedData);
+            if (processedData.formName) {
+                updateFormName(processedData.formName);
+            }
+            if (processedData.description) {
+                updateFormSetting({ description: processedData.description });
+            }
+            if (processedData.fields && processedData.fields.length > 0) {
+                updateQuestionsList(processedData.fields);
+                setQuestionIdInFocus(undefined);
+            } else {
+                message.warning("AI generated data, but no fields were created.");
+            }
+        } catch (error) {
+            console.error("Error applying AI generated form data:", error);
+            const errorMsg = error instanceof Error ? error.message : "Failed to apply the generated form data.";
+            message.error(errorMsg);
+        }
+    };
 
   return (
     <StyleWrapper
@@ -141,44 +169,59 @@ export const QuestionsList = () => {
       ref={containerRef}
       style={{ position: "relative" }}
     >
-      <div>
-        <FormTitle className="form-title" />
-        <DescriptionStyle>
-          <div className="form-description">
-            <Input.TextArea
-              key="description"
-              value={formSettings.description}
-              onChange={handleDescriptionChange}
-              autoSize
-            />
+      <div style={{ padding: "10px", paddingBottom: "0px" , textAlign: "center" }}>
+        <Button
+            onClick={() => setIsAiModalOpen(true)}
+            icon={<span role="img" aria-label="sparkles">✨</span>}>
+            Create with AI
+        </Button>
+      </div>
+          <div>
+            <FormTitle className="form-title" />
+            <DescriptionStyle>
+              <div className="form-description">
+                <Input.TextArea
+                  key="description"
+                  value={formSettings.description}
+                  onChange={handleDescriptionChange}
+                  autoSize
+                  placeholder="Add a form description (optional, supports Markdown)"
+                />
+              </div>
+            </DescriptionStyle>
           </div>
-        </DescriptionStyle>
-      </div>
-      <Reorder.Group
-        values={questionsList}
-        onReorder={updateQuestionsList}
-        className="reorder-group"
-      >
-        <div>
-          {questionsList.map((question, idx) => (
-            <DraggableQuestionItem
-              key={question[1]}
-              question={question}
-              onEdit={editQuestion}
-              onReorderKey={onReorderKey}
-              firstQuestion={idx === 0}
-              lastQuestion={idx === questionsList.length - 1}
+
+          {questionsList.length > 0 ? (
+             <Reorder.Group
+               values={questionsList}
+               onReorder={updateQuestionsList}
+               className="reorder-group"
+             >
+               {questionsList.map((question, idx) => (
+                 <DraggableQuestionItem
+                   key={question[1]}
+                   question={question}
+                   onEdit={editQuestion}
+                   onReorderKey={onReorderKey}
+                   firstQuestion={idx === 0}
+                   lastQuestion={idx === questionsList.length - 1}
+                 />
+               ))}
+             </Reorder.Group>
+          ) : (
+             <div style={{ textAlign: 'center', padding: '40px', color: 'grey' }}>
+                    <Text type="secondary">No questions yet. Add some using the sidebar or "Create with AI".</Text>
+                </div>
+            )}
+            <div ref={bottomElementRef} style={{ height: "1px" }}></div>
+            <div className="mobile-add-btn">
+                <FloatingButton onClick={onPlusButtonClick} containerRef={containerRef} />
+            </div>
+            <AIFormGeneratorModal
+                isOpen={isAiModalOpen}
+                onClose={() => setIsAiModalOpen(false)}
+                onFormGenerated={handleAIFormGenerated}
             />
-          ))}
-          <div ref={bottomElementRef}></div>
-        </div>
-      </Reorder.Group>
-      <div className="mobile-add-btn">
-        <FloatingButton
-          onClick={onPlusButtonClick}
-          containerRef={containerRef}
-        />
-      </div>
-    </StyleWrapper>
-  );
+        </StyleWrapper>
+    );
 };

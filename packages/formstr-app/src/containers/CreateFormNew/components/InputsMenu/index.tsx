@@ -7,12 +7,14 @@ function InputsMenu() {
 
   const onMenuClick = ({ key }: { key: string }) => {
     const selectedItem = INPUTS_MENU.find((item) => item.key === key);
+      if (selectedItem) {
     addQuestion(
       selectedItem?.primitive,
       undefined,
       selectedItem?.answerSettings
     );
     console.log("after add question");
+  }
   };
 
   const items = [

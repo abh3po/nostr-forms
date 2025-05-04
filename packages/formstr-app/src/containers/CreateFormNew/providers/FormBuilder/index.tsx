@@ -269,6 +269,10 @@ export default function FormBuilderProvider({
     setViewKey(form.viewKey);
   };
 
+  const updateFormName = (name: string) => {
+    setFormName(name);
+  };
+
   return (
     <FormBuilderContext.Provider
       value={{

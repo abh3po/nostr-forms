@@ -53,6 +53,7 @@ export const FormFiller: React.FC<FormFillerProps> = ({
   const [form] = Form.useForm();
   const [formSubmitted, setFormSubmitted] = useState(false);
   const [noAccess, setNoAccess] = useState<boolean>(false);
+  const [formExpired, setFormExpired] = useState<boolean>(false);
   const [editKey, setEditKey] = useState<string | undefined | null>();
   const [allowedUsers, setAllowedUsers] = useState<string[]>([]);
   const [formEvent, setFormEvent] = useState<Event | undefined>();
@@ -132,14 +133,13 @@ export const FormFiller: React.FC<FormFillerProps> = ({
     sendNotification(formTemplate!, responses);
     setFormSubmitted(true);
   };
-
-  const renderSubmitButton = (settings: IFormSettings) => {
-    if (isPreview) return null;
-    if (!formEvent) return null;
+const renderSubmitButton = (formSettings: IFormSettings) => {
+  if (isPreview) return null;
+  if (!formEvent) return null;
     if (allowedUsers.length === 0) {
       return (
         <SubmitButton
-          selfSign={settings.disallowAnonymous}
+          selfSign={formSettings.disallowAnonymous}
           edit={false}
           onSubmit={onSubmit}
           form={form}

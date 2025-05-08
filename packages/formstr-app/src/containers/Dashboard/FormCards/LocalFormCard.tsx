@@ -30,14 +30,17 @@ export const LocalFormCard: React.FC<LocalFormCardProps> = ({
       className="form-card"
       extra={
         <div>
-          <EditOutlined
-            style={{ color: "purple", marginBottom: 3 }}
-            onClick={() =>
-              navigate(
-                editPath(form.privateKey, form.formId, form.relay, form.viewKey)
-              )
-            }
-          />
+          <Button
+              type="text"
+              style={{color: "purple", marginRight: 5 }}
+              onClick={() =>
+                navigate(
+                  editPath(form.privateKey, form.formId, form.relay, form.viewKey)
+                )
+              }
+            >
+              <EditOutlined />
+            </Button>
           <DeleteFormTrigger formKey={form.key} onDeleted={onDeleted} />
         </div>
       }

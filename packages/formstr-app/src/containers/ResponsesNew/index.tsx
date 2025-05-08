@@ -3,7 +3,7 @@ import { Event, getPublicKey, nip19, nip44, SubCloser } from "nostr-tools";
 import { useParams, useSearchParams } from "react-router-dom";
 import { fetchFormResponses } from "../../nostr/responses"
 import SummaryStyle from "./summary.style";
-import { Button, Card, Divider, Table, Typography } from "antd";
+import { Button, Card, Divider, Table, Typography, Modal, Descriptions, Space } from "antd";
 import ResponseWrapper from "./Responses.style";
 import { isMobile } from "../../utils/utility";
 import { useProfileContext } from "../../hooks/useProfileContext";
@@ -13,9 +13,16 @@ import { fetchKeys, getAllowedUsers, getFormSpec } from "../../utils/formUtils";
 import { Export } from "./Export";
 import { Field, Tag } from "../../nostr/types";
 import { useApplicationContext } from "../../hooks/useApplicationContext";
+import { ResponseDetailModal } from '../ResponsesNew/components/ResponseDetailModal';
 import { getDefaultRelays } from "../../nostr/common";
 
 const { Text } = Typography;
+
+type ResponseDetailItem = {
+  key: string; 
+  question: string;
+  answer: string;
+};
 
 export const Response = () => {
   const [responses, setResponses] = useState<Event[] | undefined>(undefined);
@@ -27,9 +34,15 @@ export const Response = () => {
   const { pubkey: userPubkey, requestPubkey } = useProfileContext();
   const viewKeyParams = searchParams.get("viewKey");
   const [responseCloser, setResponsesCloser] = useState<SubCloser | null>(null);
+  const [selectedEventForModal, setSelectedEventForModal] = useState<Event | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const handleResponseEvent = (event: Event) => {
-    setResponses((prev: Event[] | undefined) => [...(prev || []), event]);
-  };
+    setResponses((prev = []) => {
+        if (prev.some(e => e.id === event.id)) {
+            return prev;
+        }
+        return [...prev, event];
+    });  };
   let { poolRef } = useApplicationContext();
 
   const initialize = async () => {
@@ -37,7 +50,7 @@ export const Response = () => {
 
     if (!(pubKey || secretKey)) return;
 
-    if(!poolRef) return
+    if(!poolRef?.current) return
 
     if (secretKey) {
       setEditKey(secretKey);
@@ -86,40 +99,59 @@ export const Response = () => {
   };
 
   useEffect(() => {
-    if (!formEvent && !responses) initialize();
+    if (!(pubKey || secretKey) || !formId || !poolRef?.current) return;
+    if (responses === undefined && formEvent === undefined) {
+        initialize();
+    }
     return () => {
       if (responseCloser) responseCloser.close()
       }
-  }, [poolRef]);
+  }, [pubKey, formId, secretKey, poolRef, userPubkey, viewKeyParams]);
 
   const getResponderCount = () => {
     if (!responses) return 0;
     return new Set(responses.map((r) => r.pubkey)).size;
   };
 
-  const getInputs = (responseEvent: Event) => {
+  const getInputs = (responseEvent: Event): Tag[] => {
     if (responseEvent.content === "") {
-      return responseEvent.tags.filter((tag) => tag[0] === "response");
+      return responseEvent.tags.filter((tag): tag is Tag => Array.isArray(tag) && tag[0] === "response");
     } else if (editKey) {
-      let conversationKey = nip44.v2.utils.getConversationKey(
-        editKey,
-        responseEvent.pubkey
-      );
-      let decryptedContent = nip44.v2.decrypt(
-        responseEvent.content,
-        conversationKey
-      );
       try {
-        return JSON.parse(decryptedContent).filter(
-          (tag: Tag) => tag[0] === "response"
+        let conversationKey = nip44.v2.utils.getConversationKey(
+          editKey,
+          responseEvent.pubkey
         );
+        let decryptedContent = nip44.v2.decrypt(
+          responseEvent.content,
+          conversationKey
+        );
+         const parsed = JSON.parse(decryptedContent);
+         if(Array.isArray(parsed)) {
+             return parsed.filter(
+               (tag: Tag): tag is Tag => Array.isArray(tag) && tag[0] === "response"
+             );
+         }
+         return [];
       } catch (e) {
-        return [];
+          console.error("Failed to parse decrypted response content:", e);
+          return [];
       }
     } else {
-      alert("You do not have access to view responses for this form.");
+      console.warn("Cannot decrypt response: EditKey not available.");
+      return [];
     }
-    return [];
+  };
+
+  const handleRowClick = (record: any) => {
+     const authorPubKey = record.key;
+     if (!responses) return;
+     const authorEvents = responses.filter(event => event.pubkey === authorPubKey);
+     if (authorEvents.length === 0) return;
+     const latestEvent = authorEvents.sort((a, b) => b.created_at - a.created_at)[0];
+
+     setSelectedEventForModal(latestEvent);
+     setIsModalOpen(true);
   };
 
   const getData = (useLabels: boolean = false) => {
@@ -151,18 +183,30 @@ export const Response = () => {
         responsesCount: pubkeyResponses.length.toString(),
       };
       inputs.forEach((input) => {
+        if (!Array.isArray(input) || input.length < 2) return;
         let questionField = formSpec.find(
           (t) => t[0] === "field" && t[1] === input[1]
         );
         let question = questionField?.[3];
         const label = useLabels ? question || input[1] : input[1];
-        let responseLabel = input[2];
+        let responseLabel = input[2] || "";
         if (questionField && questionField[2] === "option") {
           let choices = JSON.parse(questionField[4]) as Tag[];
           let choiceField = choices.filter((choice) => {
             return choice[0] === input[2];
           })?.[0];
-          if (choiceField[1]) responseLabel = choiceField[1];
+          if (choiceField && choiceField[1]) responseLabel = choiceField[1];
+          if (input.length > 3) {
+            try {
+              const metadata = JSON.parse(input[3] || "{}");
+              if (metadata.message) {
+                const otherChoice = choices.find(c => { try { return JSON.parse(c[2] || '{}')?.isOther === true; } catch { return false; } });
+                if (otherChoice && input[2].split(';').includes(otherChoice[0])) {
+                  responseLabel += ` (${metadata.message})`;
+                }
+              }
+            } catch {}
+          }
         }
         answerObject[label] = responseLabel;
       });
@@ -229,7 +273,9 @@ export const Response = () => {
     let uniqueQuestionIds: Set<string> = new Set();
     responses?.forEach((response: Event) => {
       let responseTags = getInputs(response);
-      responseTags.forEach((t: Tag) => uniqueQuestionIds.add(t[1]));
+      responseTags.forEach((t: Tag) => {
+        if (Array.isArray(t) && t.length > 1) uniqueQuestionIds.add(t[1]);
+      });
     });
     let fields =
       formSpec?.filter((field) => field[0] === "field") || ([] as Field[]);
@@ -242,7 +288,7 @@ export const Response = () => {
       columns.push({
         key: fieldId,
         title: label,
-        dataIndex: fieldId,
+        dataIndex: label || fieldId,
         width: 1.5,
       });
     });
@@ -254,6 +300,11 @@ export const Response = () => {
         width: 1.5,
       });
     });
+    if (formSpec === null && responses && uniqueQuestionIds.size > 0) {
+      uniqueQuestionIds.forEach(id => {
+        columns.push({ key: id, title: `Question ID: ${id}`, dataIndex: id, width: 1.5 });
+      });
+    }
     return [...columns, ...rightColumns];
   };
 
@@ -283,7 +334,7 @@ export const Response = () => {
             <Divider />
             <div className="response-count-container">
               <Text className="response-count">
-                {responses ? getResponderCount() : "Searching for Responses.."}{" "}
+                {responses === undefined ? "Searching..." : getResponderCount()}{" "}
               </Text>
               <Text className="response-count-label">responder(s)</Text>
             </div>
@@ -295,16 +346,35 @@ export const Response = () => {
         <div style={{ overflow: "scroll", marginBottom: 60 }}>
           <Table
             columns={getColumns()}
-            dataSource={getData()}
+            dataSource={getData(true)}
             pagination={false}
             loading={{
-              spinning: !!!responses,
-              tip: "🔎 Looking for your responses...",
+              spinning: responses === undefined,
+              tip: "🔎 Looking for responses...",
             }}
             scroll={{ x: isMobile() ? 900 : 1500, y: "calc(65% - 400px)" }}
+            onRow={(record) => {
+              return {
+                onClick: (event) => {
+                  event.stopPropagation();
+                  handleRowClick(record);
+                },
+                style: { cursor: 'pointer' }
+              };
+            }}
           />
         </div>
       </ResponseWrapper>
+      <ResponseDetailModal
+       isVisible={isModalOpen}
+       onClose={() => {
+           setIsModalOpen(false);
+           setSelectedEventForModal(null);
+       }}
+       event={selectedEventForModal}
+       formSpec={formSpec}
+       editKey={editKey}
+   />
     </div>
   );
 };

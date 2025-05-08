@@ -5,6 +5,7 @@ import { CheckboxCreator } from "./InputElements/OptionTypes/CheckBoxCreator";
 import { DropdownCreator } from "./InputElements/OptionTypes/DropdownCreator";
 import { DatePicker, Input, InputNumber, TimePicker } from "antd";
 import { Choice } from "./InputElements/OptionTypes/types";
+import { CountryDropdown } from "react-country-region-selector";
 
 interface InputsProps {
   inputType: string;
@@ -50,6 +51,14 @@ const Inputs: React.FC<InputsProps> = ({
             initialValues={options}
             onValuesChange={optionsHandler}
           />
+        );
+      case AnswerTypes.country:
+        return (
+          <CountryDropdown
+          disabled={true}
+          defaultOptionLabel="Select your country"
+          style={{ width: "30%", height: "30px" }}
+      />
         );
       case AnswerTypes.dropdown:
         return (

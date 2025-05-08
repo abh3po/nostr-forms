@@ -12,7 +12,7 @@ import { CheckboxGroupProps } from "antd/es/checkbox";
 import { CheckboxValueType } from "antd/es/checkbox/Group";
 import Markdown from "react-markdown";
 import ChoiceFillerStyle from "./choiceFiller.style";
-import { ChangeEvent, useState } from "react";
+import { ChangeEvent, useEffect, useState } from "react";
 
 interface ChoiceFillerProps {
   answerType: AnswerTypes.checkboxes | AnswerTypes.radioButton;
@@ -28,22 +28,46 @@ export const ChoiceFiller: React.FC<ChoiceFillerProps> = ({
   defaultValue,
 }) => {
   const [otherMessage, setOtherMessage] = useState("");
+  const [selectedValues, setSelectedValues] = useState<string[]>(defaultValue ? defaultValue.split(";") : []);
   
   function handleChoiceChange(e: RadioChangeEvent): void;
-
   function handleChoiceChange(checkedValues: CheckboxValueType[]): void;
-
+  
   function handleChoiceChange(e: RadioChangeEvent | CheckboxValueType[]) {
     if (Array.isArray(e)) {
-      onChange(e.sort().join(";"), otherMessage);
+      const selectedChoiceIds = e as string[];
+      setSelectedValues(selectedChoiceIds);
+      onChange(selectedChoiceIds.sort().join(";"), "");
       return;
     }
-    onChange(e.target.value, otherMessage);
+    
+    const selectedValue = e.target.value;
+    setSelectedValues([selectedValue]);
+    
+    const selectedOption = options.find(opt => opt[0] === selectedValue);
+    if (selectedOption) {
+      const config = JSON.parse(selectedOption[2] || "{}") as { isOther?: boolean };
+      onChange(selectedValue, otherMessage);
+    } else {
+      onChange(selectedValue, "");
+    }
   }
 
-  function handleMessage(e: ChangeEvent<HTMLInputElement>){
-    setOtherMessage(e.target.value)
+  function handleOtherInputChange(e: ChangeEvent<HTMLInputElement>) {
+    const newMessage = e.target.value;
+    setOtherMessage(newMessage);
+    onChange(selectedValues[0], newMessage);
   }
+
+  useEffect(() => {
+    if (defaultValue) {
+      if (answerType === AnswerTypes.checkboxes) {
+        setSelectedValues(defaultValue.split(";"));
+      } else {
+        setSelectedValues([defaultValue]);
+      }
+    }
+  }, [defaultValue, answerType]);
 
   let ElementConfig: {
     Element: typeof Radio,
@@ -55,28 +79,46 @@ export const ChoiceFiller: React.FC<ChoiceFillerProps> = ({
     Element: Radio,
     defaultValue: defaultValue
   }
- if (answerType === AnswerTypes.checkboxes) {
-   ElementConfig = {
-     Element: Checkbox,
-     defaultValue: defaultValue?.split(";")
-   }
+  
+  if (answerType === AnswerTypes.checkboxes) {
+    ElementConfig = {
+      Element: Checkbox,
+      defaultValue: defaultValue?.split(";")
+    }
   }
+  
   return (
-    //@ts-ignore
     <ChoiceFillerStyle>
       <ElementConfig.Element.Group
         onChange={handleChoiceChange}
         defaultValue={ElementConfig.defaultValue}
       >
-        <Space direction="vertical">
+        <Space direction="vertical" style={{ width: '100%' }}>
           {options.map((choice) => {
             let [choiceId, label, configString] = choice;
-            let config = JSON.parse(configString || "{}")
+            let config = JSON.parse(configString || "{}") as { isOther?: boolean };
+            const isOtherOption = config.isOther;
+            const isSelected = selectedValues.includes(choiceId);
+            
+            const showOtherInput = answerType === AnswerTypes.radioButton && isOtherOption && isSelected;
+            
             return (
-              <ElementConfig.Element key={choiceId} value={choiceId}>
-                <Markdown>{label}</Markdown>
-                {config.isOther && <Input placeholder="Add an optional message..." onInput={handleMessage}/>}
-              </ElementConfig.Element>
+              <div key={choiceId} style={{ display: 'flex', flexDirection: 'column' }}>
+                <div style={{ display: 'flex', alignItems: 'flex-start' }}>
+                  <ElementConfig.Element key={choiceId} value={choiceId}>
+                    <Markdown>{isOtherOption ? "Other:" : label}</Markdown>
+                  </ElementConfig.Element>
+                </div>
+                {showOtherInput && (
+                  <div style={{ marginLeft: 24, marginTop: 4 }}>
+                    <Input 
+                      placeholder="Please specify"
+                      onChange={handleOtherInputChange}
+                      value={otherMessage}
+                    />
+                  </div>
+                )}
+              </div>
             );
           })}
         </Space>

@@ -98,22 +98,31 @@ export const Response = () => {
   };
 
   const getInputs = (responseEvent: Event) => {
+    if (!responseEvent) return [];
+    
     if (responseEvent.content === "") {
       return responseEvent.tags.filter((tag) => tag[0] === "response");
     } else if (editKey) {
-      let conversationKey = nip44.v2.utils.getConversationKey(
-        editKey,
-        responseEvent.pubkey
-      );
-      let decryptedContent = nip44.v2.decrypt(
-        responseEvent.content,
-        conversationKey
-      );
       try {
-        return JSON.parse(decryptedContent).filter(
-          (tag: Tag) => tag[0] === "response"
+        let conversationKey = nip44.v2.utils.getConversationKey(
+          editKey,
+          responseEvent.pubkey
         );
+        let decryptedContent = nip44.v2.decrypt(
+          responseEvent.content,
+          conversationKey
+        );
+        
+        try {
+          return JSON.parse(decryptedContent).filter(
+            (tag: Tag) => tag[0] === "response"
+          );
+        } catch (e) {
+          console.error("Error parsing decrypted content:", e);
+          return [];
+        }
       } catch (e) {
+        console.error("Error decrypting response:", e);
         return [];
       }
     } else {
@@ -126,22 +135,26 @@ export const Response = () => {
     let answers: Array<{
       [key: string]: string;
     }> = [];
-    if (!formSpec || !responses) return;
+    if (!formSpec || !responses) return answers;
+    
     let responsePerPubkey = new Map<string, Event[]>();
     responses.forEach((r: Event) => {
       let existingResponse = responsePerPubkey.get(r.pubkey);
       if (!existingResponse) responsePerPubkey.set(r.pubkey, [r]);
       else responsePerPubkey.set(r.pubkey, [...existingResponse, r]);
     });
-
+  
     Array.from(responsePerPubkey.keys()).forEach((pub) => {
       let pubkeyResponses = responsePerPubkey.get(pub);
       if (!pubkeyResponses || pubkeyResponses.length == 0) return;
+      
       let response = pubkeyResponses.sort(
         (a, b) => b.created_at - a.created_at
       )[0];
+      
       let inputs = getInputs(response) as Tag[];
-      if (inputs.length === 0) return;
+      if (!inputs || inputs.length === 0) return;
+      
       let answerObject: {
         [key: string]: string;
       } = {
@@ -150,27 +163,65 @@ export const Response = () => {
         authorPubkey: nip19.npubEncode(response.pubkey),
         responsesCount: pubkeyResponses.length.toString(),
       };
+      
       inputs.forEach((input) => {
+        if (!input || !Array.isArray(input) || input.length < 3) return;
+        
         let questionField = formSpec.find(
           (t) => t[0] === "field" && t[1] === input[1]
         );
+        
         let question = questionField?.[3];
         const label = useLabels ? question || input[1] : input[1];
-        let responseLabel = input[2];
-        if (questionField && questionField[2] === "option") {
-          let choices = JSON.parse(questionField[4]) as Tag[];
-          let choiceField = choices.filter((choice) => {
-            return choice[0] === input[2];
-          })?.[0];
-          if (choiceField[1]) responseLabel = choiceField[1];
+        
+        let responseValue = input[2] || "";
+                let responseMessage = "";
+        if (input.length >= 4 && input[3]) {
+          try {
+            const metadata = JSON.parse(input[3]);
+            if (metadata && metadata.message) {
+              responseMessage = metadata.message;
+            }
+          } catch (e) {
+            console.error("Error parsing metadata:", e);
+          }
         }
-        answerObject[label] = responseLabel;
+        
+        if (questionField && questionField[2] === "option" && questionField[4]) {
+          try {
+            let choices = JSON.parse(questionField[4]) as Tag[];
+            let choiceField = choices.find(choice => choice[0] === responseValue);
+            
+            if (choiceField && choiceField[1]) {              
+              let isOtherOption = false;
+              if (choiceField[2]) {
+                try {
+                  const config = JSON.parse(choiceField[2]);
+                  isOtherOption = !!config.isOther;
+                } catch (e) {
+                }
+              }
+              
+              if (isOtherOption && responseMessage) {
+                responseValue = `Other: ${responseMessage}`;
+              } else {
+                responseValue = choiceField[1];
+              }
+            }
+          } catch (e) {
+            console.error("Error processing choices:", e);
+          }
+        }
+        
+        answerObject[label] = responseValue;
       });
+      
       answers.push(answerObject);
     });
+    
     return answers;
   };
-
+  
   const getFormName = () => {
     if (!formSpec) return "Form Details Unnaccessible";
 

@@ -9,9 +9,9 @@ export const blankTemplate: FormTemplate = {
   name: 'Blank Form',
   description: 'Start with a clean slate.',
   initialState: {
-    formName: 'Untitled Form',
+    formName: 'Form Title',
     formSettings: {
-      description: 'description here',
+      description: 'Form description',
       thankYouPage: true,
       notifyNpubs: [],
       publicForm: true,

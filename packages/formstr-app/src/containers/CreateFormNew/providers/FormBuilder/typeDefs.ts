@@ -40,6 +40,8 @@ export interface IFormBuilderContext {
   formSettings: IFormSettings;
   updateFormSetting: (settings: IFormSettings) => void;
   updateFormTitleImage: (e: React.FormEvent<HTMLInputElement>) => void;
+  updateFormTitleBackgroundColor: (color: string) => void;
+  updateFormBackgroundType: (type: "image" | "color") => void;
   isRightSettingsOpen: boolean;
   isLeftMenuOpen: boolean;
   setIsLeftMenuOpen: (isOpen: boolean) => void;

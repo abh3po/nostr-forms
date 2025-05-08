@@ -1,4 +1,4 @@
-import { FormSpec, V1FormSpec } from "@formstr/sdk/dist/interfaces";
+import { FormSpec, V1FormSpec, IFormSettings } from "@formstr/sdk/dist/interfaces/v1";
 import FillerStyle from "./formFiller.style";
 import FormTitle from "../../../containers/CreateFormNew/components/FormTitle";
 import {
@@ -122,6 +122,19 @@ export const FormFillerOld: React.FC<FormFillerProps> = ({
     settings = formTemplate.settings;
     fields = formTemplate.fields;
   }
+  
+  interface ExtendedFormSettings extends IFormSettings {
+    titleBackgroundType?: "image" | "color";
+    titleBackgroundColor?: string;
+    titleTextSize?: number;
+    titleTextColor?: string;
+    titleTextXOffset?: number;
+    titleTextYOffset?: number;
+    showBanner?: boolean;
+  }
+  
+  const extendedSettings = settings as ExtendedFormSettings;
+  
   return (
     <FillerStyle $isPreview={isPreview}>
       {!formSubmitted && (
@@ -131,14 +144,21 @@ export const FormFillerOld: React.FC<FormFillerProps> = ({
               <FormTitle
                 className="form-title"
                 edit={false}
-                imageUrl={settings?.titleImageUrl}
+                imageUrl={extendedSettings?.titleImageUrl}
                 formTitle={name}
+                titleBackgroundType={extendedSettings?.titleBackgroundType}
+                titleBackgroundColor={extendedSettings?.titleBackgroundColor}
+                titleTextSize={extendedSettings?.titleTextSize}
+                titleTextColor={extendedSettings?.titleTextColor}
+                titleTextXOffset={extendedSettings?.titleTextXOffset}
+                titleTextYOffset={extendedSettings?.titleTextYOffset}
+                showBanner={extendedSettings?.showBanner}
               />
             )}
             {!hideDescription && (
               <div className="form-description">
                 <Text>
-                  <Markdown>{settings?.description}</Markdown>
+                  <Markdown>{extendedSettings?.description}</Markdown>
                 </Text>
               </div>
             )}
@@ -177,7 +197,7 @@ export const FormFillerOld: React.FC<FormFillerProps> = ({
                   );
                 })}
                 <SubmitButton
-                  selfSign={formTemplate?.settings?.disallowAnonymous}
+                  selfSign={extendedSettings?.disallowAnonymous}
                   edit={false}
                   onSubmit={saveResponse}
                   form={form}

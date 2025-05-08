@@ -28,9 +28,21 @@ export const FormBuilderContext = React.createContext<IFormBuilderContext>({
   deleteQuestion: (tempId: string) => null,
   questionIdInFocus: undefined,
   setQuestionIdInFocus: (tempId?: string) => null,
-  formSettings: { titleImageUrl: "", formId: "" },
+  formSettings: { 
+    titleImageUrl: "", 
+    titleBackgroundType: "image", 
+    titleBackgroundColor: "#f17124", 
+    titleTextSize: 24,
+    titleTextColor: "#ffffff",
+    titleTextXOffset: 16,
+    titleTextYOffset: 10,
+    showBanner: true,
+    formId: "" 
+  },
   updateFormSetting: (settings: IFormSettings) => null,
   updateFormTitleImage: (e: React.FormEvent<HTMLInputElement>) => null,
+  updateFormTitleBackgroundColor: (color: string) => null,
+  updateFormBackgroundType: (type: "image" | "color") => null,
   closeSettingsOnOutsideClick: () => null,
   closeMenuOnOutsideClick: () => null,
   isRightSettingsOpen: false,
@@ -56,6 +68,13 @@ export const FormBuilderContext = React.createContext<IFormBuilderContext>({
 const InitialFormSettings: IFormSettings = {
   titleImageUrl:
     "https://images.pexels.com/photos/733857/pexels-photo-733857.jpeg",
+  titleBackgroundType: "image",
+  titleBackgroundColor: "#f17124",
+  titleTextSize: 24,
+  titleTextColor: "#ffffff",
+  titleTextXOffset: 16,
+  titleTextYOffset: 10,
+  showBanner: true,
   description:
     "This is the description, you can use markdown while editing it!" +
     " tap anywhere on the form to edit, including this description.",
@@ -238,14 +257,51 @@ export default function FormBuilderProvider({
   };
 
   const updateFormSetting = (settings: IFormSettings) => {
-    setFormSettings((preSettings) => ({ ...preSettings, ...settings }));
+    console.log("FormBuilder: updating settings with", settings);
+    setFormSettings((preSettings) => {
+      const newSettings = { ...preSettings, ...settings };
+      console.log("FormBuilder: new settings =", newSettings);
+      return newSettings;
+    });
   };
 
   const updateFormTitleImage = (e: React.FormEvent<HTMLInputElement>) => {
     const imageUrl = e.currentTarget.value;
     updateFormSetting({
       titleImageUrl: imageUrl || "",
+      titleBackgroundType: "image"
     });
+  };
+
+  const updateFormTitleBackgroundColor = (color: string) => {
+    if (formSettings.titleBackgroundType === "color") {
+      updateFormSetting({
+        titleBackgroundColor: color
+      });
+    } else {
+      updateFormSetting({
+        titleBackgroundColor: color,
+        titleBackgroundType: "color"
+      });
+    }
+  };
+
+  const updateFormBackgroundType = (type: "image" | "color") => {
+    if (type === "color" && !formSettings.titleBackgroundColor) {
+      updateFormSetting({
+        titleBackgroundType: type,
+        titleBackgroundColor: "#f17124"
+      });
+    } else if (type === "image" && !formSettings.titleImageUrl) {
+      updateFormSetting({
+        titleBackgroundType: type,
+        titleImageUrl: "https://images.pexels.com/photos/733857/pexels-photo-733857.jpeg"
+      });
+    } else {
+      updateFormSetting({
+        titleBackgroundType: type
+      });
+    }
   };
 
   const initializeForm = (form: FormInitData) => {
@@ -253,6 +309,46 @@ export default function FormBuilderProvider({
     let settings = JSON.parse(
       form.spec.filter((f) => f[0] === "settings")?.[0]?.[1] || "{}"
     );
+    
+    // Ensure we have default values for the new fields if they're missing
+    if (!settings.titleBackgroundType) {
+      settings.titleBackgroundType = settings.titleImageUrl ? "image" : "color";
+    }
+    if (!settings.titleBackgroundColor) {
+      settings.titleBackgroundColor = "#f17124";
+    }
+    
+    // Convert string titleTextSize to number if needed
+    if (settings.titleTextSize) {
+      if (typeof settings.titleTextSize === 'string') {
+        // Convert old string values to numbers
+        switch(settings.titleTextSize) {
+          case 'small': 
+            settings.titleTextSize = 18;
+            break;
+          case 'large': 
+            settings.titleTextSize = 32;
+            break;
+          case 'medium':
+          default:
+            settings.titleTextSize = 24;
+            break;
+        }
+      }
+    } else {
+      settings.titleTextSize = 24;
+    }
+
+    if (settings.titleTextXOffset === undefined) {
+      settings.titleTextXOffset = 16;
+    }
+    if (settings.titleTextYOffset === undefined) {
+      settings.titleTextYOffset = 10;
+    }
+    if (settings.showBanner === undefined) {
+      settings.showBanner = true;
+    }
+    
     settings = { ...InitialFormSettings, ...settings };
     let fields = form.spec.filter((f) => f[0] === "field") as Field[];
     setFormSettings((settings) => {
@@ -283,6 +379,8 @@ export default function FormBuilderProvider({
         formSettings,
         updateFormSetting,
         updateFormTitleImage,
+        updateFormTitleBackgroundColor,
+        updateFormBackgroundType,
         closeSettingsOnOutsideClick,
         closeMenuOnOutsideClick,
         toggleSettingsWindow,

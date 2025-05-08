@@ -25,8 +25,6 @@ import { AddressPointer } from "nostr-tools/nip19";
 import { LoadingOutlined } from "@ant-design/icons";
 import { sendNotification } from "../../nostr/common";
 import { sendResponses } from "../../nostr/common";
-import { FormRenderer } from "./formRenderer";
-import { resolve } from "path";
 
 const { Text } = Typography;
 
@@ -52,6 +50,7 @@ export const FormFiller: React.FC<FormFillerProps> = ({
   const [formTemplate, setFormTemplate] = useState<Tag[] | null>(
     formSpec || null
   );
+  const [form] = Form.useForm();
   const [formSubmitted, setFormSubmitted] = useState(false);
   const [noAccess, setNoAccess] = useState<boolean>(false);
   const [editKey, setEditKey] = useState<string | undefined | null>();
@@ -100,9 +99,70 @@ export const FormFiller: React.FC<FormFillerProps> = ({
     initialize(pubKey, formId, relays);
   }, [formEvent, formTemplate, userPubKey]);
 
-  const onSubmit = async (responses: Response[]) => {
+  const handleInput = (
+    questionId: string,
+    answer: string,
+    message?: string
+  ) => {
+    if (!answer || answer === "") {
+      form.setFieldValue(questionId, null);
+      return;
+    }
+    form.setFieldValue(questionId, [answer, message]);
+  };
+
+  const getResponseRelays = (formEvent: Event) => {
+    let formRelays = formEvent.tags
+      .filter((r) => r[0] === "relay")
+      ?.map((r) => r[1]);
+    let finalRelays = Array.from(new Set([...(relays || []), ...(formRelays || [])]));
+    return finalRelays
+  };
+
+  const onSubmit = async () => {
+    let formResponses = form.getFieldsValue(true);
+    const responses: Response[] = Object.keys(formResponses).map(
+      (fieldId: string) => {
+        let answer = null;
+        let message = null;
+        if (formResponses[fieldId]) [answer, message] = formResponses[fieldId];
+        return ["response", fieldId, answer, JSON.stringify({ message })];
+      }
+    );
     sendNotification(formTemplate!, responses);
     setFormSubmitted(true);
+  };
+
+  const renderSubmitButton = (settings: IFormSettings) => {
+    if (isPreview) return null;
+    if (!formEvent) return null;
+    if (allowedUsers.length === 0) {
+      return (
+        <SubmitButton
+          selfSign={settings.disallowAnonymous}
+          edit={false}
+          onSubmit={onSubmit}
+          form={form}
+          relays={getResponseRelays(formEvent)}
+          formEvent={formEvent}
+        />
+      );
+    } else if (!userPubKey) {
+      return <Button onClick={requestPubkey}>Login to fill this form</Button>;
+    } else if (userPubKey && !allowedUsers.includes(userPubKey)) {
+      return <RequestAccess pubkey={pubKey!} formId={formId!} />;
+    } else {
+      return (
+        <SubmitButton
+          selfSign={true}
+          edit={false}
+          onSubmit={onSubmit}
+          form={form}
+          relays={getResponseRelays(formEvent)}
+          formEvent={formEvent}
+        />
+      );
+    }
   };
 
   if ((!pubKey || !formId) && !isPreview) {
@@ -177,12 +237,71 @@ export const FormFiller: React.FC<FormFillerProps> = ({
     fields = formTemplate.filter((tag) => tag[0] === "field") as Field[];
 
     return (
-      <FormRenderer
-        formEvent={formEvent!}
-        formSpec={formTemplate as Field[]}
-        onSubmitClick={onSubmit}
-        isPreview={isPreview}
-      />
+      <FillerStyle $isPreview={isPreview}>
+        <div className="filler-container">
+          <div className="form-filler">
+            {!hideTitleImage && (
+              <FormTitle
+                className="form-title"
+                edit={false}
+                imageUrl={settings?.titleImageUrl}
+                formTitle={name}
+              />
+            )}
+            {!hideDescription && (
+              <div className="form-description">
+                <Text>
+                  <Markdown>{settings?.description}</Markdown>
+                </Text>
+              </div>
+            )}
+
+            <Form
+              form={form}
+              onFinish={() => {}}
+              className={
+                hideDescription ? "hidden-description" : "with-description"
+              }
+            >
+              <div>
+                <FormFields fields={fields} handleInput={handleInput} />
+                <>{renderSubmitButton(settings)}</>
+              </div>
+            </Form>
+          </div>
+          <div className="branding-container">
+            <Link to="/">
+              <CreatedUsingFormstr />
+            </Link>
+            {!isMobile() && (
+              <a
+                href="https://github.com/abhay-raizada/nostr-forms"
+                className="foss-link"
+              >
+                <Text className="text-style">
+                  Formstr is free and Open Source
+                </Text>
+              </a>
+            )}
+          </div>
+        </div>
+        {embedded ? (
+          formSubmitted && (
+            <div className="embed-submitted">
+              {" "}
+              <Text>Response Submitted</Text>{" "}
+            </div>
+          )
+        ) : (
+          <ThankYouScreen
+            isOpen={formSubmitted}
+            onClose={() => {
+              let navigationUrl = editKey ? `/r/${pubKey}/${formId}` : `/`;
+              navigate(navigationUrl);
+            }}
+          />
+        )}
+      </FillerStyle>
     );
   }
 };

@@ -16,7 +16,6 @@ import { ReactComponent as CreatedUsingFormstr } from "../../Images/created-usin
 import Markdown from "react-markdown";
 import { Event, nip19 } from "nostr-tools";
 import { FormFields } from "./FormFields";
-import { RequestAccess } from "./RequestAccess";
 import { fetchFormTemplate } from "@formstr/sdk/dist/formstr/nip101/fetchFormTemplate";
 import { useProfileContext } from "../../hooks/useProfileContext";
 import { getAllowedUsers, getFormSpec } from "../../utils/formUtils";
@@ -115,8 +114,10 @@ export const FormFiller: React.FC<FormFillerProps> = ({
     let formRelays = formEvent.tags
       .filter((r) => r[0] === "relay")
       ?.map((r) => r[1]);
-    let finalRelays = Array.from(new Set([...(relays || []), ...(formRelays || [])]));
-    return finalRelays
+    let finalRelays = Array.from(
+      new Set([...(relays || []), ...(formRelays || [])])
+    );
+    return finalRelays;
   };
 
   const onSubmit = async () => {
@@ -150,7 +151,6 @@ export const FormFiller: React.FC<FormFillerProps> = ({
     } else if (!userPubKey) {
       return <Button onClick={requestPubkey}>Login to fill this form</Button>;
     } else if (userPubKey && !allowedUsers.includes(userPubKey)) {
-      return <RequestAccess pubkey={pubKey!} formId={formId!} />;
     } else {
       return (
         <SubmitButton
@@ -224,7 +224,6 @@ export const FormFiller: React.FC<FormFillerProps> = ({
     return (
       <>
         <Text>Your profile does not have access to view this form</Text>
-        <RequestAccess pubkey={pubKey!} formId={formId!} />
       </>
     );
   }

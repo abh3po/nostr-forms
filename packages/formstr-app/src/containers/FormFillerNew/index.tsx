@@ -1,24 +1,17 @@
-import { Field, Tag, Option, Response } from "@formstr/sdk/dist/formstr/nip101";
-import FillerStyle from "./formFiller.style";
-import FormTitle from "../CreateFormNew/components/FormTitle";
-import {
-  Link,
-  useNavigate,
-  useParams,
-  useSearchParams,
-} from "react-router-dom";
+import { Tag, Response } from "@formstr/sdk/dist/formstr/nip101";
+import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { useEffect, useState } from "react";
-import { Button, Form, Spin, Typography } from "antd";
+import { Button, Spin, Typography } from "antd";
 import { Event, nip19 } from "nostr-tools";
-import { RequestAccess } from "./RequestAccess";
-import { fetchFormTemplate } from "@formstr/sdk/dist/formstr/nip101/fetchFormTemplate";
+import { fetchFormTemplate } from "../../nostr/fetchFormTemplate";
 import { useProfileContext } from "../../hooks/useProfileContext";
-import { getAllowedUsers, getFormSpec } from "../../utils/formUtils";
-import { IFormSettings } from "../CreateFormNew/components/FormSettings/types";
 import { AddressPointer } from "nostr-tools/nip19";
 import { LoadingOutlined } from "@ant-design/icons";
 import { sendNotification } from "../../nostr/common";
-import { FormRenderer } from "./formRenderer";
+import { FormRendererContainer } from "./FormRendererContainer";
+import { useApplicationContext } from "../../hooks/useApplicationContext";
+import { ThankYouScreen } from "./ThankYouScreen";
+import { ROUTES } from "../../constants/routes";
 
 const { Text } = Typography;
 
@@ -27,10 +20,7 @@ interface FormFillerProps {
   embedded?: boolean;
 }
 
-export const FormFiller: React.FC<FormFillerProps> = ({
-  formSpec,
-  embedded,
-}) => {
+export const FormFiller: React.FC<FormFillerProps> = ({ formSpec }) => {
   const { naddr } = useParams();
   let isPreview = !!formSpec;
   if (!isPreview && !naddr)
@@ -45,9 +35,6 @@ export const FormFiller: React.FC<FormFillerProps> = ({
     formSpec || null
   );
   const [formSubmitted, setFormSubmitted] = useState(false);
-  const [noAccess, setNoAccess] = useState<boolean>(false);
-  const [editKey, setEditKey] = useState<string | undefined | null>();
-  const [allowedUsers, setAllowedUsers] = useState<string[]>([]);
   const [formEvent, setFormEvent] = useState<Event | undefined>();
   const [searchParams] = useSearchParams();
   const hideTitleImage = searchParams.get("hideTitleImage") === "true";
@@ -55,42 +42,33 @@ export const FormFiller: React.FC<FormFillerProps> = ({
   const hideDescription = searchParams.get("hideDescription") === "true";
   const navigate = useNavigate();
 
+  const { poolRef } = useApplicationContext();
+
   if (!formId && !formSpec) {
     return null;
   }
-
-  const onKeysFetched = (keys: Tag[] | null) => {
-    let editKey = keys?.find((k) => k[0] === "EditAccess")?.[1] || null;
-    setEditKey(editKey);
-  };
 
   const initialize = async (
     formAuthor: string,
     formId: string,
     relays?: string[]
   ) => {
-    if (!formEvent) {
-      const form = await fetchFormTemplate(formAuthor, formId, relays);
-      if (!form) return;
-      setFormEvent(form);
-      setAllowedUsers(getAllowedUsers(form));
-      const formSpec = await getFormSpec(
-        form,
-        userPubKey,
-        onKeysFetched,
-        viewKeyParams
-      );
-      if (!formSpec) setNoAccess(true);
-      setFormTemplate(formSpec);
-    }
+    const form = await fetchFormTemplate(
+      formAuthor,
+      formId,
+      poolRef.current,
+      (event: Event) => {
+        setFormEvent(event);
+      }
+    );
   };
 
   useEffect(() => {
     if (!(pubKey && formId)) {
       return;
     }
-    initialize(pubKey, formId, relays);
-  }, [formEvent, formTemplate, userPubKey]);
+    if (!formEvent) initialize(pubKey, formId, relays);
+  }, []);
 
   const onSubmit = async (responses: Response[]) => {
     sendNotification(formTemplate!, responses);
@@ -152,29 +130,19 @@ export const FormFiller: React.FC<FormFillerProps> = ({
       </>
     );
   }
-  if (noAccess) {
+  if (formEvent) {
     return (
-      <>
-        <Text>Your profile does not have access to view this form</Text>
-        <RequestAccess pubkey={pubKey!} formId={formId!} />
-      </>
-    );
-  }
-  let name: string, settings: IFormSettings, fields: Field[];
-  if (formTemplate) {
-    name = formTemplate.find((tag) => tag[0] === "name")?.[1] || "";
-    settings = JSON.parse(
-      formTemplate.find((tag) => tag[0] === "settings")?.[1] || "{}"
-    ) as IFormSettings;
-    fields = formTemplate.filter((tag) => tag[0] === "field") as Field[];
-
-    return (
-      <FormRenderer
+      <FormRendererContainer
         formEvent={formEvent!}
-        formSpec={formTemplate as Field[]}
         onSubmitClick={onSubmit}
-        isPreview={isPreview}
+        viewKey={viewKeyParams}
+        hideTitleImage={hideTitleImage}
+        hideDescription={hideDescription}
       />
     );
   }
+  <ThankYouScreen
+    isOpen={formSubmitted}
+    onClose={() => navigate(ROUTES.DASHBOARD)}
+  />;
 };

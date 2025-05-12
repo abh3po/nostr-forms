@@ -4,6 +4,7 @@ import useFormBuilderContext from "./hooks/useFormBuilderContext";
 import { useEffect, useState } from "react";
 import { HEADER_MENU_KEYS } from "./components/Header/config";
 import { FormFiller } from "../FormFillerNew";
+import { FormRenderer } from "../FormFillerNew/FormRenderer";
 
 function CreateForm() {
   const { state } = useLocation();
@@ -27,7 +28,14 @@ function CreateForm() {
     return <FormBuilder />;
   }
   if (selectedTab === HEADER_MENU_KEYS.PREVIEW) {
-    return <FormFiller formSpec={getFormSpec()} />;
+    return (
+      <FormRenderer
+        formTemplate={getFormSpec()}
+        form={null}
+        footer={null}
+        onInput={() => {}}
+      />
+    );
   }
 
   return null;

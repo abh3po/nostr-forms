@@ -15,7 +15,6 @@ export const fetchFormTemplate = async (
     authors: [formIdPubkey],
     "#d": [formIdentifier],
   };
-  console.log("attempting to fetch", pubKey, formIdentifier, "from", relayList);
   const nostrEvent = await pool.get(relayList, filter);
   console.log("nostr event fetched is", nostrEvent);
   pool.close(relayList);

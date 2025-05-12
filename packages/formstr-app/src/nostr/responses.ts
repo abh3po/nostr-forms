@@ -22,7 +22,6 @@ export const fetchFormResponses = (
     "#a": [`30168:${pubKey}:${formId}`],
   };
   if (allowedPubkeys) filter.authors = allowedPubkeys;
-  console.log("Filter for fetching response", filter);
   let closer = pool.subscribeMany(relayList, [filter], {
     onevent: handleResponseEvent,
   });

@@ -3,11 +3,11 @@ import { Event } from "nostr-tools";
 import { Response, Tag } from "../../nostr/types";
 import { useProfileContext } from "../../hooks/useProfileContext";
 import { getAllowedUsers, getFormSpec } from "../../utils/formUtils";
-import { getDefaultRelays } from "../../nostr/common";
 import { SubmitButton } from "./SubmitButton/submit";
 import { FormRenderer } from "./FormRenderer";
 import { useEffect, useState } from "react";
 import { getResponseRelays } from "../../utils/ResponseUtils";
+import { IFormSettings } from "../CreateFormNew/components/FormSettings/types";
 
 const { Text } = Typography;
 
@@ -28,6 +28,7 @@ export const FormRendererContainer: React.FC<FormRendererContainerProps> = ({
   const [form] = Form.useForm();
   const { Text } = Typography;
   const [formTemplate, setFormTemplate] = useState<Tag[]>();
+  const [settings, setSettings] = useState<IFormSettings>();
 
   useEffect(() => {
     const initialize = async () => {
@@ -41,7 +42,14 @@ export const FormRendererContainer: React.FC<FormRendererContainerProps> = ({
         () => {},
         viewKey
       );
-      if (formSpec) setFormTemplate(formSpec);
+
+      if (formSpec) {
+        const settings = JSON.parse(
+          formSpec.find((tag) => tag[0] === "settings")?.[1] || "{}"
+        ) as IFormSettings;
+        setSettings(settings);
+        setFormTemplate(formSpec);
+      }
     };
     initialize();
   }, []);
@@ -75,7 +83,7 @@ export const FormRendererContainer: React.FC<FormRendererContainerProps> = ({
   if (allowedUsers.length === 0) {
     footer = (
       <SubmitButton
-        selfSign={true}
+        selfSign={!!settings?.disallowAnonymous}
         edit={false}
         onSubmit={onSubmit}
         form={form}

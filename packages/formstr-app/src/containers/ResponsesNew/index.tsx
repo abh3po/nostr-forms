@@ -88,7 +88,6 @@ export const Response = () => {
     let pubkeys = getAllowedUsers(formEvent);
     if (pubkeys.length !== 0) allowedPubkeys = pubkeys;
     let formRelays = getResponseRelays(formEvent);
-    console.log("relays are ", formRelays, "formId is", formId);
     let responseCloser = fetchFormResponses(
       formEvent.pubkey,
       formId,

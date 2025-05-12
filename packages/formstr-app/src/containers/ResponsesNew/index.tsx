@@ -1,13 +1,13 @@
 import { useEffect, useState } from "react";
 import { Event, getPublicKey, nip19, nip44, SubCloser } from "nostr-tools";
 import { useParams, useSearchParams } from "react-router-dom";
-import { fetchFormResponses } from "../../nostr/responses"
+import { fetchFormResponses } from "../../nostr/responses";
 import SummaryStyle from "./summary.style";
 import { Button, Card, Divider, Table, Typography } from "antd";
 import ResponseWrapper from "./Responses.style";
 import { isMobile } from "../../utils/utility";
 import { useProfileContext } from "../../hooks/useProfileContext";
-import { fetchFormTemplate } from "@formstr/sdk/dist/formstr/nip101/fetchFormTemplate";
+import { fetchFormTemplate } from "../../nostr/fetchFormTemplate";
 import { hexToBytes } from "@noble/hashes/utils";
 import { fetchKeys, getAllowedUsers, getFormSpec } from "../../utils/formUtils";
 import { Export } from "./Export";
@@ -28,6 +28,7 @@ export const Response = () => {
   const viewKeyParams = searchParams.get("viewKey");
   const [responseCloser, setResponsesCloser] = useState<SubCloser | null>(null);
   const handleResponseEvent = (event: Event) => {
+    console.log("Got a response", event);
     setResponses((prev: Event[] | undefined) => [...(prev || []), event]);
   };
   let { poolRef } = useApplicationContext();
@@ -37,60 +38,77 @@ export const Response = () => {
 
     if (!(pubKey || secretKey)) return;
 
-    if(!poolRef) return
+    if (!poolRef) return;
 
     if (secretKey) {
       setEditKey(secretKey);
       pubKey = getPublicKey(hexToBytes(secretKey));
     }
     let relay = searchParams.get("relay");
-    const formEvent = await fetchFormTemplate(
+    fetchFormTemplate(
       pubKey!,
       formId,
+      poolRef.current,
+      async (event: Event) => {
+        setFormEvent(event);
+        if (!secretKey) {
+          if (userPubkey) {
+            let keys = await fetchKeys(event.pubkey, formId!, userPubkey);
+            let editKey = keys?.find((k) => k[0] === "EditAccess")?.[1] || null;
+            setEditKey(editKey);
+          }
+        }
+        let formRelays = event.tags
+          .filter((t) => t[0] === "relay")
+          .map((r) => r[1]);
+        formRelays = formRelays.length
+          ? formRelays
+          : relay
+          ? [relay]
+          : getDefaultRelays();
+        const formSpec = await getFormSpec(
+          event,
+          userPubkey,
+          null,
+          viewKeyParams
+        );
+        setFormSpec(formSpec);
+      },
       relay ? [relay!] : undefined
     );
+  };
+
+  useEffect(() => {
+    if (!formEvent) initialize();
+    return () => {
+      if (responseCloser) responseCloser.close();
+    };
+  }, [poolRef]);
+
+  useEffect(() => {
+    console.log("not working?", formEvent, formId);
     if (!formEvent) return;
-    if (!secretKey) {
-      if (userPubkey) {
-        let keys = await fetchKeys(formEvent.pubkey, formId, userPubkey);
-        let editKey = keys?.find((k) => k[0] === "EditAccess")?.[1] || null;
-        setEditKey(editKey);
-      }
-    }
-    let formRelays = formEvent.tags
-      .filter((t) => t[0] === "relay")
-      .map((r) => r[1]);
-    formRelays = formRelays.length ? formRelays : relay ? [relay] : getDefaultRelays()
-    setFormEvent(formEvent);
-    const formSpec = await getFormSpec(
-      formEvent,
-      userPubkey,
-      null,
-      viewKeyParams
-    );
-    setFormSpec(formSpec);
+    if (!formId) return;
+    if (responses) return;
     let allowedPubkeys;
     let pubkeys = getAllowedUsers(formEvent);
     if (pubkeys.length !== 0) allowedPubkeys = pubkeys;
-    let responseCloser =  fetchFormResponses(
-      pubKey!,
+    let formRelays = formEvent.tags
+      .filter((t) => t[0] === "relay")
+      .map((r) => r[1]);
+    console.log("relays are ", formRelays, "formId is", formId);
+    let responseCloser = fetchFormResponses(
+      formEvent.pubkey,
       formId,
       poolRef.current,
       handleResponseEvent,
       allowedPubkeys,
       formRelays
-    )
+    );
     setResponsesCloser(responseCloser);
 
     setResponses(responses);
-  };
-
-  useEffect(() => {
-    if (!formEvent && !responses) initialize();
-    return () => {
-      if (responseCloser) responseCloser.close()
-      }
-  }, [poolRef]);
+  }, [formEvent]);
 
   const getResponderCount = () => {
     if (!responses) return 0;

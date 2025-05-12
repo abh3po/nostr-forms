@@ -9,13 +9,7 @@ import {
 } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { Button, Form, Spin, Typography } from "antd";
-import { ThankYouScreen } from "./ThankYouScreen";
-import { SubmitButton } from "./SubmitButton/submit";
-import { isMobile } from "../../utils/utility";
-import { ReactComponent as CreatedUsingFormstr } from "../../Images/created-using-formstr.svg";
-import Markdown from "react-markdown";
 import { Event, nip19 } from "nostr-tools";
-import { FormFields } from "./FormFields";
 import { RequestAccess } from "./RequestAccess";
 import { fetchFormTemplate } from "@formstr/sdk/dist/formstr/nip101/fetchFormTemplate";
 import { useProfileContext } from "../../hooks/useProfileContext";
@@ -24,9 +18,7 @@ import { IFormSettings } from "../CreateFormNew/components/FormSettings/types";
 import { AddressPointer } from "nostr-tools/nip19";
 import { LoadingOutlined } from "@ant-design/icons";
 import { sendNotification } from "../../nostr/common";
-import { sendResponses } from "../../nostr/common";
 import { FormRenderer } from "./formRenderer";
-import { resolve } from "path";
 
 const { Text } = Typography;
 

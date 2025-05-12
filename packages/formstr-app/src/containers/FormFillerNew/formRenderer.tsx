@@ -62,6 +62,7 @@ export const FormRenderer: React.FC<FormRendererProps> = ({
       .filter((r) => r[0] === "relay")
       ?.map((r) => r[1]);
     if (formRelays.length == 0) formRelays = getDefaultRelays();
+    console.log("Response relays are", formRelays);
     let finalRelays = Array.from(new Set(formRelays));
     return finalRelays;
   };

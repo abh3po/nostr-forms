@@ -14,6 +14,7 @@ import { Export } from "./Export";
 import { Field, Tag } from "../../nostr/types";
 import { useApplicationContext } from "../../hooks/useApplicationContext";
 import { getDefaultRelays } from "../../nostr/common";
+import { getResponseRelays } from "../../utils/ResponseUtils";
 
 const { Text } = Typography;
 
@@ -58,14 +59,7 @@ export const Response = () => {
             setEditKey(editKey);
           }
         }
-        let formRelays = event.tags
-          .filter((t) => t[0] === "relay")
-          .map((r) => r[1]);
-        formRelays = formRelays.length
-          ? formRelays
-          : relay
-          ? [relay]
-          : getDefaultRelays();
+        let formRelays = getResponseRelays(event);
         const formSpec = await getFormSpec(
           event,
           userPubkey,
@@ -93,9 +87,7 @@ export const Response = () => {
     let allowedPubkeys;
     let pubkeys = getAllowedUsers(formEvent);
     if (pubkeys.length !== 0) allowedPubkeys = pubkeys;
-    let formRelays = formEvent.tags
-      .filter((t) => t[0] === "relay")
-      .map((r) => r[1]);
+    let formRelays = getResponseRelays(formEvent);
     console.log("relays are ", formRelays, "formId is", formId);
     let responseCloser = fetchFormResponses(
       formEvent.pubkey,

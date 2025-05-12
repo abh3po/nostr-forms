@@ -7,6 +7,7 @@ import { getDefaultRelays } from "../../nostr/common";
 import { SubmitButton } from "./SubmitButton/submit";
 import { FormRenderer } from "./FormRenderer";
 import { useEffect, useState } from "react";
+import { getResponseRelays } from "../../utils/ResponseUtils";
 
 const { Text } = Typography;
 
@@ -57,14 +58,6 @@ export const FormRendererContainer: React.FC<FormRendererContainerProps> = ({
     form.setFieldValue(questionId, [answer, message]);
   };
 
-  const getResponseRelays = () => {
-    let formRelays = formEvent.tags
-      .filter((r) => r[0] === "relay")
-      ?.map((r) => r[1]);
-    if (formRelays.length === 0) formRelays = getDefaultRelays();
-    return Array.from(new Set(formRelays));
-  };
-
   const onSubmit = async () => {
     const formResponses = form.getFieldsValue(true);
     const responses: Response[] = Object.keys(formResponses).map((fieldId) => {
@@ -86,7 +79,7 @@ export const FormRendererContainer: React.FC<FormRendererContainerProps> = ({
         edit={false}
         onSubmit={onSubmit}
         form={form}
-        relays={getResponseRelays()}
+        relays={getResponseRelays(formEvent)}
         formEvent={formEvent}
       />
     );
@@ -101,7 +94,7 @@ export const FormRendererContainer: React.FC<FormRendererContainerProps> = ({
         edit={false}
         onSubmit={onSubmit}
         form={form}
-        relays={getResponseRelays()}
+        relays={getResponseRelays(formEvent)}
         formEvent={formEvent}
       />
     );

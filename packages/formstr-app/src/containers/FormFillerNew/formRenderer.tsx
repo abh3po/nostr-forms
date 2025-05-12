@@ -163,6 +163,7 @@ export const FormRenderer: React.FC<FormRendererProps> = ({
               <div>
                 <FormFields fields={fields} handleInput={handleInput} />
               </div>
+              {renderSubmitButton(settings)}
             </Form>
           </div>
           <div className="branding-container">
@@ -181,7 +182,6 @@ export const FormRenderer: React.FC<FormRendererProps> = ({
             )}
           </div>
         </div>
-        {renderSubmitButton(settings)}
       </FillerStyle>
     );
   }

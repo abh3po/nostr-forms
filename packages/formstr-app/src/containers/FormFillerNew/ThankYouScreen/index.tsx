@@ -8,6 +8,7 @@ export const ThankYouScreen = ({
   isOpen: boolean;
   onClose: () => void;
 }) => {
+  console.log("IS THABNK YOU MODAL OPEN?", isOpen);
   return (
     <Modal open={isOpen} onCancel={onClose} closable={true} footer={null}>
       <ThankYouStyle>

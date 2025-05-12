@@ -31,9 +31,6 @@ export const FormFiller: React.FC<FormFillerProps> = ({ formSpec }) => {
   let formId = decodedData?.identifier;
   let relays = decodedData?.relays;
   const { pubkey: userPubKey, requestPubkey } = useProfileContext();
-  const [formTemplate, setFormTemplate] = useState<Tag[] | null>(
-    formSpec || null
-  );
   const [formSubmitted, setFormSubmitted] = useState(false);
   const [formEvent, setFormEvent] = useState<Event | undefined>();
   const [searchParams] = useSearchParams();
@@ -44,6 +41,7 @@ export const FormFiller: React.FC<FormFillerProps> = ({ formSpec }) => {
 
   const { poolRef } = useApplicationContext();
 
+  console.log("FORM SUBMITTED?", formSubmitted);
   if (!formId && !formSpec) {
     return null;
   }
@@ -59,7 +57,8 @@ export const FormFiller: React.FC<FormFillerProps> = ({ formSpec }) => {
       poolRef.current,
       (event: Event) => {
         setFormEvent(event);
-      }
+      },
+      relays
     );
   };
 
@@ -70,8 +69,8 @@ export const FormFiller: React.FC<FormFillerProps> = ({ formSpec }) => {
     if (!formEvent) initialize(pubKey, formId, relays);
   }, []);
 
-  const onSubmit = async (responses: Response[]) => {
-    sendNotification(formTemplate!, responses);
+  const onSubmit = async (responses: Response[], formTemplate: Tag[]) => {
+    sendNotification(formTemplate, responses);
     setFormSubmitted(true);
   };
 
@@ -132,17 +131,20 @@ export const FormFiller: React.FC<FormFillerProps> = ({ formSpec }) => {
   }
   if (formEvent) {
     return (
-      <FormRendererContainer
-        formEvent={formEvent!}
-        onSubmitClick={onSubmit}
-        viewKey={viewKeyParams}
-        hideTitleImage={hideTitleImage}
-        hideDescription={hideDescription}
-      />
+      <>
+        <FormRendererContainer
+          formEvent={formEvent!}
+          onSubmitClick={onSubmit}
+          viewKey={viewKeyParams}
+          hideTitleImage={hideTitleImage}
+          hideDescription={hideDescription}
+        />
+        <ThankYouScreen
+          isOpen={formSubmitted}
+          onClose={() => navigate(ROUTES.DASHBOARD)}
+        />
+        ;
+      </>
     );
   }
-  <ThankYouScreen
-    isOpen={formSubmitted}
-    onClose={() => navigate(ROUTES.DASHBOARD)}
-  />;
 };

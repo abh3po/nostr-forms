@@ -12,7 +12,7 @@ const { Text } = Typography;
 
 interface FormRendererContainerProps {
   formEvent: Event;
-  onSubmitClick: (responses: Response[]) => void;
+  onSubmitClick: (responses: Response[], formTemplate: Tag[]) => void;
   viewKey: string | null;
   hideTitleImage?: boolean;
   hideDescription?: boolean;
@@ -73,7 +73,7 @@ export const FormRendererContainer: React.FC<FormRendererContainerProps> = ({
       if (formResponses[fieldId]) [answer, message] = formResponses[fieldId];
       return ["response", fieldId, answer, JSON.stringify({ message })];
     });
-    onSubmitClick(responses);
+    onSubmitClick(responses, formTemplate!);
   };
 
   const allowedUsers = getAllowedUsers(formEvent);

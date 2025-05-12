@@ -108,7 +108,11 @@ export const FormRendererContainer: React.FC<FormRendererContainerProps> = ({
     );
   }
   if (!formTemplate)
-    return <Typography.Text> Could not decipher form </Typography.Text>;
+    return (
+      <div>
+        <Typography.Text> Form is encrypted </Typography.Text>
+      </div>
+    );
   return (
     <FormRenderer
       formTemplate={formTemplate}

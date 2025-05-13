@@ -143,7 +143,6 @@ export const FormFiller: React.FC<FormFillerProps> = ({ formSpec }) => {
           isOpen={formSubmitted}
           onClose={() => navigate(ROUTES.DASHBOARD)}
         />
-        ;
       </>
     );
   }

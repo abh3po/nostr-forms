@@ -1,4 +1,4 @@
-import { Divider, Switch, Tooltip, Typography } from "antd";
+import { Button, Divider, Switch, Tooltip, Typography } from "antd";
 import StyleWrapper from "./style";
 import useFormBuilderContext from "../../hooks/useFormBuilderContext";
 import TitleImage from "./TitleImage";
@@ -7,11 +7,17 @@ import { RelayList } from "./RelayList";
 import FormIdentifier from "./FormIdentifier";
 import { Notifications } from "./Notifications";
 import { isMobile } from "../../../../utils/utility";
+import RelayManagerModal from './RelayManagerModal';
 
 const { Text } = Typography;
 
 function FormSettings() {
-  const { formSettings, updateFormSetting } = useFormBuilderContext();
+  const {
+    formSettings,
+    updateFormSetting,
+    toggleRelayManagerModal,
+    isRelayManagerModalOpen,
+  } = useFormBuilderContext();
 
   const handleAnonymousToggle = (checked: boolean) => {
     updateFormSetting({
@@ -43,7 +49,7 @@ function FormSettings() {
           <div className="property-setting">
             <Text className="property-text">Make Form Public</Text>
             <Switch
-              defaultChecked={!formSettings.encryptForm}
+              checked={!formSettings.encryptForm}
               onChange={handlePublicForm}
             />
           </div>
@@ -75,7 +81,7 @@ function FormSettings() {
         <div className="property-setting">
           <Text className="property-text">Disallow Anonymous Submissions</Text>
           <Switch
-            defaultChecked={formSettings.disallowAnonymous}
+            checked={formSettings.disallowAnonymous}
             onChange={handleAnonymousToggle}
           />
         </div>
@@ -95,8 +101,25 @@ function FormSettings() {
       </div>
       <Divider className="divider" />
       <div className="form-setting">
-        <RelayList />
+        <div className="property-setting">
+            <Text className="property-name" style={{marginBottom: '8px'}}>Relay Configuration</Text>
+        </div>
+        <Button 
+          onClick={toggleRelayManagerModal} 
+          type="primary" 
+          style={{ width: '100%', marginBottom: '10px' }}
+        >
+          Manage Relays
+        </Button>
+        <RelayList /> 
       </div>
+
+      {isRelayManagerModalOpen && (
+        <RelayManagerModal
+          isOpen={isRelayManagerModalOpen}
+          onClose={toggleRelayManagerModal}
+        />
+      )}
     </StyleWrapper>
   );
 }

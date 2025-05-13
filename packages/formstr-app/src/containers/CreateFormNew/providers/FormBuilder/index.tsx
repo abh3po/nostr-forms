@@ -1,6 +1,6 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState, useCallback } from "react";
 import { AnswerSettings } from "@formstr/sdk/dist/interfaces";
-import { FormInitData, IFormBuilderContext } from "./typeDefs";
+import { FormInitData, IFormBuilderContext, RelayItem, RelayStatus } from "./typeDefs";
 import { generateQuestion } from "../../utils";
 import { getDefaultRelays } from "@formstr/sdk";
 import { makeTag } from "../../../../utils/utility";
@@ -12,45 +12,53 @@ import { getPublicKey } from "nostr-tools";
 import { useNavigate } from "react-router-dom";
 import { useProfileContext } from "../../../../hooks/useProfileContext";
 import { createForm } from "../../../../nostr/createForm";
-import {
-  getItem,
-  LOCAL_STORAGE_KEYS,
-  setItem,
-} from "../../../../utils/localStorage";
+import { getItem, LOCAL_STORAGE_KEYS, setItem} from "../../../../utils/localStorage";
 import { Field } from "../../../../nostr/types";
+import { checkRelayConnection } from '../../../../utils/relayUtils';
+import { message } from 'antd';
+
+const LOCAL_STORAGE_CUSTOM_RELAYS_KEY = "formstr:customRelays";
 
 export const FormBuilderContext = React.createContext<IFormBuilderContext>({
   questionsList: [],
-  initializeForm: (form: FormInitData) => null,
-  saveForm: (onRelayAccepted?: (url: string) => void) => Promise.resolve(),
-  editQuestion: (question: Field, tempId: string) => null,
-  addQuestion: (primitive?: string, label?: string) => null,
-  deleteQuestion: (tempId: string) => null,
+  initializeForm: () => null,
+  saveForm: () => Promise.resolve(),
+  editQuestion: () => null,
+  addQuestion: () => null,
+  deleteQuestion: () => null,
   questionIdInFocus: undefined,
-  setQuestionIdInFocus: (tempId?: string) => null,
+  setQuestionIdInFocus: () => null,
   formSettings: { titleImageUrl: "", formId: "" },
-  updateFormSetting: (settings: IFormSettings) => null,
-  updateFormTitleImage: (e: React.FormEvent<HTMLInputElement>) => null,
+  updateFormSetting: () => null,
+  updateFormTitleImage: () => null,
   closeSettingsOnOutsideClick: () => null,
   closeMenuOnOutsideClick: () => null,
   isRightSettingsOpen: false,
   isLeftMenuOpen: false,
-  setIsLeftMenuOpen: (open: boolean) => null,
+  setIsLeftMenuOpen: () => null,
   toggleSettingsWindow: () => null,
   formName: "",
-  updateFormName: (name: string) => null,
-  updateQuestionsList: (list: Field[]) => null,
+  updateFormName: () => null,
+  updateQuestionsList: () => null,
   getFormSpec: () => [],
   saveDraft: () => null,
   selectedTab: HEADER_MENU_KEYS.BUILDER,
-  setSelectedTab: (tab: string) => "",
+  setSelectedTab: () => {},
   bottomElementRef: null,
   relayList: [],
-  setRelayList: (relayList: { url: string; tempId: string }[]) => null,
   editList: null,
-  setEditList: (keys: Set<string>) => null,
+  setEditList: () => null,
   viewList: null,
-  setViewList: (keys: Set<string>) => null,
+  setViewList: () => null,
+  isRelayManagerModalOpen: false,
+  toggleRelayManagerModal: () => null,
+  relayConnectionStatuses: new Map(),
+  updateRelayConnectionStatus: () => null,
+  testRelayConnection: async () => {},
+  testAllRelayConnections: () => {},
+  addRelayToList: () => null,
+  editRelayInList: () => null,
+  deleteRelayFromList: () => null,
 });
 
 const InitialFormSettings: IFormSettings = {
@@ -75,58 +83,190 @@ export default function FormBuilderProvider({
   const [questionsList, setQuestionsList] = useState<Array<Field>>([
     generateQuestion(),
   ]);
-  const [questionIdInFocus, setQuestionIdInFocus] = useState<
-    string | undefined
-  >();
-  const [formSettings, setFormSettings] =
-    useState<IFormSettings>(InitialFormSettings);
-
+  const [questionIdInFocus, setQuestionIdInFocus] = useState<string | undefined>();
+  const [formSettings, setFormSettings] = useState<IFormSettings>(InitialFormSettings);
   const [isRightSettingsOpen, setIsRightSettingsOpen] = useState(false);
   const [isLeftMenuOpen, setIsLeftMenuOpen] = useState(false);
   const [formName, setFormName] = useState<string>(
     "This is the title of your form! Tap to edit."
   );
   const bottomElement = useRef<HTMLDivElement>(null);
-  const [relayList, setRelayList] = useState(
-    getDefaultRelays().map((relay) => {
-      return { url: relay, tempId: makeTag(6) };
-    })
-  );
-  const { pubkey: userPubkey, requestPubkey } = useProfileContext();
+  const { pubkey: userPubkey } = useProfileContext();
   const [editList, setEditList] = useState<Set<string>>(
     new Set(userPubkey ? [userPubkey] : [])
   );
   const [viewList, setViewList] = useState<Set<string>>(new Set([]));
-  const [selectedTab, setSelectedTab] = useState<string>(
-    HEADER_MENU_KEYS.BUILDER
-  );
+  const [selectedTab, setSelectedTab] = useState<string>(HEADER_MENU_KEYS.BUILDER);
   const [secretKey, setSecretKey] = useState<string | null>(null);
   const [viewKey, setViewKey] = useState<string | null | undefined>(null);
-
-  useEffect(() => {
-    if (userRelays.length) {
-      setRelayList(
-        userRelays.map((relay) => {
-          return { url: relay, tempId: makeTag(6) };
-        })
-      );
-    }
-  }, [userRelays]);
-
   const navigate = useNavigate();
 
-  const toggleSettingsWindow = () => {
-    setIsRightSettingsOpen((open) => {
-      return !open;
+  const [relayList, setRelayList] = useState<RelayItem[]>([]);
+  const [relayConnectionStatuses, setRelayConnectionStatuses] = useState<Map<string, RelayStatus>>(new Map());
+  const [isRelayManagerModalOpen, setIsRelayManagerModalOpen] = useState(false);
+  const [isRelayListInitialized, setIsRelayListInitialized] = useState(false);
+
+  const relayListRef = useRef(relayList);
+  useEffect(() => {
+    relayListRef.current = relayList;
+  }, [relayList]);
+
+  const updateRelayConnectionStatus = useCallback((relayId: string, status: RelayStatus) => {
+    setRelayConnectionStatuses(prevStatuses => new Map(prevStatuses).set(relayId, status));
+  }, []);
+
+  const testRelayConnection = useCallback(async (relayId: string) => {
+    const currentRelayList = relayListRef.current;
+    const relayToTest = currentRelayList.find(r => r.tempId === relayId);
+    if (!relayToTest) return;
+
+    updateRelayConnectionStatus(relayId, 'pending');
+    try {
+      const status = await checkRelayConnection(relayToTest.url);
+      updateRelayConnectionStatus(relayId, status);
+    } catch (error) {
+      updateRelayConnectionStatus(relayId, 'error');
+    }
+  }, [updateRelayConnectionStatus]);
+
+  const testAllRelayConnectionsInstance = useCallback(() => {
+    const currentRelayList = relayListRef.current;
+    currentRelayList.forEach(relay => {
+      testRelayConnection(relay.tempId);
     });
+  }, [testRelayConnection]);
+
+  const testAllRelayConnectionsInstanceRef = useRef(testAllRelayConnectionsInstance);
+  useEffect(() => {
+    testAllRelayConnectionsInstanceRef.current = testAllRelayConnectionsInstance;
+  }, [testAllRelayConnectionsInstance]);
+  useEffect(() => {
+    let baseList: RelayItem[];
+    const storedUserManagedRelays = getItem<RelayItem[]>(LOCAL_STORAGE_CUSTOM_RELAYS_KEY);
+
+    if (userRelays && userRelays.length > 0) {
+      baseList = userRelays.map(url => {
+        const existingStoredRelay = storedUserManagedRelays?.find(r => r.url === url);
+        return existingStoredRelay || { url, tempId: makeTag(6) };
+      });
+      setItem(LOCAL_STORAGE_CUSTOM_RELAYS_KEY, baseList);
+    } else if (storedUserManagedRelays) {
+      baseList = storedUserManagedRelays;
+    } else {
+      baseList = [];
+    }
+
+    const defaultRelayUrls = getDefaultRelays();
+    const finalRelayList = [...baseList];
+    const baseListUrls = new Set(baseList.map(r => r.url));
+
+    defaultRelayUrls.forEach(defaultUrl => {
+      if (!baseListUrls.has(defaultUrl)) {
+        const existingStoredDefault = storedUserManagedRelays?.find(r => r.url === defaultUrl);
+        if (existingStoredDefault) {
+            finalRelayList.push(existingStoredDefault);
+        } else {
+            finalRelayList.push({ url: defaultUrl, tempId: makeTag(6) });
+        }
+      }
+    });
+    
+    const uniqueRelayMap = new Map<string, RelayItem>();
+    baseList.forEach(relay => uniqueRelayMap.set(relay.url, relay));
+    finalRelayList.forEach(relay => {
+        if (!uniqueRelayMap.has(relay.url)) {
+            uniqueRelayMap.set(relay.url, relay);
+        }
+    });
+    const uniqueFinalRelayList = Array.from(uniqueRelayMap.values());
+
+    setRelayList(uniqueFinalRelayList);
+
+    const initialStatuses = new Map<string, RelayStatus>();
+    uniqueFinalRelayList.forEach(relay => initialStatuses.set(relay.tempId, 'unknown'));
+    setRelayConnectionStatuses(initialStatuses);
+    
+    setIsRelayListInitialized(true);
+  }, [userRelays]);
+
+  useEffect(() => {
+    if (isRelayListInitialized && testAllRelayConnectionsInstanceRef.current) {
+      const timerId = setTimeout(() => {
+        testAllRelayConnectionsInstanceRef.current?.();
+      }, 100);
+      return () => clearTimeout(timerId);
+    }
+  }, [isRelayListInitialized]);
+
+  const toggleRelayManagerModal = useCallback(() => {
+    setIsRelayManagerModalOpen(prev => {
+      const newState = !prev;
+      if (newState && isRelayListInitialized) {
+        testAllRelayConnectionsInstanceRef.current?.();
+      }
+      return newState;
+    });
+  }, [isRelayListInitialized]);
+
+  const addRelayToList = useCallback((url: string) => {
+    const currentRelayList = relayListRef.current;
+    if (currentRelayList.some(relay => relay.url === url)) {
+        message.warning(`Relay URL ${url} already exists.`);
+        return;
+    }
+    const newRelay: RelayItem = { url, tempId: makeTag(6) };
+    const updatedList = [...currentRelayList, newRelay];
+    setRelayList(updatedList);
+    setItem(LOCAL_STORAGE_CUSTOM_RELAYS_KEY, updatedList);
+    updateRelayConnectionStatus(newRelay.tempId, 'pending');
+    testRelayConnection(newRelay.tempId);
+  }, [updateRelayConnectionStatus, testRelayConnection]);
+
+  const editRelayInList = useCallback((tempId: string, newUrl: string) => {
+    const currentRelayList = relayListRef.current;
+    if (currentRelayList.some(relay => relay.url === newUrl && relay.tempId !== tempId)) {
+        message.warning(`Relay URL ${newUrl} already exists.`);
+        return;
+    }
+    const updatedList = currentRelayList.map(relay =>
+        relay.tempId === tempId ? { ...relay, url: newUrl } : relay
+    );
+    setRelayList(updatedList);
+    setItem(LOCAL_STORAGE_CUSTOM_RELAYS_KEY, updatedList);
+    updateRelayConnectionStatus(tempId, 'pending');
+    testRelayConnection(tempId);
+  }, [updateRelayConnectionStatus, testRelayConnection]);
+
+  const deleteRelayFromList = useCallback((tempId: string) => {
+    const currentRelayList = relayListRef.current;
+    const relayToDelete = currentRelayList.find(r => r.tempId === tempId);
+    if (!relayToDelete) return;
+
+    const defaultRelayUrlsSet = new Set(getDefaultRelays());
+    const isDefaultRelay = defaultRelayUrlsSet.has(relayToDelete.url);
+
+    let updatedList = currentRelayList.filter(relay => relay.tempId !== tempId);
+    setItem(LOCAL_STORAGE_CUSTOM_RELAYS_KEY, updatedList); 
+
+    setRelayList(updatedList);
+
+    setRelayConnectionStatuses(prevStatuses => {
+      const newStatuses = new Map(prevStatuses);
+      newStatuses.delete(tempId);
+      return newStatuses;
+    });
+  }, []);
+
+  const toggleSettingsWindow = () => {
+    setIsRightSettingsOpen((open) => !open);
   };
 
   const closeSettingsOnOutsideClick = () => {
-    isRightSettingsOpen && toggleSettingsWindow();
+    if (isRightSettingsOpen) toggleSettingsWindow();
   };
 
   const closeMenuOnOutsideClick = () => {
-    isLeftMenuOpen && setIsLeftMenuOpen(false);
+    if (isLeftMenuOpen) setIsLeftMenuOpen(false);
   };
 
   const getFormSpec = (): Tag[] => {
@@ -141,10 +281,10 @@ export default function FormBuilderProvider({
   const saveForm = async (onRelayAccepted?: (url: string) => void) => {
     const formToSave = getFormSpec();
     if (!formSettings.formId) {
-      alert("Form ID is required");
+      message.error("Form ID is required");
       return;
     }
-    const relayUrls = relayList.map((relay) => relay.url);
+    const relayUrls = relayListRef.current.map((relay) => relay.url);
     await createForm(
       formToSave,
       relayUrls,
@@ -160,21 +300,21 @@ export default function FormBuilderProvider({
         viewKey: Uint8Array;
         acceptedRelays: string[];
       }) => {
-        const { signingKey, viewKey, acceptedRelays } = artifacts;
+        const { signingKey, viewKey: formViewKey, acceptedRelays } = artifacts;
         navigate("/dashboard", {
           state: {
             pubKey: getPublicKey(signingKey),
             formId: formSettings.formId,
             secretKey: bytesToHex(signingKey),
-            viewKey: formSettings.viewKeyInUrl ? bytesToHex(viewKey) : null,
+            viewKey: formSettings.viewKeyInUrl ? bytesToHex(formViewKey) : null,
             name: formName,
-            relay: acceptedRelays[0],
+            relay: acceptedRelays.length > 0 ? acceptedRelays[0] : "",
           },
         });
       },
       (error) => {
-        console.log("Error creating form", error);
-        alert("error creating the form: " + error);
+        console.error("Error creating form:", error);
+        message.error("Error creating the form: " + (error instanceof Error ? error.message : String(error)));
       }
     );
   };
@@ -250,20 +390,17 @@ export default function FormBuilderProvider({
 
   const initializeForm = (form: FormInitData) => {
     setFormName(form.spec.filter((f) => f[0] === "name")?.[0]?.[1] || "");
-    let settings = JSON.parse(
+    let settingsFromFile = JSON.parse(
       form.spec.filter((f) => f[0] === "settings")?.[0]?.[1] || "{}"
     );
-    settings = { ...InitialFormSettings, ...settings };
+    settingsFromFile = { ...InitialFormSettings, ...settingsFromFile };
     let fields = form.spec.filter((f) => f[0] === "field") as Field[];
-    setFormSettings((settings) => {
-      return { ...settings, formId: form.id };
-    });
-    let viewList = form.spec.filter((f) => f[0] === "allowed").map((t) => t[1]);
+    setFormSettings((currentSettings) => ({ ...currentSettings, ...settingsFromFile, formId: form.id }));
+    let newViewList = form.spec.filter((f) => f[0] === "allowed").map((t) => t[1]);
     let allKeys = form.spec.filter((f) => f[0] === "p").map((t) => t[1]);
-    let editList: string[] = allKeys.filter((p) => !viewList.includes(p));
-    setViewList(new Set(viewList));
-    setEditList(new Set(editList));
-    setFormSettings(settings);
+    let newEditList: string[] = allKeys.filter((p) => !newViewList.includes(p));
+    setViewList(new Set(newViewList));
+    setEditList(new Set(newEditList));
     setQuestionsList(fields);
     setSecretKey(form.secret || null);
     setViewKey(form.viewKey);
@@ -298,11 +435,19 @@ export default function FormBuilderProvider({
         setSelectedTab,
         bottomElementRef: bottomElement,
         relayList,
-        setRelayList,
         editList,
         setEditList,
         viewList,
         setViewList,
+        isRelayManagerModalOpen,
+        toggleRelayManagerModal,
+        relayConnectionStatuses,
+        updateRelayConnectionStatus,
+        testRelayConnection,
+        testAllRelayConnections: testAllRelayConnectionsInstanceRef.current || (() => {}),
+        addRelayToList,
+        editRelayInList,
+        deleteRelayFromList,
       }}
     >
       {children}

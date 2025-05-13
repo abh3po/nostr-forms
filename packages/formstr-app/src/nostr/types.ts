@@ -42,3 +42,16 @@ export const KINDS = {
   myFormsList: 14083,
   formTemplate: 30168,
 };
+
+export interface FormField {
+  type: string;
+  label: string;
+  name: string;
+  options?: string[];
+  description?: string;
+}
+
+export interface FormResponse {
+  formName(fields: FormField[], formName: any, description: any): unknown;
+  fields: FormField[];
+}

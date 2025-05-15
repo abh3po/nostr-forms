@@ -16,18 +16,45 @@ export function makeTag(length: number) {
   return result;
 }
 
+export const downloadHTMLToDevice = (fileContent: string, name = "form") => {
+  const blob = new Blob([fileContent], { type: "text/html" });
+
+  // Create a temporary link element
+  const link = document.createElement("a");
+  link.href = URL.createObjectURL(blob);
+  link.download = `${name}.html`;
+
+  // Programmatically click the link to trigger the download
+  link.click();
+
+  // Clean up the URL object
+  URL.revokeObjectURL(link.href);
+};
+
+export const makeFormNAddr = (
+  publicKey: string,
+  formId: string,
+  relaysEncode?: string[],
+) => {
+  return nip19.naddrEncode({
+    pubkey: publicKey,
+    identifier: formId,
+    relays: relaysEncode || ["wss://relay.damus.io"],
+    kind: 30168,
+  });
+};
+
 export const naddrUrl = (
   publicKey: string,
   formId: string,
   relaysEncode?: string[],
   viewKey?: string,
 ) => {
-  let formUrl = `/f/${nip19.naddrEncode({
-    pubkey: publicKey,
-    identifier: formId,
-    relays: relaysEncode || ["wss://relay.damus.io"],
-    kind: 30168,
-  })}`;
+  let formUrl = `/f/${makeFormNAddr(
+    publicKey,
+    formId,
+    relaysEncode || ["wss://relay.damus.io"],
+  )}`;
   if (viewKey) formUrl = formUrl + `?viewKey=${viewKey}`;
   return formUrl;
 };

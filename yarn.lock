@@ -2790,14 +2790,14 @@
     debug "^4.3.4"
 
 "@typescript-eslint/parser@^6.10.0":
-  version "6.10.0"
-  resolved "https://registry.npmjs.org/@typescript-eslint/parser/-/parser-6.10.0.tgz"
-  integrity sha512-+sZwIj+s+io9ozSxIWbNB5873OSdfeBEH/FR0re14WLI6BaKuSOnnwCJ2foUiu8uXf4dRp1UqHP0vrZ1zXGrog==
+  version "6.21.0"
+  resolved "https://registry.yarnpkg.com/@typescript-eslint/parser/-/parser-6.21.0.tgz#af8fcf66feee2edc86bc5d1cf45e33b0630bf35b"
+  integrity sha512-tbsV1jPne5CkFQCgPBcDOt30ItF7aJoZL997JSF7MhGQqOeT3svWRYxiqlfA5RUdlHN6Fi+EI9bxqbdyAUZjYQ==
   dependencies:
-    "@typescript-eslint/scope-manager" "6.10.0"
-    "@typescript-eslint/types" "6.10.0"
-    "@typescript-eslint/typescript-estree" "6.10.0"
-    "@typescript-eslint/visitor-keys" "6.10.0"
+    "@typescript-eslint/scope-manager" "6.21.0"
+    "@typescript-eslint/types" "6.21.0"
+    "@typescript-eslint/typescript-estree" "6.21.0"
+    "@typescript-eslint/visitor-keys" "6.21.0"
     debug "^4.3.4"
 
 "@typescript-eslint/scope-manager@5.62.0":
@@ -2808,13 +2808,13 @@
     "@typescript-eslint/types" "5.62.0"
     "@typescript-eslint/visitor-keys" "5.62.0"
 
-"@typescript-eslint/scope-manager@6.10.0":
-  version "6.10.0"
-  resolved "https://registry.npmjs.org/@typescript-eslint/scope-manager/-/scope-manager-6.10.0.tgz"
-  integrity sha512-TN/plV7dzqqC2iPNf1KrxozDgZs53Gfgg5ZHyw8erd6jd5Ta/JIEcdCheXFt9b1NYb93a1wmIIVW/2gLkombDg==
+"@typescript-eslint/scope-manager@6.21.0":
+  version "6.21.0"
+  resolved "https://registry.yarnpkg.com/@typescript-eslint/scope-manager/-/scope-manager-6.21.0.tgz#ea8a9bfc8f1504a6ac5d59a6df308d3a0630a2b1"
+  integrity sha512-OwLUIWZJry80O99zvqXVEioyniJMa+d2GrqpUTqi5/v5D5rOrppJVBPa0yKCblcigC0/aYAzxxqQ1B+DS2RYsg==
   dependencies:
-    "@typescript-eslint/types" "6.10.0"
-    "@typescript-eslint/visitor-keys" "6.10.0"
+    "@typescript-eslint/types" "6.21.0"
+    "@typescript-eslint/visitor-keys" "6.21.0"
 
 "@typescript-eslint/type-utils@5.62.0":
   version "5.62.0"
@@ -2831,10 +2831,10 @@
   resolved "https://registry.npmjs.org/@typescript-eslint/types/-/types-5.62.0.tgz"
   integrity sha512-87NVngcbVXUahrRTqIK27gD2t5Cu1yuCXxbLcFtCzZGlfyVWWh8mLHkoxzjsB6DDNnvdL+fW8MiwPEJyGJQDgQ==
 
-"@typescript-eslint/types@6.10.0":
-  version "6.10.0"
-  resolved "https://registry.npmjs.org/@typescript-eslint/types/-/types-6.10.0.tgz"
-  integrity sha512-36Fq1PWh9dusgo3vH7qmQAj5/AZqARky1Wi6WpINxB6SkQdY5vQoT2/7rW7uBIsPDcvvGCLi4r10p0OJ7ITAeg==
+"@typescript-eslint/types@6.21.0":
+  version "6.21.0"
+  resolved "https://registry.npmjs.org/@typescript-eslint/types/-/types-6.21.0.tgz"
+  integrity sha512-1kFmZ1rOm5epu9NZEZm1kckCDGj5UJEf7P1kliH4LKu/RkwpsfqqGmY2OOcUs18lSlQBKLDYBOGxRVtrMN5lpg==
 
 "@typescript-eslint/typescript-estree@5.62.0":
   version "5.62.0"
@@ -2849,16 +2849,17 @@
     semver "^7.3.7"
     tsutils "^3.21.0"
 
-"@typescript-eslint/typescript-estree@6.10.0":
-  version "6.10.0"
-  resolved "https://registry.npmjs.org/@typescript-eslint/typescript-estree/-/typescript-estree-6.10.0.tgz"
-  integrity sha512-ek0Eyuy6P15LJVeghbWhSrBCj/vJpPXXR+EpaRZqou7achUWL8IdYnMSC5WHAeTWswYQuP2hAZgij/bC9fanBg==
+"@typescript-eslint/typescript-estree@6.21.0":
+  version "6.21.0"
+  resolved "https://registry.yarnpkg.com/@typescript-eslint/typescript-estree/-/typescript-estree-6.21.0.tgz#c47ae7901db3b8bddc3ecd73daff2d0895688c46"
+  integrity sha512-6npJTkZcO+y2/kr+z0hc4HwNfrrP4kNYh57ek7yCNlrBjWQ1Y0OS7jiZTkgumrvkX5HkEKXFZkkdFNkaW2wmUQ==
   dependencies:
-    "@typescript-eslint/types" "6.10.0"
-    "@typescript-eslint/visitor-keys" "6.10.0"
+    "@typescript-eslint/types" "6.21.0"
+    "@typescript-eslint/visitor-keys" "6.21.0"
     debug "^4.3.4"
     globby "^11.1.0"
     is-glob "^4.0.3"
+    minimatch "9.0.3"
     semver "^7.5.4"
     ts-api-utils "^1.0.1"
 
@@ -2884,12 +2885,12 @@
     "@typescript-eslint/types" "5.62.0"
     eslint-visitor-keys "^3.3.0"
 
-"@typescript-eslint/visitor-keys@6.10.0":
-  version "6.10.0"
-  resolved "https://registry.npmjs.org/@typescript-eslint/visitor-keys/-/visitor-keys-6.10.0.tgz"
-  integrity sha512-xMGluxQIEtOM7bqFCo+rCMh5fqI+ZxV5RUUOa29iVPz1OgCZrtc7rFnz5cLUazlkPKYqX+75iuDq7m0HQ48nCg==
+"@typescript-eslint/visitor-keys@6.21.0":
+  version "6.21.0"
+  resolved "https://registry.yarnpkg.com/@typescript-eslint/visitor-keys/-/visitor-keys-6.21.0.tgz#87a99d077aa507e20e238b11d56cc26ade45fe47"
+  integrity sha512-JJtkDduxLi9bivAB+cYOVMtbkqdPOhZ+ZI5LC47MIRrDV4Yn2o+ZnW10Nkmr28xRpSpdJ6Sm42Hjf2+REYXm0A==
   dependencies:
-    "@typescript-eslint/types" "6.10.0"
+    "@typescript-eslint/types" "6.21.0"
     eslint-visitor-keys "^3.4.1"
 
 "@ungap/structured-clone@^1.0.0", "@ungap/structured-clone@^1.2.0":
@@ -5742,7 +5743,7 @@ fs.realpath@^1.0.0:
 
 fsevents@^2.3.2, fsevents@~2.3.2:
   version "2.3.3"
-  resolved "https://registry.yarnpkg.com/fsevents/-/fsevents-2.3.3.tgz#cac6407785d03675a2a5e1a5305c697b347d90d6"
+  resolved "https://registry.npmjs.org/fsevents/-/fsevents-2.3.3.tgz"
   integrity sha512-5xoDfX+fL7faATnagmWPpbFtwh/R77WmMMqqHGS65C3vvB0YHrgF+B1YmZ3441tMj5n63k0212XNoJwzlhffQw==
 
 function-bind@^1.1.1, function-bind@^1.1.2:
@@ -6073,6 +6074,19 @@ html-escaper@^2.0.0:
   version "2.0.2"
   resolved "https://registry.npmjs.org/html-escaper/-/html-escaper-2.0.2.tgz"
   integrity sha512-H2iMtd0I4Mt5eYiapRdIDjp+XzelXQ0tFE4JS7YFwFevXXMmOp9myNrUvCg0D6ws8iqkRPBfKHgbwig1SmlLfg==
+
+html-inline-css-webpack-plugin@^1.11.2:
+  version "1.11.2"
+  resolved "https://registry.yarnpkg.com/html-inline-css-webpack-plugin/-/html-inline-css-webpack-plugin-1.11.2.tgz#3b34e93f07140ed5bb8020ee46f4cd7393da1ecc"
+  integrity sha512-jzJptIAOrYQh9ITxiDeNWQvPwk1nHZIo0P9/ZlLsfSYKqggMENJdO+Hcw67xSHoxtL2t+X9QO00eHu6W/c8V0Q==
+  dependencies:
+    lodash "^4.17.21"
+    tslib "^2.6.0"
+
+html-inline-script-webpack-plugin@^3.2.1:
+  version "3.2.1"
+  resolved "https://registry.yarnpkg.com/html-inline-script-webpack-plugin/-/html-inline-script-webpack-plugin-3.2.1.tgz#32ae9a4a743c508bda854386c9af3b2e358bb5b7"
+  integrity sha512-PEj9Ve31BE0dva6eTD6wHMOztgIdPxF6gx3wad7ohBkCn7MXpuUvPC9t5ThMJ2NrVi1jWGBYU76DfoS+8dabRw==
 
 html-minifier-terser@^6.0.2:
   version "6.1.0"
@@ -8283,6 +8297,13 @@ minimalistic-assert@^1.0.0:
   resolved "https://registry.npmjs.org/minimalistic-assert/-/minimalistic-assert-1.0.1.tgz"
   integrity sha512-UtJcAD4yEaGtjPezWuO9wC4nwUnVH/8/Im3yEHQP4b67cXlD/Qr9hdITCU1xDbSEXg2XKNaP8jsReV7vQd00/A==
 
+minimatch@9.0.3:
+  version "9.0.3"
+  resolved "https://registry.yarnpkg.com/minimatch/-/minimatch-9.0.3.tgz#a6e00c3de44c3a542bfaae70abfc22420a6da825"
+  integrity sha512-RHiac9mvaRw0x3AYRgDC1CxAP7HTcNrrECeA8YYJeWnpo+2Q5CegtZjaotWTWxDG3UeGA1coE05iH1mPjT/2mg==
+  dependencies:
+    brace-expansion "^2.0.1"
+
 minimatch@^3.0.4, minimatch@^3.0.5, minimatch@^3.1.1, minimatch@^3.1.2:
   version "3.1.2"
   resolved "https://registry.npmjs.org/minimatch/-/minimatch-3.1.2.tgz"
@@ -10056,61 +10077,6 @@ react-router@6.18.0:
   dependencies:
     "@remix-run/router" "1.11.0"
 
-react-scripts@5.0.1:
-  version "5.0.1"
-  resolved "https://registry.npmjs.org/react-scripts/-/react-scripts-5.0.1.tgz"
-  integrity sha512-8VAmEm/ZAwQzJ+GOMLbBsTdDKOpuZh7RPs0UymvBR2vRk4iZWCskjbFnxqjrzoIvlNNRZ3QJFx6/qDSi6zSnaQ==
-  dependencies:
-    "@babel/core" "^7.16.0"
-    "@pmmmwh/react-refresh-webpack-plugin" "^0.5.3"
-    "@svgr/webpack" "^5.5.0"
-    babel-jest "^27.4.2"
-    babel-loader "^8.2.3"
-    babel-plugin-named-asset-import "^0.3.8"
-    babel-preset-react-app "^10.0.1"
-    bfj "^7.0.2"
-    browserslist "^4.18.1"
-    camelcase "^6.2.1"
-    case-sensitive-paths-webpack-plugin "^2.4.0"
-    css-loader "^6.5.1"
-    css-minimizer-webpack-plugin "^3.2.0"
-    dotenv "^10.0.0"
-    dotenv-expand "^5.1.0"
-    eslint "^8.3.0"
-    eslint-config-react-app "^7.0.1"
-    eslint-webpack-plugin "^3.1.1"
-    file-loader "^6.2.0"
-    fs-extra "^10.0.0"
-    html-webpack-plugin "^5.5.0"
-    identity-obj-proxy "^3.0.0"
-    jest "^27.4.3"
-    jest-resolve "^27.4.2"
-    jest-watch-typeahead "^1.0.0"
-    mini-css-extract-plugin "^2.4.5"
-    postcss "^8.4.4"
-    postcss-flexbugs-fixes "^5.0.2"
-    postcss-loader "^6.2.1"
-    postcss-normalize "^10.0.1"
-    postcss-preset-env "^7.0.1"
-    prompts "^2.4.2"
-    react-app-polyfill "^3.0.0"
-    react-dev-utils "^12.0.1"
-    react-refresh "^0.11.0"
-    resolve "^1.20.0"
-    resolve-url-loader "^4.0.0"
-    sass-loader "^12.3.0"
-    semver "^7.3.5"
-    source-map-loader "^3.0.0"
-    style-loader "^3.3.1"
-    tailwindcss "^3.0.2"
-    terser-webpack-plugin "^5.2.5"
-    webpack "^5.64.4"
-    webpack-dev-server "^4.6.0"
-    webpack-manifest-plugin "^4.0.2"
-    workbox-webpack-plugin "^6.4.1"
-  optionalDependencies:
-    fsevents "^2.3.2"
-
 react@^18.2.0:
   version "18.2.0"
   resolved "https://registry.npmjs.org/react/-/react-18.2.0.tgz"
@@ -11337,9 +11303,9 @@ tryer@^1.0.1:
   integrity sha512-c3zayb8/kWWpycWYg87P71E1S1ZL6b6IJxfb5fvsUgsf0S2MVGaDhDXXjDMpdCpfWXqptc+4mXwmiy1ypXqRAA==
 
 ts-api-utils@^1.0.1:
-  version "1.0.3"
-  resolved "https://registry.npmjs.org/ts-api-utils/-/ts-api-utils-1.0.3.tgz"
-  integrity sha512-wNMeqtMz5NtwpT/UZGY5alT+VoKdSsOOP/kqHFcUW1P/VRhH2wJ48+DN2WwUliNbQ976ETwDL0Ifd2VVvgonvg==
+  version "1.4.3"
+  resolved "https://registry.yarnpkg.com/ts-api-utils/-/ts-api-utils-1.4.3.tgz#bfc2215fe6528fecab2b0fba570a2e8a4263b064"
+  integrity sha512-i3eMG77UTMD0hZhgRS562pv83RC6ukSAC2GMNWc+9dieh/+jDM5u5YG+NHX6VNDRHQcHwmsTHctP9LhbC3WxVw==
 
 ts-interface-checker@^0.1.9:
   version "0.1.13"

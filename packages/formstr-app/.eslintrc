@@ -4,5 +4,6 @@
     "ecmaVersion": "latest",
     "sourceType": "module",
     "project": "./tsconfig.json"
-  }
+  },
+  "ignorePatterns": ["config/**.*.js", "config/*.js", "scripts/*.js"]
 }

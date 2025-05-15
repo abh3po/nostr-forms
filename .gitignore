@@ -27,3 +27,4 @@ yarn-debug.log*
 yarn-error.log*
 
 .idea
+packages/formstr-app/public/api/form-filler-ui/

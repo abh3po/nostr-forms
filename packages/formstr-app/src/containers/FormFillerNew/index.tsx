@@ -21,21 +21,26 @@ interface FormFillerProps {
 }
 
 export const FormFiller: React.FC<FormFillerProps> = ({ formSpec }) => {
-  const { naddr } = useParams();
-  let isPreview = !!formSpec;
+  let { naddr } = useParams();
+  const _viewKey = window.__FORMSTR__FORM_IDENTIFIER__?.viewKey;
+  if (!naddr) {
+    const _naddr = window.__FORMSTR__FORM_IDENTIFIER__?.naddr;
+    naddr = _naddr !== "@naddr" ? _naddr : undefined;
+  }
+  const isPreview = !!formSpec;
   if (!isPreview && !naddr)
     return <Text> Not enough data to render this url </Text>;
   let decodedData;
   if (!isPreview) decodedData = nip19.decode(naddr!).data as AddressPointer;
-  let pubKey = decodedData?.pubkey;
-  let formId = decodedData?.identifier;
-  let relays = decodedData?.relays;
+  const pubKey = decodedData?.pubkey;
+  const formId = decodedData?.identifier;
+  const relays = decodedData?.relays;
   const { pubkey: userPubKey, requestPubkey } = useProfileContext();
   const [formSubmitted, setFormSubmitted] = useState(false);
   const [formEvent, setFormEvent] = useState<Event | undefined>();
   const [searchParams] = useSearchParams();
   const hideTitleImage = searchParams.get("hideTitleImage") === "true";
-  const viewKeyParams = searchParams.get("viewKey");
+  const viewKeyParams = searchParams.get("viewKey") || _viewKey || "";
   const hideDescription = searchParams.get("hideDescription") === "true";
   const navigate = useNavigate();
 
@@ -49,7 +54,7 @@ export const FormFiller: React.FC<FormFillerProps> = ({ formSpec }) => {
   const initialize = async (
     formAuthor: string,
     formId: string,
-    relays?: string[]
+    relays?: string[],
   ) => {
     const form = await fetchFormTemplate(
       formAuthor,
@@ -58,7 +63,7 @@ export const FormFiller: React.FC<FormFillerProps> = ({ formSpec }) => {
       (event: Event) => {
         setFormEvent(event);
       },
-      relays
+      relays,
     );
   };
 
@@ -133,7 +138,7 @@ export const FormFiller: React.FC<FormFillerProps> = ({ formSpec }) => {
     return (
       <>
         <FormRendererContainer
-          formEvent={formEvent!}
+          formEvent={formEvent}
           onSubmitClick={onSubmit}
           viewKey={viewKeyParams}
           hideTitleImage={hideTitleImage}

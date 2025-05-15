@@ -9,4 +9,5 @@ export const ANSWER_TYPE_MAP = {
   [AnswerTypes.dropdown]: "number",
   [AnswerTypes.date]: "number",
   [AnswerTypes.label]: "number",
+  [AnswerTypes.country]: "string",
 }

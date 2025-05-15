@@ -5,6 +5,7 @@ import { ChoiceFiller } from "./InputTypes/ChoiceFiller";
 import { DropdownFiller } from "./InputTypes/DropdownFiller";
 import { DateFiller } from "./InputTypes/DateFiller";
 import { TimeFiller } from "./InputTypes/TimeFiller";
+import { CountryFiller } from "./InputTypes/CountryFiller";
 import { Option } from "@formstr/sdk/dist/formstr/nip101";
 import { AnswerTypes } from "@formstr/sdk/dist/interfaces";
 
@@ -95,10 +96,17 @@ export const InputFiller: React.FC<InputFillerProps> = ({
           onChange={handleValueChange}
         />
       ),
+      [AnswerTypes.country]: (
+        <CountryFiller
+          defaultValue={defaultValue as string}
+          onChange={handleValueChange}
+        />
+      ),
     };
 
     return INPUT_TYPE_COMPONENT_MAP[answerType];
   };
+ 
 
   return <>{getInput(fieldConfig.renderElement, fieldConfig)}</>;
 };

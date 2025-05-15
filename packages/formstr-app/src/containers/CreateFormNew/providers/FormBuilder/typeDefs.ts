@@ -2,6 +2,7 @@ import { AnswerSettings } from "@formstr/sdk/dist/interfaces";
 import { IFormSettings } from "../../components/FormSettings/types";
 import { Tag } from "@formstr/sdk/dist/formstr/nip101";
 import { Field } from "../../../../nostr/types";
+import { ProcessedFormData } from "../../../../utils/aiProcessor";
 
 export interface ILocalForm {
   key: string;
@@ -58,4 +59,7 @@ export interface IFormBuilderContext {
   setEditList: (keys: Set<string>) => void;
   viewList: Set<string> | null;
   setViewList: (keys: Set<string>) => void;
+  isAiModalOpen: boolean;
+  setIsAiModalOpen: (isOpen: boolean) => void;
+  handleAIFormGenerated: (processedData: ProcessedFormData) => void;
 }

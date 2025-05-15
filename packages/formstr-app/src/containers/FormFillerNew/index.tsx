@@ -18,15 +18,17 @@ const { Text } = Typography;
 interface FormFillerProps {
   formSpec?: Tag[];
   embedded?: boolean;
+  naddr?: string;
+  viewKey?: string;
 }
 
-export const FormFiller: React.FC<FormFillerProps> = ({ formSpec }) => {
+export const FormFiller: React.FC<FormFillerProps> = ({
+  formSpec,
+  naddr: _naddr,
+  viewKey: _viewKey,
+}) => {
   let { naddr } = useParams();
-  const _viewKey = window.__FORMSTR__FORM_IDENTIFIER__?.viewKey;
-  if (!naddr) {
-    const _naddr = window.__FORMSTR__FORM_IDENTIFIER__?.naddr;
-    naddr = _naddr !== "@naddr" ? _naddr : undefined;
-  }
+  naddr = naddr || _naddr;
   const isPreview = !!formSpec;
   if (!isPreview && !naddr)
     return <Text> Not enough data to render this url </Text>;

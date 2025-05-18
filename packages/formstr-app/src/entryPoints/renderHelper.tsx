@@ -48,10 +48,7 @@ export const renderReactComponent = ({
 }: {
   Component: React.FC;
 }) => {
-  window.requestIdleCallback(() => {
-    const hasRendered = tryAndRender({ Component });
-    // if (!hasRendered && numTries <= 3) {
-    // renderFiller();
-    // }
+  document.addEventListener("DOMContentLoaded", () => {
+    tryAndRender({ Component });
   });
 };

@@ -50,8 +50,8 @@ export const renderReactComponent = ({
 }) => {
   window.requestIdleCallback(() => {
     const hasRendered = tryAndRender({ Component });
-    if (!hasRendered && numTries <= 3) {
-      // renderFiller();
-    }
+    // if (!hasRendered && numTries <= 3) {
+    // renderFiller();
+    // }
   });
 };

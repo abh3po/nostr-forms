@@ -6,7 +6,8 @@ const Component = () => {
   const _viewKey = window.__FORMSTR__FORM_IDENTIFIER__?.viewKey;
   const _naddr = window.__FORMSTR__FORM_IDENTIFIER__?.naddr;
   const naddr = _naddr !== "@naddr" ? _naddr : undefined;
-  return <FormFiller naddr={_naddr} viewKey={_viewKey} />;
+  const viewKey = _viewKey !== "@viewKey" ? _viewKey : undefined;
+  return <FormFiller naddr={naddr} viewKey={viewKey} />;
 };
 
 renderReactComponent({ Component });

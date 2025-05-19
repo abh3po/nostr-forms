@@ -1,0 +1,11 @@
+{
+  "development": {
+    "apiBaseUrl": "http://127.0.0.1:5000"
+  },
+  "staging": {
+    "apiBaseUrl": "https://staging.formstr.app"
+  },
+  "production": {
+    "apiBaseUrl": "https://api.formstr.app"
+  }
+}

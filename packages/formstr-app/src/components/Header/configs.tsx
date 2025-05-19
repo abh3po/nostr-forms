@@ -1,10 +1,6 @@
 import { Link } from "react-router-dom";
-import { Button } from "antd";
-import {
-  SearchOutlined,
-  PlusOutlined,
-  InfoCircleOutlined,
-} from "@ant-design/icons";
+import GradientCreateFormButton from "./GradientCreateFormButton";
+import { SearchOutlined, InfoCircleOutlined,} from "@ant-design/icons";
 import { ROUTES } from "../../constants/routes";
 
 export const HEADER_MENU_KEYS = {
@@ -31,13 +27,6 @@ export const HEADER_MENU = [
   },
   {
     key: HEADER_MENU_KEYS.CREATE_FORMS,
-    label: (
-      <Button
-        type="primary"
-        icon={<PlusOutlined style={{ paddingTop: "2px" }} />}
-      >
-        Create Form
-      </Button>
-    ),
+    label: <GradientCreateFormButton />,
   },
 ];

@@ -11,6 +11,9 @@ import { ShareTab } from "./ShareTab";
 import { EmbedTab } from "./EmbedTab";
 import { SaveStatus } from "./SaveStatus";
 import { saveToDevice, saveToMyForms } from "./utils/saveHelpers";
+import { CustomSlugForm } from "./payments/customSlugForm";
+import { ZapQRCodeModal } from "./payments/zapQRModal";
+import { useNavigate } from "react-router-dom"; // or next/router if using Next.js
 
 export const FormDetails = ({
   isOpen,
@@ -26,7 +29,19 @@ export const FormDetails = ({
   const [savedOnNostr, setSavedOnNostr] = useState<null | "saving" | "saved">(
     null
   );
+  const [invoice, setInvoice] = useState<string | null>(null);
+  const [hash, setHash] = useState<string | null>(null);
+  const navigate = useNavigate(); // or useRouter()
   const { pubkey: userPub, requestPubkey } = useProfileContext();
+
+  const handleInvoiceReady = (inv: string, hash: string) => {
+    setInvoice(inv);
+    setHash(hash);
+  };
+
+  const handleZapSuccess = () => {
+    navigate(`/i/${hash}`);
+  };
 
   useEffect(() => {
     saveToDevice(
@@ -89,6 +104,14 @@ export const FormDetails = ({
               viewKey={viewKey}
             />
           )}
+          <CustomSlugForm onInvoiceReady={handleInvoiceReady} />
+          <ZapQRCodeModal
+            open={!!invoice}
+            invoice={invoice!}
+            hash={hash!}
+            onSuccess={handleZapSuccess}
+            onClose={() => setInvoice(null)}
+          />
           <Divider />
           <SaveStatus
             savedLocally={savedLocally}

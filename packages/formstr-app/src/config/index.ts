@@ -3,6 +3,7 @@ type Environment = "development" | "staging" | "production";
 interface Config {
   [key: string]: {
     apiBaseUrl: string;
+    wsBaseUrl: string;
   };
 }
 

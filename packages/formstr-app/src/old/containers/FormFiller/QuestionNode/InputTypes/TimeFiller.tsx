@@ -11,6 +11,10 @@ export const TimeFiller: React.FC<TimeFillerProps> = ({
   defaultValue,
 }) => {
   const handleChange: TimePickerProps["onChange"] = (_, timeString) => {
+    if (Array.isArray(timeString)) {
+      onChange(timeString[0]);
+      return;
+    }
     onChange(timeString);
   };
   return (

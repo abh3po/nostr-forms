@@ -48,7 +48,6 @@ export const FormFiller: React.FC<FormFillerProps> = ({
 
   const { poolRef } = useApplicationContext();
 
-  console.log("FORM SUBMITTED?", formSubmitted);
   if (!formId && !formSpec) {
     return null;
   }
@@ -56,7 +55,7 @@ export const FormFiller: React.FC<FormFillerProps> = ({
   const initialize = async (
     formAuthor: string,
     formId: string,
-    relays?: string[],
+    relays?: string[]
   ) => {
     const form = await fetchFormTemplate(
       formAuthor,
@@ -65,7 +64,7 @@ export const FormFiller: React.FC<FormFillerProps> = ({
       (event: Event) => {
         setFormEvent(event);
       },
-      relays,
+      relays
     );
   };
 

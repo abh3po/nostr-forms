@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useLocation } from "react-router-dom";
 import { FormDetails } from "../CreateFormNew/components/FormDetails";
-import { Event, SubCloser } from "nostr-tools";
+import { Event } from "nostr-tools";
 import { useProfileContext } from "../../hooks/useProfileContext";
 import { getDefaultRelays } from "@formstr/sdk";
 import { FormEventCard } from "./FormCards/FormEventCard";
@@ -15,11 +15,12 @@ import { DownOutlined } from "@ant-design/icons";
 import { MyForms } from "./FormCards/MyForms";
 import { Drafts } from "./FormCards/Drafts";
 import { LocalForms } from "./FormCards/LocalForms";
-import { useNavigate } from "react-router-dom"; 
-import { availableTemplates, FormTemplate} from "../../templates";
+import { useNavigate } from "react-router-dom";
+import { availableTemplates, FormTemplate } from "../../templates";
 import { ROUTES } from "../../constants/routes";
 import { FormInitData } from "../CreateFormNew/providers/FormBuilder/typeDefs";
 import { createFormSpecFromTemplate } from "../../utils/formUtils";
+import { SubCloser } from "nostr-tools/abstract-pool";
 
 const MENU_OPTIONS = {
   local: "On this device",
@@ -53,18 +54,17 @@ export const Dashboard = () => {
     getItem(LOCAL_STORAGE_KEYS.LOCAL_FORMS) || []
   );
   const [nostrForms, setNostrForms] = useState<Map<string, Event>>(new Map());
-  
+
   const getCurrentFilterFromPath = (): FilterType => {
     const path = location.pathname;
     return ROUTE_TO_FILTER_MAP[path] || "local";
   };
-  
+
   const [filter, setFilter] = useState<FilterType>(getCurrentFilterFromPath());
 
   const { poolRef } = useApplicationContext();
 
   const subCloserRef = useRef<SubCloser | null>(null);
-
 
   useEffect(() => {
     const currentFilter = getCurrentFilterFromPath();
@@ -119,7 +119,7 @@ export const Dashboard = () => {
 
   const renderForms = () => {
     if (filter === "local") {
-      if (localForms.length == 0){ 
+      if (localForms.length == 0) {
         return (
           <EmptyScreen
             templates={availableTemplates}
@@ -139,12 +139,12 @@ export const Dashboard = () => {
         />
       );
     } else if (filter === "shared") {
-      if (nostrForms.size == 0){
+      if (nostrForms.size == 0) {
         return <EmptyScreen message="No forms shared with you." />;
       }
       return Array.from(nostrForms.values()).map((formEvent: Event) => {
         let d_tag = formEvent.tags.find((t) => t[0] === "d")?.[1];
-        if (!d_tag) return null; 
+        if (!d_tag) return null;
         let key = `${formEvent.kind}:${formEvent.pubkey}:${d_tag}`;
         return <FormEventCard key={key} event={formEvent} />;
       });
@@ -161,18 +161,15 @@ export const Dashboard = () => {
       local: ROUTES.DASHBOARD_LOCAL,
       shared: ROUTES.DASHBOARD_SHARED,
       myForms: ROUTES.DASHBOARD_MY_FORMS,
-      drafts: ROUTES.DASHBOARD_DRAFTS
+      drafts: ROUTES.DASHBOARD_DRAFTS,
     };
-    
+
     navigate(routeMap[selectedFilter]);
   };
 
   const menu = (
     <Menu style={{ textAlign: "center" }}>
-      <Menu.Item 
-        key="local"
-        onClick={() => handleFilterChange("local")}
-      >
+      <Menu.Item key="local" onClick={() => handleFilterChange("local")}>
         {MENU_OPTIONS.local}
       </Menu.Item>
       <Menu.Item
@@ -189,10 +186,7 @@ export const Dashboard = () => {
       >
         {MENU_OPTIONS.myForms}
       </Menu.Item>
-      <Menu.Item 
-        key="drafts"
-        onClick={() => handleFilterChange("drafts")}
-      >
+      <Menu.Item key="drafts" onClick={() => handleFilterChange("drafts")}>
         {MENU_OPTIONS.drafts}
       </Menu.Item>
     </Menu>
@@ -201,14 +195,16 @@ export const Dashboard = () => {
   return (
     <DashboardStyleWrapper>
       <div className="dashboard-container">
-      <div className="filter-dropdown-container">
-          <Dropdown overlay={menu} trigger={["click"]} placement="bottomLeft" overlayClassName="dashboard-filter-menu"
->
+        <div className="filter-dropdown-container">
+          <Dropdown
+            overlay={menu}
+            trigger={["click"]}
+            placement="bottomLeft"
+            overlayClassName="dashboard-filter-menu"
+          >
             <Button>
               {MENU_OPTIONS[filter]}
-              <DownOutlined
-                style={{ marginLeft: "8px", fontSize: "12px" }}
-              />
+              <DownOutlined style={{ marginLeft: "8px", fontSize: "12px" }} />
             </Button>
           </Dropdown>
         </div>

@@ -9,7 +9,6 @@ import {
   Space,
 } from "antd";
 import { CheckboxGroupProps } from "antd/es/checkbox";
-import { CheckboxValueType } from "antd/es/checkbox/Group";
 import Markdown from "react-markdown";
 import ChoiceFillerStyle from "./choiceFiller.style";
 import { ChangeEvent, useState } from "react";
@@ -28,12 +27,12 @@ export const ChoiceFiller: React.FC<ChoiceFillerProps> = ({
   defaultValue,
 }) => {
   const [otherMessage, setOtherMessage] = useState("");
-  
+
   function handleChoiceChange(e: RadioChangeEvent): void;
 
-  function handleChoiceChange(checkedValues: CheckboxValueType[]): void;
+  function handleChoiceChange(checkedValues: string[]): void;
 
-  function handleChoiceChange(e: RadioChangeEvent | CheckboxValueType[]) {
+  function handleChoiceChange(e: RadioChangeEvent | string[]) {
     if (Array.isArray(e)) {
       onChange(e.sort().join(";"), otherMessage);
       return;
@@ -41,25 +40,27 @@ export const ChoiceFiller: React.FC<ChoiceFillerProps> = ({
     onChange(e.target.value, otherMessage);
   }
 
-  function handleMessage(e: ChangeEvent<HTMLInputElement>){
-    setOtherMessage(e.target.value)
+  function handleMessage(e: ChangeEvent<HTMLInputElement>) {
+    setOtherMessage(e.target.value);
   }
 
-  let ElementConfig: {
-    Element: typeof Radio,
-    defaultValue?: RadioGroupProps['defaultValue']
-  } | {
-    Element: typeof Checkbox,
-    defaultValue?: CheckboxGroupProps['defaultValue']
-  } = {
+  let ElementConfig:
+    | {
+        Element: typeof Radio;
+        defaultValue?: RadioGroupProps["defaultValue"];
+      }
+    | {
+        Element: typeof Checkbox;
+        defaultValue?: CheckboxGroupProps["defaultValue"];
+      } = {
     Element: Radio,
-    defaultValue: defaultValue
-  }
- if (answerType === AnswerTypes.checkboxes) {
-   ElementConfig = {
-     Element: Checkbox,
-     defaultValue: defaultValue?.split(";")
-   }
+    defaultValue: defaultValue,
+  };
+  if (answerType === AnswerTypes.checkboxes) {
+    ElementConfig = {
+      Element: Checkbox,
+      defaultValue: defaultValue?.split(";"),
+    };
   }
   return (
     //@ts-ignore
@@ -71,11 +72,16 @@ export const ChoiceFiller: React.FC<ChoiceFillerProps> = ({
         <Space direction="vertical">
           {options.map((choice) => {
             let [choiceId, label, configString] = choice;
-            let config = JSON.parse(configString || "{}")
+            let config = JSON.parse(configString || "{}");
             return (
               <ElementConfig.Element key={choiceId} value={choiceId}>
                 <Markdown>{label}</Markdown>
-                {config.isOther && <Input placeholder="Add an optional message..." onInput={handleMessage}/>}
+                {config.isOther && (
+                  <Input
+                    placeholder="Add an optional message..."
+                    onInput={handleMessage}
+                  />
+                )}
               </ElementConfig.Element>
             );
           })}

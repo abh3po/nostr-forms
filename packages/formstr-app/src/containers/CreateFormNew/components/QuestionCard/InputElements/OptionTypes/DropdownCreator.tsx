@@ -4,8 +4,8 @@ import { useState } from "react";
 import OptionsStyle from "./Options.style";
 import { AddOption } from "./AddOption";
 import { handleDelete, handleLabelChange } from "./utils";
-import { MenuItemType } from "antd/es/menu/hooks/useItems";
 import { Choice, ChoiceSettings } from "./types";
+import { MenuItemType } from "antd/es/menu/interface";
 
 interface RadioButtonCreatorProps {
   initialValues?: Array<Choice>;

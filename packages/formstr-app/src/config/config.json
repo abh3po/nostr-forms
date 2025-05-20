@@ -1,11 +1,14 @@
 {
   "development": {
-    "apiBaseUrl": "http://127.0.0.1:5000"
+    "apiBaseUrl": "http://localhost:5000",
+    "wsBaseUrl": "ws://localhost:5000"
   },
   "staging": {
-    "apiBaseUrl": "https://staging.formstr.app"
+    "apiBaseUrl": "https://staging.formstr.app",
+    "wsBaseUrl": "wss://staging.formstr.app"
   },
   "production": {
-    "apiBaseUrl": "https://api.formstr.app"
+    "apiBaseUrl": "https://api.formstr.app",
+    "wsBaseUrl": "wss://api.formstr.app"
   }
 }

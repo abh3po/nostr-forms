@@ -15,9 +15,7 @@ function InputsMenu() {
     console.log("after add question");
   };
 
-  const items = [
-    { key: "Inputs", label: "Inputs", children: INPUTS_MENU, type: "group" },
-  ];
+  const items = [{ key: "Inputs", label: "Inputs", children: INPUTS_MENU }];
   return <Menu selectedKeys={[]} items={items} onClick={onMenuClick} />;
 }
 

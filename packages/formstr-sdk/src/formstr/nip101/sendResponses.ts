@@ -15,7 +15,7 @@ const encryptResponse = async (
     return await window.nostr.nip44.encrypt(receiverPublicKey, message);
   }
   let conversationKey = nip44.v2.utils.getConversationKey(
-    bytesToHex(senderPrivateKey),
+    senderPrivateKey,
     receiverPublicKey
   );
   return nip44.v2.encrypt(message, conversationKey);

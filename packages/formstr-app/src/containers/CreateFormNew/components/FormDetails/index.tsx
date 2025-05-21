@@ -22,25 +22,36 @@ export const FormDetails = ({
   secretKey,
   viewKey,
   name,
-  relay,
+  relays,
   onClose,
-}: any) => {
+}: {
+  isOpen: boolean;
+  pubKey: string;
+  formId: string;
+  secretKey: string;
+  viewKey: string;
+  name: string;
+  relays: string[];
+  onClose: () => void;
+}) => {
   const [savedLocally, setSavedLocally] = useState(false);
   const [savedOnNostr, setSavedOnNostr] = useState<null | "saving" | "saved">(
     null
   );
   const [invoice, setInvoice] = useState<string | null>(null);
   const [hash, setHash] = useState<string | null>(null);
+  const [slug, setSlug] = useState<string | null>(null);
   const navigate = useNavigate(); // or useRouter()
   const { pubkey: userPub, requestPubkey } = useProfileContext();
 
-  const handleInvoiceReady = (inv: string, hash: string) => {
+  const handleInvoiceReady = (inv: string, hash: string, slug: string) => {
     setInvoice(inv);
     setHash(hash);
+    setSlug(slug);
   };
 
   const handleZapSuccess = () => {
-    navigate(`/i/${hash}`);
+    navigate(`/i/${slug}`);
   };
 
   useEffect(() => {
@@ -49,7 +60,7 @@ export const FormDetails = ({
       secretKey,
       formId,
       name,
-      relay,
+      relays,
       () => {
         setSavedLocally(true);
       },
@@ -60,18 +71,18 @@ export const FormDetails = ({
         pubKey,
         secretKey,
         formId,
-        relay,
+        relays,
         userPub,
         setSavedOnNostr,
         viewKey
       );
   }, [userPub]);
 
-  const formUrl = constructFormUrl(pubKey, formId, relay, viewKey);
+  const formUrl = constructFormUrl(pubKey, formId, relays, viewKey);
   const responsesUrl = constructNewResponseUrl(
     secretKey,
     formId,
-    relay,
+    relays,
     viewKey
   );
 
@@ -100,11 +111,17 @@ export const FormDetails = ({
             <EmbedTab
               pubKey={pubKey}
               formId={formId}
-              relay={relay}
+              relays={relays}
               viewKey={viewKey}
             />
           )}
-          <CustomSlugForm onInvoiceReady={handleInvoiceReady} />
+          <CustomSlugForm
+            onInvoiceReady={handleInvoiceReady}
+            formId={formId}
+            formPubkey={pubKey}
+            relays={relays}
+            viewKey={viewKey}
+          />
           <ZapQRCodeModal
             open={!!invoice}
             invoice={invoice!}

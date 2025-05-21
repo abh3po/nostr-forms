@@ -65,10 +65,10 @@ export function constructEmbeddedUrl(
   pubKey: string,
   formId: string,
   options: { [key: string]: boolean } = {},
-  relay: string,
+  relays: string[],
   viewKey?: string
 ) {
-  const embeddedUrl = constructFormUrl(pubKey, formId, relay);
+  const embeddedUrl = constructFormUrl(pubKey, formId, relays);
 
   const params = new URLSearchParams();
   if (viewKey) params.append("viewKey", viewKey);
@@ -127,10 +127,10 @@ export const getAllowedUsers = (formEvent: Event) => {
 export const constructFormUrl = (
   pubkey: string,
   formId: string,
-  relay: string,
+  relays: string[],
   viewKey?: string
 ) => {
-  const naddr = naddrUrl(pubkey, formId, [relay], viewKey);
+  const naddr = naddrUrl(pubkey, formId, relays, viewKey);
   const baseUrl = `${window.location.origin}${naddr}`;
   return baseUrl;
 };
@@ -151,12 +151,12 @@ export const editPath = (
 export const responsePath = (
   secretKey: string,
   formId: string,
-  relay?: string,
+  relays?: string[],
   viewKey?: string
 ) => {
   const baseUrl = `/s/${secretKey}/${formId}`;
   const params = new URLSearchParams();
-  if (relay) params.append("relay", relay);
+  if (relays && relays.length !== 0) params.append("relay", relays[0]);
   if (viewKey) params.append("viewKey", viewKey);
   return params.toString() ? `${baseUrl}?${params.toString()}` : baseUrl;
 };
@@ -164,10 +164,10 @@ export const responsePath = (
 export const constructNewResponseUrl = (
   secretKey: string,
   formId: string,
-  relay?: string,
+  relays?: string[],
   viewKey?: string
 ) => {
   const baseUrl = `${window.location.origin}`;
-  const responsePart = responsePath(secretKey, formId, relay, viewKey);
+  const responsePart = responsePath(secretKey, formId, relays, viewKey);
   return `${baseUrl}${responsePart}`;
 };

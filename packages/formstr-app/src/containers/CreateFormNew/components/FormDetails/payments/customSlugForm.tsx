@@ -7,9 +7,17 @@ import { appConfig } from "../../../../../config";
 const { Text } = Typography;
 
 export const CustomSlugForm = ({
+  formId,
   onInvoiceReady,
+  formPubkey,
+  relays,
+  viewKey,
 }: {
-  onInvoiceReady: (invoice: string, hash: string) => void;
+  onInvoiceReady: (invoice: string, hash: string, slug: string) => void;
+  formId: string;
+  formPubkey: string;
+  relays: string[];
+  viewKey?: string;
 }) => {
   const [slug, setSlug] = useState("");
   const [checking, setChecking] = useState(false);
@@ -40,39 +48,27 @@ export const CustomSlugForm = ({
     }
   };
 
-  async function createInvoice(data: { amount: number }) {
-    const formPath = `/api/forms/${slug}`;
-    const apiURl = `${appConfig.apiBaseUrl}${formPath}`;
-    try {
-      // Generate the NIP-98 auth header (including payload hash).
-      const authHeader = await generateAuthHeader(apiURl, "POST", data);
-      // Send the request with the Authorization header.
-      const response = await axios.post(apiURl, data, {
-        headers: { Authorization: authHeader },
-      });
-      console.log("Invoice created:", response.data);
-    } catch (e) {
-      console.error("Failed to make Nostr-authenticated request:", e);
-    }
-  }
-
   const handlePay = async () => {
     const payPath = `/api/generateInvoice`;
     const apiURl = `${appConfig.apiBaseUrl}${payPath}`;
     try {
       const authHeader = await generateAuthHeader(apiURl, "POST", {
         slug: slug,
+        formId: formId,
+        formPubkey,
+        relays,
+        viewKey,
       });
       const res = await axios.post(
         apiURl,
-        { slug },
+        { slug, formId, formPubkey, relays, viewKey },
         {
           headers: { Authorization: authHeader },
         }
       );
       const { invoice, paymentHash } = res.data;
       console.log("QR data is", invoice, paymentHash, res.data); // assume backend returns hash
-      onInvoiceReady(invoice, paymentHash); // pass hash instead of slug
+      onInvoiceReady(invoice, paymentHash, slug); // pass hash instead of slug
     } catch (err: any) {
       setError(err.response?.data?.error || "Payment error");
     }

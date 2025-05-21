@@ -13,7 +13,7 @@ export const saveToDevice = (
   formAuthorSecret: string,
   formId: string,
   name: string,
-  relay: string,
+  relays: string[],
   callback: () => void,
   viewKey?: string
 ) => {
@@ -23,7 +23,8 @@ export const saveToDevice = (
     privateKey: `${formAuthorSecret}`,
     name: name,
     formId: formId,
-    relay: relay,
+    relay: relays[0],
+    relays: relays,
     createdAt: new Date().toString(),
   };
   if (viewKey) saveObject.viewKey = viewKey;
@@ -47,7 +48,7 @@ export const saveToMyForms = async (
   formAuthorPub: string,
   formAuthorSecret: string,
   formId: string,
-  relay: string,
+  relays: string[],
   userPub: string,
   callback: (state: "saving" | "saved" | null) => void,
   viewKey?: string
@@ -56,7 +57,7 @@ export const saveToMyForms = async (
 
   callback("saving");
   const pool = new SimplePool();
-  const relays = getDefaultRelays();
+  const newRelays = relays && relays.length !== 0 ? relays : getDefaultRelays();
 
   try {
     if (!window.nostr) {
@@ -70,7 +71,7 @@ export const saveToMyForms = async (
         }, 10000);
 
         try {
-          const existingList = await pool.querySync(relays, {
+          const existingList = await pool.querySync(newRelays, {
             kinds: [KINDS.myFormsList],
             authors: [userPub],
           });
@@ -112,7 +113,7 @@ export const saveToMyForms = async (
     if (viewKey) secrets = `${secrets}:${viewKey}`;
 
     const forms = setupResult.forms;
-    forms.push(["f", `${formAuthorPub}:${formId}`, relay, secrets]);
+    forms.push(["f", `${formAuthorPub}:${formId}`, relays[0], secrets]);
 
     const encryptedString = await window.nostr.nip44.encrypt(
       userPub,

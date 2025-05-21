@@ -13,6 +13,7 @@ export interface ILocalForm {
   formCredentials?: Array<string>;
   formId: string;
   relay: string;
+  relays: string[];
 }
 
 export interface FormInitData {

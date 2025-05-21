@@ -18,7 +18,12 @@ export const LocalFormCard: React.FC<LocalFormCardProps> = ({
 }) => {
   const navigate = useNavigate();
   let responseUrl = form.formId
-    ? responsePath(form.privateKey, form.formId, form.relay, form.viewKey)
+    ? responsePath(
+        form.privateKey,
+        form.formId,
+        form.relays && form.relays.length !== 0 ? form.relays : [form.relay],
+        form.viewKey
+      )
     : `/response/${form.privateKey}`;
   let formUrl =
     form.publicKey && form.formId

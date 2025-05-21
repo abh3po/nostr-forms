@@ -7,12 +7,12 @@ import { constructEmbeddedUrl } from "../../../../utils/formUtils";
 export const EmbedTab = ({
   pubKey,
   formId,
-  relay,
+  relays,
   viewKey,
 }: {
   pubKey: string;
   formId: string;
-  relay: string;
+  relays: string[];
   viewKey?: string;
 }) => {
   const [embedOptions, setEmbedOptions] = useState<{
@@ -27,7 +27,7 @@ export const EmbedTab = ({
     pubKey,
     formId,
     embedOptions,
-    relay,
+    relays,
     viewKey
   )}" height="700px" width="480px" frameborder="0" style="border-style:none;box-shadow:0px 0px 2px 2px rgba(0,0,0,0.2);" cellspacing="0" ></iframe>`;
 

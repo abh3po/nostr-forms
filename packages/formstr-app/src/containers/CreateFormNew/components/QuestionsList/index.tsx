@@ -8,7 +8,7 @@ import React, { ChangeEvent, useRef, useState } from "react";
 import { Reorder, motion, useDragControls, DragControls } from "framer-motion";
 import { Field } from "../../../../nostr/types";
 import { isMobile } from "../../../../utils/utility";
-
+import AIForm from "../AIForm";
 interface FloatingButtonProps {
   onClick: () => void;
   containerRef: React.RefObject<HTMLDivElement>;
@@ -141,6 +141,7 @@ export const QuestionsList = () => {
       ref={containerRef}
       style={{ position: "relative" }}
     >
+      <AIForm/>
       <div>
         <FormTitle className="form-title" />
         <DescriptionStyle>

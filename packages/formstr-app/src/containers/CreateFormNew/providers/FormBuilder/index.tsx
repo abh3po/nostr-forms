@@ -18,6 +18,9 @@ import {
   setItem,
 } from "../../../../utils/localStorage";
 import { Field } from "../../../../nostr/types";
+import { ProcessedFormData } from "../../../../utils/aiProcessor";
+import { message } from 'antd';
+
 
 export const FormBuilderContext = React.createContext<IFormBuilderContext>({
   questionsList: [],
@@ -51,6 +54,9 @@ export const FormBuilderContext = React.createContext<IFormBuilderContext>({
   setEditList: (keys: Set<string>) => null,
   viewList: null,
   setViewList: (keys: Set<string>) => null,
+  isAiModalOpen: false,
+  setIsAiModalOpen: (isOpen: boolean) => null,
+  handleAIFormGenerated: (processedData: ProcessedFormData) => null,
 });
 
 const InitialFormSettings: IFormSettings = {
@@ -102,6 +108,7 @@ export default function FormBuilderProvider({
   );
   const [secretKey, setSecretKey] = useState<string | null>(null);
   const [viewKey, setViewKey] = useState<string | null | undefined>(null);
+    const [isAiModalOpen, setIsAiModalOpen] = useState(false);
 
   useEffect(() => {
     if (userRelays.length) {
@@ -258,15 +265,36 @@ export default function FormBuilderProvider({
     setFormSettings((settings) => {
       return { ...settings, formId: form.id };
     });
-    let viewList = form.spec.filter((f) => f[0] === "allowed").map((t) => t[1]);
+    let viewListFromSpec = form.spec.filter((f) => f[0] === "allowed").map((t) => t[1]);
     let allKeys = form.spec.filter((f) => f[0] === "p").map((t) => t[1]);
-    let editList: string[] = allKeys.filter((p) => !viewList.includes(p));
-    setViewList(new Set(viewList));
-    setEditList(new Set(editList));
+    let editListFromSpec: string[] = allKeys.filter((p) => !viewListFromSpec.includes(p)); // Renamed to avoid conflict
+    setViewList(new Set(viewListFromSpec));
+    setEditList(new Set(editListFromSpec));
     setFormSettings(settings);
     setQuestionsList(fields);
     setSecretKey(form.secret || null);
     setViewKey(form.viewKey);
+  };
+  const handleAIFormGenerated = (processedData: ProcessedFormData) => {
+    try {
+        console.log("Applying processed AI data:", processedData);
+        if (processedData.formName) {
+            setFormName(processedData.formName);
+        }
+        if (processedData.description) {
+            updateFormSetting({ description: processedData.description });
+        }
+        if (processedData.fields && processedData.fields.length > 0) {
+            updateQuestionsList(processedData.fields);
+            setQuestionIdInFocus(undefined);
+        } else {
+            message.warning("AI generated data, but no fields were created.");
+        }
+    } catch (error) {
+        console.error("Error applying AI generated form data:", error);
+        const errorMsg = error instanceof Error ? error.message : "Failed to apply the generated form data.";
+        message.error(errorMsg);
+    }
   };
 
   return (
@@ -303,6 +331,9 @@ export default function FormBuilderProvider({
         setEditList,
         viewList,
         setViewList,
+        isAiModalOpen,
+        setIsAiModalOpen,
+        handleAIFormGenerated,
       }}
     >
       {children}

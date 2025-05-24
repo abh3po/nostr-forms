@@ -14,6 +14,7 @@ export default styled.div`
   .property-setting {
     display: flex;
     justify-content: space-between;
+    align-items: center;
     margin: 12px 0;
     font-size: 14px;
   }
@@ -31,11 +32,14 @@ export default styled.div`
     border: 1px solid #dedede;
     border-radius: 10px;
     padding: 10px;
-  }
+    width: 100%;
+    box-sizing: border-box;
 
   .warning-text {
     font-size: 12px;
     color: #ea8dea;
+    display: block;
+    margin-top: 4px;
   }
 
   .warning-text a {
@@ -46,12 +50,13 @@ export default styled.div`
   .file-input:focus {
     outline: none;
     border: 1px solid #dedede;
-    box-shadow: 0 0 10px #f00;
+    box-shadow: 0 0 10px #f00; /* Consider a less aggressive focus color */
     border-radius: 10px;
   }
 
   .npub-list {
     list-style: circle;
+    padding-left: 20px;
   }
 
   .npub-list-text {
@@ -64,28 +69,29 @@ export default styled.div`
   }
 
   .relay-text-container {
-    width: 60%;
     text-overflow: ellipsis;
     overflow: hidden;
+    margin-right: 8px;
   }
 
-  .relay-icons {
-    padding-left: 10px;
-  }
 
   .relay-item {
     display: flex;
     justify-content: space-between;
+    align-items: center;
     margin: 5px;
-  }
+    padding: 4px 0;
 
-  .relay-edit-item {
-    padding-right: 5px;
-  }
-
-  .add-relay-container {
+  .relay-item.read-only {
     display: flex;
-    justify-content: flex-end;
+    align-items: center;
+    padding: 6px 0;
+    margin: 0 5px;
+  }
+
+  .ant-collapse-content-box {
+    padding-top: 0px;
+    padding-bottom: 8px;
   }
 
   .ant-btn-icon-only {

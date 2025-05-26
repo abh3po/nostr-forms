@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
-import { Button, Card, Divider, Table, Typography, Skeleton } from "antd";
+import { Button, Card, Divider, Typography, Skeleton, Input } from "antd";
+import { SearchOutlined } from "@ant-design/icons";
 import { naddrUrl } from "../../utils/utility";
 import StyleWrapper from "./style";
 import { getPublicForms } from "../../nostr/publicForms";
@@ -11,8 +12,10 @@ import ReactMarkdown from "react-markdown";
 function PublicForms() {
   const [isLoading, setIsLoading] = useState(false);
   const [forms, setForms] = useState<Event[]>([]);
+  const [searchQuery, setSearchQuery] = useState("");
 
   const navigate = useNavigate();
+  
   useEffect(() => {
     const handleFormEvent = (event: Event) => {
       setForms(prevForms => {
@@ -20,12 +23,13 @@ function PublicForms() {
           return prevForms;
         }
         return [...prevForms, event];
-      });      setIsLoading(false);  
+      });
+      setIsLoading(false);  
     };
 
     const loadingTimeout = setTimeout(() => {
       setIsLoading(false); 
-  }, 10000); 
+    }, 10000); 
   
     setIsLoading(true);
     getPublicForms(getDefaultRelays(), handleFormEvent);
@@ -36,8 +40,30 @@ function PublicForms() {
     
   }, []);
 
+  const filteredForms = forms.filter(form => {
+    const nameTag = form.tags.find((t) => t[0] === "name");
+    const name = nameTag?.[1] ?? "[Untitled Form]";
+    return name.toLowerCase().includes(searchQuery.toLowerCase());
+  });
+
   return (
     <StyleWrapper>
+      <div style={{ 
+        padding: '20px 30px 0 30px', 
+        display: 'flex', 
+        justifyContent: 'center' 
+      }}>
+        <Input 
+          placeholder="Search forms by title" 
+          prefix={<SearchOutlined />} 
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          size="large"
+          allowClear
+          style={{ width: '50%' }}
+        />
+      </div>
+
       {isLoading ? (
         Array(3).fill(0).map((_, index) => (
           <Card key={index} style={{ margin: 30 }}>
@@ -49,8 +75,8 @@ function PublicForms() {
             </div>
           </Card>
         ))
-      ) : forms.length > 0 ? (
-        forms.map((f: Event) => {
+      ) : filteredForms.length > 0 ? (
+        filteredForms.map((f: Event) => {
           if (f.content === "") {
             const nameTag = f.tags.find((t) => t[0] === "name");
             const formIdTag = f.tags.find((t) => t[0] === "d");
@@ -97,7 +123,6 @@ function PublicForms() {
                   }}
                 >
                   <ReactMarkdown>
-                    {}
                     {truncatedDescription}
                   </ReactMarkdown>
                 </div>
@@ -112,7 +137,6 @@ function PublicForms() {
                 >
                   <Button
                     onClick={() => {
-                      
                       navigate(naddrUrl(f.pubkey, formId, getDefaultRelays()));
                     }}
                     style={{ color: "green", borderColor: "green" }}
@@ -123,30 +147,28 @@ function PublicForms() {
                   <Typography.Text
                     style={{ color: "grey", fontSize: 12, margin: 10 }}
                   >
-                    {}
                     {new Date(f.created_at * 1000).toLocaleDateString()}
                   </Typography.Text>
                 </div>
               </Card>
             );
           } else {
-            
             return (
               <Card
                 key={f.id} 
                 title="Encrypted Content"
                 style={{ margin: 30, fontSize: 12, color: "grey" }}
               >
-                {" "}
                 {new Date(f.created_at * 1000).toLocaleDateString()}
               </Card>
             );
           }
         })
       ) : (
-        
         <Typography.Text style={{ display: 'block', textAlign: 'center', margin: '40px' }}>
-          No public forms found on the connected relays.
+          {searchQuery ? 
+            `No forms found matching "${searchQuery}". Try a different search term.` : 
+            "No public forms found on the connected relays."}
         </Typography.Text>
       )}
     </StyleWrapper>

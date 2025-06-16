@@ -23,6 +23,7 @@ declare global {
     __FORMSTR__FORM_IDENTIFIER__: {
       naddr?: string;
       viewKey?: string;
+      formContent?: string;
     };
     nostr: {
       getPublicKey: () => Promise<string>;

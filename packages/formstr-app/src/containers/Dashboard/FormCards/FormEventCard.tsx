@@ -12,12 +12,19 @@ import {
 import {
   editPath,
   getDecryptedForm,
+  getFormData,
   responsePath,
 } from "../../../utils/formUtils";
 import ReactMarkdown from "react-markdown";
-import { DownloadOutlined, EditOutlined, MoreOutlined, CopyOutlined } from "@ant-design/icons";
+import {
+  DownloadOutlined,
+  EditOutlined,
+  MoreOutlined,
+  CopyOutlined,
+} from "@ant-design/icons";
 import { useEffect, useState } from "react";
 import { constructDraftUrl } from "./Drafts";
+import { useApplicationContext } from "../../../hooks/useApplicationContext";
 
 interface FormEventCardProps {
   event: Event;
@@ -34,6 +41,7 @@ export const FormEventCard: React.FC<FormEventCardProps> = ({
   viewKey,
 }) => {
   const navigate = useNavigate();
+  const { poolRef } = useApplicationContext();
   const publicForm = event.content === "";
   const [tags, setTags] = useState<Tag[]>([]);
   useEffect(() => {
@@ -70,9 +78,11 @@ export const FormEventCard: React.FC<FormEventCardProps> = ({
       formId,
       relays.length ? relays : ["wss://relay.damus.io"],
     );
+    const formData = JSON.stringify(await getFormData(naddr, poolRef.current));
     const formFillerUI = (await (await fetch("/api/form-filler-ui")).text())
       ?.replace("@naddr", naddr)
-      .replace("@viewKey", viewKey || "");
+      .replace("@viewKey", viewKey || "")
+      .replace("@formContent", formData);
     downloadHTMLToDevice(formFillerUI, name[1]);
   };
 
@@ -88,7 +98,7 @@ export const FormEventCard: React.FC<FormEventCardProps> = ({
     localStorage.setItem("formstr:draftForms", JSON.stringify(updatedDrafts));
     window.open(
       constructDraftUrl(duplicatedForm, window.location.origin),
-      "_blank"
+      "_blank",
     );
   };
 
@@ -111,14 +121,34 @@ export const FormEventCard: React.FC<FormEventCardProps> = ({
     });
     saveAndOpen(duplicatedTags, newFormId);
   };
-  const menuItems: MenuProps['items'] = secretKey
+  const menuItems: MenuProps["items"] = secretKey
     ? [
-        { key: 'download', label: 'Download', icon: <DownloadOutlined />, onClick: downloadForm },
-        { key: 'edit', label: 'Edit', icon: <EditOutlined />, onClick: () => navigate(editPath(secretKey, formId, relay, viewKey)) },
-        { key: 'duplicate', label: 'Duplicate', icon: <CopyOutlined />, onClick: handleDuplicate },
+        {
+          key: "download",
+          label: "Download",
+          icon: <DownloadOutlined />,
+          onClick: downloadForm,
+        },
+        {
+          key: "edit",
+          label: "Edit",
+          icon: <EditOutlined />,
+          onClick: () => navigate(editPath(secretKey, formId, relay, viewKey)),
+        },
+        {
+          key: "duplicate",
+          label: "Duplicate",
+          icon: <CopyOutlined />,
+          onClick: handleDuplicate,
+        },
       ]
     : [
-        { key: 'download', label: 'Download', icon: <DownloadOutlined />, onClick: downloadForm },
+        {
+          key: "download",
+          label: "Download",
+          icon: <DownloadOutlined />,
+          onClick: downloadForm,
+        },
       ];
 
   return (
@@ -129,7 +159,7 @@ export const FormEventCard: React.FC<FormEventCardProps> = ({
         <div style={{ display: "flex", flexDirection: "row" }}>
           <Dropdown
             menu={{ items: menuItems }}
-            trigger={['click']}
+            trigger={["click"]}
             placement="bottomRight"
           >
             <Button

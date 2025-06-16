@@ -30,7 +30,7 @@ export const FormRenderer: React.FC<FormRendererProps> = ({
 }) => {
   const name = formTemplate.find((tag) => tag[0] === "name")?.[1] || "";
   const settings = JSON.parse(
-    formTemplate.find((tag) => tag[0] === "settings")?.[1] || "{}"
+    formTemplate.find((tag) => tag[0] === "settings")?.[1] || "{}",
   ) as IFormSettings;
   const fields = formTemplate.filter((tag) => tag[0] === "field") as Field[];
 

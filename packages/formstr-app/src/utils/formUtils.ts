@@ -6,6 +6,8 @@ import { nip44, Event, UnsignedEvent, SimplePool, nip19 } from "nostr-tools";
 import { bytesToHex } from "@noble/hashes/utils";
 import { sha256 } from "@noble/hashes/sha256";
 import { naddrUrl } from "./utility";
+import { AddressPointer } from "nostr-tools/nip19";
+import { fetchFormTemplate } from "../nostr/fetchFormTemplate";
 
 export const createFormSpecFromTemplate = (
   template: FormTemplate,
@@ -170,4 +172,22 @@ export const constructNewResponseUrl = (
   const baseUrl = `${window.location.origin}`;
   const responsePart = responsePath(secretKey, formId, relay, viewKey);
   return `${baseUrl}${responsePart}`;
+};
+
+export const getFormData = async (naddr: string, poolRef: SimplePool) => {
+  const decodedData = nip19.decode(naddr).data as AddressPointer;
+  const pubKey = decodedData?.pubkey;
+  const formId = decodedData?.identifier;
+  const relays = decodedData?.relays;
+  return new Promise((resolve) => {
+    fetchFormTemplate(
+      pubKey,
+      formId,
+      poolRef,
+      (event: Event) => {
+        resolve(event);
+      },
+      relays,
+    );
+  });
 };

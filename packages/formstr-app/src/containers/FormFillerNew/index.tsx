@@ -20,10 +20,12 @@ interface FormFillerProps {
   embedded?: boolean;
   naddr?: string;
   viewKey?: string;
+  preFetchedFormContent?: Event;
 }
 
 export const FormFiller: React.FC<FormFillerProps> = ({
   formSpec,
+  preFetchedFormContent,
   naddr: _naddr,
   viewKey: _viewKey,
 }) => {
@@ -39,7 +41,9 @@ export const FormFiller: React.FC<FormFillerProps> = ({
   const relays = decodedData?.relays;
   const { pubkey: userPubKey, requestPubkey } = useProfileContext();
   const [formSubmitted, setFormSubmitted] = useState(false);
-  const [formEvent, setFormEvent] = useState<Event | undefined>();
+  const [formEvent, setFormEvent] = useState<Event | undefined>(
+    preFetchedFormContent,
+  );
   const [searchParams] = useSearchParams();
   const hideTitleImage = searchParams.get("hideTitleImage") === "true";
   const viewKeyParams = searchParams.get("viewKey") || _viewKey || "";

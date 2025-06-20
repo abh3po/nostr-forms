@@ -82,7 +82,7 @@ export const FormEventCard: React.FC<FormEventCardProps> = ({
     const formFillerUI = (await (await fetch("/api/form-filler-ui")).text())
       ?.replace("@naddr", naddr)
       .replace("@viewKey", viewKey || "")
-      .replace("@formContent", formData);
+      .replace("@formContent", btoa(formData));
     downloadHTMLToDevice(formFillerUI, name[1]);
   };
 

@@ -11,7 +11,7 @@ const Component = () => {
   const viewKey = _viewKey !== "@viewKey" ? _viewKey : undefined;
   const formContent =
     _formContent && _formContent !== "@formContent"
-      ? (JSON.parse(_formContent) as Event)
+      ? (JSON.parse(atob(_formContent)) as Event)
       : undefined;
   return (
     <FormFiller

@@ -107,12 +107,17 @@ export const FormRendererContainer: React.FC<FormRendererContainerProps> = ({
       />
     );
   }
-  if (!formTemplate)
+  if (!formTemplate) {
+    console.log("USERPUBKEY IS PRESENT?", userPubKey);
+    if (!userPubKey) {
+      return <Button onClick={requestPubkey}>Form Requires Login</Button>;
+    }
     return (
       <div>
-        <Typography.Text> Form is encrypted </Typography.Text>
+        <Typography.Text> You do not have access to this form </Typography.Text>
       </div>
     );
+  }
   return (
     <FormRenderer
       formTemplate={formTemplate}

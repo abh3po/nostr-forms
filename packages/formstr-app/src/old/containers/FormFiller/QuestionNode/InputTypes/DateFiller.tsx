@@ -11,6 +11,10 @@ export const DateFiller: React.FC<DateFillerProps> = ({
   defaultValue,
 }) => {
   const handleChange: DatePickerProps["onChange"] = (date, dateString) => {
+    if (Array.isArray(dateString)) {
+      onChange(dateString[0]);
+      return;
+    }
     onChange(dateString);
   };
   return (

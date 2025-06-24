@@ -15,7 +15,12 @@ import {
   responsePath,
 } from "../../../utils/formUtils";
 import ReactMarkdown from "react-markdown";
-import { DownloadOutlined, EditOutlined, MoreOutlined, CopyOutlined } from "@ant-design/icons";
+import {
+  DownloadOutlined,
+  EditOutlined,
+  MoreOutlined,
+  CopyOutlined,
+} from "@ant-design/icons";
 import { useEffect, useState } from "react";
 import { constructDraftUrl } from "./Drafts";
 
@@ -24,7 +29,8 @@ interface FormEventCardProps {
   onDeleted?: () => void;
   relay?: string;
   secretKey?: string;
-  viewKey?: string;
+  viewKey?: string | null;
+  shortLink?: string;
 }
 export const FormEventCard: React.FC<FormEventCardProps> = ({
   event,
@@ -32,6 +38,7 @@ export const FormEventCard: React.FC<FormEventCardProps> = ({
   relay,
   secretKey,
   viewKey,
+  shortLink,
 }) => {
   const navigate = useNavigate();
   const publicForm = event.content === "";
@@ -60,7 +67,7 @@ export const FormEventCard: React.FC<FormEventCardProps> = ({
   let settings: { description?: string } = {};
   if (publicForm || viewKey) {
     settings = JSON.parse(
-      tags.filter((t) => t[0] === "settings")?.[0]?.[1] || "{}",
+      tags.filter((t) => t[0] === "settings")?.[0]?.[1] || "{}"
     );
   }
 
@@ -68,7 +75,7 @@ export const FormEventCard: React.FC<FormEventCardProps> = ({
     const naddr = makeFormNAddr(
       pubKey,
       formId,
-      relays.length ? relays : ["wss://relay.damus.io"],
+      relays.length ? relays : ["wss://relay.damus.io"]
     );
     const formFillerUI = (await (await fetch("/api/form-filler-ui")).text())
       ?.replace("@naddr", naddr)
@@ -111,14 +118,34 @@ export const FormEventCard: React.FC<FormEventCardProps> = ({
     });
     saveAndOpen(duplicatedTags, newFormId);
   };
-  const menuItems: MenuProps['items'] = secretKey
+  const menuItems: MenuProps["items"] = secretKey
     ? [
-        { key: 'download', label: 'Download', icon: <DownloadOutlined />, onClick: downloadForm },
-        { key: 'edit', label: 'Edit', icon: <EditOutlined />, onClick: () => navigate(editPath(secretKey, formId, relay, viewKey)) },
-        { key: 'duplicate', label: 'Duplicate', icon: <CopyOutlined />, onClick: handleDuplicate },
+        {
+          key: "download",
+          label: "Download",
+          icon: <DownloadOutlined />,
+          onClick: downloadForm,
+        },
+        {
+          key: "edit",
+          label: "Edit",
+          icon: <EditOutlined />,
+          onClick: () => navigate(editPath(secretKey, formId, relay, viewKey)),
+        },
+        {
+          key: "duplicate",
+          label: "Duplicate",
+          icon: <CopyOutlined />,
+          onClick: handleDuplicate,
+        },
       ]
     : [
-        { key: 'download', label: 'Download', icon: <DownloadOutlined />, onClick: downloadForm },
+        {
+          key: "download",
+          label: "Download",
+          icon: <DownloadOutlined />,
+          onClick: downloadForm,
+        },
       ];
 
   return (
@@ -129,7 +156,7 @@ export const FormEventCard: React.FC<FormEventCardProps> = ({
         <div style={{ display: "flex", flexDirection: "row" }}>
           <Dropdown
             menu={{ items: menuItems }}
-            trigger={['click']}
+            trigger={["click"]}
             placement="bottomRight"
           >
             <Button
@@ -176,7 +203,7 @@ export const FormEventCard: React.FC<FormEventCardProps> = ({
           <Button
             onClick={(e) => {
               secretKey
-                ? navigate(responsePath(secretKey, formId, relay, viewKey))
+                ? navigate(responsePath(secretKey, formId, relays, viewKey))
                 : navigate(`/r/${pubKey}/${formId}`);
             }}
             type="dashed"
@@ -190,14 +217,18 @@ export const FormEventCard: React.FC<FormEventCardProps> = ({
           <Button
             onClick={(e: any) => {
               e.stopPropagation();
-              navigate(
-                naddrUrl(
-                  pubKey,
-                  formId,
-                  relays.length ? relays : ["wss://relay.damus.io"],
-                  viewKey,
-                ),
-              );
+              if (shortLink) {
+                navigate(shortLink);
+              } else {
+                navigate(
+                  naddrUrl(
+                    pubKey,
+                    formId,
+                    relays.length ? relays : ["wss://relay.damus.io"],
+                    viewKey
+                  )
+                );
+              }
             }}
             style={{
               marginLeft: "10px",

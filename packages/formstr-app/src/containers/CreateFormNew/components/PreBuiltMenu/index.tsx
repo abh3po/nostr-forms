@@ -19,7 +19,6 @@ function PreBuiltMenu() {
       key: "Pre-built",
       label: "Pre-built",
       children: PRE_BUILT_MENU,
-      type: "group",
     },
   ];
   return <Menu selectedKeys={[]} items={items} onClick={onMenuClick} />;

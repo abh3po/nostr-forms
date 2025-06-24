@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Event, getPublicKey, nip19, SubCloser } from "nostr-tools";
+import { Event, getPublicKey, nip19 } from "nostr-tools";
 import { useParams, useSearchParams } from "react-router-dom";
 import { fetchFormResponses } from "../../nostr/responses";
 import SummaryStyle from "./summary.style";
@@ -9,13 +9,22 @@ import { isMobile } from "../../utils/utility";
 import { useProfileContext } from "../../hooks/useProfileContext";
 import { fetchFormTemplate } from "../../nostr/fetchFormTemplate";
 import { hexToBytes } from "@noble/hashes/utils";
-import { fetchKeys, getAllowedUsers, getFormSpec as getFormSpecFromEventUtil } from "../../utils/formUtils"; 
+import {
+  fetchKeys,
+  getAllowedUsers,
+  getFormSpec as getFormSpecFromEventUtil,
+} from "../../utils/formUtils";
 import { Export } from "./Export";
 import { Field, Tag } from "../../nostr/types";
 import { useApplicationContext } from "../../hooks/useApplicationContext";
-import { ResponseDetailModal } from './components/ResponseDetailModal';
+import { ResponseDetailModal } from "./components/ResponseDetailModal";
 import { getDefaultRelays } from "../../nostr/common";
-import { getResponseRelays, getInputsFromResponseEvent, getResponseLabels } from "../../utils/ResponseUtils";
+import {
+  getResponseRelays,
+  getInputsFromResponseEvent,
+  getResponseLabels,
+} from "../../utils/ResponseUtils";
+import { SubCloser } from "nostr-tools/pool";
 
 const { Text } = Typography;
 
@@ -29,15 +38,17 @@ export const Response = () => {
   const { pubkey: userPubkey, requestPubkey } = useProfileContext();
   const viewKeyParams = searchParams.get("viewKey");
   const [responseCloser, setResponsesCloser] = useState<SubCloser | null>(null);
-  const [selectedEventForModal, setSelectedEventForModal] = useState<Event | null>(null);
-  const [selectedResponseInputsForModal, setSelectedResponseInputsForModal] = useState<Tag[] | null>(null);
+  const [selectedEventForModal, setSelectedEventForModal] =
+    useState<Event | null>(null);
+  const [selectedResponseInputsForModal, setSelectedResponseInputsForModal] =
+    useState<Tag[] | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   let { poolRef } = useApplicationContext();
-  const [isFormSpecLoading, setIsFormSpecLoading] = useState(true); 
+  const [isFormSpecLoading, setIsFormSpecLoading] = useState(true);
 
   const handleResponseEvent = (event: Event) => {
     setResponses((prev: Event[] | undefined) => {
-      if (prev?.some(e => e.id === event.id)) {
+      if (prev?.some((e) => e.id === event.id)) {
         return prev;
       }
       return [...(prev || []), event];
@@ -47,8 +58,8 @@ export const Response = () => {
   const initialize = async () => {
     if (!formId) return;
     if (!(pubKey || secretKey)) return;
-    if(!poolRef?.current) return;
-    setIsFormSpecLoading(true); 
+    if (!poolRef?.current) return;
+    setIsFormSpecLoading(true);
 
     if (secretKey) {
       setEditKey(secretKey);
@@ -64,7 +75,8 @@ export const Response = () => {
         if (!secretKey) {
           if (userPubkey) {
             let keys = await fetchKeys(event.pubkey, formId!, userPubkey);
-            let fetchedEditKey = keys?.find((k) => k[0] === "EditAccess")?.[1] || null;
+            let fetchedEditKey =
+              keys?.find((k) => k[0] === "EditAccess")?.[1] || null;
             setEditKey(fetchedEditKey);
           }
         }
@@ -101,7 +113,7 @@ export const Response = () => {
     };
   }, [pubKey, formId, secretKey, userPubkey, viewKeyParams]);
   useEffect(() => {
-    if (!formEvent || !formId || !poolRef.current) { 
+    if (!formEvent || !formId || !poolRef.current) {
       return;
     }
     let allowedPubkeys;
@@ -131,12 +143,16 @@ export const Response = () => {
   const handleRowClick = (record: any) => {
     const authorPubKey = record.key;
     if (!responses || !formSpec || formSpec.length === 0) {
-        console.warn("Form spec not ready or no responses, cannot open modal.");
-        return;
+      console.warn("Form spec not ready or no responses, cannot open modal.");
+      return;
     }
-    const authorEvents = responses.filter(event => event.pubkey === authorPubKey);
+    const authorEvents = responses.filter(
+      (event) => event.pubkey === authorPubKey
+    );
     if (authorEvents.length === 0) return;
-    const latestEvent = authorEvents.sort((a, b) => b.created_at - a.created_at)[0];
+    const latestEvent = authorEvents.sort(
+      (a, b) => b.created_at - a.created_at
+    )[0];
 
     const inputsForModal = getInputsFromResponseEvent(latestEvent, editKey);
     setSelectedResponseInputsForModal(inputsForModal);
@@ -148,7 +164,7 @@ export const Response = () => {
     let answers: Array<{
       [key: string]: string;
     }> = [];
-    if (!formSpec || !responses) return answers; 
+    if (!formSpec || !responses) return answers;
     let responsePerPubkey = new Map<string, Event[]>();
     responses.forEach((r: Event) => {
       let existingResponse = responsePerPubkey.get(r.pubkey);
@@ -159,11 +175,11 @@ export const Response = () => {
     Array.from(responsePerPubkey.keys()).forEach((pub) => {
       let pubkeyResponses = responsePerPubkey.get(pub);
       if (!pubkeyResponses || pubkeyResponses.length === 0) return;
-      let responseEvent = pubkeyResponses.sort( 
+      let responseEvent = pubkeyResponses.sort(
         (a, b) => b.created_at - a.created_at
       )[0];
-      let inputs = getInputsFromResponseEvent(responseEvent, editKey) as Tag[]; 
-      if (inputs.length === 0 && responseEvent.content !== "" && !editKey) { 
+      let inputs = getInputsFromResponseEvent(responseEvent, editKey) as Tag[];
+      if (inputs.length === 0 && responseEvent.content !== "" && !editKey) {
       }
 
       let answerObject: {
@@ -176,7 +192,10 @@ export const Response = () => {
       };
       inputs.forEach((input) => {
         if (!Array.isArray(input) || input.length < 2) return;
-        const { questionLabel, responseLabel, fieldId } = getResponseLabels(input, formSpec);
+        const { questionLabel, responseLabel, fieldId } = getResponseLabels(
+          input,
+          formSpec
+        );
         const displayKey = useLabels ? questionLabel : fieldId;
         answerObject[displayKey] = responseLabel;
       });
@@ -186,7 +205,7 @@ export const Response = () => {
   };
 
   const getFormName = () => {
-    if (!formSpec) return "Loading Form Name..."; 
+    if (!formSpec) return "Loading Form Name...";
     let nameTag = formSpec.find((tag) => tag[0] === "name");
     if (nameTag) return nameTag[1] || "Untitled Form";
     return "Untitled Form";
@@ -213,7 +232,9 @@ export const Response = () => {
             target="_blank"
             rel="noopener noreferrer"
           >
-            {isMobile() ? `${data.substring(0,10)}...${data.substring(data.length-5)}` : data}
+            {isMobile()
+              ? `${data.substring(0, 10)}...${data.substring(data.length - 5)}`
+              : data}
           </a>
         ),
       },
@@ -243,7 +264,8 @@ export const Response = () => {
     responses?.forEach((response: Event) => {
       let responseTags = getInputsFromResponseEvent(response, editKey);
       responseTags.forEach((t: Tag) => {
-        if (Array.isArray(t) && t.length > 1) uniqueQuestionIdsInResponses.add(t[1]);
+        if (Array.isArray(t) && t.length > 1)
+          uniqueQuestionIdsInResponses.add(t[1]);
       });
     });
     let fieldsFromSpec =
@@ -253,25 +275,35 @@ export const Response = () => {
       let [_, fieldId, __, label] = field;
       columns.push({
         key: fieldId,
-        title: label || `Question: ${fieldId.substring(0,5)}...`,
+        title: label || `Question: ${fieldId.substring(0, 5)}...`,
         dataIndex: label || fieldId,
         width: 150,
       });
-      uniqueQuestionIdsInResponses.delete(fieldId); 
+      uniqueQuestionIdsInResponses.delete(fieldId);
     });
     const extraFieldIdsFromResponses = Array.from(uniqueQuestionIdsInResponses);
     extraFieldIdsFromResponses.forEach((fieldId) => {
       columns.push({
         key: fieldId,
-        title: `Question ID: ${fieldId.substring(0,8)}...`, 
-        dataIndex: fieldId, 
+        title: `Question ID: ${fieldId.substring(0, 8)}...`,
+        dataIndex: fieldId,
         width: 150,
       });
     });
-    if (formSpec === null && responses && extraFieldIdsFromResponses.length > 0 && fieldsFromSpec.length === 0) { 
-      extraFieldIdsFromResponses.forEach(id => {
-        if (!columns.find(col => col.key === id)) {
-            columns.push({ key: id, title: `Question ID: ${id.substring(0,8)}...`, dataIndex: id, width: 150 });
+    if (
+      formSpec === null &&
+      responses &&
+      extraFieldIdsFromResponses.length > 0 &&
+      fieldsFromSpec.length === 0
+    ) {
+      extraFieldIdsFromResponses.forEach((id) => {
+        if (!columns.find((col) => col.key === id)) {
+          columns.push({
+            key: id,
+            title: `Question ID: ${id.substring(0, 8)}...`,
+            dataIndex: id,
+            width: 150,
+          });
         }
       });
     }
@@ -280,15 +312,24 @@ export const Response = () => {
 
   if (!(pubKey || secretKey) || !formId) return <Text>Invalid url</Text>;
 
-  if (formEvent && formEvent.content !== "" && !userPubkey && !viewKeyParams && !editKey) { 
+  if (
+    formEvent &&
+    formEvent.content !== "" &&
+    !userPubkey &&
+    !viewKeyParams &&
+    !editKey
+  ) {
     return (
-      <div style={{ textAlign: 'center', marginTop: '20px' }}>
-        <Text>This form's responses are private. You need to login or have a view key to see them.</Text>
+      <div style={{ textAlign: "center", marginTop: "20px" }}>
+        <Text>
+          This form's responses are private. You need to login or have a view
+          key to see them.
+        </Text>
         <Button
           onClick={() => {
             requestPubkey();
           }}
-          style={{ marginTop: '10px' }}
+          style={{ marginTop: "10px" }}
         >
           Login
         </Button>
@@ -297,15 +338,27 @@ export const Response = () => {
   }
   if (isFormSpecLoading) {
     return (
-      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '80vh' }}>
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          height: "80vh",
+        }}
+      >
         <Spin size="large" tip="Loading form details..." />
       </div>
     );
   }
-  if (formSpec === null && formEvent && formEvent.content !== "") { 
-     return <div style={{ textAlign: 'center', marginTop: '20px' }}>
-              <Text>Could not load or decrypt form specification. Responses cannot be displayed.</Text>
-            </div>;
+  if (formSpec === null && formEvent && formEvent.content !== "") {
+    return (
+      <div style={{ textAlign: "center", marginTop: "20px" }}>
+        <Text>
+          Could not load or decrypt form specification. Responses cannot be
+          displayed.
+        </Text>
+      </div>
+    );
   }
 
   return (
@@ -317,7 +370,9 @@ export const Response = () => {
             <Divider />
             <div className="response-count-container">
               <Text className="response-count">
-                {responses === undefined ? "Searching..." : getResponderCount()}{" "}
+                {responses === undefined
+                  ? "Searching..."
+                  : getResponderCount()}{" "}
               </Text>
               <Text className="response-count-label">responder(s)</Text>
             </div>
@@ -330,7 +385,7 @@ export const Response = () => {
           <Table
             columns={getColumns()}
             dataSource={getData(true)}
-            pagination={{ pageSize: 10 }} 
+            pagination={{ pageSize: 10 }}
             loading={{
               spinning: responses === undefined,
               tip: "🔎 Looking for responses...",
@@ -343,30 +398,36 @@ export const Response = () => {
                   if (formSpec && formSpec.length > 0) {
                     handleRowClick(record);
                   } else {
-                    console.warn("Form specification not ready, cannot open details modal.");
+                    console.warn(
+                      "Form specification not ready, cannot open details modal."
+                    );
                   }
                 },
-                style: { cursor: (formSpec && formSpec.length > 0) ? 'pointer' : 'default' }
+                style: {
+                  cursor:
+                    formSpec && formSpec.length > 0 ? "pointer" : "default",
+                },
               };
             }}
           />
         </div>
       </ResponseWrapper>
       {isModalOpen &&
-        formSpec && formSpec.length > 0 &&
+        formSpec &&
+        formSpec.length > 0 &&
         selectedResponseInputsForModal && (
-        <ResponseDetailModal
-          isVisible={isModalOpen}
-          onClose={() => {
+          <ResponseDetailModal
+            isVisible={isModalOpen}
+            onClose={() => {
               setIsModalOpen(false);
               setSelectedEventForModal(null);
               setSelectedResponseInputsForModal(null);
-          }}
-          formSpec={formSpec} 
-          processedInputs={selectedResponseInputsForModal}
-          responseMetadataEvent={selectedEventForModal}
-        />
-      )}
+            }}
+            formSpec={formSpec}
+            processedInputs={selectedResponseInputsForModal}
+            responseMetadataEvent={selectedEventForModal}
+          />
+        )}
     </div>
   );
 };

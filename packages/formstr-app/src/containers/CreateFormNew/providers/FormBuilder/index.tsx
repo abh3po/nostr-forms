@@ -1,6 +1,11 @@
 import React, { useEffect, useRef, useState, useCallback } from "react";
 import { AnswerSettings } from "@formstr/sdk/dist/interfaces";
-import { FormInitData, IFormBuilderContext, RelayItem, RelayStatus } from "./typeDefs";
+import {
+  FormInitData,
+  IFormBuilderContext,
+  RelayItem,
+  RelayStatus,
+} from "./typeDefs";
 import { generateQuestion } from "../../utils";
 import { getDefaultRelays } from "@formstr/sdk";
 import { makeTag } from "../../../../utils/utility";
@@ -12,9 +17,13 @@ import { getPublicKey } from "nostr-tools";
 import { useNavigate } from "react-router-dom";
 import { useProfileContext } from "../../../../hooks/useProfileContext";
 import { createForm } from "../../../../nostr/createForm";
-import { getItem, LOCAL_STORAGE_KEYS, setItem} from "../../../../utils/localStorage";
+import {
+  getItem,
+  LOCAL_STORAGE_KEYS,
+  setItem,
+} from "../../../../utils/localStorage";
 import { Field } from "../../../../nostr/types";
-import { message } from 'antd';
+import { message } from "antd";
 
 const LOCAL_STORAGE_CUSTOM_RELAYS_KEY = "formstr:customRelays";
 
@@ -78,8 +87,11 @@ export default function FormBuilderProvider({
   const [questionsList, setQuestionsList] = useState<Array<Field>>([
     generateQuestion(),
   ]);
-  const [questionIdInFocus, setQuestionIdInFocus] = useState<string | undefined>();
-  const [formSettings, setFormSettings] = useState<IFormSettings>(InitialFormSettings);
+  const [questionIdInFocus, setQuestionIdInFocus] = useState<
+    string | undefined
+  >();
+  const [formSettings, setFormSettings] =
+    useState<IFormSettings>(InitialFormSettings);
   const [isRightSettingsOpen, setIsRightSettingsOpen] = useState(false);
   const [isLeftMenuOpen, setIsLeftMenuOpen] = useState(false);
   const [formName, setFormName] = useState<string>(
@@ -91,7 +103,9 @@ export default function FormBuilderProvider({
     new Set(userPubkey ? [userPubkey] : [])
   );
   const [viewList, setViewList] = useState<Set<string>>(new Set([]));
-  const [selectedTab, setSelectedTab] = useState<string>(HEADER_MENU_KEYS.BUILDER);
+  const [selectedTab, setSelectedTab] = useState<string>(
+    HEADER_MENU_KEYS.BUILDER
+  );
   const [secretKey, setSecretKey] = useState<string | null>(null);
   const [viewKey, setViewKey] = useState<string | null | undefined>(null);
   const navigate = useNavigate();
@@ -100,11 +114,15 @@ export default function FormBuilderProvider({
   const [isRelayManagerModalOpen, setIsRelayManagerModalOpen] = useState(false);
   useEffect(() => {
     let baseList: RelayItem[];
-    const storedUserManagedRelays = getItem<RelayItem[]>(LOCAL_STORAGE_CUSTOM_RELAYS_KEY);
+    const storedUserManagedRelays = getItem<RelayItem[]>(
+      LOCAL_STORAGE_CUSTOM_RELAYS_KEY
+    );
 
     if (userRelays && userRelays.length > 0) {
-      baseList = userRelays.map(url => {
-        const existingStoredRelay = storedUserManagedRelays?.find(r => r.url === url);
+      baseList = userRelays.map((url) => {
+        const existingStoredRelay = storedUserManagedRelays?.find(
+          (r) => r.url === url
+        );
         return existingStoredRelay || { url, tempId: makeTag(6) };
       });
     } else if (storedUserManagedRelays) {
@@ -115,68 +133,85 @@ export default function FormBuilderProvider({
 
     const defaultRelayUrls = getDefaultRelays();
     const finalRelayList = [...baseList];
-    const baseListUrls = new Set(baseList.map(r => r.url));
+    const baseListUrls = new Set(baseList.map((r) => r.url));
 
-    defaultRelayUrls.forEach(defaultUrl => {
+    defaultRelayUrls.forEach((defaultUrl) => {
       if (!baseListUrls.has(defaultUrl)) {
-        const existingStoredDefault = storedUserManagedRelays?.find(r => r.url === defaultUrl);
+        const existingStoredDefault = storedUserManagedRelays?.find(
+          (r) => r.url === defaultUrl
+        );
         if (existingStoredDefault) {
-            finalRelayList.push(existingStoredDefault);
+          finalRelayList.push(existingStoredDefault);
         } else {
-            finalRelayList.push({ url: defaultUrl, tempId: makeTag(6) });
+          finalRelayList.push({ url: defaultUrl, tempId: makeTag(6) });
         }
       }
     });
-    
+
     const uniqueRelayMap = new Map<string, RelayItem>();
-    baseList.forEach(relay => uniqueRelayMap.set(relay.url, relay));
-    finalRelayList.forEach(relay => {
-        if (!uniqueRelayMap.has(relay.url)) {
-            uniqueRelayMap.set(relay.url, relay);
-        }
+    baseList.forEach((relay) => uniqueRelayMap.set(relay.url, relay));
+    finalRelayList.forEach((relay) => {
+      if (!uniqueRelayMap.has(relay.url)) {
+        uniqueRelayMap.set(relay.url, relay);
+      }
     });
     const uniqueFinalRelayList = Array.from(uniqueRelayMap.values());
 
     setRelayList(uniqueFinalRelayList);
   }, [userRelays]);
   const toggleRelayManagerModal = useCallback(() => {
-    setIsRelayManagerModalOpen(prev => !prev);
+    setIsRelayManagerModalOpen((prev) => !prev);
   }, []);
 
   const addRelayToList = useCallback((url: string) => {
-    setRelayList(prevRelayList => {
-        if (prevRelayList.some(relay => relay.url === url)) {
-            message.warning(`Relay URL ${url} already exists.`);
-            return prevRelayList;
-        }
-        const newRelay: RelayItem = { url, tempId: makeTag(6) };
-        const updatedList = [...prevRelayList, newRelay];
-        setItem(LOCAL_STORAGE_CUSTOM_RELAYS_KEY, updatedList.filter(r => !getDefaultRelays().includes(r.url))); // Only store custom relays
-        return updatedList;
+    setRelayList((prevRelayList) => {
+      if (prevRelayList.some((relay) => relay.url === url)) {
+        message.warning(`Relay URL ${url} already exists.`);
+        return prevRelayList;
+      }
+      const newRelay: RelayItem = { url, tempId: makeTag(6) };
+      const updatedList = [...prevRelayList, newRelay];
+      setItem(
+        LOCAL_STORAGE_CUSTOM_RELAYS_KEY,
+        updatedList.filter((r) => !getDefaultRelays().includes(r.url))
+      ); // Only store custom relays
+      return updatedList;
     });
   }, []);
 
   const editRelayInList = useCallback((tempId: string, newUrl: string) => {
-    setRelayList(prevRelayList => {
-        if (prevRelayList.some(relay => relay.url === newUrl && relay.tempId !== tempId)) {
-            message.warning(`Relay URL ${newUrl} already exists.`);
-            return prevRelayList;
-        }
-        const updatedList = prevRelayList.map(relay =>
-            relay.tempId === tempId ? { ...relay, url: newUrl } : relay
-        );
-        setItem(LOCAL_STORAGE_CUSTOM_RELAYS_KEY, updatedList.filter(r => !getDefaultRelays().includes(r.url))); // Only store custom relays
-        return updatedList;
+    setRelayList((prevRelayList) => {
+      if (
+        prevRelayList.some(
+          (relay) => relay.url === newUrl && relay.tempId !== tempId
+        )
+      ) {
+        message.warning(`Relay URL ${newUrl} already exists.`);
+        return prevRelayList;
+      }
+      const updatedList = prevRelayList.map((relay) =>
+        relay.tempId === tempId ? { ...relay, url: newUrl } : relay
+      );
+      setItem(
+        LOCAL_STORAGE_CUSTOM_RELAYS_KEY,
+        updatedList.filter((r) => !getDefaultRelays().includes(r.url))
+      ); // Only store custom relays
+      return updatedList;
     });
   }, []);
 
   const deleteRelayFromList = useCallback((tempId: string) => {
-    setRelayList(prevRelayList => {
-        const relayToDelete = prevRelayList.find(r => r.tempId === tempId);
-        if (!relayToDelete) return prevRelayList;
-        let updatedList = prevRelayList.filter(relay => relay.tempId !== tempId);
-        setItem(LOCAL_STORAGE_CUSTOM_RELAYS_KEY, updatedList.filter(r => !getDefaultRelays().includes(r.url))); // Only store custom relays
-        return updatedList;
+    setRelayList((prevRelayList) => {
+      const relayToDelete = prevRelayList.find((r) => r.tempId === tempId);
+      if (!relayToDelete) return prevRelayList;
+      let updatedList = prevRelayList.filter(
+        (relay) => relay.tempId !== tempId
+      );
+      setItem(
+        LOCAL_STORAGE_CUSTOM_RELAYS_KEY,
+        updatedList.filter((r) => !getDefaultRelays().includes(r.url))
+      ); // Only store custom relays
+      return updatedList;
     });
   }, []);
 
@@ -231,13 +266,16 @@ export default function FormBuilderProvider({
             secretKey: bytesToHex(signingKey),
             viewKey: formSettings.viewKeyInUrl ? bytesToHex(formViewKey) : null,
             name: formName,
-            relay: acceptedRelays.length > 0 ? acceptedRelays[0] : "",
+            relays: relayUrls,
           },
         });
       },
       (error) => {
         console.error("Error creating form:", error);
-        message.error("Error creating the form: " + (error instanceof Error ? error.message : String(error)));
+        message.error(
+          "Error creating the form: " +
+            (error instanceof Error ? error.message : String(error))
+        );
       }
     );
   };
@@ -318,8 +356,14 @@ export default function FormBuilderProvider({
     );
     settingsFromFile = { ...InitialFormSettings, ...settingsFromFile };
     let fields = form.spec.filter((f) => f[0] === "field") as Field[];
-    setFormSettings((currentSettings) => ({ ...currentSettings, ...settingsFromFile, formId: form.id }));
-    let newViewList = form.spec.filter((f) => f[0] === "allowed").map((t) => t[1]);
+    setFormSettings((currentSettings) => ({
+      ...currentSettings,
+      ...settingsFromFile,
+      formId: form.id,
+    }));
+    let newViewList = form.spec
+      .filter((f) => f[0] === "allowed")
+      .map((t) => t[1]);
     let allKeys = form.spec.filter((f) => f[0] === "p").map((t) => t[1]);
     let newEditList: string[] = allKeys.filter((p) => !newViewList.includes(p));
     setViewList(new Set(newViewList));

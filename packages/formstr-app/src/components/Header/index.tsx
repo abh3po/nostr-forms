@@ -18,7 +18,8 @@ import { NostrAvatar } from "./NostrAvatar";
 import { ReactComponent as GeyserIcon } from "../../Images/Geyser.svg";
 import { useState } from "react";
 import FAQModal from "../FAQModal";
-import { useTemplateContext } from '../../provider/TemplateProvider';
+import { useTemplateContext } from "../../provider/TemplateProvider";
+import ThemedUniversalModal from "../UniversalMarkdownModal";
 
 export const NostrHeader = () => {
   const { Header } = Layout;
@@ -31,7 +32,7 @@ export const NostrHeader = () => {
     if (e.key === HEADER_MENU_KEYS.HELP) {
       setIsFAQModalVisible(true);
       setSelectedKey([e.key]);
-      return; 
+      return;
     }
     if (e.key === HEADER_MENU_KEYS.CREATE_FORMS) {
       openTemplateModal();
@@ -134,9 +135,18 @@ export const NostrHeader = () => {
           </Col>
         </Row>
       </Header>
-      <FAQModal
+      {/* <FAQModal
         visible={isFAQModalVisible}
         onClose={() => { setIsFAQModalVisible(false); setSelectedKey([]); }}
+      /> */}
+      <ThemedUniversalModal
+        visible={isFAQModalVisible}
+        onClose={() => {
+          setIsFAQModalVisible(false);
+          setSelectedKey([]);
+        }}
+        filePath="/docs/faq.md"
+        title="Frequently Asked Questions"
       />
     </>
   );

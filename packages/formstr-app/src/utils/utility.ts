@@ -34,7 +34,7 @@ export const downloadHTMLToDevice = (fileContent: string, name = "form") => {
 export const makeFormNAddr = (
   publicKey: string,
   formId: string,
-  relaysEncode?: string[],
+  relaysEncode?: string[]
 ) => {
   return nip19.naddrEncode({
     pubkey: publicKey,
@@ -48,12 +48,12 @@ export const naddrUrl = (
   publicKey: string,
   formId: string,
   relaysEncode?: string[],
-  viewKey?: string,
+  viewKey?: string | null
 ) => {
   let formUrl = `/f/${makeFormNAddr(
     publicKey,
     formId,
-    relaysEncode || ["wss://relay.damus.io"],
+    relaysEncode || ["wss://relay.damus.io"]
   )}`;
   if (viewKey) formUrl = formUrl + `?viewKey=${viewKey}`;
   return formUrl;
@@ -61,7 +61,7 @@ export const naddrUrl = (
 
 export function constructFormUrl(
   publicKey: string,
-  formIdentifier: string | null = null,
+  formIdentifier: string | null = null
 ) {
   let hostname = window.location.host;
   if (hostname.includes("abhay-raizada")) {
@@ -74,7 +74,7 @@ export function constructFormUrl(
 }
 
 export function constructDraftUrl(
-  draft: { formSpec: unknown; tempId: string } | null,
+  draft: { formSpec: unknown; tempId: string } | null
 ) {
   if (!draft) {
     return;

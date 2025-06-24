@@ -14,9 +14,7 @@ function BasicMenu() {
     );
   };
 
-  const items = [
-    { key: "Basic", label: "Basic", children: BASIC_MENU, type: "group" },
-  ];
+  const items = [{ key: "Basic", label: "Basic", children: BASIC_MENU }];
   return <Menu selectedKeys={[]} items={items} onClick={onMenuClick} />;
 }
 

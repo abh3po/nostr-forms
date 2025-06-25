@@ -25,7 +25,7 @@ export const FormRenderer: React.FC<FormRendererProps> = ({
   form,
   onInput,
   footer,
-  hideTitleImage,
+  hideTitleImage = false,
   hideDescription,
 }) => {
   const name = formTemplate.find((tag) => tag[0] === "name")?.[1] || "";
@@ -38,19 +38,19 @@ export const FormRenderer: React.FC<FormRendererProps> = ({
     <FillerStyle>
       <div className="filler-container">
         <div className="form-filler">
-          {hideTitleImage ? (
+          {hideTitleImage && (
             <FormBanner
               imageUrl={settings?.titleImageUrl || ""}
               formTitle={name}
             />
-          ) : null}
-          {hideDescription ? (
+          )}
+          {hideDescription && (
             <div className="form-description">
               <Text>
                 <Markdown>{settings?.description}</Markdown>
               </Text>
             </div>
-          ) : null}
+          )}
           <Form form={form} onFinish={() => {}} className="with-description">
             <FormFields fields={fields} handleInput={onInput} />
             {footer}

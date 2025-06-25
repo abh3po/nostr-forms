@@ -23,6 +23,8 @@ export const FormRendererContainer: React.FC<FormRendererContainerProps> = ({
   formEvent,
   onSubmitClick,
   viewKey,
+  hideTitleImage,
+  hideDescription,
 }) => {
   const { pubkey: userPubKey, requestPubkey } = useProfileContext();
   const [form] = Form.useForm();
@@ -119,8 +121,8 @@ export const FormRendererContainer: React.FC<FormRendererContainerProps> = ({
       form={form}
       onInput={handleInput}
       footer={footer}
-      hideTitleImage
-      hideDescription
+      hideTitleImage={hideTitleImage}
+      hideDescription={hideDescription}
     />
   );
 };

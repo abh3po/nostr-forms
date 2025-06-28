@@ -39,7 +39,7 @@ export const FormRendererContainer: React.FC<FormRendererContainerProps> = ({
       const formSpec = await getFormSpec(
         formEvent,
         userPubKey,
-        () => {},
+        () => { },
         viewKey
       );
 
@@ -119,8 +119,10 @@ export const FormRendererContainer: React.FC<FormRendererContainerProps> = ({
       form={form}
       onInput={handleInput}
       footer={footer}
-      hideTitleImage
-      hideDescription
+      hideTitleImage={settings?.hideTitleImage}
+      hideDescription={settings?.hideDescription}
     />
   );
 };
+
+

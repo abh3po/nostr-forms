@@ -38,20 +38,23 @@ export const FormRenderer: React.FC<FormRendererProps> = ({
     <FillerStyle>
       <div className="filler-container">
         <div className="form-filler">
-          {hideTitleImage ? (
+
+          {!hideTitleImage && settings?.titleImageUrl && (
             <FormBanner
-              imageUrl={settings?.titleImageUrl || ""}
+              imageUrl={settings.titleImageUrl}
               formTitle={name}
             />
-          ) : null}
-          {hideDescription ? (
+          )}
+
+          {!hideDescription && settings?.description && (
             <div className="form-description">
               <Text>
-                <Markdown>{settings?.description}</Markdown>
+                <Markdown>{settings.description}</Markdown>
               </Text>
             </div>
-          ) : null}
-          <Form form={form} onFinish={() => {}} className="with-description">
+          )}
+
+          <Form form={form} onFinish={() => { }} className="with-description">
             <FormFields fields={fields} handleInput={onInput} />
             {footer}
           </Form>
@@ -76,3 +79,5 @@ export const FormRenderer: React.FC<FormRendererProps> = ({
     </FillerStyle>
   );
 };
+
+

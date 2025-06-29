@@ -69,5 +69,3 @@ function DeleteFormTrigger({
 }
 
 export default DeleteFormTrigger;
-
-

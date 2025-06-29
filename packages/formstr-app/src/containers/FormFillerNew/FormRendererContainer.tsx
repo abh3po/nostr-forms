@@ -8,7 +8,6 @@ import { FormRenderer } from "./FormRenderer";
 import { useEffect, useState } from "react";
 import { getResponseRelays } from "../../utils/ResponseUtils";
 import { IFormSettings } from "../CreateFormNew/components/FormSettings/types";
-import { useSearchParams } from "react-router-dom"; 
 
 const { Text } = Typography;
 
@@ -16,22 +15,24 @@ interface FormRendererContainerProps {
   formEvent: Event;
   onSubmitClick: (responses: Response[], formTemplate: Tag[]) => void;
   viewKey: string | null;
+  hideTitleImage:  boolean;
+  hideDescription: boolean
 }
 
 export const FormRendererContainer: React.FC<FormRendererContainerProps> = ({
   formEvent,
   onSubmitClick,
   viewKey,
+  hideDescription,
+  hideTitleImage
 }) => {
   const { pubkey: userPubKey, requestPubkey } = useProfileContext();
   const [form] = Form.useForm();
   const { Text } = Typography;
   const [formTemplate, setFormTemplate] = useState<Tag[]>();
   const [settings, setSettings] = useState<IFormSettings>();
-  const [searchParams] = useSearchParams();
-  const hideTitleImage = searchParams.get("hideTitleImage") === "true";
-  const hideDescription = searchParams.get("hideDescription") === "true";
-
+ 
+  
   useEffect(() => {
     const initialize = async () => {
       if (formEvent.content === "") {

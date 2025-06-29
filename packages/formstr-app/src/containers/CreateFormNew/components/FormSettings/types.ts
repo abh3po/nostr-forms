@@ -8,6 +8,4 @@ export interface IFormSettings {
   formId?: string;
   encryptForm?: boolean
   viewKeyInUrl?: boolean
-  hideTitleImage?: boolean;
-  hideDescription?: boolean;
 }

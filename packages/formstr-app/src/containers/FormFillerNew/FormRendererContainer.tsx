@@ -8,6 +8,7 @@ import { FormRenderer } from "./FormRenderer";
 import { useEffect, useState } from "react";
 import { getResponseRelays } from "../../utils/ResponseUtils";
 import { IFormSettings } from "../CreateFormNew/components/FormSettings/types";
+import { useSearchParams } from "react-router-dom"; 
 
 const { Text } = Typography;
 
@@ -15,8 +16,6 @@ interface FormRendererContainerProps {
   formEvent: Event;
   onSubmitClick: (responses: Response[], formTemplate: Tag[]) => void;
   viewKey: string | null;
-  hideTitleImage?: boolean;
-  hideDescription?: boolean;
 }
 
 export const FormRendererContainer: React.FC<FormRendererContainerProps> = ({
@@ -29,6 +28,9 @@ export const FormRendererContainer: React.FC<FormRendererContainerProps> = ({
   const { Text } = Typography;
   const [formTemplate, setFormTemplate] = useState<Tag[]>();
   const [settings, setSettings] = useState<IFormSettings>();
+  const [searchParams] = useSearchParams();
+  const hideTitleImage = searchParams.get("hideTitleImage") === "true";
+  const hideDescription = searchParams.get("hideDescription") === "true";
 
   useEffect(() => {
     const initialize = async () => {
@@ -39,7 +41,7 @@ export const FormRendererContainer: React.FC<FormRendererContainerProps> = ({
       const formSpec = await getFormSpec(
         formEvent,
         userPubKey,
-        () => { },
+        () => {},
         viewKey
       );
 
@@ -71,7 +73,8 @@ export const FormRendererContainer: React.FC<FormRendererContainerProps> = ({
     const responses: Response[] = Object.keys(formResponses).map((fieldId) => {
       let answer = null;
       let message = null;
-      if (formResponses[fieldId]) [answer, message] = formResponses[fieldId];
+      if (formResponses[fieldId])
+        [answer, message] = formResponses[fieldId];
       return ["response", fieldId, answer, JSON.stringify({ message })];
     });
     onSubmitClick(responses, formTemplate!);
@@ -107,20 +110,22 @@ export const FormRendererContainer: React.FC<FormRendererContainerProps> = ({
       />
     );
   }
+
   if (!formTemplate)
     return (
       <div>
         <Typography.Text> Form is encrypted </Typography.Text>
       </div>
     );
+
   return (
     <FormRenderer
       formTemplate={formTemplate}
       form={form}
       onInput={handleInput}
       footer={footer}
-      hideTitleImage={settings?.hideTitleImage}
-      hideDescription={settings?.hideDescription}
+      hideTitleImage={hideTitleImage}         
+      hideDescription={hideDescription}       
     />
   );
 };

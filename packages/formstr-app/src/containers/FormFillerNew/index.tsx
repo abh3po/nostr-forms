@@ -143,8 +143,6 @@ export const FormFiller: React.FC<FormFillerProps> = ({
           formEvent={formEvent}
           onSubmitClick={onSubmit}
           viewKey={viewKeyParams}
-          hideTitleImage={hideTitleImage}
-          hideDescription={hideDescription}
         />
         <ThankYouScreen
           isOpen={formSubmitted}

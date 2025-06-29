@@ -15,8 +15,8 @@ interface FormRendererContainerProps {
   formEvent: Event;
   onSubmitClick: (responses: Response[], formTemplate: Tag[]) => void;
   viewKey: string | null;
-  hideTitleImage:  boolean;
-  hideDescription: boolean
+  hideTitleImage?:  boolean;
+  hideDescription?: boolean
 }
 
 export const FormRendererContainer: React.FC<FormRendererContainerProps> = ({
@@ -31,8 +31,6 @@ export const FormRendererContainer: React.FC<FormRendererContainerProps> = ({
   const { Text } = Typography;
   const [formTemplate, setFormTemplate] = useState<Tag[]>();
   const [settings, setSettings] = useState<IFormSettings>();
- 
-  
   useEffect(() => {
     const initialize = async () => {
       if (formEvent.content === "") {

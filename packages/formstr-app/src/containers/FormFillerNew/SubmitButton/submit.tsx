@@ -66,6 +66,11 @@ export const SubmitButton: React.FC<SubmitButtonProps> = ({
   };
 
   const submitForm = async (anonymous: boolean = true) => {
+     if (!anonymous && typeof window !== "undefined" && !window.nostr) {
+      alert("Nostr extension not found. Please install a Nostr extension to submit as yourself.");
+      setIsSubmitting(false);
+      return;
+    }
     setIsSubmitting(true);
     try {
       await form.validateFields();

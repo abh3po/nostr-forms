@@ -39,7 +39,7 @@ export default function PublicFormCard({ event }: { event: Event }) {
           }
           .ant-card-hoverable:hover {
             transform: scale(1.02);
-            box-shadow: 0 8px 30px rgba(0,0,0,0.3);
+            box-shadow: 0 8px 30px rgba(0,0,0,0.2);
           }
         `}
       </style>
@@ -72,20 +72,20 @@ export default function PublicFormCard({ event }: { event: Event }) {
           style={{
             position: "relative",
             zIndex: 2,
-            background: "rgba(0,0,0,0.6)",
+            background: "rgba(0,0,0,0.3)",
             borderRadius: 8,
             padding: 20,
           }}
         >
-          <Typography.Title level={4} style={{ color: "white", margin: 0 }}>
+          <Typography.Title level={4} style={{ color: "white", margin: 0, textShadow: "2px 2px 4px rgba(0,0,0,0.7)" }}>
             {name}
           </Typography.Title>
           <Divider style={{ borderColor: "rgba(255,255,255,0.2)" }} />
-          <div style={{ color: "white", opacity: "90%" }}>
+          <div style={{ color: "white", opacity: "80%",  textShadow: "2px 2px 4px rgba(0,0,0,0.7)" }}>
             <ReactMarkdown>{truncatedDescription}</ReactMarkdown>
           </div>
           <Divider style={{ borderColor: "rgba(255,255,255,0.2)" }} />
-          <div style={{ display: "flex", justifyContent: "space-between" }}>
+          <div style={{ display: "flex", justifyContent: "space-between",  textShadow: "2px 2px 4px rgba(0,0,0,0.7)" }}>
             <Typography.Text style={{ color: "white", marginTop: 5 }}>
               {new Date(event.created_at * 1000).toLocaleDateString()}
             </Typography.Text>

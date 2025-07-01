@@ -37,29 +37,38 @@ function PublicForms() {
     <StyleWrapper>
       <Typography.Text>Recently Posted</Typography.Text>
       {isLoading ? (
-        Array(3)
-          .fill(0)
-          .map((_, index) => (
-            <Card key={index} style={{ margin: 30 }}>
-              <Skeleton
-                active
-                title={{ width: "40%" }}
-                paragraph={{ rows: 3 }}
-              />
-              <Divider />
-              <div
-                style={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  alignItems: "center",
-                  margin: 30
-                }}
-              >
-                <Skeleton.Button active style={{ width: 100 }} />
-                <Skeleton.Input active style={{ width: 120 }} />
-              </div>
-            </Card>
-          ))
+        <div
+          style={{
+            alignItems: "center",
+            display: "flex",
+            flexDirection: "column",
+            marginLeft: "10%",
+            marginRight: "10%",
+            width: "80%",
+          }}
+        >
+          {Array(3)
+            .fill(0)
+            .map((_, index) => (
+              <Card key={index} style={{ margin: 20, width: "80%", minWidth: "360px" }}>
+                <Skeleton
+                  active
+                  title={{ width: "40%" }}
+                  paragraph={{ rows: 2 }}
+                />
+                <Divider />
+                <div
+                  style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                    margin: 30,
+                  }}
+                >
+                </div>
+              </Card>
+            ))}
+        </div>
       ) : forms.length > 0 ? (
         <div
           style={{
@@ -68,7 +77,7 @@ function PublicForms() {
             flexDirection: "column",
             marginLeft: "10%",
             marginRight: "10%",
-            width: "80%"
+            width: "80%",
           }}
         >
           {forms.map((f: Event) => {

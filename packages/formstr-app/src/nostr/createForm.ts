@@ -81,6 +81,7 @@ export const createForm = async (
       ...tags,
       ...form.filter((tag: Tag) => !["d", "name"].includes(tag[0])),
     ];
+    tags.push(["t", "public"])
   }
   relayList.forEach((r: string) => tags.push(["relay", r]));
   const baseTemplateEvent: UnsignedEvent = {

@@ -8,6 +8,7 @@ export const getPublicForms = async (
   let filter = {
     kinds: [30168],
     limit: 50,
+    "#t": ["public"]
   };
   pool.subscribeMany(relays, [filter], {
     onevent: (e: Event) => {

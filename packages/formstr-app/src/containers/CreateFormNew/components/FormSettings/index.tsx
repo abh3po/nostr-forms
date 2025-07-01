@@ -46,7 +46,7 @@ function FormSettings() {
           trigger={isMobile() ? "click" : "hover"}
         >
           <div className="property-setting">
-            <Text className="property-text">Make Form Public</Text>
+            <Text className="property-text">Post to Bulletin Board</Text>
             <Switch
               checked={!formSettings.encryptForm}
               onChange={handlePublicForm}
@@ -105,7 +105,7 @@ function FormSettings() {
         </div>
         <Button 
           onClick={toggleRelayManagerModal} 
-          type="primary" 
+          type="default" 
           style={{ width: '100%', marginBottom: '10px' }}
         >
           Manage Relays

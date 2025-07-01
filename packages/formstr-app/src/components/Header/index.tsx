@@ -121,7 +121,7 @@ export const NostrHeader = () => {
               <Logo />
             </Link>
           </Col>
-          <Col md={10} xs={6} sm={2}>
+          <Col md={12} xs={10} sm={2}>
             <Menu
               mode="horizontal"
               theme="light"

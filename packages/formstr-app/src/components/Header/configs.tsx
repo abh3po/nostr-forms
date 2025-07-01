@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { Button } from "antd";
-import Icon, {
+import {
   SearchOutlined,
   PlusOutlined,
   InfoCircleOutlined,
@@ -49,7 +49,7 @@ export const HEADER_MENU = [
   },
   {
     key: HEADER_MENU_KEYS.PUBLIC_FORMS,
-    label: "Global Forms",
+    label: "Bulletin Board",
     icon: (
       <Link to={ROUTES.PUBLIC_FORMS}>
         <SearchOutlined />

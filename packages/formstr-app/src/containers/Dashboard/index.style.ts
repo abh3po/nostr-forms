@@ -13,7 +13,7 @@ export default styled.div`
   }
 
   .form-card {
-    min-width: 400px;
+    min-width: 390px;
     width: 80%;
     margin: 10px;
   }

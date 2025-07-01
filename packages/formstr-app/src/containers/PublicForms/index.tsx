@@ -1,12 +1,9 @@
 import { useState, useEffect } from "react";
-import { Button, Card, Divider, Table, Typography, Skeleton } from "antd";
-import { naddrUrl } from "../../utils/utility";
+import { Card, Divider, Typography, Skeleton } from "antd";
 import StyleWrapper from "./style";
 import { getPublicForms } from "../../nostr/publicForms";
 import { Event } from "nostr-tools";
 import { getDefaultRelays } from "../../nostr/common";
-import { useNavigate } from "react-router-dom";
-import ReactMarkdown from "react-markdown";
 import PublicFormCard from "./PublicFormCard";
 
 function PublicForms() {
@@ -55,6 +52,7 @@ function PublicForms() {
                   display: "flex",
                   justifyContent: "space-between",
                   alignItems: "center",
+                  margin: 30
                 }}
               >
                 <Skeleton.Button active style={{ width: 100 }} />

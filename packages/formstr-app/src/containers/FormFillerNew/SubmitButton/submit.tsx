@@ -32,22 +32,21 @@ export const SubmitButton: React.FC<SubmitButtonProps> = ({
   const [acceptedRelays, setAcceptedRelays] = useState<string[]>([]);
 
   const saveResponse = async (anonymous: boolean = true) => {
-    let formId = formEvent.tags.find((t) => t[0] === "d")?.[1];
+    const formId = formEvent.tags.find((t) => t[0] === "d")?.[1];
     if (!formId) {
       alert("FORM ID NOT FOUND");
       return;
     }
-    let pubKey = formEvent.pubkey;
+    let  pubKey = formEvent.pubkey;
     let formResponses = form.getFieldsValue(true);
-    const responses: Response[] = Object.keys(formResponses).map(
-      (fieldId: string) => {
-        let answer = null;
-        let message = null;
-        if (formResponses[fieldId]) [answer, message] = formResponses[fieldId];
-        return ["response", fieldId, answer, JSON.stringify({ message })];
-      }
-    );
-    let anonUser = null;
+    const responses: Response[] = Object.keys(formResponses).map((fieldId:string) => {
+      let answer = null;
+      let message = null;
+      if (formResponses[fieldId]) [answer, message] = formResponses[fieldId];
+      return ["response", fieldId, answer, JSON.stringify({ message })];
+    }
+  );
+  let anonUser = null;
     if (anonymous) {
       anonUser = generateSecretKey();
     }
@@ -59,14 +58,20 @@ export const SubmitButton: React.FC<SubmitButtonProps> = ({
       true,
       relays,
       (url: string) => setAcceptedRelays((prev) => [...prev, url])
-    ).then((res: any) => {
+    ).then(() => {
       setIsSubmitting(false);
       onSubmit();
     });
   };
-
+  
   const submitForm = async (anonymous: boolean = true) => {
     setIsSubmitting(true);
+    // Check for Nostr extension if it's NOT anonymous
+    if (!anonymous && typeof window !== "undefined" && !window.nostr) {
+      alert("Nostr extension not found. Please install a Nostr extension to submit as yourself.");
+      setIsSubmitting(false);
+      return;
+    }
     try {
       await form.validateFields();
       let errors = form.getFieldsError().filter((e) => e.errors.length > 0);
@@ -77,7 +82,7 @@ export const SubmitButton: React.FC<SubmitButtonProps> = ({
     } catch (err) {
       setIsSubmitting(false);
       setIsDisabled(false);
-      console.log("Error in sending response", err);
+      console.error("Error in sending response", err);
     }
   };
 
@@ -85,7 +90,7 @@ export const SubmitButton: React.FC<SubmitButtonProps> = ({
     if (e.key === "signSubmition") {
       await submitForm(false);
     } else {
-      await submitForm(true);
+      await submitForm(true); 
     }
   };
 

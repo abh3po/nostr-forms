@@ -31,6 +31,9 @@ export const sendResponses = async (
 ) => {
   let responderPub;
   responderPub = await getUserPublicKey(responderSecretKey);
+  if (!responderPub) {
+    throw new Error("Responder public key not available");
+  }
   let tags = [["a", `30168:${formAuthorPub}:${formId}`]];
   let content = "";
   if (!encryptResponses) {

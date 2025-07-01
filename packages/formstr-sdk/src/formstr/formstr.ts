@@ -165,12 +165,13 @@ export const getFormTemplate = async (formId: string): Promise<V1FormSpec> => {
   return formTemplate;
 };
 
-function checkWindowNostr() {
-  if (!window?.nostr) {
-    throw Error("No method provided to access nostr");
+function checkWindowNostr(): boolean {
+  if (!window.nostr) {
+    console.error("Nostr extension not found.");
+    return false;
   }
+  return true;
 }
-
 export async function encryptMessage(
   message: string,
   receiverPublicKey: string,
@@ -200,9 +201,14 @@ export async function encryptMessage(
 async function decryptPastForms(
   ciphertext: string,
   userSecretKey: Uint8Array | null
-) {
-  const publicKey = await getUserPublicKey(userSecretKey);
-  let decryptedForms;
+): Promise<string | null> {
+  const publicKey = await getUserPublicKey();
+  if (!publicKey) {
+    alert("Unable to decrypt. Public key not available.");
+    return null;
+  }
+
+  let decryptedForms: string;
   if (userSecretKey) {
     decryptedForms = await nip04.decrypt(userSecretKey, publicKey, ciphertext);
   } else {
@@ -226,15 +232,14 @@ export async function signEvent(
   return nostrEvent;
 }
 
-export async function getUserPublicKey(userSecretKey: Uint8Array | null) {
-  let userPublicKey;
-  if (userSecretKey) {
-    userPublicKey = getPublicKey(userSecretKey);
-  } else {
-    checkWindowNostr();
-    userPublicKey = await window.nostr.getPublicKey();
+export async function getUserPublicKey(secretKey?: Uint8Array | null): Promise<string | null> {
+  if (secretKey) {
+    return getPublicKey(secretKey); // From 'nostr-tools'
   }
-  return userPublicKey;
+  if (window.nostr) {
+    return await window.nostr.getPublicKey();
+  }
+  return null;
 }
 
 export async function getPastUserForms<
@@ -254,11 +259,19 @@ export async function getPastUserForms<
     saveEvent[0].content,
     userSecretKey
   );
+  if (!decryptedForms) {
+    console.error("Failed to decrypt forms");
+    return [];
+  }
   return JSON.parse(decryptedForms) as FormStructure[];
 }
 
 export const getDecoratedPastForms = async () => {
-  const userPublicKey = await getUserPublicKey(null);
+  const userPublicKey = await getUserPublicKey();
+  if (!userPublicKey) {
+    alert("Unable to fetch past forms. Public key not available.");
+    return null;
+  }
   const pastForms: Array<string | Array<string>> = await getPastUserForms(
     userPublicKey,
     null
@@ -278,7 +291,11 @@ export const saveFormOnNostr = async (
   formCredentials: Array<string>,
   userSecretKey: Uint8Array | null
 ) => {
-  const userPublicKey = await getUserPublicKey(userSecretKey);
+  const userPublicKey = await getUserPublicKey();
+  if (!userPublicKey) {
+    alert("Public key not available. Cannot save form.");
+    return;
+  }
   let pastForms: (string | (string | null)[])[][] = await getPastUserForms(
     userPublicKey,
     userSecretKey
@@ -296,7 +313,7 @@ export const saveFormOnNostr = async (
   const baseNip51Event = {
     kind: 30001,
     pubkey: userPublicKey,
-    tags: [["d", "forms"]], //don't overwrite tags reuse previous tags
+    tags: [["d", "forms"]],  //don't overwrite tags reuse previous tags
     content: ciphertext,
     created_at: Math.floor(Date.now() / 1000),
   };
@@ -387,7 +404,9 @@ export const sendResponses = async (
   }
 
   if (!anonymous && !userSecretKey) {
-    userPk = await getUserPublicKey(userSecretKey);
+    const pubkey = await getUserPublicKey();
+    if (!pubkey) throw new Error("User public key not available.");
+    userPk = pubkey;
   }
 
   ciphertext = await encryptMessage(message, formIdPubkey, userSk, "nip44");
@@ -457,7 +476,7 @@ export async function fetchPublicForms() {
       let template = null;
       try {
         template = JSON.parse(kind0.content) as V1FormSpec;
-      } catch (e) {}
+      } catch (e) { }
       if (!template) return null;
       return { content: template, pubkey: kind0.pubkey };
     })
@@ -678,7 +697,11 @@ export const getFormResponsesCount = async (formId: string) => {
 export const syncFormsOnNostr = async (
   formCredentialsList: Array<Array<string>>
 ) => {
-  const publicKey = await getUserPublicKey(null);
+  const publicKey = await getUserPublicKey();
+  if (!publicKey) {
+    alert("Unable to decrypt. Public key not available.");
+    return null;
+  }
   const pastForms: (string | (string | null)[])[][] =
     await getPastUserForms(publicKey);
   const nostrList = formCredentialsList.map((formCredentials) => {

@@ -5,7 +5,7 @@ import { sendResponses } from "../../../nostr/common";
 import { RelayPublishModal } from "../../../components/RelayPublishModal/RelaysPublishModal";
 import { Event, generateSecretKey } from "nostr-tools";
 import { Response } from "../../../nostr/types";
-
+import { useApplicationContext } from "../../../provider/ApplicationProvider";
 interface SubmitButtonProps {
   selfSign: boolean | undefined;
   edit: boolean;
@@ -64,10 +64,10 @@ export const SubmitButton: React.FC<SubmitButtonProps> = ({
       onSubmit();
     });
   };
-
+  const { requestLogin } = useApplicationContext();
   const submitForm = async (anonymous: boolean = true) => {
-     if (!anonymous && typeof window !== "undefined" && !window.nostr) {
-      alert("Nostr extension not found. Please install a Nostr extension to submit as yourself.");
+    if (!anonymous && typeof window !== "undefined" && !window.nostr) {
+      requestLogin?.();
       setIsSubmitting(false);
       return;
     }

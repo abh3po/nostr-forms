@@ -69,7 +69,8 @@ export const SubmitButton: React.FC<SubmitButtonProps> = ({
        setIsSubmitting(true);
         if (!anonymous) {
            if(!requestLogin()){
-                  return false
+                setIsSubmitting(false);
+                return false;
           }
         }
       

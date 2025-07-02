@@ -8,7 +8,7 @@ interface ApplicationProviderProps {
 
 export interface ApplicationContextType {
   poolRef: React.MutableRefObject<SimplePool>;
-  requestLogin: () => void;
+  requestLogin: () => boolean;
 }
 
 export const ApplicationContext = createContext<
@@ -19,15 +19,20 @@ export const ApplicationProvider: FC<ApplicationProviderProps> = ({
   children,
 }) => {
   const poolRef = useRef(new SimplePool());
-  const requestLogin = async () => {
-    if (!window.nostr) {
-      Modal.warning({
-        title: "Nostr Extension Not Found",
-        content: "Please install a Nostr extension like Alby or Snort.",
-      });
-      return;
-    }
-  };
+ 
+
+  const requestLogin =  (): boolean => {
+  if (!window.nostr) {
+    Modal.warning({
+      title: "Nostr Extension Not Found",
+      content: "Please install a Nostr extension like Alby or Snort.",
+    });
+    return false;
+  }
+  return true;
+};
+
+
   const contextValue: ApplicationContextType = {
     poolRef,
     requestLogin,
@@ -38,12 +43,4 @@ export const ApplicationProvider: FC<ApplicationProviderProps> = ({
       {children}
     </ApplicationContext.Provider>
   );
-};
-
-export const useApplicationContext = () => {
-  const context = useContext(ApplicationContext);
-  if (!context) {
-    throw new Error("useApplicationContext must be used within ApplicationProvider");
-  }
-  return context;
 };

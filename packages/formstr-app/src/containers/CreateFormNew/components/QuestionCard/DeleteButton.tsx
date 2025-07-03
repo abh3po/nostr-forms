@@ -5,9 +5,14 @@ import { message } from 'antd';
 interface DeleteButtonProps {
   onDelete: () => void;
   className?: string;
+  itemType?: 'question' | 'section';
 }
 
-const DeleteButton: React.FC<DeleteButtonProps> = ({ onDelete, className }) => {
+const DeleteButton: React.FC<DeleteButtonProps> = ({ 
+  onDelete, 
+  className, 
+  itemType = 'question' 
+}) => {
   const [showUndoDelete, setShowUndoDelete] = useState(false);
   const [messageApi, contextHolder] = message.useMessage();
   const timeoutRef = useRef<number>();
@@ -20,7 +25,7 @@ const DeleteButton: React.FC<DeleteButtonProps> = ({ onDelete, className }) => {
     
     messageKeyRef.current = `delete-${Date.now()}`;
     messageApi.loading({ 
-      content: `Question will be deleted in ${count}s`,
+      content: `${itemType === 'section' ? 'Section' : 'Question'} will be deleted in ${count}s`,
       key: messageKeyRef.current,
       duration: 0 
     });
@@ -28,7 +33,7 @@ const DeleteButton: React.FC<DeleteButtonProps> = ({ onDelete, className }) => {
     intervalRef.current = window.setInterval(() => {
       count -= 1;
       messageApi.loading({ 
-        content: `Question will be deleted in ${count}s`,
+        content: `${itemType === 'section' ? 'Section' : 'Question'} will be deleted in ${count}s`,
         key: messageKeyRef.current,
         duration: 0 
       });
@@ -61,7 +66,7 @@ const DeleteButton: React.FC<DeleteButtonProps> = ({ onDelete, className }) => {
       if (intervalRef.current) clearInterval(intervalRef.current);
       if (messageKeyRef.current) messageApi.destroy(messageKeyRef.current);
     };
-  }, []);
+  }, [messageApi]);
 
   return (
     <>

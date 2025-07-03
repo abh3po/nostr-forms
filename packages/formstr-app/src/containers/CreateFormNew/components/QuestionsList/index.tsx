@@ -1,5 +1,5 @@
 import QuestionCard from "../QuestionCard";
-import { Button, Input } from "antd";
+import { Button, Input, Empty } from "antd";
 import FormTitle from "../FormTitle";
 import StyleWrapper from "./style";
 import DescriptionStyle from "./description.style";
@@ -8,6 +8,7 @@ import React, { ChangeEvent, useRef, useState } from "react";
 import { Reorder, motion, useDragControls, DragControls } from "framer-motion";
 import { Field } from "../../../../nostr/types";
 import { isMobile } from "../../../../utils/utility";
+import Section from "../SectionManager/Section";
 
 interface FloatingButtonProps {
   onClick: () => void;
@@ -64,6 +65,10 @@ const DraggableQuestionItem: React.FC<DraggableQuestionItemProps> = ({
   const currentlyMobile = isMobile();
   const dragControls = currentlyMobile ? useDragControls() : undefined;
 
+  const handleDragStart = (e: React.DragEvent) => {
+    e.dataTransfer.setData("questionId", question[1]);
+  };
+
   return (
     <Reorder.Item
       value={question}
@@ -79,20 +84,26 @@ const DraggableQuestionItem: React.FC<DraggableQuestionItemProps> = ({
       }}
       style={{ cursor: "grab" }} 
     >
-      <QuestionCard
-        question={question}
-        onEdit={onEdit}
-        onReorderKey={onReorderKey}
-        firstQuestion={firstQuestion}
-        lastQuestion={lastQuestion}
-        dragControls={dragControls} 
-      />
+      <div
+        draggable
+        onDragStart={handleDragStart}
+      >
+        <QuestionCard
+          question={question}
+          onEdit={onEdit}
+          onReorderKey={onReorderKey}
+          firstQuestion={firstQuestion}
+          lastQuestion={lastQuestion}
+          dragControls={dragControls} 
+        />
+      </div>
     </Reorder.Item>
   );
 };
 
 export const QuestionsList = () => {
   const containerRef = useRef<HTMLDivElement>(null);
+  const [isUnsectionedDropTarget, setIsUnsectionedDropTarget] = useState(false);
 
   const {
     formSettings,
@@ -103,6 +114,9 @@ export const QuestionsList = () => {
     updateQuestionsList,
     setIsLeftMenuOpen,
     bottomElementRef,
+    sections,
+    getSectionForQuestion,
+    moveQuestionToSection
   } = useFormBuilderContext();
 
   const handleDescriptionChange = (e: ChangeEvent<HTMLTextAreaElement>) => {
@@ -134,6 +148,181 @@ export const QuestionsList = () => {
     setIsLeftMenuOpen(true);
   };
 
+  // Handle dropping into unsectioned area
+  const handleUnsectionedDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsUnsectionedDropTarget(true);
+  };
+  
+  const handleUnsectionedDragLeave = () => {
+    setIsUnsectionedDropTarget(false);
+  };
+  
+  const handleUnsectionedDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsUnsectionedDropTarget(false);
+    
+    const questionId = e.dataTransfer.getData("questionId");
+    if (questionId) {
+      moveQuestionToSection(questionId, undefined);
+    }
+  };
+
+  // Separate questions by sections
+  const renderQuestions = () => {
+    // If sections are not enabled or no sections exist, render questions as usual
+    if (!formSettings.enableSections || !sections || sections.length === 0) {
+      return (
+        <div>
+          <Reorder.Group
+            values={questionsList}
+            onReorder={updateQuestionsList}
+            className="reorder-group"
+          >
+            <div>
+              {questionsList.map((question, idx) => (
+                <DraggableQuestionItem
+                  key={question[1]}
+                  question={question}
+                  onEdit={editQuestion}
+                  onReorderKey={onReorderKey}
+                  firstQuestion={idx === 0}
+                  lastQuestion={idx === questionsList.length - 1}
+                />
+              ))}
+              <div ref={bottomElementRef}></div>
+            </div>
+          </Reorder.Group>
+          
+          {/* Unsectioned drop area when sections exist but question has no section */}
+          {sections.length > 0 && (
+            <div
+              style={{
+                minHeight: 60,
+                border: isUnsectionedDropTarget ? '2px dashed #1890ff' : '2px dashed #d9d9d9',
+                borderRadius: 8,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                margin: '16px 0',
+                backgroundColor: isUnsectionedDropTarget ? '#f0f9ff' : '#fafafa'
+              }}
+              onDragOver={handleUnsectionedDragOver}
+              onDragLeave={handleUnsectionedDragLeave}
+              onDrop={handleUnsectionedDrop}
+            >
+              <span style={{ color: '#8c8c8c' }}>
+                {isUnsectionedDropTarget ? 'Drop to remove from section' : 'Unsectioned Questions Area'}
+              </span>
+            </div>
+          )}
+        </div>
+      );
+    }
+  
+    // When sections exist and are enabled
+    const unsectionedQuestions = questionsList.filter(
+      question => !getSectionForQuestion(question[1])
+    );
+
+    return (
+      <div className="sectioned-form">
+        {/* Render unsectioned questions first */}
+        {unsectionedQuestions.length > 0 && (
+          <div
+            style={{
+              marginBottom: 24,
+              padding: 16,
+              border: isUnsectionedDropTarget ? '2px dashed #1890ff' : '1px solid #f0f0f0',
+              borderRadius: 8,
+              backgroundColor: isUnsectionedDropTarget ? '#f0f9ff' : '#fafafa'
+            }}
+            onDragOver={handleUnsectionedDragOver}
+            onDragLeave={handleUnsectionedDragLeave}
+            onDrop={handleUnsectionedDrop}
+          >
+            <h4 style={{ margin: '0 0 16px 0', color: '#8c8c8c' }}>
+              Unsectioned Questions
+              {isUnsectionedDropTarget && <span> - Drop here to remove from section</span>}
+            </h4>
+            <Reorder.Group
+              values={unsectionedQuestions}
+              onReorder={(reordered) => {
+                // Update the main questions list while preserving sectioned questions
+                const sectionedQuestions = questionsList.filter(
+                  q => getSectionForQuestion(q[1])
+                );
+                updateQuestionsList([...reordered, ...sectionedQuestions]);
+              }}
+              className="reorder-group"
+            >
+              <div>
+                {unsectionedQuestions.map((question, idx) => (
+                  <DraggableQuestionItem
+                    key={question[1]}
+                    question={question}
+                    onEdit={editQuestion}
+                    onReorderKey={onReorderKey}
+                    firstQuestion={idx === 0}
+                    lastQuestion={idx === unsectionedQuestions.length - 1}
+                  />
+                ))}
+              </div>
+            </Reorder.Group>
+          </div>
+        )}
+
+        {/* Render each section with its questions */}
+        {sections.map((section) => {
+          const sectionQuestions = questionsList.filter(
+            question => getSectionForQuestion(question[1]) === section.id
+          );
+  
+          return (
+            <Section 
+              key={section.id} 
+              section={section}
+            >
+              {sectionQuestions.length === 0 ? (
+                <Empty 
+                  description="No questions in this section. Drag questions here or add new ones."
+                  image={Empty.PRESENTED_IMAGE_SIMPLE} 
+                />
+              ) : (
+                <Reorder.Group
+                  values={sectionQuestions}
+                  onReorder={(reordered) => {
+                    // Update the main questions list while preserving other questions
+                    const reorderedIds = new Set(reordered.map(q => q[1]));
+                    const remainingQuestions = questionsList.filter(
+                      q => !reorderedIds.has(q[1])
+                    );
+                    updateQuestionsList([...reordered, ...remainingQuestions]);
+                  }}
+                  className="reorder-group"
+                >
+                  <div>
+                    {sectionQuestions.map((question, idx) => (
+                      <DraggableQuestionItem
+                        key={question[1]}
+                        question={question}
+                        onEdit={editQuestion}
+                        onReorderKey={onReorderKey}
+                        firstQuestion={idx === 0}
+                        lastQuestion={idx === sectionQuestions.length - 1}
+                      />
+                    ))}
+                  </div>
+                </Reorder.Group>
+              )}
+            </Section>
+          );
+        })}
+        <div ref={bottomElementRef}></div>
+      </div>
+    );
+  };
+
   return (
     <StyleWrapper
       className="main-content"
@@ -154,25 +343,9 @@ export const QuestionsList = () => {
           </div>
         </DescriptionStyle>
       </div>
-      <Reorder.Group
-        values={questionsList}
-        onReorder={updateQuestionsList}
-        className="reorder-group"
-      >
-        <div>
-          {questionsList.map((question, idx) => (
-            <DraggableQuestionItem
-              key={question[1]}
-              question={question}
-              onEdit={editQuestion}
-              onReorderKey={onReorderKey}
-              firstQuestion={idx === 0}
-              lastQuestion={idx === questionsList.length - 1}
-            />
-          ))}
-          <div ref={bottomElementRef}></div>
-        </div>
-      </Reorder.Group>
+      
+      {renderQuestions()}
+      
       <div className="mobile-add-btn">
         <FloatingButton
           onClick={onPlusButtonClick}

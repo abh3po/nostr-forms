@@ -14,8 +14,8 @@ import { useProfileContext } from "../../../../hooks/useProfileContext";
 import { createForm } from "../../../../nostr/createForm";
 import { getItem, LOCAL_STORAGE_KEYS, setItem} from "../../../../utils/localStorage";
 import { Field } from "../../../../nostr/types";
+import { ProcessedFormData } from "../../../../utils/aiProcessor";
 import { message } from 'antd';
-
 const LOCAL_STORAGE_CUSTOM_RELAYS_KEY = "formstr:customRelays";
 
 export const FormBuilderContext = React.createContext<IFormBuilderContext>({
@@ -48,7 +48,11 @@ export const FormBuilderContext = React.createContext<IFormBuilderContext>({
   editList: null,
   setEditList: () => null,
   viewList: null,
-  setViewList: () => null,
+
+  setViewList: (keys: Set<string>) => null,
+  isAiModalOpen: false,
+  setIsAiModalOpen: (isOpen: boolean) => null,
+  handleAIFormGenerated: (processedData: ProcessedFormData) => null,
   isRelayManagerModalOpen: false,
   toggleRelayManagerModal: () => null,
   addRelayToList: () => null,
@@ -94,6 +98,8 @@ export default function FormBuilderProvider({
   const [selectedTab, setSelectedTab] = useState<string>(HEADER_MENU_KEYS.BUILDER);
   const [secretKey, setSecretKey] = useState<string | null>(null);
   const [viewKey, setViewKey] = useState<string | null | undefined>(null);
+
+    const [isAiModalOpen, setIsAiModalOpen] = useState(false);
   const navigate = useNavigate();
 
   const [relayList, setRelayList] = useState<RelayItem[]>([]);
@@ -318,15 +324,39 @@ export default function FormBuilderProvider({
     );
     settingsFromFile = { ...InitialFormSettings, ...settingsFromFile };
     let fields = form.spec.filter((f) => f[0] === "field") as Field[];
-    setFormSettings((currentSettings) => ({ ...currentSettings, ...settingsFromFile, formId: form.id }));
-    let newViewList = form.spec.filter((f) => f[0] === "allowed").map((t) => t[1]);
-    let allKeys = form.spec.filter((f) => f[0] === "p").map((t) => t[1]);
-    let newEditList: string[] = allKeys.filter((p) => !newViewList.includes(p));
-    setViewList(new Set(newViewList));
-    setEditList(new Set(newEditList));
-    setQuestionsList(fields);
-    setSecretKey(form.secret || null);
-    setViewKey(form.viewKey);
+  const viewListFromSpec = form.spec
+    .filter((f) => f[0] === "viewList")
+    .flatMap((f) => f.slice(1));
+  const editListFromSpec = form.spec
+    .filter((f) => f[0] === "editList")
+    .flatMap((f) => f.slice(1));
+      setFormSettings((prev) => ({ ...prev, ...settingsFromFile, formId: form.id }));
+      setViewList(new Set(viewListFromSpec));
+      setEditList(new Set(editListFromSpec));
+      setQuestionsList(fields);
+      setSecretKey(form.secret || null);
+      setViewKey(form.viewKey);
+  };
+  const handleAIFormGenerated = (processedData: ProcessedFormData) => {
+    try {
+        console.log("Applying processed AI data:", processedData);
+        if (processedData.formName) {
+            setFormName(processedData.formName);
+        }
+        if (processedData.description) {
+            updateFormSetting({ description: processedData.description });
+        }
+        if (processedData.fields && processedData.fields.length > 0) {
+            updateQuestionsList(processedData.fields);
+            setQuestionIdInFocus(undefined);
+        } else {
+            message.warning("AI generated data, but no fields were created.");
+        }
+    } catch (error) {
+        console.error("Error applying AI generated form data:", error);
+        const errorMsg = error instanceof Error ? error.message : "Failed to apply the generated form data.";
+        message.error(errorMsg);
+    }
   };
 
   return (
@@ -362,6 +392,9 @@ export default function FormBuilderProvider({
         setEditList,
         viewList,
         setViewList,
+        isAiModalOpen,
+        setIsAiModalOpen,
+        handleAIFormGenerated,
         isRelayManagerModalOpen,
         toggleRelayManagerModal,
         addRelayToList,

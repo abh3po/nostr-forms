@@ -1,6 +1,6 @@
 import { Layout, Menu, Row, Col, Typography, MenuProps } from "antd";
 import { Link } from "react-router-dom";
-import { ArrowLeftOutlined, MenuOutlined } from "@ant-design/icons";
+import { ArrowLeftOutlined, MenuOutlined, RocketOutlined } from "@ant-design/icons";
 import { HEADER_MENU, HEADER_MENU_KEYS } from "./config";
 import { Button } from "antd";
 import useFormBuilderContext from "../../hooks/useFormBuilderContext";
@@ -15,11 +15,19 @@ export const CreateFormHeader: React.FC = () => {
 
   const { Header } = Layout;
   const { Text } = Typography;
-  const { saveForm, setSelectedTab, formSettings, relayList } =
-    useFormBuilderContext();
+  const {
+    saveForm,
+    setSelectedTab,
+    formSettings,
+    relayList,
+    setIsAiModalOpen,
+    selectedTab,
+  } = useFormBuilderContext();
 
-  const onClickHandler: MenuProps["onClick"] = (e) => {
-    setSelectedTab(e.key);
+  const onMenuClickHandler: MenuProps["onClick"] = (e) => {
+    if (e.key === HEADER_MENU_KEYS.BUILDER || e.key === HEADER_MENU_KEYS.PREVIEW) {
+      setSelectedTab(e.key);
+    }
   };
 
   const handlePublishClick = async () => {
@@ -27,10 +35,8 @@ export const CreateFormHeader: React.FC = () => {
       alert("Form ID is required");
       return;
     }
-
     setIsPostPublishModalOpen(true);
     setAcceptedRelays([]);
-
     try {
       await saveForm((url: string) => {
         const normalizedUrl = normalizeURL(url);
@@ -41,17 +47,19 @@ export const CreateFormHeader: React.FC = () => {
     }
   };
 
+  const handleAiBuilderClick = () => {
+    setIsAiModalOpen(true);
+  };
+
   return (
     <StyleWrapper>
       <Header className="create-form-header">
-        <Row className="header-row" justify="space-between">
+        <Row className="header-row" justify="space-between" align="middle">
           <Col>
-            <Row className="header-row" justify="space-between">
-              <Col
-                style={{ paddingRight: 10, paddingBottom: 4, color: "black" }}
-              >
+            <Row className="header-row" justify="space-between" align="middle">
+              <Col style={{ paddingRight: 10, display: 'flex', alignItems: 'center' }}>
                 <Link className="app-link" to="/">
-                  <ArrowLeftOutlined />
+                  <ArrowLeftOutlined style={{ color: "black" }} />
                 </Link>
               </Col>
               <Col>
@@ -60,8 +68,16 @@ export const CreateFormHeader: React.FC = () => {
             </Row>
           </Col>
 
-          <Col md={8} xs={10} sm={10}>
-            <Row className="header-row" justify="end">
+          <Col md={10} xs={12} sm={12}>
+            <Row className="header-row" justify="end" align="middle" gutter={[8, 0]}>
+              <Col>
+                <Button
+                  icon={<RocketOutlined />}
+                  onClick={handleAiBuilderClick}
+                >
+                  AI Builder
+                </Button>
+              </Col>
               <Col>
                 <Button
                   type="primary"
@@ -71,14 +87,16 @@ export const CreateFormHeader: React.FC = () => {
                   Publish
                 </Button>
               </Col>
-              <Col md={12} xs={5} sm={2}>
+              <Col md={10} xs={5} sm={2}>
                 <Menu
                   mode="horizontal"
                   theme="light"
+                  selectedKeys={[selectedTab]}
                   defaultSelectedKeys={[HEADER_MENU_KEYS.BUILDER]}
                   overflowedIndicator={<MenuOutlined />}
                   items={HEADER_MENU}
-                  onClick={onClickHandler}
+                  onClick={onMenuClickHandler}
+                  style={{ borderBottom: 'none' }}
                 />
               </Col>
             </Row>

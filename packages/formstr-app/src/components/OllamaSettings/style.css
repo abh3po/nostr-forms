@@ -1,0 +1,21 @@
+.settings-title {
+    margin-top: 0 !important;
+    margin-bottom: 0.25em !important;
+}
+
+.settings-paragraph {
+    margin-bottom: 1em !important;
+}
+
+.settings-paragraph-tight {
+    margin-bottom: 0 !important;
+}
+
+.settings-list {
+    margin: 4px 0 8px 12px !important;
+    padding: 0 !important;
+}
+
+.settings-final-paragraph {
+    margin-top: 0 !important;
+}

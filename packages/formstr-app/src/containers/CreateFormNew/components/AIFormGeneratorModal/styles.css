@@ -1,0 +1,38 @@
+.ai-modal-divider {
+    margin: 4px 0 !important;
+}
+
+.ai-modal-controls-container {
+    display: flex;
+    align-items: flex-end;
+    gap: 0px;
+    margin-bottom: 0px;
+}
+
+.ai-modal-model-selector-wrapper {
+    flex: 1;
+}
+
+.ai-modal-button-success {
+    background-color: #00796b;
+    color: white;
+    border-color: #00796b;
+}
+
+.ai-modal-button-success:hover {
+    background-color: #004d40;
+    color: white !important;
+    border-color: #004d40 !important;
+}
+
+.ai-modal-button-danger {
+    background-color: #d32f2f;
+    color: white;
+    border-color: #d32f2f;
+}
+
+.ai-modal-button-danger:hover {
+    background-color: #c62828;
+    color: white !important;
+    border-color: #c62828 !important;
+}

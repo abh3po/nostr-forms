@@ -1,21 +1,23 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Event, getPublicKey, nip19, SubCloser } from "nostr-tools";
 import { useParams, useSearchParams } from "react-router-dom";
 import { fetchFormResponses } from "../../nostr/responses";
 import SummaryStyle from "./summary.style";
-import { Button, Card, Divider, Table, Typography, Spin } from "antd";
+import { Button, Card, Divider, Table, Typography, Spin, Space } from "antd";
 import ResponseWrapper from "./Responses.style";
 import { isMobile } from "../../utils/utility";
 import { useProfileContext } from "../../hooks/useProfileContext";
 import { fetchFormTemplate } from "../../nostr/fetchFormTemplate";
 import { hexToBytes } from "@noble/hashes/utils";
-import { fetchKeys, getAllowedUsers, getFormSpec as getFormSpecFromEventUtil } from "../../utils/formUtils"; 
+import { fetchKeys, getAllowedUsers, getFormSpec as getFormSpecFromEventUtil } from "../../utils/formUtils";
 import { Export } from "./Export";
 import { Field, Tag } from "../../nostr/types";
 import { useApplicationContext } from "../../hooks/useApplicationContext";
 import { ResponseDetailModal } from './components/ResponseDetailModal';
 import { getDefaultRelays } from "../../nostr/common";
 import { getResponseRelays, getInputsFromResponseEvent, getResponseLabels } from "../../utils/ResponseUtils";
+import { RobotOutlined } from "@ant-design/icons";
+import AIAnalysisChat from './components/AIAnalysisChat';
 
 const { Text } = Typography;
 
@@ -32,8 +34,16 @@ export const Response = () => {
   const [selectedEventForModal, setSelectedEventForModal] = useState<Event | null>(null);
   const [selectedResponseInputsForModal, setSelectedResponseInputsForModal] = useState<Tag[] | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isChatVisible, setIsChatVisible] = useState(false);
+  const chatRef = useRef<HTMLDivElement>(null);
   let { poolRef } = useApplicationContext();
-  const [isFormSpecLoading, setIsFormSpecLoading] = useState(true); 
+  const [isFormSpecLoading, setIsFormSpecLoading] = useState(true);
+
+  useEffect(() => {
+    if (isChatVisible && chatRef.current) {
+      chatRef.current.scrollIntoView({ behavior: 'smooth', block: 'end' });
+    }
+  }, [isChatVisible]);
 
   const handleResponseEvent = (event: Event) => {
     setResponses((prev: Event[] | undefined) => {
@@ -48,12 +58,14 @@ export const Response = () => {
     if (!formId) return;
     if (!(pubKey || secretKey)) return;
     if(!poolRef?.current) return;
-    setIsFormSpecLoading(true); 
+
+    setIsFormSpecLoading(true);
 
     if (secretKey) {
       setEditKey(secretKey);
       pubKey = getPublicKey(hexToBytes(secretKey));
     }
+
     let relay = searchParams.get("relay");
     fetchFormTemplate(
       pubKey!,
@@ -92,7 +104,9 @@ export const Response = () => {
       setIsFormSpecLoading(true);
       return;
     }
+
     initialize();
+
     return () => {
       if (responseCloser) {
         responseCloser.close();
@@ -100,8 +114,9 @@ export const Response = () => {
       }
     };
   }, [pubKey, formId, secretKey, userPubkey, viewKeyParams]);
+
   useEffect(() => {
-    if (!formEvent || !formId || !poolRef.current) { 
+    if (!formEvent || !formId || !poolRef.current) {
       return;
     }
     let allowedPubkeys;
@@ -134,10 +149,11 @@ export const Response = () => {
         console.warn("Form spec not ready or no responses, cannot open modal.");
         return;
     }
+
     const authorEvents = responses.filter(event => event.pubkey === authorPubKey);
     if (authorEvents.length === 0) return;
-    const latestEvent = authorEvents.sort((a, b) => b.created_at - a.created_at)[0];
 
+    const latestEvent = authorEvents.sort((a, b) => b.created_at - a.created_at)[0];
     const inputsForModal = getInputsFromResponseEvent(latestEvent, editKey);
     setSelectedResponseInputsForModal(inputsForModal);
     setSelectedEventForModal(latestEvent);
@@ -148,7 +164,8 @@ export const Response = () => {
     let answers: Array<{
       [key: string]: string;
     }> = [];
-    if (!formSpec || !responses) return answers; 
+    if (!formSpec || !responses) return answers;
+
     let responsePerPubkey = new Map<string, Event[]>();
     responses.forEach((r: Event) => {
       let existingResponse = responsePerPubkey.get(r.pubkey);
@@ -159,13 +176,12 @@ export const Response = () => {
     Array.from(responsePerPubkey.keys()).forEach((pub) => {
       let pubkeyResponses = responsePerPubkey.get(pub);
       if (!pubkeyResponses || pubkeyResponses.length === 0) return;
-      let responseEvent = pubkeyResponses.sort( 
+      let responseEvent = pubkeyResponses.sort(
         (a, b) => b.created_at - a.created_at
       )[0];
-      let inputs = getInputsFromResponseEvent(responseEvent, editKey) as Tag[]; 
-      if (inputs.length === 0 && responseEvent.content !== "" && !editKey) { 
+      let inputs = getInputsFromResponseEvent(responseEvent, editKey) as Tag[];
+      if (inputs.length === 0 && responseEvent.content !== "" && !editKey) {
       }
-
       let answerObject: {
         [key: string]: string;
       } = {
@@ -186,7 +202,7 @@ export const Response = () => {
   };
 
   const getFormName = () => {
-    if (!formSpec) return "Loading Form Name..."; 
+    if (!formSpec) return "Loading Form Name...";
     let nameTag = formSpec.find((tag) => tag[0] === "name");
     if (nameTag) return nameTag[1] || "Untitled Form";
     return "Untitled Form";
@@ -224,6 +240,7 @@ export const Response = () => {
         width: isMobile() ? 90 : 120,
       },
     ];
+
     const rightColumns: Array<{
       key: string;
       title: string;
@@ -239,6 +256,7 @@ export const Response = () => {
         width: isMobile() ? 100 : 130,
       },
     ];
+
     let uniqueQuestionIdsInResponses: Set<string> = new Set();
     responses?.forEach((response: Event) => {
       let responseTags = getInputsFromResponseEvent(response, editKey);
@@ -246,9 +264,9 @@ export const Response = () => {
         if (Array.isArray(t) && t.length > 1) uniqueQuestionIdsInResponses.add(t[1]);
       });
     });
+
     let fieldsFromSpec =
       formSpec?.filter((field) => field[0] === "field") || ([] as Field[]);
-
     fieldsFromSpec.forEach((field) => {
       let [_, fieldId, __, label] = field;
       columns.push({
@@ -257,30 +275,33 @@ export const Response = () => {
         dataIndex: label || fieldId,
         width: 150,
       });
-      uniqueQuestionIdsInResponses.delete(fieldId); 
+      uniqueQuestionIdsInResponses.delete(fieldId);
     });
+
     const extraFieldIdsFromResponses = Array.from(uniqueQuestionIdsInResponses);
     extraFieldIdsFromResponses.forEach((fieldId) => {
       columns.push({
         key: fieldId,
-        title: `Question ID: ${fieldId.substring(0,8)}...`, 
-        dataIndex: fieldId, 
+        title: `Question ID: ${fieldId.substring(0,8)}...`,
+        dataIndex: fieldId,
         width: 150,
       });
     });
-    if (formSpec === null && responses && extraFieldIdsFromResponses.length > 0 && fieldsFromSpec.length === 0) { 
+
+    if (formSpec === null && responses && extraFieldIdsFromResponses.length > 0 && fieldsFromSpec.length === 0) {
       extraFieldIdsFromResponses.forEach(id => {
         if (!columns.find(col => col.key === id)) {
             columns.push({ key: id, title: `Question ID: ${id.substring(0,8)}...`, dataIndex: id, width: 150 });
         }
       });
     }
+
     return [...columns, ...rightColumns];
   };
 
   if (!(pubKey || secretKey) || !formId) return <Text>Invalid url</Text>;
 
-  if (formEvent && formEvent.content !== "" && !userPubkey && !viewKeyParams && !editKey) { 
+  if (formEvent && formEvent.content !== "" && !userPubkey && !viewKeyParams && !editKey) {
     return (
       <div style={{ textAlign: 'center', marginTop: '20px' }}>
         <Text>This form's responses are private. You need to login or have a view key to see them.</Text>
@@ -295,6 +316,7 @@ export const Response = () => {
       </div>
     );
   }
+
   if (isFormSpecLoading) {
     return (
       <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '80vh' }}>
@@ -302,11 +324,13 @@ export const Response = () => {
       </div>
     );
   }
-  if (formSpec === null && formEvent && formEvent.content !== "") { 
+   if (formSpec === null && formEvent && formEvent.content !== "") {
      return <div style={{ textAlign: 'center', marginTop: '20px' }}>
               <Text>Could not load or decrypt form specification. Responses cannot be displayed.</Text>
             </div>;
   }
+
+  const hasResponses = responses && responses.length > 0;
 
   return (
     <div>
@@ -325,15 +349,26 @@ export const Response = () => {
         </div>
       </SummaryStyle>
       <ResponseWrapper>
-        <Export responsesData={getData(true) || []} formName={getFormName()} />
+        <div style={{ display: 'flex', justifyContent: 'flex-end', padding: '15px' }}>
+            <Space>
+                <Button
+                    icon={<RobotOutlined />}
+                    disabled={!hasResponses}
+                    onClick={() => setIsChatVisible(true)}
+                >
+                    AI Analysis
+                </Button>
+                <Export responsesData={getData(true) || []} formName={getFormName()} />
+            </Space>
+        </div>
         <div style={{ overflow: "scroll", marginBottom: 60 }}>
           <Table
             columns={getColumns()}
             dataSource={getData(true)}
-            pagination={{ pageSize: 10 }} 
+            pagination={{ pageSize: 10 }}
             loading={{
               spinning: responses === undefined,
-              tip: "🔎 Looking for responses...",
+              tip: "🔎 Looking for your responses...",
             }}
             scroll={{ x: isMobile() ? 900 : 1500, y: "calc(65% - 400px)" }}
             onRow={(record) => {
@@ -351,6 +386,16 @@ export const Response = () => {
             }}
           />
         </div>
+        <div ref={chatRef}>
+         {isChatVisible && formSpec && (
+            <AIAnalysisChat 
+                isVisible={isChatVisible}
+                onClose={() => setIsChatVisible(false)}
+                responsesData={getData(true)}
+                formSpec={formSpec}
+            />
+         )}
+        </div>
       </ResponseWrapper>
       {isModalOpen &&
         formSpec && formSpec.length > 0 &&
@@ -362,7 +407,7 @@ export const Response = () => {
               setSelectedEventForModal(null);
               setSelectedResponseInputsForModal(null);
           }}
-          formSpec={formSpec} 
+          formSpec={formSpec}
           processedInputs={selectedResponseInputsForModal}
           responseMetadataEvent={selectedEventForModal}
         />

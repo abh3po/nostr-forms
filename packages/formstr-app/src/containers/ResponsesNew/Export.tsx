@@ -14,28 +14,24 @@ export const Export: React.FC<{
       alert("No responses to export");
       return;
     }
-
    try {
     const XLSX = await import("xlsx");
     const SheetName = `Responses for ${formName}`.substring(0, 16) + "...";
     const workSheet = XLSX.utils.json_to_sheet(responsesData);
     const workBook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workBook, workSheet, `${SheetName}`);
-
     const fileExtension = type === "excel" ? ".xlsx" : ".csv";
     XLSX.writeFile(workBook, `${SheetName}.${fileExtension}`);
-    
    } catch (error : unknown) {
       if (error instanceof Error) {
         const errorMessage = error.message;
-
         if (errorMessage.includes("Cannot find module 'xlsx'")) {
           alert(
             "XLSX module not found. Please install the required package."
           );
           console.error("Error exporting data:", error.message);
         } else if (errorMessage.includes("json_to_sheet")) {
-          alert( 
+          alert(
             "Failed to convert data to sheet. Please check the data format."
           );
         } else if (errorMessage.includes("writeFile")) {
@@ -50,9 +46,7 @@ export const Export: React.FC<{
         console.error("Error exporting data:", error);
         alert("An unknown error occurred. Please try again.");
       }
-      
     }
-
   };
 
   const items = [
@@ -82,7 +76,6 @@ export const Export: React.FC<{
   return (
     <Dropdown.Button
       menu={menuProps}
-      className="export-excel"
       type="text"
       onClick={handleButtonClick}
       icon={<DownOutlined />}

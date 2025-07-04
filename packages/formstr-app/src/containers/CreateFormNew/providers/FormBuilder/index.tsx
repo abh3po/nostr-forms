@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState, useCallback } from "react";
 import { AnswerSettings } from "@formstr/sdk/dist/interfaces";
-import { FormInitData, IFormBuilderContext, RelayItem, RelayStatus } from "./typeDefs";
+import { FormInitData, IFormBuilderContext, RelayItem } from "./typeDefs";
 import { generateQuestion } from "../../utils";
 import { getDefaultRelays } from "@formstr/sdk";
 import { makeTag } from "../../../../utils/utility";
@@ -15,6 +15,7 @@ import { createForm } from "../../../../nostr/createForm";
 import { getItem, LOCAL_STORAGE_KEYS, setItem} from "../../../../utils/localStorage";
 import { Field } from "../../../../nostr/types";
 import { message } from 'antd';
+import { ProcessedFormData } from "../../components/AIFormGeneratorModal/aiProcessor";
 
 const LOCAL_STORAGE_CUSTOM_RELAYS_KEY = "formstr:customRelays";
 
@@ -54,6 +55,9 @@ export const FormBuilderContext = React.createContext<IFormBuilderContext>({
   addRelayToList: () => null,
   editRelayInList: () => null,
   deleteRelayFromList: () => null,
+  isAiModalOpen: false,
+  setIsAiModalOpen: () => null,
+  handleAIFormGenerated: () => null,
 });
 
 const InitialFormSettings: IFormSettings = {
@@ -94,6 +98,7 @@ export default function FormBuilderProvider({
   const [selectedTab, setSelectedTab] = useState<string>(HEADER_MENU_KEYS.BUILDER);
   const [secretKey, setSecretKey] = useState<string | null>(null);
   const [viewKey, setViewKey] = useState<string | null | undefined>(null);
+  const [isAiModalOpen, setIsAiModalOpen] = useState(false);
   const navigate = useNavigate();
 
   const [relayList, setRelayList] = useState<RelayItem[]>([]);
@@ -329,6 +334,27 @@ export default function FormBuilderProvider({
     setViewKey(form.viewKey);
   };
 
+  const handleAIFormGenerated = (processedData: ProcessedFormData) => {
+    try {
+        if (processedData.formName) {
+            setFormName(processedData.formName);
+        }
+        if (processedData.description) {
+            updateFormSetting({ description: processedData.description });
+        }
+        if (processedData.fields && processedData.fields.length > 0) {
+            updateQuestionsList(processedData.fields);
+            setQuestionIdInFocus(undefined);
+        } else {
+            message.warning("AI generated data, but no fields were created.");
+        }
+    } catch (error) {
+        const errorMsg = error instanceof Error ? error.message : "Failed to apply the generated form data.";
+        message.error(errorMsg);
+    }
+  };
+
+
   return (
     <FormBuilderContext.Provider
       value={{
@@ -367,6 +393,9 @@ export default function FormBuilderProvider({
         addRelayToList,
         editRelayInList,
         deleteRelayFromList,
+        isAiModalOpen,
+        setIsAiModalOpen,
+        handleAIFormGenerated,
       }}
     >
       {children}

@@ -2,6 +2,7 @@ import { AnswerSettings } from "@formstr/sdk/dist/interfaces";
 import { IFormSettings } from "../../components/FormSettings/types";
 import { Tag } from "@formstr/sdk/dist/formstr/nip101";
 import { Field } from "../../../../nostr/types";
+import { ProcessedFormData } from "../../components/AIFormGeneratorModal/aiProcessor";
 
 export type RelayStatus = 'connected' | 'pending' | 'error' | 'unknown';
 export interface RelayItem {
@@ -68,4 +69,7 @@ export interface IFormBuilderContext {
   addRelayToList: (url: string) => void;
   editRelayInList: (tempId: string, newUrl: string) => void;
   deleteRelayFromList: (tempId: string) => void;
+  isAiModalOpen: boolean;
+  setIsAiModalOpen: (isOpen: boolean) => void;
+  handleAIFormGenerated: (processedData: ProcessedFormData) => void;
 }

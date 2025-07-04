@@ -152,7 +152,9 @@ export const FormFiller: React.FC<FormFillerProps> = ({
         />
         <ThankYouScreen
           isOpen={formSubmitted}
-          onClose={() => navigate(ROUTES.DASHBOARD)}
+          onClose={() => {
+            setFormSubmitted(false);
+            navigate(ROUTES.DASHBOARD)}}
         />
       </>
     );

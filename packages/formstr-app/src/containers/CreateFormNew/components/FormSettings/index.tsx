@@ -60,20 +60,6 @@ function FormSettings() {
       <div className="form-setting">
         <Text className="property-name">Notifications</Text>
         <Notifications />
-        {formSettings.notifyNpubs?.length ? (
-          <Text className="warning-text">
-            *These npubs will receive
-            <a
-              href="https://github.com/nostr-protocol/nips/blob/master/04.md"
-              target="_blank"
-              rel="noreferrer"
-            >
-              {" "}
-              nip-04{" "}
-            </a>
-            encrypted notifications.
-          </Text>
-        ) : null}
       </div>
       <Divider className="divider" />
       <div className="form-setting">

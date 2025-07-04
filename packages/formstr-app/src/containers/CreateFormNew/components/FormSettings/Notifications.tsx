@@ -1,85 +1,59 @@
-import { Button, Input, Modal, Tooltip, Typography } from "antd";
+import { Modal, Tooltip, Typography } from "antd";
 import { isMobile } from "../../../../utils/utility";
 import useFormBuilderContext from "../../hooks/useFormBuilderContext";
-import { PlusOutlined } from "@ant-design/icons";
+import { EditOutlined } from "@ant-design/icons";
 import { useState } from "react";
-import AddNpubStyle from "./addNpub.style";
+import { NpubList } from "./Sharing/NpubList";
 
 const { Text } = Typography;
 export const Notifications = () => {
   const { updateFormSetting, formSettings } = useFormBuilderContext();
-  const [isNewNpub, SetIsNewNpub] = useState<boolean>(false);
-  const [newNpub, setNewNpub] = useState<string>("");
+  const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
 
-  const addNewNpub = () => {
-    SetIsNewNpub(true);
-  };
-
-  const addToNpubList = () => {
-    let existingList = formSettings.notifyNpubs || [];
-    let newNpubList = new Set([...existingList, newNpub]);
+  const handleSetNpubs = (npubs: Set<string>) => {
     updateFormSetting({
-      notifyNpubs: Array.from(newNpubList),
+      notifyNpubs: Array.from(npubs),
     });
-    setNewNpub("");
-    SetIsNewNpub(false);
   };
-  const isValidNpub = () => {
-    return newNpub.length === 63 && newNpub.startsWith("npub1");
-  };
+
+  const hasNpubs = (formSettings.notifyNpubs || []).length > 0;
 
   return (
     <>
       <Tooltip
-        title="Notify the given nostr profiles when a response is submitted"
+        title="Configure who will be notified when a response is submitted"
         trigger={isMobile() ? "click" : "hover"}
       >
         <div className="property-setting">
-          <Text>Add nostr npub</Text>
-          <PlusOutlined onClick={addNewNpub} />
+          <Text>Configure Notifications</Text>
+          <EditOutlined onClick={() => setIsModalOpen(true)} />
         </div>
-        <ul className="npub-list">
-          {formSettings.notifyNpubs?.map((npub: string) => {
-            return (
-              <li>
-                <Text className="npub-list-text">
-                  {npub.substring(0, 10) + "..."}
-                </Text>
-              </li>
-            );
-          })}
-        </ul>
       </Tooltip>
       <Modal
-        open={isNewNpub}
-        onCancel={() => {
-          SetIsNewNpub(false);
-        }}
+        open={isModalOpen}
+        onCancel={() => setIsModalOpen(false)}
         footer={null}
+        destroyOnClose
       >
-        <AddNpubStyle className="modal-container">
-          <Text> Enter the nostr npub you want to notify</Text>
-          <Input
-            placeholder="Enter nostr npub"
-            value={newNpub}
-            onChange={(e) => setNewNpub(e.target.value)}
-            className="npub-input"
-          />
-          {newNpub && !isValidNpub() && (
-            <div>
-              <Text className="error-npub">this is not a valid npub</Text>
-            </div>
-          )}
-          <Button
-            type="primary"
-            className="add-button"
-            disabled={!isValidNpub()}
-            onClick={addToNpubList}
-          >
-            {" "}
-            Add{" "}
-          </Button>
-        </AddNpubStyle>
+        <NpubList
+          NpubList={new Set(formSettings.notifyNpubs || [])}
+          setNpubList={handleSetNpubs}
+          ListHeader={"Notification Recipients"}
+        />
+        {hasNpubs && (
+          <Text className="warning-text">
+            *These npubs will receive
+            <a
+              href="https://github.com/nostr-protocol/nips/blob/master/04.md"
+              target="_blank"
+              rel="noreferrer"
+            >
+              {" "}
+              nip-04{" "}
+            </a>
+            encrypted notifications.
+          </Text>
+        )}
       </Modal>
     </>
   );

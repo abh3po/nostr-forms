@@ -1,6 +1,7 @@
 import { Event, nip44 } from "nostr-tools";
 import { Field, Tag } from '../nostr/types'; 
 import { getDefaultRelays } from "../nostr/common";
+import { hexToBytes } from "@noble/hashes/utils";
 
 export const getResponseRelays = (formEvent: Event): string[] => {
   let formRelays = formEvent.tags

@@ -2,7 +2,6 @@ import {
   Event,
   Filter,
   SimplePool,
-  SubCloser,
   getEventHash,
   utils,
 } from "nostr-tools";
@@ -15,7 +14,7 @@ export const fetchFormResponses = (
   handleResponseEvent: (event: Event) => void,
   allowedPubkeys?: string[],
   relays?: string[]
-): SubCloser => {
+): { close: () => void; } => {
   let relayList = [...(relays || []), ...getDefaultRelays()];
   const filter: Filter = {
     kinds: [1069],

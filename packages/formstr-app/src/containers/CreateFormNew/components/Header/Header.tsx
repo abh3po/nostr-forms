@@ -1,4 +1,4 @@
-import { Layout, Menu, Row, Col, Typography, MenuProps } from "antd";
+import { Layout, Menu, Row, Col, Typography, MenuProps, message } from "antd";
 import { Link } from "react-router-dom";
 import { ArrowLeftOutlined, MenuOutlined } from "@ant-design/icons";
 import { HEADER_MENU, HEADER_MENU_KEYS } from "./config";
@@ -15,7 +15,7 @@ export const CreateFormHeader: React.FC = () => {
 
   const { Header } = Layout;
   const { Text } = Typography;
-  const { saveForm, setSelectedTab, formSettings, relayList,setIsAiModalOpen,selectedTab, } =
+  const { saveForm, setSelectedTab, formSettings, relayList,setIsAiModalOpen,selectedTab, questionsList } =
     useFormBuilderContext();
 
   const onMenuClickHandler: MenuProps["onClick"] = (e) => {
@@ -29,8 +29,13 @@ export const CreateFormHeader: React.FC = () => {
   };
 
   const handlePublishClick = async () => {
+    if (questionsList.length === 0) {
+      message.error("Cannot publish a form with no questions.");
+      return;
+    }
+
     if (!formSettings?.formId) {
-      alert("Form ID is required");
+      message.error("Form ID is required");
       return;
     }
 

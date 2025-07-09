@@ -1,4 +1,4 @@
-import { Card, Input } from "antd";
+import { Card, Input, Select, Space } from "antd";
 import { ChangeEvent, useRef, PointerEvent as ReactPointerEvent } from "react";
 import useFormBuilderContext from "../../hooks/useFormBuilderContext";
 import CardHeader from "./CardHeader";
@@ -33,8 +33,17 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
   const answerSettings = JSON.parse(
     question[5] || '{"renderElement": "shortText"}'
   );
-  const { setQuestionIdInFocus } = useFormBuilderContext();
+  const { 
+    setQuestionIdInFocus, 
+    sections, 
+    getSectionForQuestion, 
+    moveQuestionToSection,
+    formSettings 
+  } = useFormBuilderContext();
   const dragTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Get current section for this question
+  const currentSectionId = getSectionForQuestion(question[1]);
 
   const handleTextChange = (event: ChangeEvent<HTMLTextAreaElement>) => {
     event.stopPropagation();
@@ -85,6 +94,14 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
     }
   };
 
+  const handleSectionChange = (sectionId: string) => {
+    if (sectionId === 'unsectioned') {
+      moveQuestionToSection(question[1], undefined);
+    } else {
+      moveQuestionToSection(question[1], sectionId);
+    }
+  };
+
   return (
     <StyledWrapper>
       <Card type="inner" className="question-card" onClick={onCardClick}>
@@ -104,6 +121,30 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
           firstQuestion={firstQuestion}
           lastQuestion={lastQuestion}
         />
+        
+        {/* Section selector - only show if sections are enabled */}
+        {formSettings.enableSections && sections.length > 0 && (
+          <div style={{ marginBottom: 16 }}>
+            <Space>
+              <span style={{ fontSize: 12, color: '#8c8c8c' }}>Section:</span>
+              <Select
+                size="small"
+                value={currentSectionId || 'unsectioned'}
+                onChange={handleSectionChange}
+                style={{ minWidth: 120 }}
+                placeholder="Select section"
+              >
+                <Select.Option value="unsectioned">Unsectioned</Select.Option>
+                {sections.map(section => (
+                  <Select.Option key={section.id} value={section.id}>
+                    {section.title || 'Untitled Section'}
+                  </Select.Option>
+                ))}
+              </Select>
+            </Space>
+          </div>
+        )}
+
         <div
           className="question-text"
           style={{ justifyContent: "space-between", display: "flex" }}

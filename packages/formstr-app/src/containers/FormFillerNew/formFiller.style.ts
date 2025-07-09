@@ -100,4 +100,133 @@ export default styled.div<{
     word-wrap: break-word;
     overflow: auto;
   }
+
+  /* Section-specific styles */
+  .section-progress {
+    margin-bottom: 24px;
+    
+    .ant-progress-bg {
+      background: linear-gradient(90deg, #FF6B00 0%, #FF2E00 100%);
+    }
+  }
+
+  .section-steps {
+    margin-bottom: 32px;
+    
+    .ant-steps-item-process .ant-steps-item-icon {
+      background-color: #FF5733;
+      border-color: #FF5733;
+    }
+    
+    .ant-steps-item-finish .ant-steps-item-icon {
+      background-color: #52c41a;
+      border-color: #52c41a;
+    }
+    
+    .ant-steps-item-title {
+      font-weight: 500;
+    }
+    
+    .ant-steps-item {
+      cursor: pointer;
+    }
+    
+    .ant-steps-item:hover .ant-steps-item-title {
+      color: #FF5733;
+    }
+
+    ${MEDIA_QUERY_MOBILE} {
+      .ant-steps-item-description {
+        display: none;
+      }
+    }
+  }
+
+  .section-header {
+    margin-bottom: 24px;
+    background: white;
+    border-radius: 8px;
+    padding: 20px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    
+    .ant-typography {
+      margin: 0;
+    }
+    
+    h4 {
+      color: #1f2937;
+      margin-bottom: 8px;
+    }
+  }
+
+  .section-navigation {
+    margin-top: 24px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    
+    .ant-btn-primary {
+      background: linear-gradient(180deg, #FF6B00 0%, #FF2E00 60.92%);
+      border: none;
+      
+      &:hover {
+        opacity: 0.8;
+      }
+    }
+
+    ${MEDIA_QUERY_MOBILE} {
+      flex-direction: column;
+      gap: 12px;
+      
+      .ant-btn {
+        width: 100%;
+      }
+    }
+  }
+
+  .section-content {
+    min-height: 300px;
+    
+    .ant-card {
+      margin-bottom: 16px;
+      border-radius: 8px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    }
+  }
+
+  /* Progress indicator styles */
+  .progress-container {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 16px;
+    
+    .ant-progress {
+      flex: 1;
+    }
+    
+    .progress-text {
+      white-space: nowrap;
+      font-size: 12px;
+      color: #6b7280;
+    }
+  }
+
+  /* Responsive adjustments for sections */
+  ${MEDIA_QUERY_MOBILE} {
+    .section-steps.ant-steps-vertical {
+      .ant-steps-item-content {
+        min-height: auto;
+      }
+      
+      .ant-steps-item-description {
+        margin-top: 4px;
+      }
+    }
+    
+    .section-header {
+      padding: 16px;
+      margin-bottom: 16px;
+    }
+  }
 `;

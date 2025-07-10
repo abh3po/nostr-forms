@@ -12,6 +12,8 @@ import { EmbedTab } from "./EmbedTab";
 import { SaveStatus } from "./SaveStatus";
 import { saveToDevice, saveToMyForms } from "./utils/saveHelpers";
 import { CustomSlugForm } from "./payments/customSlugForm";
+import axios from "axios";
+import { appConfig } from "../../../../config";
 
 export const FormDetails = ({
   isOpen,
@@ -36,6 +38,7 @@ export const FormDetails = ({
   const [savedOnNostr, setSavedOnNostr] = useState<null | "saving" | "saved">(
     null
   );
+  const [amount , setAmount] = useState(0);
   const [showCustomForm, setShowCustomForm] = useState(false);
   const { pubkey: userPub, requestPubkey } = useProfileContext();
 
@@ -63,6 +66,20 @@ export const FormDetails = ({
       );
   }, [userPub]);
 
+  useEffect(() => {
+  const fetchAmount = async () => {
+    try {
+      const amountPath = `/api/amount`;
+      const apiUrl = `${appConfig.apiBaseUrl}${amountPath}`;
+      const res = await axios.get(apiUrl);
+      console.log("Fetched amount:", res.data.amount);
+      setAmount(res.data.amount);
+    } catch (error) {
+      console.error("Failed to fetch amount:", error);
+    }
+  };
+  fetchAmount();
+}, []);
   const formUrl = constructFormUrl(pubKey, formId, relays, viewKey);
   const responsesUrl = constructNewResponseUrl(
     secretKey,
@@ -107,7 +124,7 @@ export const FormDetails = ({
             <Typography.Paragraph type="secondary">
               Get a personalized form URL like{" "}
               <Typography.Text code>/t/your-name</Typography.Text> for{" "}
-              <Typography.Text strong>2500 sats</Typography.Text>.
+              <Typography.Text strong>{amount} sats</Typography.Text>.
               <br />
               This one-time purchase is tied to your{" "}
               <Typography.Text code>Nostr</Typography.Text> profile.

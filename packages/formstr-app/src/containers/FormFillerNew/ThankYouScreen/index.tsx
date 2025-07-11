@@ -4,12 +4,23 @@ import ThankYouStyle from "./thankyou.style";
 export const ThankYouScreen = ({
   isOpen,
   onClose,
+  hideCloseButton = false,
 }: {
   isOpen: boolean;
   onClose: () => void;
+  hideCloseButton?: boolean;
 }) => {
   return (
-    <Modal open={isOpen} onCancel={onClose} closable={true} footer={null}>
+    <Modal
+      open={isOpen}
+      onCancel={onClose}
+      closable={!hideCloseButton}
+      okText="Continue to Formstr"
+      cancelButtonProps={{ style: { display: 'none' } }}
+      onOk={() => {
+        window.location.href = "https://formstr.app";
+      }}
+    >
       <ThankYouStyle>
         <div className="thank-you-image-container">
           <img

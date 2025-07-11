@@ -45,11 +45,12 @@ export const FormFiller: React.FC<FormFillerProps> = ({
     preFetchedFormContent,
   );
   const [searchParams] = useSearchParams();
+  const isDownloadedForm = searchParams.get("downloaded") === "true" || window.location.protocol === "file:";
   const hideTitleImage = searchParams.get("hideTitleImage") === "true";
   const viewKeyParams = searchParams.get("viewKey") || _viewKey || "";
   const hideDescription = searchParams.get("hideDescription") === "true";
   const navigate = useNavigate();
-
+  
   const { poolRef } = useApplicationContext();
 
   console.log("FORM SUBMITTED?", formSubmitted);
@@ -155,6 +156,7 @@ export const FormFiller: React.FC<FormFillerProps> = ({
           onClose={() => {
             setFormSubmitted(false);
             navigate(ROUTES.DASHBOARD)}}
+            hideCloseButton={isDownloadedForm}
         />
       </>
     );

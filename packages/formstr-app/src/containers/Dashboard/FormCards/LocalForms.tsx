@@ -3,7 +3,7 @@ import { ILocalForm } from "../../CreateFormNew/providers/FormBuilder/typeDefs";
 import { LocalFormCard } from "./LocalFormCard";
 import { useApplicationContext } from "../../../hooks/useApplicationContext";
 import { getDefaultRelays } from "../../../nostr/common";
-import { Event, SubCloser } from "nostr-tools";
+import { Event } from "nostr-tools";
 import { FormEventCard } from "./FormEventCard";
 
 interface LocaLFormsProps {
@@ -28,7 +28,7 @@ export const LocalForms: React.FC<LocaLFormsProps> = ({
   };
 
   useEffect(() => {
-    let closer: SubCloser;
+    let closer: { close: () => void; };
     const initialize = () => {
       let pubkeys = localForms.map((l) => l.publicKey);
       let dTags = localForms.map((f) => f.formId);

@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Event, getPublicKey, nip19, SubCloser } from "nostr-tools";
+import { Event, getPublicKey, nip19 } from "nostr-tools";
 import { useParams, useSearchParams } from "react-router-dom";
 import { fetchFormResponses } from "../../nostr/responses";
 import SummaryStyle from "./summary.style";
@@ -28,7 +28,7 @@ export const Response = () => {
   let [searchParams] = useSearchParams();
   const { pubkey: userPubkey, requestPubkey } = useProfileContext();
   const viewKeyParams = searchParams.get("viewKey");
-  const [responseCloser, setResponsesCloser] = useState<SubCloser | null>(null);
+  const [responseCloser, setResponsesCloser] = useState<{ close: () => void; } | null>(null);
   const [selectedEventForModal, setSelectedEventForModal] = useState<Event | null>(null);
   const [selectedResponseInputsForModal, setSelectedResponseInputsForModal] = useState<Tag[] | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);

@@ -1,4 +1,6 @@
 import { useEffect, useState } from "react";
+import { generateSecretKey } from "nostr-tools";
+import { bytesToHex, hexToBytes } from "@noble/hashes/utils";
 
 export const LOCAL_STORAGE_KEYS = {
   LOCAL_FORMS: "formstr:forms",
@@ -6,6 +8,9 @@ export const LOCAL_STORAGE_KEYS = {
   SUBMISSIONS: "formstr:submissions",
   PROFILE: "formstr:profile",
   OLLAMA_CONFIG: "formstr:ollama_config",
+  LOGIN_METHOD: "formstr:login_method",
+  BUNKER_URL: "formstr:bunker_url",
+  NIP46_CLIENT_SECRET: "formstr:nip46_client_secret",
 };
 
 export function getItem<T>(key: string, { parseAsJson = true } = {}): T | null {
@@ -58,4 +63,19 @@ export const useLocalStorageItems = <T>(
     //eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   return item;
+};
+
+export const getNip46ClientSecret = (): Uint8Array => {
+  const hexKey = getItem<string>(LOCAL_STORAGE_KEYS.NIP46_CLIENT_SECRET, { parseAsJson: false });
+  if (hexKey) {
+    try {
+      return hexToBytes(hexKey);
+    } catch (e) {
+      console.error("Failed to decode stored NIP-46 client secret:", e);
+    }
+  }
+
+  const newKey = generateSecretKey();
+  setItem(LOCAL_STORAGE_KEYS.NIP46_CLIENT_SECRET, bytesToHex(newKey), { parseAsJson: false });
+  return newKey;
 };

@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useLocation } from "react-router-dom";
 import { FormDetails } from "../CreateFormNew/components/FormDetails";
-import { Event, SubCloser } from "nostr-tools";
+import { Event } from "nostr-tools";
 import { useProfileContext } from "../../hooks/useProfileContext";
 import { getDefaultRelays } from "@formstr/sdk";
 import { FormEventCard } from "./FormCards/FormEventCard";
@@ -63,7 +63,7 @@ export const Dashboard = () => {
 
   const { poolRef } = useApplicationContext();
 
-  const subCloserRef = useRef<SubCloser | null>(null);
+  const subCloserRef = useRef<{ close: () => void; } | null>(null);
 
 
   useEffect(() => {

@@ -1,5 +1,4 @@
 import {
-  AbstractRelay,
   Event,
   finalizeEvent,
   generateSecretKey,
@@ -97,14 +96,14 @@ export const customPublish = (
       return Promise.reject("duplicate url");
     }
 
-    let relay: AbstractRelay | null = null;
+    let relay: Relay | null = null;
     try {
       relay = await ensureRelay(url, { connectionTimeout: 5000 });
       return await Promise.race<string>([
-        relay.publish(event).then((reason) => {
+        relay.publish(event).then((reason: string | undefined) => {
           // console.log("accepted relays", url);
           onAcceptedRelays?.(url);
-          return reason;
+          return reason || '';
         }),
         new Promise<string>((_, reject) =>
           setTimeout(() => reject("timeout"), 5000),
@@ -190,7 +189,7 @@ export const sendNotification = async (
 export const ensureRelay = async (
   url: string,
   params?: { connectionTimeout?: number },
-): Promise<AbstractRelay> => {
+): Promise<Relay> => {
   url = normalizeURL(url);
   const relay = new Relay(url);
   if (params?.connectionTimeout)

@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { Modal, Button, Input, List, Typography, Tooltip, Space } from 'antd';
 import { PlusOutlined, EditOutlined, DeleteOutlined, SaveOutlined, CloseOutlined, ReloadOutlined } from '@ant-design/icons';
-import useFormBuilderContext from '../../hooks/useFormBuilderContext';
 import RelayStatusIndicator from '../../../../components/RelayStatusIndicator';
 import { RelayItem, RelayStatus } from '../../providers/FormBuilder/typeDefs';
 import { isValidWebSocketUrl } from '../../utils';
@@ -98,21 +97,26 @@ const EditableRelayListItem: React.FC<EditableRelayItemProps> = ({
 interface RelayManagerModalProps {
   isOpen: boolean;
   onClose: () => void;
+  relayList: RelayItem[];
+  addRelayToList: (url: string) => void;
+  editRelayInList: (tempId: string, newUrl: string) => void;
+  deleteRelayFromList: (tempId: string) => void;
+  onRestoreDefaults?: () => void;
+  restoreButtonText?: string;
 }
 
-const RelayManagerModal: React.FC<RelayManagerModalProps> = ({ isOpen, onClose }) => {
-  const {
+const RelayManagerModal: React.FC<RelayManagerModalProps> = ({ isOpen, onClose,
     relayList,
     addRelayToList,
     editRelayInList,
     deleteRelayFromList,
-  } = useFormBuilderContext();
-
+  onRestoreDefaults,
+  restoreButtonText,
+}) => {
   const [newRelayUrl, setNewRelayUrl] = useState('');
   const [addError, setAddError] = useState<string | null>(null);
   const [isAdding, setIsAdding] = useState(false);
   const [localRelayStatuses, setLocalRelayStatuses] = useState<Map<string, RelayStatus>>(new Map());
-  const prevRelayListRef = useRef<RelayItem[]>([]);
 
 
   const updateLocalRelayStatus = useCallback((relayId: string, status: RelayStatus) => {
@@ -137,30 +141,13 @@ const RelayManagerModal: React.FC<RelayManagerModalProps> = ({ isOpen, onClose }
 
   useEffect(() => {
     if (isOpen) {
-      const initialStatuses = new Map<string, RelayStatus>();
-      let hasNewRelays = false;
-      const currentRelayIds = new Set(relayList.map(r => r.tempId));
-      const prevRelayIds = new Set(prevRelayListRef.current.map(r => r.tempId));
-
-      relayList.forEach(relay => {
-        const existingStatus = localRelayStatuses.get(relay.tempId);
-        initialStatuses.set(relay.tempId, existingStatus || 'unknown');
-        if (!prevRelayIds.has(relay.tempId)) {
-          hasNewRelays = true;
-        }
-      });
-            localRelayStatuses.forEach((_status, tempId) => {
-        if (!currentRelayIds.has(tempId)) {
-          initialStatuses.delete(tempId);
-        }
-      });
-      setLocalRelayStatuses(initialStatuses);
-      if (relayList.length !== prevRelayListRef.current.length || hasNewRelays) {
+      const timeoutId = setTimeout(() => {
          testAllLocalRelayConnections();
-      }
+      }, 1000); // 1-second delay
+
+      return () => clearTimeout(timeoutId);
     }
-    prevRelayListRef.current = relayList;
-  }, [isOpen, relayList, testAllLocalRelayConnections]);
+  }, [isOpen, testAllLocalRelayConnections]);
 
 
   const handleAddNewRelay = () => {
@@ -192,10 +179,15 @@ const RelayManagerModal: React.FC<RelayManagerModalProps> = ({ isOpen, onClose }
         <Button key="testAll" onClick={testAllLocalRelayConnections} icon={<ReloadOutlined />}>
           Test All Connections
         </Button>,
+        onRestoreDefaults && (
+          <Button key="restore" onClick={onRestoreDefaults}>
+            {restoreButtonText || 'Restore Defaults'}
+          </Button>
+        ),
         <Button key="close" onClick={onClose}>
           Close
         </Button>,
-      ]}
+      ].filter(Boolean)}
       destroyOnClose
     >
       {isAdding ? (

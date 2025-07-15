@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Event, getPublicKey, nip19, SubCloser } from "nostr-tools";
 import { useParams, useSearchParams } from "react-router-dom";
 import { fetchFormResponses } from "../../nostr/responses";
@@ -10,12 +10,13 @@ import { useProfileContext } from "../../hooks/useProfileContext";
 import { fetchFormTemplate } from "../../nostr/fetchFormTemplate";
 import { hexToBytes } from "@noble/hashes/utils";
 import { fetchKeys, getAllowedUsers, getFormSpec as getFormSpecFromEventUtil } from "../../utils/formUtils"; 
-import { Export } from "./Export";
 import { Field, Tag } from "../../nostr/types";
 import { useApplicationContext } from "../../hooks/useApplicationContext";
 import { ResponseDetailModal } from './components/ResponseDetailModal';
 import { getDefaultRelays } from "../../nostr/common";
 import { getResponseRelays, getInputsFromResponseEvent, getResponseLabels } from "../../utils/ResponseUtils";
+import AIAnalysisChat from './components/AIAnalysisChat';
+import { ResponseHeader } from "./components/ResponseHeader";
 
 const { Text } = Typography;
 
@@ -32,8 +33,16 @@ export const Response = () => {
   const [selectedEventForModal, setSelectedEventForModal] = useState<Event | null>(null);
   const [selectedResponseInputsForModal, setSelectedResponseInputsForModal] = useState<Tag[] | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isChatVisible, setIsChatVisible] = useState(false);
+  const chatRef = useRef<HTMLDivElement>(null);
   let { poolRef } = useApplicationContext();
   const [isFormSpecLoading, setIsFormSpecLoading] = useState(true); 
+
+  useEffect(() => {
+    if (isChatVisible && chatRef.current) {
+      chatRef.current.scrollIntoView({ behavior: 'smooth', block: 'end' });
+    }
+  }, [isChatVisible]);
 
   const handleResponseEvent = (event: Event) => {
     setResponses((prev: Event[] | undefined) => {
@@ -308,6 +317,8 @@ export const Response = () => {
             </div>;
   }
 
+  const hasResponses = responses && responses.length > 0;
+
   return (
     <div>
       <SummaryStyle>
@@ -325,7 +336,12 @@ export const Response = () => {
         </div>
       </SummaryStyle>
       <ResponseWrapper>
-        <Export responsesData={getData(true) || []} formName={getFormName()} />
+        <ResponseHeader
+          hasResponses={!!hasResponses}
+          onAiAnalysisClick={() => setIsChatVisible(true)}
+          responsesData={getData(true) || []}
+          formName={getFormName()}
+        />
         <div style={{ overflow: "scroll", marginBottom: 60 }}>
           <Table
             columns={getColumns()}
@@ -350,6 +366,16 @@ export const Response = () => {
               };
             }}
           />
+        </div>
+        <div ref={chatRef}>
+         {isChatVisible && formSpec && (
+            <AIAnalysisChat 
+                isVisible={isChatVisible}
+                onClose={() => setIsChatVisible(false)}
+                responsesData={getData(true)}
+                formSpec={formSpec}
+            />
+         )}
         </div>
       </ResponseWrapper>
       {isModalOpen &&

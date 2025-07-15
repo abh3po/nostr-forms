@@ -1,4 +1,4 @@
-import { Modal } from "antd";
+import { Modal, Button } from "antd";
 import ThankYouStyle from "./thankyou.style";
 
 export const ThankYouScreen = ({
@@ -15,11 +15,7 @@ export const ThankYouScreen = ({
       open={isOpen}
       onCancel={onClose}
       closable={!hideCloseButton}
-      okText="Continue to Formstr"
-      cancelButtonProps={{ style: { display: 'none' } }}
-      onOk={() => {
-        window.location.href = "https://formstr.app";
-      }}
+      footer={null}
     >
       <ThankYouStyle>
         <div className="thank-you-image-container">
@@ -28,6 +24,17 @@ export const ThankYouScreen = ({
             className="thank-you-image"
             alt="Thank you"
           />
+        </div>
+
+        <div className="formstr-button-container">
+          <Button
+            type="text"
+            onClick={() => {
+              window.location.href = "https://formstr.app";
+            }}
+          >
+            Continue to Formstr
+          </Button>
         </div>
       </ThankYouStyle>
     </Modal>

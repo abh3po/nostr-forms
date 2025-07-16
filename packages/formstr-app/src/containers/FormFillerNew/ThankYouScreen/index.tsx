@@ -28,7 +28,7 @@ export const ThankYouScreen = ({
 
         <div className="formstr-button-container">
           <Button
-            type="text"
+            type="primary"
             onClick={() => {
               window.location.href = "https://formstr.app";
             }}

@@ -25,13 +25,17 @@ export const CustomSlugForm = ({
   formPubkey,
   relays,
   viewKey,
+  showAccessWarning = false,
+  onEditClick,
 }: {
   formId: string;
   formPubkey: string;
   relays: string[];
   viewKey?: string;
+  showAccessWarning?: boolean;
+  onEditClick?: () => void;
 }) => {
-  const [slug, setSlug] = useState("");
+  const [slug, setSlug] = useState(formId);
   const [checking, setChecking] = useState(false);
   const [available, setAvailable] = useState<boolean | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -66,7 +70,7 @@ export const CustomSlugForm = ({
   };
 
   const handleZapSuccess = () => {
-    navigate(`/t/${slug}`);
+    navigate(`/i/${slug}`);
   };
 
   const handlePay = async () => {
@@ -121,7 +125,7 @@ export const CustomSlugForm = ({
             setAvailable(null); // reset availability
           }}
           onPressEnter={checkAvailability}
-          addonBefore="/t/"
+          addonBefore="/i/"
           suffix={
             checking ? (
               <LoadingOutlined />
@@ -161,6 +165,29 @@ export const CustomSlugForm = ({
         </Text>
 
         {error && <Alert type="error" message={error} />}
+        {/* Show yellow alert below check/pay buttons if showAccessWarning is true */}
+        {showAccessWarning && (
+          <Alert
+            message={
+              <>
+                Anyone with this URL can access your form. If you 
+                <br />
+                proceed, your form can be accessed Formstr Inc.
+                {onEditClick && (
+                  <Button
+                    type="link"
+                    style={{ marginLeft: 8, padding: 0 }}
+                    onClick={onEditClick}
+                  >
+                    Edit
+                  </Button>
+                )}
+              </>
+            }
+            type="warning"
+            showIcon
+          />
+        )}
       </Space>
       <ZapQRCodeModal
         open={!!invoice}

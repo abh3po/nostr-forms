@@ -20,9 +20,11 @@ import {
   EditOutlined,
   MoreOutlined,
   CopyOutlined,
+  InfoCircleOutlined,
 } from "@ant-design/icons";
 import { useEffect, useState } from "react";
 import { constructDraftUrl } from "./Drafts";
+import { FormDetails } from "../../CreateFormNew/components/FormDetails";
 
 interface FormEventCardProps {
   event: Event;
@@ -43,6 +45,7 @@ export const FormEventCard: React.FC<FormEventCardProps> = ({
   const navigate = useNavigate();
   const publicForm = event.content === "";
   const [tags, setTags] = useState<Tag[]>([]);
+  const [showFormDetails, setShowFormDetails] = useState(false);
   useEffect(() => {
     const initialize = async () => {
       if (event.content === "") {
@@ -121,6 +124,12 @@ export const FormEventCard: React.FC<FormEventCardProps> = ({
   const menuItems: MenuProps["items"] = secretKey
     ? [
         {
+          key: "details",
+          label: "Details",
+          icon: <InfoCircleOutlined />,
+          onClick: () => setShowFormDetails(true),
+        },
+        {
           key: "download",
           label: "Download",
           icon: <DownloadOutlined />,
@@ -141,6 +150,12 @@ export const FormEventCard: React.FC<FormEventCardProps> = ({
       ]
     : [
         {
+          key: "details",
+          label: "Details",
+          icon: <InfoCircleOutlined />,
+          onClick: () => setShowFormDetails(true),
+        },
+        {
           key: "download",
           label: "Download",
           icon: <DownloadOutlined />,
@@ -153,7 +168,7 @@ export const FormEventCard: React.FC<FormEventCardProps> = ({
       title={name[1] || "Hidden Form"}
       className="form-card"
       extra={
-        <div style={{ display: "flex", flexDirection: "row" }}>
+        <div style={{ display: "flex", flexDirection: "row", alignItems: "center" }}>
           <Dropdown
             menu={{ items: menuItems }}
             trigger={["click"]}
@@ -170,6 +185,18 @@ export const FormEventCard: React.FC<FormEventCardProps> = ({
           {onDeleted ? (
             <DeleteFormTrigger formKey={formKey} onDeleted={onDeleted} />
           ) : null}
+          {showFormDetails && (
+            <FormDetails
+              isOpen={showFormDetails}
+              onClose={() => setShowFormDetails(false)}
+              pubKey={pubKey}
+              formId={formId}
+              secretKey={secretKey || ""}
+              viewKey={viewKey || ""}
+              name={name[1] || ""}
+              relays={relays}
+            />
+          )}
         </div>
       }
       style={{

@@ -18,6 +18,6 @@ export const ROUTES = {
   DASHBOARD_SHARED: "/dashboard/shared",
   DASHBOARD_MY_FORMS: "/dashboard/my-forms",
   DASHBOARD_DRAFTS: "/dashboard/drafts",
-  CUSTOM_URL: "/t/:formSlug",
+  CUSTOM_URL: "/i/:formSlug",
   DASHBOARD_PURCHASES: "/dashboard/purchases",
 };

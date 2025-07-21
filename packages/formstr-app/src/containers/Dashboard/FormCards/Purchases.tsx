@@ -121,7 +121,7 @@ export const Purchases: React.FC = () => {
                 <FormEventCard
                   event={event}
                   viewKey={form.viewKey}
-                  shortLink={`/t/${form.slug}`}
+                  shortLink={`/i/${form.slug}`}
                 />
               ) : (
                 <Skeleton active />
@@ -137,17 +137,17 @@ export const Purchases: React.FC = () => {
               >
                 <Flair
                   color={shortUrlColor}
-                  onClick={() => window.open(`/t/${form.slug}`, "_blank")}
+                  onClick={() => window.open(`${window.location.origin}/i/${form.slug}`, "_blank")}
                   style={{ fontSize: 12, padding: "2px 8px" }}
                 >
                   <Text
                     type="secondary"
                     style={{ marginRight: 4, fontSize: 12 }}
                   >
-                    Short URL:
+                    URL:
                   </Text>
                   <Text code style={{ fontSize: 12 }}>
-                    {`/t/${form.slug}`}
+                    {`${window.location.origin}/i/${form.slug}`}
                   </Text>
                 </Flair>
                 <Flair
@@ -158,7 +158,7 @@ export const Purchases: React.FC = () => {
                     type="secondary"
                     style={{ marginRight: 4, fontSize: 12 }}
                   >
-                    Short llnk expires on:
+                    URL expires on:
                   </Text>
                   <Text style={{ fontSize: 12 }}>
                     {form.expirationDate

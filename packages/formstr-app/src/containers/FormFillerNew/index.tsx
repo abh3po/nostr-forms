@@ -52,7 +52,6 @@ export const FormFiller: React.FC<FormFillerProps> = ({
 
   const { poolRef } = useApplicationContext();
 
-  console.log("FORM SUBMITTED?", formSubmitted);
   if (!formId && !formSpec) {
     return null;
   }

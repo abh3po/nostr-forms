@@ -62,6 +62,23 @@ function checkWindowNostr() {
   }
 }
 
+function toHexNpub(npubOrHex: string): string {
+  try {
+    // Attempt to decode npub
+    const decoded = nip19.decode(npubOrHex);
+    if (decoded.type !== "npub" || typeof decoded.data !== "string") {
+      throw new Error("Invalid npub format");
+    }
+    return decoded.data;
+  } catch {
+    // Not a valid npub, check if it's a valid hex pubkey
+    if (/^[0-9a-f]{64}$/i.test(npubOrHex)) {
+      return npubOrHex;
+    }
+    throw new Error(`Invalid public key format: ${npubOrHex}`);
+  }
+}
+
 export async function getUserPublicKey(userSecretKey: Uint8Array | null) {
   let userPublicKey;
   if (userSecretKey) {
@@ -170,7 +187,7 @@ export const sendNotification = async (
   const newPk = getPublicKey(newSk);
   const pool = new SimplePool();
   settings.notifyNpubs?.forEach(async (npub) => {
-    const hexNpub = nip19.decode(npub).data.toString();
+    const hexNpub = toHexNpub(npub)
     const encryptedMessage = await nip04.encrypt(newSk, hexNpub, message);
     const baseKind4Event: Event = {
       kind: 4,

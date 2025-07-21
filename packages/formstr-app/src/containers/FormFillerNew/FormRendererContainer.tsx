@@ -43,7 +43,6 @@ export const FormRendererContainer: React.FC<FormRendererContainerProps> = ({
         () => {},
         viewKey
       );
-
       if (formSpec) {
         const settings = JSON.parse(
           formSpec.find((tag) => tag[0] === "settings")?.[1] || "{}"

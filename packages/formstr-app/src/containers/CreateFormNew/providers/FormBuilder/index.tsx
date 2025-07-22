@@ -58,6 +58,7 @@ export const FormBuilderContext = React.createContext<IFormBuilderContext>({
   isAiModalOpen: false,
   setIsAiModalOpen: () => null,
   handleAIFormGenerated: () => null,
+  restoreFormRelaysToUserDefault: () => null,
 });
 
 const InitialFormSettings: IFormSettings = {
@@ -103,7 +104,7 @@ export default function FormBuilderProvider({
 
   const [relayList, setRelayList] = useState<RelayItem[]>([]);
   const [isRelayManagerModalOpen, setIsRelayManagerModalOpen] = useState(false);
-  useEffect(() => {
+  const setInitialRelayList = useCallback(() => {
     let baseList: RelayItem[];
     const storedUserManagedRelays = getItem<RelayItem[]>(LOCAL_STORAGE_CUSTOM_RELAYS_KEY);
 
@@ -144,6 +145,16 @@ export default function FormBuilderProvider({
 
     setRelayList(uniqueFinalRelayList);
   }, [userRelays]);
+
+  useEffect(() => {
+    setInitialRelayList();
+  }, [setInitialRelayList]);
+  
+  const restoreFormRelaysToUserDefault = useCallback(() => {
+    setInitialRelayList();
+    message.success('Relays restored to your defaults.');
+  }, [setInitialRelayList]);
+  
   const toggleRelayManagerModal = useCallback(() => {
     setIsRelayManagerModalOpen(prev => !prev);
   }, []);
@@ -156,7 +167,6 @@ export default function FormBuilderProvider({
         }
         const newRelay: RelayItem = { url, tempId: makeTag(6) };
         const updatedList = [...prevRelayList, newRelay];
-        setItem(LOCAL_STORAGE_CUSTOM_RELAYS_KEY, updatedList.filter(r => !getDefaultRelays().includes(r.url))); // Only store custom relays
         return updatedList;
     });
   }, []);
@@ -170,7 +180,6 @@ export default function FormBuilderProvider({
         const updatedList = prevRelayList.map(relay =>
             relay.tempId === tempId ? { ...relay, url: newUrl } : relay
         );
-        setItem(LOCAL_STORAGE_CUSTOM_RELAYS_KEY, updatedList.filter(r => !getDefaultRelays().includes(r.url))); // Only store custom relays
         return updatedList;
     });
   }, []);
@@ -180,7 +189,6 @@ export default function FormBuilderProvider({
         const relayToDelete = prevRelayList.find(r => r.tempId === tempId);
         if (!relayToDelete) return prevRelayList;
         let updatedList = prevRelayList.filter(relay => relay.tempId !== tempId);
-        setItem(LOCAL_STORAGE_CUSTOM_RELAYS_KEY, updatedList.filter(r => !getDefaultRelays().includes(r.url))); // Only store custom relays
         return updatedList;
     });
   }, []);
@@ -396,6 +404,7 @@ export default function FormBuilderProvider({
         isAiModalOpen,
         setIsAiModalOpen,
         handleAIFormGenerated,
+        restoreFormRelaysToUserDefault,
       }}
     >
       {children}

@@ -29,6 +29,14 @@ export interface FormInitData {
   viewKey?: string | null;
 }
 
+export interface SectionData {
+  id: string;
+  title: string;
+  description?: string;
+  questionIds: string[];
+  order?: number;
+}
+
 export interface IFormBuilderContext {
   initializeForm: (form: FormInitData) => void;
   questionsList: Field[];
@@ -72,4 +80,11 @@ export interface IFormBuilderContext {
   isAiModalOpen: boolean;
   setIsAiModalOpen: (isOpen: boolean) => void;
   handleAIFormGenerated: (processedData: ProcessedFormData) => void;
+  sections: SectionData[];
+  addSection: (title?: string, description?: string) => SectionData;
+  updateSection: (id: string, updates: Partial<SectionData>) => void;
+  removeSection: (id: string) => void;
+  moveQuestionToSection: (questionId: string, sectionId?: string) => void;
+  getSectionForQuestion: (questionId: string) => string | null;
+  reorderSections: (newOrder: SectionData[]) => void;
 }

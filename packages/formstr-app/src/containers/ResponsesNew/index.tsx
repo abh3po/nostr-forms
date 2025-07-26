@@ -144,7 +144,7 @@ export const Response = () => {
     setIsModalOpen(true);
   };
 
-  const getData = (useLabels: boolean = false) => {
+  const getData = () => {
     let answers: Array<{
       [key: string]: string;
     }> = [];
@@ -176,9 +176,8 @@ export const Response = () => {
       };
       inputs.forEach((input) => {
         if (!Array.isArray(input) || input.length < 2) return;
-        const { questionLabel, responseLabel, fieldId } = getResponseLabels(input, formSpec);
-        const displayKey = useLabels ? questionLabel : fieldId;
-        answerObject[displayKey] = responseLabel;
+        const { responseLabel, fieldId } = getResponseLabels(input, formSpec);
+        answerObject[fieldId] = responseLabel;
       });
       answers.push(answerObject);
     });
@@ -230,7 +229,7 @@ export const Response = () => {
       dataIndex: string;
       fixed?: "left" | "right";
       width?: number;
-      render?: (data: string) => JSX.Element;
+      render?: (data: string, record: any) => JSX.Element;
     }> = [
       {
         key: "createdAt",
@@ -254,7 +253,7 @@ export const Response = () => {
       columns.push({
         key: fieldId,
         title: label || `Question: ${fieldId.substring(0,5)}...`,
-        dataIndex: label || fieldId,
+        dataIndex: fieldId,
         width: 150,
       });
       uniqueQuestionIdsInResponses.delete(fieldId); 
@@ -325,11 +324,11 @@ export const Response = () => {
         </div>
       </SummaryStyle>
       <ResponseWrapper>
-        <Export responsesData={getData(true) || []} formName={getFormName()} />
+        <Export responsesData={getData() || []} formName={getFormName()} />
         <div style={{ overflow: "scroll", marginBottom: 60 }}>
           <Table
             columns={getColumns()}
-            dataSource={getData(true)}
+            dataSource={getData()}
             pagination={{ pageSize: 10 }} 
             loading={{
               spinning: responses === undefined,

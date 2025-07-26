@@ -11,6 +11,8 @@ interface QuestionProps {
   options: Option[]
   inputHandler: (questionId: string, answer: string, message?: string) => void;
   required: boolean;
+  disabled?: boolean;
+  value?: any;
 }
 
 export const QuestionNode: React.FC<QuestionProps> = ({
@@ -20,6 +22,8 @@ export const QuestionNode: React.FC<QuestionProps> = ({
   options,
   inputHandler,
   required,
+  disabled = false,
+  value,
 }) => {
   const answerHandler = (questionId: string) => {
     return (answer: string, message?: string) => {
@@ -38,6 +42,8 @@ export const QuestionNode: React.FC<QuestionProps> = ({
         fieldConfig={fieldConfig}
         options={options}
         onChange={answerHandler(fieldId)}
+        disabled={disabled}
+        defaultValue={value ? value[0] : undefined}
       />
     </Card>
   );

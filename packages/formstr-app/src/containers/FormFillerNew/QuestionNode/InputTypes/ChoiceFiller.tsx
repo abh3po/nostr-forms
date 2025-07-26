@@ -19,6 +19,7 @@ interface ChoiceFillerProps {
   options: Option[];
   onChange: (value: string, message: string) => void;
   defaultValue?: string;
+  disabled?: boolean;
 }
 
 export const ChoiceFiller: React.FC<ChoiceFillerProps> = ({
@@ -26,6 +27,7 @@ export const ChoiceFiller: React.FC<ChoiceFillerProps> = ({
   options,
   onChange,
   defaultValue,
+  disabled = false,
 }) => {
   const [otherMessage, setOtherMessage] = useState("");
   
@@ -66,16 +68,17 @@ export const ChoiceFiller: React.FC<ChoiceFillerProps> = ({
     <ChoiceFillerStyle>
       <ElementConfig.Element.Group
         onChange={handleChoiceChange}
-        defaultValue={ElementConfig.defaultValue}
+        value={ElementConfig.defaultValue}
+        disabled={disabled}
       >
         <Space direction="vertical">
           {options.map((choice) => {
             let [choiceId, label, configString] = choice;
             let config = JSON.parse(configString || "{}")
             return (
-              <ElementConfig.Element key={choiceId} value={choiceId}>
+              <ElementConfig.Element key={choiceId} value={choiceId} disabled={disabled}>
                 <Markdown>{label}</Markdown>
-                {config.isOther && <Input placeholder="Add an optional message..." onInput={handleMessage}/>}
+                {config.isOther && <Input placeholder="Add an optional message..." onInput={handleMessage} disabled={disabled}/>} 
               </ElementConfig.Element>
             );
           })}

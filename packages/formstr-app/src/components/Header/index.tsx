@@ -11,7 +11,7 @@ import {
 import { Link } from "react-router-dom";
 import "./index.css";
 import { ReactComponent as Logo } from "../../Images/formstr.svg";
-import { DownOutlined, MenuOutlined, UserOutlined } from "@ant-design/icons";
+import { DownOutlined, MenuOutlined, SettingOutlined } from "@ant-design/icons";
 import { HEADER_MENU, HEADER_MENU_KEYS } from "./configs";
 import { useProfileContext } from "../../hooks/useProfileContext";
 import { NostrAvatar } from "./NostrAvatar";
@@ -22,7 +22,7 @@ import { useTemplateContext } from '../../provider/TemplateProvider';
 
 export const NostrHeader = () => {
   const { Header } = Layout;
-  const { pubkey, requestPubkey, logout } = useProfileContext();
+  const { pubkey, requestPubkey, logout, toggleGlobalRelayModal } = useProfileContext();
   const [isFAQModalVisible, setIsFAQModalVisible] = useState(false);
   const [selectedKey, setSelectedKey] = useState<string[]>([]);
   const { openTemplateModal } = useTemplateContext();
@@ -43,19 +43,7 @@ export const NostrHeader = () => {
     setSelectedKey([e.key]);
   };
 
-  const dropdownMenuItems: MenuProps["items"] = [
-    ...[
-      pubkey
-        ? {
-            key: "logout",
-            label: <a onClick={logout}>Logout</a>,
-          }
-        : {
-            key: "login",
-            label: <a onClick={requestPubkey}>Login</a>,
-          },
-    ],
-    {
+  const supportUsItem = {
       key: "Support Us",
       icon: (
         <div
@@ -86,8 +74,33 @@ export const NostrHeader = () => {
       onClick: () => {
         window.open("https://geyser.fund/project/formstr", "_blank");
       },
-    },
-  ];
+  };
+
+  const dropdownMenuItems: MenuProps["items"] = [];
+
+  if (pubkey) {
+    dropdownMenuItems.push(
+      {
+        key: "settings",
+        label: "Settings",
+        icon: <SettingOutlined />,
+        onClick: toggleGlobalRelayModal,
+      },
+      supportUsItem,
+      {
+        key: "logout",
+        label: <a onClick={logout}>Logout</a>,
+      }
+    );
+  } else {
+    dropdownMenuItems.push(
+      {
+        key: "login",
+        label: <a onClick={requestPubkey}>Login</a>,
+      },
+      supportUsItem
+    );
+  }
 
   const User = {
     key: HEADER_MENU_KEYS.USER,

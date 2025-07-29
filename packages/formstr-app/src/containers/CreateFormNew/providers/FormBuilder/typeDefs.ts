@@ -72,4 +72,5 @@ export interface IFormBuilderContext {
   isAiModalOpen: boolean;
   setIsAiModalOpen: (isOpen: boolean) => void;
   handleAIFormGenerated: (processedData: ProcessedFormData) => void;
+  restoreFormRelaysToUserDefault: () => void;
 }

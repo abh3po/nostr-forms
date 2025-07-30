@@ -266,7 +266,7 @@ export default function FormBuilderProvider({
             secretKey: bytesToHex(signingKey),
             viewKey: formSettings.viewKeyInUrl ? bytesToHex(formViewKey) : null,
             name: formName,
-            relay: relayUrls,
+            relays: relayUrls,
           },
         });
       },

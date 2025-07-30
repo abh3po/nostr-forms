@@ -67,7 +67,7 @@ export const saveToMyForms = async (
     const setupWithTimeout = async (): Promise<SetupResult> => {
       return new Promise(async (resolve, reject) => {
         const timeoutId = setTimeout(() => {
-          reject(new Error("Setup timed out after 15s"));
+          reject(new Error("Setup timed out after 10s"));
         }, 10000);
 
         try {

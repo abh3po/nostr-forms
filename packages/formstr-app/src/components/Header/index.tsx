@@ -19,6 +19,9 @@ export const NostrHeader = () => {
   const { openTemplateModal } = useTemplateContext();
 
   const onMenuClick: MenuProps["onClick"] = (e) => {
+    if (e.key === HEADER_MENU_KEYS.USER) {
+      return;
+    }
     if (e.key === HEADER_MENU_KEYS.HELP) {
       setIsFAQModalVisible(true);
       setSelectedKey([e.key]);
@@ -89,7 +92,12 @@ export const NostrHeader = () => {
           }}
           trigger={["click"]}
         >
-          <div onClick={(e) => e.preventDefault()}>
+          <div
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+            }}
+          >
             <NostrAvatar pubkey={pubkey} /> <DownOutlined />
           </div>
         </Dropdown>
@@ -112,7 +120,7 @@ export const NostrHeader = () => {
               <Logo />
             </Link>
           </Col>
-          <Col md={8} xs={2} sm={2}>
+          <Col md={12} xs={10} sm={2}>
             <Menu
               mode="horizontal"
               theme="light"

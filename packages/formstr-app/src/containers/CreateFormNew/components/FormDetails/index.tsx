@@ -13,8 +13,6 @@ import { EmbedTab } from "./EmbedTab";
 import { SaveStatus } from "./SaveStatus";
 import { saveToDevice, saveToMyForms } from "./utils/saveHelpers";
 import { CustomSlugForm } from "./payments/customSlugForm";
-import axios from "axios";
-import { appConfig } from "../../../../config";
 import { useNavigate } from "react-router-dom";
 
 export const FormDetails = ({

@@ -18,14 +18,27 @@ export const LocalFormCard: React.FC<LocalFormCardProps> = ({
 }) => {
   const navigate = useNavigate();
   let responseUrl = form.formId
-    ? responsePath(form.privateKey, form.formId, form.relay, form.viewKey)
+    ? responsePath(
+        form.privateKey,
+        form.formId,
+        form.relays && form.relays.length !== 0 ? form.relays : [form.relay],
+        form.viewKey
+      )
     : `/response/${form.privateKey}`;
   let formUrl =
     form.publicKey && form.formId
       ? naddrUrl(form.publicKey, form.formId, [form.relay], form.viewKey)
       : `/fill/${form.publicKey}`;
-  const menuItems: MenuProps['items'] = [
-    { key: 'edit', label: 'Edit', icon: <EditOutlined />, onClick: () => navigate(editPath(form.privateKey, form.formId, form.relay, form.viewKey)) },
+  const menuItems: MenuProps["items"] = [
+    {
+      key: "edit",
+      label: "Edit",
+      icon: <EditOutlined />,
+      onClick: () =>
+        navigate(
+          editPath(form.privateKey, form.formId, form.relay, form.viewKey)
+        ),
+    },
   ];
 
   return (
@@ -36,7 +49,7 @@ export const LocalFormCard: React.FC<LocalFormCardProps> = ({
         <div>
           <Dropdown
             menu={{ items: menuItems }}
-            trigger={['click']}
+            trigger={["click"]}
             placement="bottomRight"
           >
             <Button

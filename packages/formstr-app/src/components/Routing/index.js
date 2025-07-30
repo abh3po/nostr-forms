@@ -12,6 +12,7 @@ import { V1DraftsController } from "../../containers/Drafts";
 import CreateForm from "../../containers/CreateFormNew";
 import { Dashboard } from "../../containers/Dashboard";
 import EditForm from "../../containers/EditForm";
+import { CustomUrlForm } from "../../containers/FormFillerNew/CustomUrlForm";
 
 const withNostrHeaderWrapper = (Component, props) => {
   return (
@@ -45,7 +46,7 @@ function Routing() {
         path={`${ROUTES.CREATE_FORMS_NEW}/*`}
         element={withNewCreateFormHeaderWrapper(CreateForm)}
       />
-       <Route
+      <Route
         path={`${ROUTES.EDIT_FORM_SECRET}/*`}
         element={withNewCreateFormHeaderWrapper(EditForm)}
       />
@@ -80,6 +81,7 @@ function Routing() {
         path={`${ROUTES.DASHBOARD}/:filterType?`}
         element={withNostrHeaderWrapper(Dashboard)}
       />
+      <Route path={`${ROUTES.CUSTOM_URL}`} element={<CustomUrlForm />} />
     </Routes>
   );
 }

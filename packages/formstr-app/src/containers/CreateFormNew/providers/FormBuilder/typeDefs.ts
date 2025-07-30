@@ -4,7 +4,7 @@ import { Tag } from "@formstr/sdk/dist/formstr/nip101";
 import { Field } from "../../../../nostr/types";
 import { ProcessedFormData } from "../../components/AIFormGeneratorModal/aiProcessor";
 
-export type RelayStatus = 'connected' | 'pending' | 'error' | 'unknown';
+export type RelayStatus = "connected" | "pending" | "error" | "unknown";
 export interface RelayItem {
   url: string;
   tempId: string;
@@ -20,6 +20,7 @@ export interface ILocalForm {
   formCredentials?: Array<string>;
   formId: string;
   relay: string;
+  relays: string[];
 }
 
 export interface FormInitData {

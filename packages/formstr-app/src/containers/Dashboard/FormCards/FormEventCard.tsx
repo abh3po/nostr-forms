@@ -21,17 +21,20 @@ import {
   EditOutlined,
   MoreOutlined,
   CopyOutlined,
+  InfoCircleOutlined,
 } from "@ant-design/icons";
 import { useEffect, useState } from "react";
 import { constructDraftUrl } from "./Drafts";
 import { useApplicationContext } from "../../../hooks/useApplicationContext";
+import { FormDetails } from "../../CreateFormNew/components/FormDetails";
 
 interface FormEventCardProps {
   event: Event;
   onDeleted?: () => void;
   relay?: string;
   secretKey?: string;
-  viewKey?: string;
+  viewKey?: string | null;
+  shortLink?: string;
 }
 export const FormEventCard: React.FC<FormEventCardProps> = ({
   event,
@@ -39,11 +42,13 @@ export const FormEventCard: React.FC<FormEventCardProps> = ({
   relay,
   secretKey,
   viewKey,
+  shortLink,
 }) => {
   const navigate = useNavigate();
   const { poolRef } = useApplicationContext();
   const publicForm = event.content === "";
   const [tags, setTags] = useState<Tag[]>([]);
+  const [showFormDetails, setShowFormDetails] = useState(false);
   useEffect(() => {
     const initialize = async () => {
       if (event.content === "") {
@@ -68,7 +73,7 @@ export const FormEventCard: React.FC<FormEventCardProps> = ({
   let settings: { description?: string } = {};
   if (publicForm || viewKey) {
     settings = JSON.parse(
-      tags.filter((t) => t[0] === "settings")?.[0]?.[1] || "{}",
+      tags.filter((t) => t[0] === "settings")?.[0]?.[1] || "{}"
     );
   }
 
@@ -76,7 +81,7 @@ export const FormEventCard: React.FC<FormEventCardProps> = ({
     const naddr = makeFormNAddr(
       pubKey,
       formId,
-      relays.length ? relays : ["wss://relay.damus.io"],
+      relays.length ? relays : ["wss://relay.damus.io"]
     );
     const formData = JSON.stringify(await getFormData(naddr, poolRef.current));
     const formFillerUI = (await (await fetch("/api/form-filler-ui")).text())
@@ -98,7 +103,7 @@ export const FormEventCard: React.FC<FormEventCardProps> = ({
     localStorage.setItem("formstr:draftForms", JSON.stringify(updatedDrafts));
     window.open(
       constructDraftUrl(duplicatedForm, window.location.origin),
-      "_blank",
+      "_blank"
     );
   };
 
@@ -141,6 +146,12 @@ export const FormEventCard: React.FC<FormEventCardProps> = ({
           icon: <CopyOutlined />,
           onClick: handleDuplicate,
         },
+        {
+          key: "details",
+          label: "Details",
+          icon: <InfoCircleOutlined />,
+          onClick: () => setShowFormDetails(true),
+        },
       ]
     : [
         {
@@ -149,6 +160,12 @@ export const FormEventCard: React.FC<FormEventCardProps> = ({
           icon: <DownloadOutlined />,
           onClick: downloadForm,
         },
+        {
+          key: "details",
+          label: "Details",
+          icon: <InfoCircleOutlined />,
+          onClick: () => setShowFormDetails(true),
+        },
       ];
 
   return (
@@ -156,7 +173,13 @@ export const FormEventCard: React.FC<FormEventCardProps> = ({
       title={name[1] || "Hidden Form"}
       className="form-card"
       extra={
-        <div style={{ display: "flex", flexDirection: "row" }}>
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "row",
+            alignItems: "center",
+          }}
+        >
           <Dropdown
             menu={{ items: menuItems }}
             trigger={["click"]}
@@ -173,6 +196,18 @@ export const FormEventCard: React.FC<FormEventCardProps> = ({
           {onDeleted ? (
             <DeleteFormTrigger formKey={formKey} onDeleted={onDeleted} />
           ) : null}
+          {showFormDetails && (
+            <FormDetails
+              isOpen={showFormDetails}
+              onClose={() => setShowFormDetails(false)}
+              pubKey={pubKey}
+              formId={formId}
+              secretKey={secretKey || ""}
+              viewKey={viewKey || ""}
+              name={name[1] || ""}
+              relays={relays}
+            />
+          )}
         </div>
       }
       style={{
@@ -206,7 +241,7 @@ export const FormEventCard: React.FC<FormEventCardProps> = ({
           <Button
             onClick={(e) => {
               secretKey
-                ? navigate(responsePath(secretKey, formId, relay, viewKey))
+                ? navigate(responsePath(secretKey, formId, relays, viewKey))
                 : navigate(`/r/${pubKey}/${formId}`);
             }}
             type="dashed"
@@ -220,14 +255,18 @@ export const FormEventCard: React.FC<FormEventCardProps> = ({
           <Button
             onClick={(e: any) => {
               e.stopPropagation();
-              navigate(
-                naddrUrl(
-                  pubKey,
-                  formId,
-                  relays.length ? relays : ["wss://relay.damus.io"],
-                  viewKey,
-                ),
-              );
+              if (shortLink) {
+                navigate(shortLink);
+              } else {
+                navigate(
+                  naddrUrl(
+                    pubKey,
+                    formId,
+                    relays.length ? relays : ["wss://relay.damus.io"],
+                    viewKey
+                  )
+                );
+              }
             }}
             style={{
               marginLeft: "10px",

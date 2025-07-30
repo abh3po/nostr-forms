@@ -15,8 +15,8 @@ interface FormRendererContainerProps {
   formEvent: Event;
   onSubmitClick: (responses: Response[], formTemplate: Tag[]) => void;
   viewKey: string | null;
-  hideTitleImage?:  boolean;
-  hideDescription?: boolean
+  hideTitleImage?: boolean;
+  hideDescription?: boolean;
 }
 
 export const FormRendererContainer: React.FC<FormRendererContainerProps> = ({
@@ -24,7 +24,7 @@ export const FormRendererContainer: React.FC<FormRendererContainerProps> = ({
   onSubmitClick,
   viewKey,
   hideDescription,
-  hideTitleImage
+  hideTitleImage,
 }) => {
   const { pubkey: userPubKey, requestPubkey } = useProfileContext();
   const [form] = Form.useForm();
@@ -71,8 +71,7 @@ export const FormRendererContainer: React.FC<FormRendererContainerProps> = ({
     const responses: Response[] = Object.keys(formResponses).map((fieldId) => {
       let answer = null;
       let message = null;
-      if (formResponses[fieldId])
-        [answer, message] = formResponses[fieldId];
+      if (formResponses[fieldId]) [answer, message] = formResponses[fieldId];
       return ["response", fieldId, answer, JSON.stringify({ message })];
     });
     onSubmitClick(responses, formTemplate!);
@@ -109,12 +108,16 @@ export const FormRendererContainer: React.FC<FormRendererContainerProps> = ({
     );
   }
 
-  if (!formTemplate)
+  if (!formTemplate) {
+    if (!userPubKey) {
+      return <Button onClick={requestPubkey}>Form Requires Login</Button>;
+    }
     return (
       <div>
-        <Typography.Text> Form is encrypted </Typography.Text>
+        <Typography.Text> You do not have access to this form</Typography.Text>
       </div>
     );
+  }
 
   return (
     <FormRenderer
@@ -122,8 +125,8 @@ export const FormRendererContainer: React.FC<FormRendererContainerProps> = ({
       form={form}
       onInput={handleInput}
       footer={footer}
-      hideTitleImage={hideTitleImage}         
-      hideDescription={hideDescription}       
+      hideTitleImage={hideTitleImage}
+      hideDescription={hideDescription}
     />
   );
 };

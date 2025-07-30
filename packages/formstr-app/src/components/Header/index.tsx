@@ -1,13 +1,4 @@
-import {
-  Layout,
-  Menu,
-  Row,
-  Col,
-  Button,
-  Dropdown,
-  MenuProps,
-  Typography,
-} from "antd";
+import { Layout, Menu, Row, Col, Dropdown, MenuProps, Typography } from "antd";
 import { Link } from "react-router-dom";
 import "./index.css";
 import { ReactComponent as Logo } from "../../Images/formstr.svg";
@@ -17,8 +8,8 @@ import { useProfileContext } from "../../hooks/useProfileContext";
 import { NostrAvatar } from "./NostrAvatar";
 import { ReactComponent as GeyserIcon } from "../../Images/Geyser.svg";
 import { useState } from "react";
-import FAQModal from "../FAQModal";
-import { useTemplateContext } from '../../provider/TemplateProvider';
+import { useTemplateContext } from "../../provider/TemplateProvider";
+import ThemedUniversalModal from "../UniversalMarkdownModal";
 
 export const NostrHeader = () => {
   const { Header } = Layout;
@@ -28,13 +19,10 @@ export const NostrHeader = () => {
   const { openTemplateModal } = useTemplateContext();
 
   const onMenuClick: MenuProps["onClick"] = (e) => {
-    if (e.key === HEADER_MENU_KEYS.USER) {
-      return;
-    }
     if (e.key === HEADER_MENU_KEYS.HELP) {
       setIsFAQModalVisible(true);
       setSelectedKey([e.key]);
-      return; 
+      return;
     }
     if (e.key === HEADER_MENU_KEYS.CREATE_FORMS) {
       openTemplateModal();
@@ -99,8 +87,9 @@ export const NostrHeader = () => {
             overflowedIndicator: null,
             style: { overflow: "auto" },
           }}
+          trigger={["click"]}
         >
-          <div onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}>
+          <div onClick={(e) => e.preventDefault()}>
             <NostrAvatar pubkey={pubkey} /> <DownOutlined />
           </div>
         </Dropdown>
@@ -123,7 +112,7 @@ export const NostrHeader = () => {
               <Logo />
             </Link>
           </Col>
-          <Col md={12} xs={10} sm={2}>
+          <Col md={8} xs={2} sm={2}>
             <Menu
               mode="horizontal"
               theme="light"
@@ -136,9 +125,14 @@ export const NostrHeader = () => {
           </Col>
         </Row>
       </Header>
-      <FAQModal
+      <ThemedUniversalModal
         visible={isFAQModalVisible}
-        onClose={() => { setIsFAQModalVisible(false); setSelectedKey([]); }}
+        onClose={() => {
+          setIsFAQModalVisible(false);
+          setSelectedKey([]);
+        }}
+        filePath="/docs/faq.md"
+        title="Frequently Asked Questions"
       />
     </>
   );

@@ -5,12 +5,14 @@ interface DropdownFillerProps {
   options: Option[];
   onChange: (text: string) => void;
   defaultValue?: string;
+  disabled?: boolean;
 }
 
 export const DropdownFiller: React.FC<DropdownFillerProps> = ({
   options,
   onChange,
   defaultValue,
+  disabled = false,
 }) => {
   return (
     <>
@@ -20,8 +22,9 @@ export const DropdownFiller: React.FC<DropdownFillerProps> = ({
           let [choiceId, label] = choice;
           return { value: choiceId, label: label };
         })}
-        defaultValue={defaultValue}
+        value={defaultValue}
         placeholder="Select an option"
+        disabled={disabled}
       />
     </>
   );

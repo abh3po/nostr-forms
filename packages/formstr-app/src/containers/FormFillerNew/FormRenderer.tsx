@@ -18,6 +18,8 @@ interface FormRendererProps {
   footer?: React.ReactNode;
   hideTitleImage?: boolean;
   hideDescription?: boolean;
+  disabled?: boolean;
+  initialValues?: Record<string, any>;
 }
 
 export const FormRenderer: React.FC<FormRendererProps> = ({
@@ -27,6 +29,8 @@ export const FormRenderer: React.FC<FormRendererProps> = ({
   footer,
   hideTitleImage,
   hideDescription,
+  disabled = false,
+  initialValues,
 }) => {
   const name = formTemplate.find((tag) => tag[0] === "name")?.[1] || "";
   const settings = JSON.parse(
@@ -55,7 +59,7 @@ export const FormRenderer: React.FC<FormRendererProps> = ({
           )}
 
           <Form form={form} onFinish={() => { }} className="with-description">
-            <FormFields fields={fields} handleInput={onInput} />
+            <FormFields fields={fields} handleInput={onInput} disabled={disabled} values={initialValues}/>
             {footer}
           </Form>
         </div>

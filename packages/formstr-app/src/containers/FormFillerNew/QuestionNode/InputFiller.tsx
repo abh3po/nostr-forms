@@ -13,6 +13,7 @@ interface InputFillerProps {
   options: Option[];
   onChange: (answer: string, message?: string) => void;
   defaultValue?: string | number | boolean;
+  testId? : string;
 }
 
 export const InputFiller: React.FC<InputFillerProps> = ({
@@ -20,6 +21,7 @@ export const InputFiller: React.FC<InputFillerProps> = ({
   options,
   onChange,
   defaultValue,
+  testId = "input-filler",
 }) => {
   const handleInputChange = (
     e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -43,6 +45,7 @@ export const InputFiller: React.FC<InputFillerProps> = ({
           defaultValue={defaultValue as string}
           onChange={handleInputChange}
           placeholder="Please enter your response"
+          data-testid={`${testId}:text-input`}
         />
       ),
       [AnswerTypes.paragraph]: (
@@ -50,6 +53,7 @@ export const InputFiller: React.FC<InputFillerProps> = ({
           defaultValue={defaultValue as string}
           onChange={handleInputChange}
           placeholder="Please enter your response"
+          data-testid={`${testId}:text-area`}
         />
       ),
       [AnswerTypes.number]: (
@@ -58,6 +62,7 @@ export const InputFiller: React.FC<InputFillerProps> = ({
           onChange={handleValueChange}
           style={{ width: "100%" }}
           placeholder="Please enter your response"
+          data-testid={`${testId}:number-input`}
         />
       ),
       [AnswerTypes.radioButton]: (
@@ -66,6 +71,7 @@ export const InputFiller: React.FC<InputFillerProps> = ({
           options={options}
           defaultValue={defaultValue as string}
           onChange={handleValueChange}
+          testId={`${testId}:radio`}
         />
       ),
       [AnswerTypes.checkboxes]: (
@@ -74,6 +80,7 @@ export const InputFiller: React.FC<InputFillerProps> = ({
           answerType={answerType as AnswerTypes.checkboxes}
           options={options}
           onChange={handleValueChange}
+          testId={`${testId}:checkboxes`}
         />
       ),
       [AnswerTypes.dropdown]: (
@@ -81,18 +88,21 @@ export const InputFiller: React.FC<InputFillerProps> = ({
           defaultValue={defaultValue as string}
           options={options}
           onChange={handleValueChange}
+          testId={`${testId}:dropdown`}
         />
       ),
       [AnswerTypes.date]: (
         <DateFiller
           defaultValue={defaultValue as string}
           onChange={handleValueChange}
+          testId={`${testId}:date`}
         />
       ),
       [AnswerTypes.time]: (
         <TimeFiller
           defaultValue={defaultValue as string}
           onChange={handleValueChange}
+          testId={`${testId}:time`}
         />
       ),
     };

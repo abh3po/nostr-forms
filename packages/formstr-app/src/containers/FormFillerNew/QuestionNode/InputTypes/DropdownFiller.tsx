@@ -5,12 +5,14 @@ interface DropdownFillerProps {
   options: Option[];
   onChange: (text: string) => void;
   defaultValue?: string;
+  testId? : string;
 }
 
 export const DropdownFiller: React.FC<DropdownFillerProps> = ({
   options,
   onChange,
   defaultValue,
+  testId = "dropdown-filler",
 }) => {
   return (
     <>
@@ -22,6 +24,7 @@ export const DropdownFiller: React.FC<DropdownFillerProps> = ({
         })}
         defaultValue={defaultValue}
         placeholder="Select an option"
+        data-testid={`${testId}:select`}
       />
     </>
   );

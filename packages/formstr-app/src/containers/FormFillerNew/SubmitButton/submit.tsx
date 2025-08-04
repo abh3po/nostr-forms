@@ -119,6 +119,7 @@ export const SubmitButton: React.FC<SubmitButtonProps> = ({
         icon={<DownOutlined />}
         disabled={isDisabled}
         className="submit-button"
+        data-testid="submit-button"
       >
         {disabled ? (
           disabledMessage

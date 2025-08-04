@@ -11,6 +11,7 @@ interface QuestionProps {
   options: Option[]
   inputHandler: (questionId: string, answer: string, message?: string) => void;
   required: boolean;
+  testId: string;
 }
 
 export const QuestionNode: React.FC<QuestionProps> = ({
@@ -20,6 +21,7 @@ export const QuestionNode: React.FC<QuestionProps> = ({
   options,
   inputHandler,
   required,
+  testId,
 }) => {
   const answerHandler = (questionId: string) => {
     return (answer: string, message?: string) => {
@@ -28,7 +30,7 @@ export const QuestionNode: React.FC<QuestionProps> = ({
   };
 
   return (
-    <Card type="inner" className="filler-question">
+    <Card type="inner" className="filler-question" data-testid={`${testId}:card`}>
       {required && <span style={{ color: "#ea8dea" }}>* &nbsp;</span>}
       <div className="question-text">
         <Markdown>{label}</Markdown>
@@ -38,6 +40,7 @@ export const QuestionNode: React.FC<QuestionProps> = ({
         fieldConfig={fieldConfig}
         options={options}
         onChange={answerHandler(fieldId)}
+        testId={`${testId}:input`}
       />
     </Card>
   );

@@ -16,6 +16,13 @@ export const BASIC_MENU = [
       renderElement: AnswerTypes.label,
     },
   },
+  {
+    key: BASIC_MENU_KEYS.SECTION,
+    label: "Section",
+    icon: <InputIcon style={{ color: "#1e3f66", fill: "#1e3f66" }} />,
+    primitive: "section",
+    answerSettings: undefined,
+  },
 ];
 
 export const INPUTS_MENU = [

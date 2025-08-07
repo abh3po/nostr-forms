@@ -61,7 +61,7 @@ const DeleteButton: React.FC<DeleteButtonProps> = ({ onDelete, className }) => {
       if (intervalRef.current) clearInterval(intervalRef.current);
       if (messageKeyRef.current) messageApi.destroy(messageKeyRef.current);
     };
-  }, []);
+  }, [messageApi]);
 
   return (
     <>

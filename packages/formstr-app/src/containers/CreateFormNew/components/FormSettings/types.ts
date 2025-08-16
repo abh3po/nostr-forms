@@ -1,11 +1,15 @@
+import { SectionData } from "../../providers/FormBuilder/typeDefs";
+
 export interface IFormSettings {
   titleImageUrl?: string;
   description?: string;
   thankYouPage?: boolean;
-  notifyNpubs?: Array<string>;
+  notifyNpubs?: string[];
   publicForm?: boolean;
   disallowAnonymous?: boolean;
+  encryptForm?: boolean;
+  viewKeyInUrl?: boolean;
   formId?: string;
-  encryptForm?: boolean
-  viewKeyInUrl?: boolean
+  sections?: SectionData[];
+  enableSections?: boolean;
 }

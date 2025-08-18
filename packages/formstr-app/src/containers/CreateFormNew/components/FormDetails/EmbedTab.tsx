@@ -49,7 +49,18 @@ export const EmbedTab = ({
       </div>
 
       <div className="embed-container">
-        <code className="embedded-code">{iframeHtml}</code>
+        <pre
+          className="embedded-code"
+          style={{
+            whiteSpace: "pre-wrap", // ✅ wrap long strings
+            wordBreak: "break-word", // ✅ break inside long tag
+            overflowX: "auto", // ✅ horizontal scroll as fallback
+            display: "block",
+          }}
+        >
+          {iframeHtml}
+        </pre>
+
         <CopyButton getText={() => iframeHtml} textBefore="" textAfter="" />
       </div>
     </div>

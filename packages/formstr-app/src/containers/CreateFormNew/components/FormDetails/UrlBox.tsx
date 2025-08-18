@@ -1,6 +1,7 @@
 import { Button, Tooltip } from "antd";
 import { CopyOutlined, LinkOutlined } from "@ant-design/icons";
 import { useState } from "react";
+import { isMobile } from "../../../../utils/utility";
 
 export const UrlBox = ({
   label,
@@ -38,11 +39,12 @@ export const UrlBox = ({
               background: "#f5f5f5",
               padding: "8px 12px",
               borderRadius: 8,
-              maxWidth,
+              width: isMobile() ? 200 : 400,
+              minWidth: 0, // ✅ lets flexbox shrink
               overflow: "hidden",
               whiteSpace: showFullUrl ? "normal" : "nowrap",
               textOverflow: showFullUrl ? "clip" : "ellipsis",
-              flexShrink: 0,
+              flex: 1, // ✅ allow it to take remaining space, shrink if needed
             }}
           >
             <a
@@ -51,6 +53,7 @@ export const UrlBox = ({
               rel="noopener noreferrer"
               style={{
                 display: "inline-block",
+                paddingTop: 10,
                 maxWidth: "100%",
                 overflow: "hidden",
                 textOverflow: showFullUrl ? "clip" : "ellipsis",

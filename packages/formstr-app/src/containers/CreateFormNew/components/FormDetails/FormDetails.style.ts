@@ -6,6 +6,7 @@ export default styled.div`
     align-items: center;
     text-align: center;
     flex-direction: column;
+    width: 100%;
   }
 
   .form-details-card {
@@ -31,12 +32,16 @@ export default styled.div`
     align-items: center;
     align-content: center;
     justify-content: center;
+    width: 100%;
   }
 
   .embedded-code {
     width: 50%;
+    max-width: 100%;
     word-wrap: break-word;
+    overflow-wrap: anywhere;
   }
+
   .ant-checkbox {
     margin-bottom: 4px;
     overflow-wrap: normal;
@@ -44,18 +49,20 @@ export default styled.div`
 
   .share-links {
     word-wrap: break-word;
+    overflow-wrap: anywhere;
     justify-content: center;
     align-items: center;
+    max-width: 100%;
   }
 
   .embed-container {
     padding: 10px;
-    background: rgb(0, 0, 0);
     background: radial-gradient(
       rgba(199, 199, 199, 1) 0%,
       rgba(255, 255, 255, 1) 100%
     );
     margin-bottom: 10px;
     width: 60%;
+    max-width: 100%;
   }
 `;

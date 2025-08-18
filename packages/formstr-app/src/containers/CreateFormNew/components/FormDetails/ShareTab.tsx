@@ -9,7 +9,12 @@ export const ShareTab = ({
   responsesUrl?: string;
 }) => {
   return (
-    <div className="share-links" style={{ textAlign: "center" }}>
+    <div
+      className="share-links"
+      style={{
+        textAlign: "center",
+      }}
+    >
       <Success />
       <div style={{ marginTop: 12 }}>
         <UrlBox label="Live Form URL" url={formUrl} />

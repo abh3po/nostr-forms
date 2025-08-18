@@ -2,7 +2,7 @@ import { Button, Card, Typography, Dropdown, MenuProps } from "antd";
 import { ILocalForm } from "../../CreateFormNew/providers/FormBuilder/typeDefs";
 import { useNavigate } from "react-router-dom";
 import DeleteFormTrigger from "./DeleteForm";
-import { naddrUrl } from "../../../utils/utility";
+import { makeFormNAddr, naddrUrl } from "../../../utils/utility";
 import { editPath, responsePath } from "../../../utils/formUtils";
 import { EditOutlined, MoreOutlined } from "@ant-design/icons";
 
@@ -20,8 +20,11 @@ export const LocalFormCard: React.FC<LocalFormCardProps> = ({
   let responseUrl = form.formId
     ? responsePath(
         form.privateKey,
-        form.formId,
-        form.relays && form.relays.length !== 0 ? form.relays : [form.relay],
+        makeFormNAddr(
+          form.publicKey,
+          form.formId,
+          form.relays && form.relays.length !== 0 ? form.relays : [form.relay]
+        ),
         form.viewKey
       )
     : `/response/${form.privateKey}`;
@@ -36,7 +39,15 @@ export const LocalFormCard: React.FC<LocalFormCardProps> = ({
       icon: <EditOutlined />,
       onClick: () =>
         navigate(
-          editPath(form.privateKey, form.formId, form.relay, form.viewKey)
+          editPath(
+            form.privateKey,
+            makeFormNAddr(
+              form.publicKey,
+              form.formId,
+              form.relays?.length ? form.relays : undefined
+            ),
+            form.viewKey
+          )
         ),
     },
   ];

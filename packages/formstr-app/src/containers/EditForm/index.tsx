@@ -4,16 +4,26 @@ import useFormBuilderContext from "../CreateFormNew/hooks/useFormBuilderContext"
 import { useEffect, useState } from "react";
 import { HEADER_MENU_KEYS } from "../CreateFormNew/components/Header/config";
 import { FormFiller } from "../FormFillerNew";
-import { getPublicKey, SimplePool } from "nostr-tools";
+import { getPublicKey, nip19, SimplePool } from "nostr-tools";
 import { hexToBytes } from "@noble/hashes/utils";
 import { getDefaultRelays } from "@formstr/sdk";
 import { Spin, Typography } from "antd";
 import { getFormSpec as formSpecFromEvent } from "../../utils/formUtils";
 import { useProfileContext } from "../../hooks/useProfileContext";
 import { LoadingOutlined } from "@ant-design/icons";
+import { AddressPointer } from "nostr-tools/nip19";
 
 function EditForm() {
-  const { formSecret, formId } = useParams();
+  const { naddr, secretKey, identifier } = useParams();
+  let formId: string | undefined;
+  let relays: string[] | undefined;
+  if (!secretKey && !identifier) {
+    const { identifier, relays: relaysArray } = nip19.decode(naddr!)
+      .data as AddressPointer;
+    formId = identifier;
+    relays = relaysArray;
+  }
+  const formSecret = secretKey || window.location.hash.replace(/^#/, "");
   const { initializeForm, saveDraft, selectedTab, getFormSpec } =
     useFormBuilderContext();
   const [initialized, setInitialized] = useState(false);
@@ -30,7 +40,7 @@ function EditForm() {
       kinds: [30168],
     };
     let pool = new SimplePool();
-    let formEvent = await pool.get(getDefaultRelays(), filter);
+    let formEvent = await pool.get(relays || getDefaultRelays(), filter);
     if (!formEvent) {
       setError("Form Not Found :(");
       return;

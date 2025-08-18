@@ -1,9 +1,16 @@
 import { FormTemplate } from "../templates";
-import { makeTag } from "./utility";
+import { makeFormNAddr, makeTag } from "./utility";
 import { getDefaultRelays } from "@formstr/sdk";
 import { Tag } from "@formstr/sdk/dist/formstr/nip101";
-import { nip44, Event, UnsignedEvent, SimplePool, nip19 } from "nostr-tools";
-import { bytesToHex } from "@noble/hashes/utils";
+import {
+  nip44,
+  Event,
+  UnsignedEvent,
+  SimplePool,
+  nip19,
+  getPublicKey,
+} from "nostr-tools";
+import { bytesToHex, hexToBytes } from "@noble/hashes/utils";
 import { sha256 } from "@noble/hashes/sha256";
 import { naddrUrl } from "./utility";
 import { AddressPointer } from "nostr-tools/nip19";
@@ -138,29 +145,26 @@ export const constructFormUrl = (
 };
 
 export const editPath = (
-  scretKey: string,
-  formId: string,
-  relay?: string,
+  formSecret: string,
+  naddr: string,
   viewKey?: string | null
 ) => {
-  const baseUrl = `/edit/${scretKey}/${formId}`;
   const params = new URLSearchParams();
-  if (relay) params.append("relay", relay);
-  if (viewKey) params.append("viewKey", viewKey);
-  return params.toString() ? `${baseUrl}?${params.toString()}` : baseUrl;
-};
+  if (viewKey) params.set("viewKey", viewKey);
 
+  const query = params.toString() ? `?${params.toString()}` : "";
+  return `/edit/${naddr}${query}#${formSecret}`;
+};
 export const responsePath = (
   secretKey: string,
-  formId: string,
-  relays?: string[],
+  naddr: string,
   viewKey?: string | null
 ) => {
-  const baseUrl = `/s/${secretKey}/${formId}`;
   const params = new URLSearchParams();
-  if (relays && relays.length !== 0) params.append("relay", relays[0]);
-  if (viewKey) params.append("viewKey", viewKey);
-  return params.toString() ? `${baseUrl}?${params.toString()}` : baseUrl;
+  if (viewKey) params.set("viewKey", viewKey);
+
+  const query = params.toString() ? `?${params.toString()}` : "";
+  return `/s/${naddr}${query}#${secretKey}`;
 };
 
 export const constructNewResponseUrl = (
@@ -170,7 +174,11 @@ export const constructNewResponseUrl = (
   viewKey?: string
 ) => {
   const baseUrl = `${window.location.origin}`;
-  const responsePart = responsePath(secretKey, formId, relays, viewKey);
+  const responsePart = responsePath(
+    secretKey,
+    makeFormNAddr(getPublicKey(hexToBytes(secretKey)), formId, relays),
+    viewKey
+  );
   return `${baseUrl}${responsePart}`;
 };
 

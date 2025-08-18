@@ -14,6 +14,7 @@ import { SaveStatus } from "./SaveStatus";
 import { saveToDevice, saveToMyForms } from "./utils/saveHelpers";
 import { CustomSlugForm } from "./payments/customSlugForm";
 import { useNavigate } from "react-router-dom";
+import { makeFormNAddr } from "../../../../utils/utility";
 
 export const FormDetails = ({
   isOpen,
@@ -110,7 +111,13 @@ export const FormDetails = ({
             viewKey={viewKey}
             showAccessWarning={/viewKey/.test(formUrl)}
             onEditClick={() =>
-              navigate(editPath(secretKey, formId, relays[0], viewKey))
+              navigate(
+                editPath(
+                  secretKey,
+                  makeFormNAddr(pubKey, formId, relays),
+                  viewKey
+                )
+              )
             }
           />
 

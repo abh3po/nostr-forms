@@ -27,6 +27,7 @@ import { useEffect, useState } from "react";
 import { constructDraftUrl } from "./Drafts";
 import { useApplicationContext } from "../../../hooks/useApplicationContext";
 import { FormDetails } from "../../CreateFormNew/components/FormDetails";
+import { getDefaultRelays } from "@formstr/sdk";
 
 interface FormEventCardProps {
   event: Event;
@@ -138,7 +139,14 @@ export const FormEventCard: React.FC<FormEventCardProps> = ({
           key: "edit",
           label: "Edit",
           icon: <EditOutlined />,
-          onClick: () => navigate(editPath(secretKey, formId, relay, viewKey)),
+          onClick: () =>
+            navigate(
+              editPath(
+                secretKey,
+                makeFormNAddr(pubKey, formId, relay ? [relay] : undefined),
+                viewKey
+              )
+            ),
         },
         {
           key: "duplicate",
@@ -241,7 +249,13 @@ export const FormEventCard: React.FC<FormEventCardProps> = ({
           <Button
             onClick={(e) => {
               secretKey
-                ? navigate(responsePath(secretKey, formId, relays, viewKey))
+                ? navigate(
+                    responsePath(
+                      secretKey,
+                      makeFormNAddr(pubKey, formId, relays),
+                      viewKey
+                    )
+                  )
                 : navigate(`/r/${pubKey}/${formId}`);
             }}
             type="dashed"

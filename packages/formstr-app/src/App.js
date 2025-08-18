@@ -4,12 +4,10 @@ import Routing from "./components/Routing";
 import { ProfileProvider } from "./provider/ProfileProvider";
 import { ApplicationProvider } from "./provider/ApplicationProvider";
 import { TemplateProvider } from "./provider/TemplateProvider";
-import { HandleLegacyRoutes } from "./components/HandleLegacyRoutes";
 
 function App() {
   return (
     <BrowserRouter>
-        <HandleLegacyRoutes>
       <div className="App">
         <ApplicationProvider>
           <ProfileProvider>
@@ -19,7 +17,6 @@ function App() {
           </ProfileProvider>
         </ApplicationProvider>
       </div>
-        </HandleLegacyRoutes>
     </BrowserRouter>
   );
 }

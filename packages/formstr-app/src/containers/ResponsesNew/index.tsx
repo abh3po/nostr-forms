@@ -33,16 +33,22 @@ export const Response = () => {
   const [formEvent, setFormEvent] = useState<Event | undefined>(undefined);
   const [formSpec, setFormSpec] = useState<Tag[] | null | undefined>(undefined);
   const [editKey, setEditKey] = useState<string | undefined | null>();
-  let { naddr, formSecret, identifier } = useParams();
+  let { naddr, formSecret, identifier, pubKey } = useParams();
   let formId: string | undefined;
   let pubkey: string | undefined;
   let relays: string[] | undefined;
-  if (!formSecret && !identifier) {
-    let { identifier, pubkey, relays } = nip19.decode(naddr!)
-      .data as AddressPointer;
-    formId = identifier;
+  if (!formSecret && !identifier && naddr) {
+    let {
+      identifier: dTag,
+      pubkey,
+      relays,
+    } = nip19.decode(naddr!).data as AddressPointer;
+    formId = dTag;
     pubkey = pubkey;
     relays = relays;
+  } else {
+    formId = identifier;
+    pubkey = pubKey;
   }
   const secretKey = formSecret || window.location.hash.replace(/^#/, "");
   if (!pubkey) pubkey = getPublicKey(hexToBytes(secretKey));
@@ -331,7 +337,7 @@ export const Response = () => {
     }
     return [...columns, ...rightColumns];
   };
-
+  console.log("INVALID URL", pubkey, secretKey, formId);
   if (!(pubkey || secretKey) || !formId) return <Text>Invalid url</Text>;
 
   if (

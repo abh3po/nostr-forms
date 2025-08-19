@@ -14,16 +14,16 @@ import { LoadingOutlined } from "@ant-design/icons";
 import { AddressPointer } from "nostr-tools/nip19";
 
 function EditForm() {
-  const { naddr, secretKey, identifier } = useParams();
-  let formId: string | undefined = identifier;
+  const { naddr } = useParams();
+  let formId: string | undefined;
   let relays: string[] | undefined;
-  if (!secretKey && !identifier) {
+  if (naddr) {
     const { identifier, relays: relaysArray } = nip19.decode(naddr!)
       .data as AddressPointer;
     formId = identifier;
     relays = relaysArray;
   }
-  const formSecret = secretKey || window.location.hash.replace(/^#/, "");
+  const formSecret = window.location.hash.replace(/^#/, "");
   const { initializeForm, saveDraft, selectedTab, getFormSpec } =
     useFormBuilderContext();
   const [initialized, setInitialized] = useState(false);

@@ -51,10 +51,6 @@ function Routing() {
         element={withNewCreateFormHeaderWrapper(EditForm)}
       />
       <Route
-        path={`${ROUTES.EDIT_FORM_SECRET_OLD}/*`}
-        element={withNewCreateFormHeaderWrapper(EditForm)}
-      />
-      <Route
         path={`${ROUTES.PUBLIC_FORMS}/*`}
         element={withNostrHeaderWrapper(PublicForms)}
       />
@@ -74,10 +70,6 @@ function Routing() {
       />
       <Route
         path={`${ROUTES.RESPONSES_SECRET}/*`}
-        element={withNostrHeaderWrapper(Response)}
-      />
-      <Route
-        path={`${ROUTES.RESPONSES_SECRET_OLD}/*`}
         element={withNostrHeaderWrapper(Response)}
       />
       <Route

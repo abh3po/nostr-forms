@@ -258,14 +258,14 @@ export const CustomSlugForm = ({
                       <Alert
                         message={
                           <>
-                            <Text>
-                            Your current current form visitibilty is set to "Anyone with the link can access your form", if you proceed this will also apply to Formstr Inc.
+                            <Text style={{fontSize: 8}}>
+                            Your current current form visitibilty is set to "Anyone with the link can access your form", if you proceed with customized links with this setting Formstr Inc will also be able to access this form.
                             To change it, so that only fixed participants can access the form, please click 
                             </Text>
                             {onEditClick && (
                               <Button
                                 type="link"
-                                style={{ marginLeft: 8, padding: 0 }}
+                                style={{ padding: 0, fontSize: 8 }}
                                 onClick={onEditClick}
                               >
                                 here

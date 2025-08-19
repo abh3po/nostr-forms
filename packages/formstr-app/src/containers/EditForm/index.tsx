@@ -15,7 +15,7 @@ import { AddressPointer } from "nostr-tools/nip19";
 
 function EditForm() {
   const { naddr, secretKey, identifier } = useParams();
-  let formId: string | undefined;
+  let formId: string | undefined = identifier;
   let relays: string[] | undefined;
   if (!secretKey && !identifier) {
     const { identifier, relays: relaysArray } = nip19.decode(naddr!)

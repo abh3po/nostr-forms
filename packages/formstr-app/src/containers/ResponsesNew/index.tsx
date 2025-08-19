@@ -34,24 +34,21 @@ export const Response = () => {
   const [formSpec, setFormSpec] = useState<Tag[] | null | undefined>(undefined);
   const [editKey, setEditKey] = useState<string | undefined | null>();
   let { naddr, formSecret, identifier, pubKey } = useParams();
-  let formId: string | undefined;
-  let pubkey: string | undefined;
+  let formId: string | undefined = identifier;
+  let pubkey: string | undefined = pubKey;
   let relays: string[] | undefined;
   if (!formSecret && !identifier && naddr) {
     let {
       identifier: dTag,
-      pubkey,
-      relays,
+      pubkey: decodedPubkey,
+      relays: decodedRelays,
     } = nip19.decode(naddr!).data as AddressPointer;
     formId = dTag;
-    pubkey = pubkey;
-    relays = relays;
-  } else {
-    formId = identifier;
-    pubkey = pubKey;
+    pubkey = decodedPubkey;
+    relays = decodedRelays;
   }
   const secretKey = formSecret || window.location.hash.replace(/^#/, "");
-  if (!pubkey) pubkey = getPublicKey(hexToBytes(secretKey));
+  if (!pubkey && secretKey) pubkey = getPublicKey(hexToBytes(secretKey));
 
   let [searchParams] = useSearchParams();
   const { pubkey: userPubkey, requestPubkey } = useProfileContext();
@@ -337,7 +334,6 @@ export const Response = () => {
     }
     return [...columns, ...rightColumns];
   };
-  console.log("INVALID URL", pubkey, secretKey, formId);
   if (!(pubkey || secretKey) || !formId) return <Text>Invalid url</Text>;
 
   if (

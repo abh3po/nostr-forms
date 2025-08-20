@@ -276,7 +276,7 @@ export const Response = () => {
       dataIndex: string;
       fixed?: "left" | "right";
       width?: number;
-      render?: (data: string, record: any) => JSX.Element;
+      render?: (data: string) => JSX.Element;
     }> = [
       {
         key: "createdAt",
@@ -300,8 +300,8 @@ export const Response = () => {
       let [_, fieldId, __, label] = field;
       columns.push({
         key: fieldId,
-        title: label || `Question: ${fieldId.substring(0,5)}...`,
-        dataIndex: fieldId,
+        title: label || `Question: ${fieldId.substring(0, 5)}...`,
+        dataIndex: label || fieldId,
         width: 150,
       });
       uniqueQuestionIdsInResponses.delete(fieldId);
@@ -413,8 +413,8 @@ export const Response = () => {
         <div style={{ overflow: "scroll", marginBottom: 60 }}>
           <Table
             columns={getColumns()}
-            dataSource={getData()}
-            pagination={{ pageSize: 10 }} 
+            dataSource={getData(true)}
+            pagination={{ pageSize: 10 }}
             loading={{
               spinning: responses === undefined,
               tip: "🔎 Looking for responses...",

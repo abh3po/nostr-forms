@@ -22,8 +22,6 @@ interface FormRendererProps {
   footer?: React.ReactNode;
   hideTitleImage?: boolean;
   hideDescription?: boolean;
-  disabled?: boolean;
-  initialValues?: Record<string, any>;
 }
 
 // Content item can be either a section or individual questions
@@ -43,8 +41,6 @@ export const FormRenderer: React.FC<FormRendererProps> = ({
   footer,
   hideTitleImage,
   hideDescription,
-  disabled = false,
-  initialValues,
 }) => {
   const name = formTemplate.find((tag) => tag[0] === "name")?.[1] || "";
   const settings = JSON.parse(
@@ -231,7 +227,7 @@ export const FormRenderer: React.FC<FormRendererProps> = ({
           )}
 
           {/* Form Fields */}
-          <FormFields fields={currentItem.fields} handleInput={onInput} disabled={disabled} values={initialValues} />
+          <FormFields fields={currentItem.fields} handleInput={onInput} />
         </>
       )}
 
@@ -279,7 +275,6 @@ export const FormRenderer: React.FC<FormRendererProps> = ({
               </Text>
             </div>
           )}
-
           <Form form={form} onFinish={() => {}} className="with-description">
             {renderSteppedForm()}
           </Form>

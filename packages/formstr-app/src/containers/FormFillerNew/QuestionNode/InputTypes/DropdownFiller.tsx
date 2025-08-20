@@ -5,7 +5,6 @@ interface DropdownFillerProps {
   options: Option[];
   onChange: (text: string) => void;
   defaultValue?: string;
-  disabled?: boolean;
   testId? : string;
 }
 
@@ -13,7 +12,6 @@ export const DropdownFiller: React.FC<DropdownFillerProps> = ({
   options,
   onChange,
   defaultValue,
-  disabled = false,
   testId = "dropdown-filler",
 }) => {
   return (
@@ -24,9 +22,8 @@ export const DropdownFiller: React.FC<DropdownFillerProps> = ({
           let [choiceId, label] = choice;
           return { value: choiceId, label: label };
         })}
-        value={defaultValue}
+        defaultValue={defaultValue}
         placeholder="Select an option"
-        disabled={disabled}
         data-testid={`${testId}:select`}
       />
     </>

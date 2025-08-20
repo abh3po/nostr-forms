@@ -1,9 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { Modal, Descriptions, Typography, Button, Space, Form } from 'antd';
+import { Modal, Descriptions, Typography, Button, Space } from 'antd';
 import { Event, nip19 } from 'nostr-tools';
 import { Tag } from '../../../nostr/types';
 import {getResponseLabels, DisplayableAnswerDetail} from '../../../utils/ResponseUtils';
-import { FormRenderer } from '../../FormFillerNew/FormRenderer';
 
 const { Text } = Typography;
 
@@ -26,41 +25,39 @@ export const ResponseDetailModal: React.FC<ResponseDetailModalProps> = ({
   processedInputs,
   responseMetadataEvent,
 }) => {
+  const [processedData, setProcessedData] = useState<ResponseDetailItem[]>([]);
   const [metaData, setMetaData] = useState<{ author?: string, timestamp?: string }>({});
-  const [form] = Form.useForm();
 
-
-  const buildInitialValues = (inputs: Tag[]) => {
-    const values: Record<string, any> = {};
-    if (!inputs) return values;
-    for (const tag of inputs) {
-      if (Array.isArray(tag) && tag[0] === 'response') {
-        const [, fieldId, answer, metadata] = tag;
-        let message = '';
-        try {
-          message = JSON.parse(metadata || '{}').message || '';
-        } catch {}
-        values[fieldId] = [answer, message];
-      }
+  const processInputsForDisplay = (
+    currentProcessedInputs: Tag[],
+    currentFormSpec: Tag[],
+  ): ResponseDetailItem[] => {
+    if (!currentProcessedInputs || currentProcessedInputs.length === 0) {
+      return [{ key: 'no-inputs-processed', question: 'Info', answer: 'No displayable response data available or decryption failed.' }];
     }
-    return values;
+    const details: ResponseDetailItem[] = currentProcessedInputs.map((inputTag) => {
+      const { questionLabel, responseLabel, fieldId } = getResponseLabels(inputTag, currentFormSpec);
+      return { key: fieldId, question: questionLabel, answer: responseLabel };
+    });
+    return details;
   };
 
   useEffect(() => {
-    if (isVisible && responseMetadataEvent) {
+    if (isVisible && responseMetadataEvent && processedInputs) {
       const authorNpub = nip19.npubEncode(responseMetadataEvent.pubkey);
       const timestamp = new Date(responseMetadataEvent.created_at * 1000).toLocaleString();
       setMetaData({ author: authorNpub, timestamp });
-      if (processedInputs && processedInputs.length > 0) {
-        form.setFieldsValue(buildInitialValues(processedInputs));
+      if (formSpec && formSpec.length > 0) {
+        const data = processInputsForDisplay(processedInputs, formSpec);
+        setProcessedData(data);
       } else {
-        form.resetFields();
+        setProcessedData([{ key: 'loading-spec-modal', question: 'Status', answer: 'Waiting for form details...' }]);
       }
     } else {
+      setProcessedData([]);
       setMetaData({});
-      form.resetFields();
     }
-  }, [isVisible, responseMetadataEvent, processedInputs, formSpec]);
+  }, [isVisible, responseMetadataEvent, processedInputs, formSpec]); 
 
   return (
     <Modal
@@ -75,23 +72,26 @@ export const ResponseDetailModal: React.FC<ResponseDetailModalProps> = ({
           </Text>
         </Space>
       }
-      open={isVisible}
-      onCancel={onClose}
-      footer={[<Button key="close" onClick={onClose}>Close</Button>]}
-      width={900}
-      destroyOnClose={true}
+      open={isVisible} 
+      onCancel={onClose} 
+      footer={[<Button key="close" onClick={onClose}>Close</Button>]} 
+      width={600}
+      destroyOnClose={true} 
     >
-      {formSpec && formSpec.length > 0 ? (
-        <FormRenderer
-          formTemplate={formSpec}
-          form={form}
-          onInput={() => {}}
-          disabled={true}
-          initialValues={buildInitialValues(processedInputs)}
-        />
-      ) : (
-        <Typography.Text>Waiting for form details or response data...</Typography.Text>
-      )}
+      <Descriptions bordered column={1} size="small">
+        {processedData.map(item => (
+          <Descriptions.Item key={item.key} label={item.question}>
+            <Typography.Text style={{ whiteSpace: 'pre-wrap' }}>
+                {item.answer}
+            </Typography.Text>
+          </Descriptions.Item>
+        ))}
+        {processedData.length > 0 && (processedData[0]?.key?.startsWith('no-inputs') || processedData[0]?.key?.startsWith('loading-spec')) && (
+          <Descriptions.Item key="info-state-modal" label={processedData[0].question}>
+            {processedData[0].answer}
+          </Descriptions.Item>
+        )}
+      </Descriptions>
     </Modal>
   );
 };

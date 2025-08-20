@@ -28,7 +28,7 @@ interface FormRendererProps {
 
 // Content item can be either a section or individual questions
 interface ContentItem {
-  type: 'section' | 'questions';
+  type: "section" | "questions";
   id: string;
   title: string;
   description?: string;
@@ -48,26 +48,28 @@ export const FormRenderer: React.FC<FormRendererProps> = ({
 }) => {
   const name = formTemplate.find((tag) => tag[0] === "name")?.[1] || "";
   const settings = JSON.parse(
-    formTemplate.find((tag) => tag[0] === "settings")?.[1] || "{}",
+    formTemplate.find((tag) => tag[0] === "settings")?.[1] || "{}"
   ) as IFormSettings;
   const fields = formTemplate.filter((tag) => tag[0] === "field") as Field[];
 
   // Section state management
   const [currentStep, setCurrentStep] = useState(0);
   const [completedSteps, setCompletedSteps] = useState<Set<number>>(new Set());
-  
+
   const sections = settings.sections || [];
   const enableSections = !!sections.length;
 
   // Create mixed content flow
   const createContentFlow = (): ContentItem[] => {
     if (!enableSections) {
-      return [{
-        type: 'questions',
-        id: 'all-questions',
-        title: 'Form Questions',
-        fields: fields
-      }];
+      return [
+        {
+          type: "questions",
+          id: "all-questions",
+          title: "Form Questions",
+          fields: fields,
+        },
+      ];
     }
 
     const contentItems: ContentItem[] = [];
@@ -76,32 +78,36 @@ export const FormRenderer: React.FC<FormRendererProps> = ({
     );
 
     // Get unsectioned questions that appear before any section
-    const unsectionedFields = fields.filter(field => !sectionedQuestionIds.has(field[1]));
-    
+    const unsectionedFields = fields.filter(
+      (field) => !sectionedQuestionIds.has(field[1])
+    );
+
     if (unsectionedFields.length > 0) {
       // Group unsectioned questions at the beginning
       contentItems.push({
-        type: 'questions',
-        id: 'unsectioned-questions',
-        title: 'General Questions',
-        description: 'Please answer these questions first',
-        fields: unsectionedFields
+        type: "questions",
+        id: "unsectioned-questions",
+        title: "General Questions",
+        description: "Please answer these questions first",
+        fields: unsectionedFields,
       });
     }
 
     // Add sections
     sections.forEach((section: SectionData) => {
       const sectionQuestionIds = new Set(section.questionIds);
-      const sectionFields = fields.filter(field => sectionQuestionIds.has(field[1]));
-      
+      const sectionFields = fields.filter((field) =>
+        sectionQuestionIds.has(field[1])
+      );
+
       if (sectionFields.length > 0) {
         contentItems.push({
-          type: 'section',
+          type: "section",
           id: section.id,
           title: section.title,
           description: section.description,
           fields: sectionFields,
-          sectionData: section
+          sectionData: section,
         });
       }
     });
@@ -115,12 +121,15 @@ export const FormRenderer: React.FC<FormRendererProps> = ({
   const showStepper = enableSections && contentItems.length > 1;
 
   // Calculate progress
-  const progress = ((currentStep + (completedSteps.has(currentStep) ? 1 : 0)) / contentItems.length) * 100;
+  const progress =
+    ((currentStep + (completedSteps.has(currentStep) ? 1 : 0)) /
+      contentItems.length) *
+    100;
 
   // Validate current step
   const validateCurrentStep = async (): Promise<boolean> => {
     try {
-      const fieldNames = currentItem?.fields.map(field => field[1]) || [];
+      const fieldNames = currentItem?.fields.map((field) => field[1]) || [];
       await form.validateFields(fieldNames);
       return true;
     } catch (error) {
@@ -132,14 +141,14 @@ export const FormRenderer: React.FC<FormRendererProps> = ({
   const handleNext = async () => {
     const isValid = await validateCurrentStep();
     if (isValid) {
-      setCompletedSteps(prev => new Set([...prev, currentStep]));
-      setCurrentStep(prev => prev + 1);
+      setCompletedSteps((prev) => new Set([...prev, currentStep]));
+      setCurrentStep((prev) => prev + 1);
     }
   };
 
   const handleBack = () => {
     if (currentStep > 0) {
-      setCurrentStep(prev => prev - 1);
+      setCurrentStep((prev) => prev - 1);
     }
   };
 
@@ -151,35 +160,16 @@ export const FormRenderer: React.FC<FormRendererProps> = ({
     }
   };
 
-  // Effect to mark step as completed when all required fields are filled
-  useEffect(() => {
-    const checkStepCompletion = async () => {
-      if (await validateCurrentStep()) {
-        setCompletedSteps(prev => new Set([...prev, currentStep]));
-      } else {
-        setCompletedSteps(prev => {
-          const newSet = new Set(prev);
-          newSet.delete(currentStep);
-          return newSet;
-        });
-      }
-    };
-
-    // Small delay to allow form values to update
-    const timer = setTimeout(checkStepCompletion, 100);
-    return () => clearTimeout(timer);
-  }, [form.getFieldsValue(), currentStep]);
-
   const renderSteppedForm = () => (
     <div>
       {showStepper && (
         <div style={{ marginBottom: 24 }}>
-          <Progress 
-            percent={Math.round(progress)} 
+          <Progress
+            percent={Math.round(progress)}
             showInfo={false}
             strokeColor="#FF5733"
           />
-          <Text type="secondary" style={{ fontSize: '12px' }}>
+          <Text type="secondary" style={{ fontSize: "12px" }}>
             Step {currentStep + 1} of {contentItems.length}
           </Text>
         </div>
@@ -190,7 +180,7 @@ export const FormRenderer: React.FC<FormRendererProps> = ({
           current={currentStep}
           size="small"
           style={{ marginBottom: 32 }}
-          direction={isMobile() ? 'vertical' : 'horizontal'}
+          direction={isMobile() ? "vertical" : "horizontal"}
         >
           {contentItems.map((item, index) => (
             <Step
@@ -198,14 +188,14 @@ export const FormRenderer: React.FC<FormRendererProps> = ({
               title={item.title}
               description={item.description}
               status={
-                completedSteps.has(index) 
-                  ? 'finish' 
-                  : index === currentStep 
-                    ? 'process' 
-                    : 'wait'
+                completedSteps.has(index)
+                  ? "finish"
+                  : index === currentStep
+                  ? "process"
+                  : "wait"
               }
               onClick={() => handleStepClick(index)}
-              style={{ cursor: 'pointer' }}
+              style={{ cursor: "pointer" }}
             />
           ))}
         </Steps>
@@ -222,21 +212,36 @@ export const FormRenderer: React.FC<FormRendererProps> = ({
                   <Markdown>{currentItem.description}</Markdown>
                 </Text>
               )}
-              {currentItem.type === 'questions' && (
-                <Text type="secondary" style={{ display: 'block', marginTop: 8 }}>
-                  {currentItem.fields.length} question{currentItem.fields.length !== 1 ? 's' : ''} in this step
+              {currentItem.type === "questions" && (
+                <Text
+                  type="secondary"
+                  style={{ display: "block", marginTop: 8 }}
+                >
+                  {currentItem.fields.length} question
+                  {currentItem.fields.length !== 1 ? "s" : ""} in this step
                 </Text>
               )}
             </Card>
           )}
 
           {/* Form Fields */}
-          <FormFields fields={currentItem.fields} handleInput={onInput} disabled={disabled} values={initialValues} />
+          <FormFields
+            fields={currentItem.fields}
+            handleInput={onInput}
+            disabled={disabled}
+            values={initialValues}
+          />
         </>
       )}
 
       {showStepper && (
-        <Space style={{ marginTop: 24, width: '100%', justifyContent: 'space-between' }}>
+        <Space
+          style={{
+            marginTop: 24,
+            width: "100%",
+            justifyContent: "space-between",
+          }}
+        >
           <Button
             onClick={handleBack}
             disabled={currentStep === 0}
@@ -244,12 +249,9 @@ export const FormRenderer: React.FC<FormRendererProps> = ({
           >
             Back
           </Button>
-          
+
           {!isLastStep ? (
-            <Button
-              type="primary"
-              onClick={handleNext}
-            >
+            <Button type="primary" onClick={handleNext}>
               Continue <RightOutlined />
             </Button>
           ) : (
@@ -267,10 +269,7 @@ export const FormRenderer: React.FC<FormRendererProps> = ({
       <div className="filler-container">
         <div className="form-filler">
           {!hideTitleImage && settings?.titleImageUrl && (
-            <FormBanner
-              imageUrl={settings.titleImageUrl}
-              formTitle={name}
-            />
+            <FormBanner imageUrl={settings.titleImageUrl} formTitle={name} />
           )}
           {!hideDescription && settings?.description && (
             <div className="form-description">

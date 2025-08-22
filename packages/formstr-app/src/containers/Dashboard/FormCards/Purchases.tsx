@@ -110,12 +110,20 @@ export const Purchases: React.FC = () => {
   if (formsReady.length === 0) return <Text>No purchases found.</Text>;
 
   return (
-    <div style={{ padding: 16, display: "flex", flexDirection: "column", alignItems: "center", marginLeft: "15%" }}>
+    <div
+      style={{
+        padding: 16,
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        marginLeft: 10,
+      }}
+    >
       {formsReady.map(({ form, event }, index) => {
         const shortUrlColor = pastelColors[index % pastelColors.length];
         const expiresColor = pastelColors[(index + 1) % pastelColors.length];
         return (
-          <div key={form.id} style={{ width: "80%", minWidth: "1000px"}}>
+          <div key={form.id} style={{ marginLeft: 10, marginRight: 10 }}>
             <div style={{ position: "relative" }}>
               {event ? (
                 <FormEventCard
@@ -124,7 +132,7 @@ export const Purchases: React.FC = () => {
                   shortLink={`/i/${form.slug}`}
                 />
               ) : (
-                <div style={{ width: "80%" , padding : 16}}>
+                <div style={{ width: "80%", padding: 16 }}>
                   <Skeleton active />
                 </div>
               )}
@@ -135,6 +143,7 @@ export const Purchases: React.FC = () => {
                   display: "flex",
                   gap: 8,
                   paddingLeft: 12, // align with card content
+                  flexWrap: "wrap",
                 }}
               >
                 <Flair

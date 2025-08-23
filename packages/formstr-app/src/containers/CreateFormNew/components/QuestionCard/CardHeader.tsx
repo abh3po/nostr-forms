@@ -38,19 +38,25 @@ const CardHeader: React.FC<CardHeaderProps> = ({
       <div className="action-wrapper">
         <div style={{ display: "flex" }}>
           {!firstQuestion && (
-            <div className="action-icon">
-              <ArrowUpOutlined
-                className="icon-svg"
-                onClick={() => onReorderKey("UP", question[1])}
-              />
+            <div
+              className="action-icon"
+              onMouseDown={(e) => {
+                e.preventDefault();
+                onReorderKey("UP", question[1]);
+              }}
+            >
+              <ArrowUpOutlined className="icon-svg" />
             </div>
           )}
           {!lastQuestion && (
-            <div className="action-icon">
-              <ArrowDownOutlined
-                className="icon-svg"
-                onClick={() => onReorderKey("DOWN", question[1])}
-              />
+            <div
+              className="action-icon"
+              onMouseDown={(e) => {
+                e.preventDefault();
+                onReorderKey("DOWN", question[1]);
+              }}
+            >
+              <ArrowDownOutlined className="icon-svg" />
             </div>
           )}
           <div className="action-icon">

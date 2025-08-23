@@ -1,16 +1,14 @@
 import { Card, Input, Select, Space } from "antd";
-import { ChangeEvent, useRef, PointerEvent as ReactPointerEvent } from "react";
+import { ChangeEvent } from "react";
 import useFormBuilderContext from "../../hooks/useFormBuilderContext";
 import CardHeader from "./CardHeader";
 import Inputs from "./Inputs";
 import { AnswerSettings } from "@formstr/sdk/dist/interfaces";
 import StyledWrapper from "./index.style";
-import { SmallDashOutlined } from "@ant-design/icons";
 import QuestionTextStyle from "./question.style";
 import { Choice } from "./InputElements/OptionTypes/types";
 import UploadImage from "./UploadImage";
 import { Field } from "../../../../nostr/types";
-import { DragControls } from "framer-motion";
 
 type QuestionCardProps = {
   question: Field;
@@ -18,7 +16,7 @@ type QuestionCardProps = {
   onReorderKey: (keyType: "UP" | "DOWN", tempId: string) => void;
   firstQuestion: boolean;
   lastQuestion: boolean;
-  dragControls: DragControls | undefined;
+  dragControls: undefined;
 };
 
 const QuestionCard: React.FC<QuestionCardProps> = ({
@@ -27,22 +25,18 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
   onReorderKey,
   firstQuestion,
   lastQuestion,
-  dragControls,
 }) => {
   let options = JSON.parse(question[4] || "[]") as Array<Choice>;
   const answerSettings = JSON.parse(
     question[5] || '{"renderElement": "shortText"}'
   );
-  const { 
-    setQuestionIdInFocus, 
-    sections, 
-    getSectionForQuestion, 
+  const {
+    setQuestionIdInFocus,
+    sections,
+    getSectionForQuestion,
     moveQuestionToSection,
-    formSettings 
   } = useFormBuilderContext();
-  const dragTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Get current section for this question
   const currentSectionId = getSectionForQuestion(question[1]);
 
   const handleTextChange = (event: ChangeEvent<HTMLTextAreaElement>) => {
@@ -76,26 +70,8 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
     onEdit(field, question[1]);
   };
 
-  const handlePointerDown = (event: ReactPointerEvent<HTMLDivElement>) => {
-    if (!dragControls) return;
-    const savedEvent = event;
-    if (dragTimeoutRef.current) {
-      clearTimeout(dragTimeoutRef.current);
-    }
-    dragTimeoutRef.current = setTimeout(() => {
-      dragControls.start(savedEvent);
-    }, 300);
-  };
-
-  const handlePointerUp = () => {
-    if (dragTimeoutRef.current) {
-      clearTimeout(dragTimeoutRef.current);
-      dragTimeoutRef.current = null;
-    }
-  };
-
   const handleSectionChange = (sectionId: string) => {
-    if (sectionId === 'unsectioned') {
+    if (sectionId === "unsectioned") {
       moveQuestionToSection(question[1], undefined);
     } else {
       moveQuestionToSection(question[1], sectionId);
@@ -105,14 +81,6 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
   return (
     <StyledWrapper>
       <Card type="inner" className="question-card" onClick={onCardClick}>
-        <div className="drag-icon"
-        onPointerDown={dragControls ? handlePointerDown : undefined} 
-        onPointerUp={dragControls ? handlePointerUp : undefined}
-        onPointerCancel={dragControls ? handlePointerUp : undefined}
-        style={{ touchAction: dragControls ? "none" : "auto" }}
-        >
-          <SmallDashOutlined />
-        </div>
         <CardHeader
           required={answerSettings.required}
           onRequired={handleRequiredChange}
@@ -121,23 +89,22 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
           firstQuestion={firstQuestion}
           lastQuestion={lastQuestion}
         />
-        
-        {/* Section selector - only show if sections are enabled */}
+
         {!!sections.length && (
           <div style={{ marginBottom: 16 }}>
             <Space>
-              <span style={{ fontSize: 12, color: '#8c8c8c' }}>Section:</span>
+              <span style={{ fontSize: 12, color: "#8c8c8c" }}>Section:</span>
               <Select
                 size="small"
-                value={currentSectionId || 'unsectioned'}
+                value={currentSectionId || "unsectioned"}
                 onChange={handleSectionChange}
                 style={{ minWidth: 120 }}
                 placeholder="Select section"
               >
                 <Select.Option value="unsectioned">Unsectioned</Select.Option>
-                {sections.map(section => (
+                {sections.map((section) => (
                   <Select.Option key={section.id} value={section.id}>
-                    {section.title || 'Untitled Section'}
+                    {section.title || "Untitled Section"}
                   </Select.Option>
                 ))}
               </Select>

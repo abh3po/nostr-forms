@@ -1,6 +1,10 @@
-import React, { useEffect, createContext, FC, ReactNode, useRef, useState, useCallback } from "react";
-import { SimplePool } from "nostr-tools";
-import { FormInitData, IFormBuilderContext, RelayItem, SectionData } from "./typeDefs";
+import React, { useEffect, useRef, useState, useCallback } from "react";
+import {
+  FormInitData,
+  IFormBuilderContext,
+  RelayItem,
+  SectionData,
+} from "./typeDefs";
 import { generateQuestion } from "../../utils";
 import { getDefaultRelays } from "@formstr/sdk";
 import { makeTag } from "../../../../utils/utility";
@@ -64,7 +68,7 @@ export const FormBuilderContext = React.createContext<IFormBuilderContext>({
   setIsAiModalOpen: () => null,
   handleAIFormGenerated: () => null,
   sections: [],
-  addSection: () => ({ id: '', title: '', questionIds: [] }),
+  addSection: () => ({ id: "", title: "", questionIds: [] }),
   updateSection: () => {},
   removeSection: () => {},
   moveQuestionToSection: () => {},
@@ -122,7 +126,7 @@ export default function FormBuilderProvider({
 
   const [relayList, setRelayList] = useState<RelayItem[]>([]);
   const [isRelayManagerModalOpen, setIsRelayManagerModalOpen] = useState(false);
-  
+
   useEffect(() => {
     let baseList: RelayItem[];
     const storedUserManagedRelays = getItem<RelayItem[]>(
@@ -172,104 +176,122 @@ export default function FormBuilderProvider({
   }, [userRelays]);
 
   // Section management functions
-  const addSection = useCallback((title?: string, description = ""): SectionData => {
-    const sectionNumber = sections.length + 1;
-    const defaultTitle = title || `Section ${sectionNumber}`;
-    
-    const newSection: SectionData = {
-      id: makeTag(8),
-      title: defaultTitle,
-      description,
-      questionIds: [],
-      order: sections.length
-    };
-    
-    setSections(prev => [...prev, newSection]);
-    
-    // Enable sections in form settings if first section
-    // if (sections.length === 0) {
-    //   updateFormSetting({ enableSections: true });
-    // }
-    
-    return newSection;
-  }, [sections.length]);
+  const addSection = useCallback(
+    (title?: string, description = ""): SectionData => {
+      const sectionNumber = sections.length + 1;
+      const defaultTitle = title || `Section ${sectionNumber}`;
 
-  const updateSection = useCallback((id: string, updates: Partial<SectionData>) => {
-    setSections(prev => 
-      prev.map(section => 
-        section.id === id ? { ...section, ...updates } : section
-      )
-    );
-  }, []);
+      const newSection: SectionData = {
+        id: makeTag(8),
+        title: defaultTitle,
+        description,
+        questionIds: [],
+        order: sections.length,
+      };
+
+      setSections((prev) => [...prev, newSection]);
+
+      // Enable sections in form settings if first section
+      // if (sections.length === 0) {
+      //   updateFormSetting({ enableSections: true });
+      // }
+
+      return newSection;
+    },
+    [sections.length]
+  );
+
+  const updateSection = useCallback(
+    (id: string, updates: Partial<SectionData>) => {
+      setSections((prev) =>
+        prev.map((section) =>
+          section.id === id ? { ...section, ...updates } : section
+        )
+      );
+    },
+    []
+  );
 
   const removeSection = useCallback((id: string) => {
-    setSections(prev => {
-      const sectionToRemove = prev.find(s => s.id === id);
-      const remaining = prev.filter(section => section.id !== id);
-      
+    setSections((prev) => {
+      const sectionToRemove = prev.find((s) => s.id === id);
+      const remaining = prev.filter((section) => section.id !== id);
+
       // If this was the last section, disable sections feature
       // if (remaining.length === 0) {
       //   updateFormSetting({ enableSections: false });
       //   return remaining;
       // }
-      
+
       // Renumber the remaining sections
       const renumberedSections = remaining.map((section, index) => {
         const sectionNumber = index + 1;
         const isDefaultTitle = /^Section \d+$/.test(section.title);
-        const newTitle = isDefaultTitle ? `Section ${sectionNumber}` : section.title;
-        
+        const newTitle = isDefaultTitle
+          ? `Section ${sectionNumber}`
+          : section.title;
+
         return {
           ...section,
           title: newTitle,
-          order: index
+          order: index,
         };
       });
-      
+
       return renumberedSections;
     });
   }, []);
 
-  const moveQuestionToSection = useCallback((questionId: string, sectionId?: string) => {
-    setSections(prev => {
-      const updated = prev.map(section => ({
-        ...section,
-        questionIds: section.questionIds.filter(qId => qId !== questionId)
-      }));
-      
-      if (sectionId) {
-        return updated.map(section => {
-          if (section.id === sectionId) {
-            return {
-              ...section,
-              questionIds: [...section.questionIds, questionId]
-            };
-          }
-          return section;
-        });
-      }
-      
-      return updated;
-    });
-  }, []);
+  const moveQuestionToSection = useCallback(
+    (questionId: string, sectionId?: string) => {
+      setSections((prev) => {
+        const updated = prev.map((section) => ({
+          ...section,
+          questionIds: section.questionIds.filter((qId) => qId !== questionId),
+        }));
 
-  const getSectionForQuestion = useCallback((questionId: string): string | null => {
-    const section = sections.find(s => s.questionIds.includes(questionId));
-    return section ? section.id : null;
-  }, [sections]);
+        if (sectionId) {
+          return updated.map((section) => {
+            if (section.id === sectionId) {
+              return {
+                ...section,
+                questionIds: [...section.questionIds, questionId],
+              };
+            }
+            return section;
+          });
+        }
+
+        return updated;
+      });
+    },
+    []
+  );
+
+  const getSectionForQuestion = useCallback(
+    (questionId: string): string | null => {
+      const section = sections.find((s) => s.questionIds.includes(questionId));
+      return section ? section.id : null;
+    },
+    [sections]
+  );
 
   const reorderSections = useCallback((newOrder: SectionData[]) => {
-    setSections(newOrder.map((section, index) => {
-      const sectionNumber = index + 1;
-      const isDefaultTitle = /^Section \d+$/.test(section.title);
-      const newTitle = isDefaultTitle ? `Section ${sectionNumber}` : section.title;
-      
-      return {
-        ...section,
-        title: newTitle,
-        order: index
-      };
-    }));
+    setSections(
+      newOrder.map((section, index) => {
+        const sectionNumber = index + 1;
+        const isDefaultTitle = /^Section \d+$/.test(section.title);
+        const newTitle = isDefaultTitle
+          ? `Section ${sectionNumber}`
+          : section.title;
+
+        return {
+          ...section,
+          title: newTitle,
+          order: index,
+        };
+      })
+    );
   }, []);
 
   // Relay management functions
@@ -278,29 +300,39 @@ export default function FormBuilderProvider({
   }, []);
 
   const addRelayToList = useCallback((url: string) => {
-    setRelayList(prevRelayList => {
-        if (prevRelayList.some(relay => relay.url === url)) {
-            message.warning(`Relay URL ${url} already exists.`);
-            return prevRelayList;
-        }
-        const newRelay: RelayItem = { url, tempId: makeTag(6) };
-        const updatedList = [...prevRelayList, newRelay];
-        setItem(LOCAL_STORAGE_CUSTOM_RELAYS_KEY, updatedList.filter(r => !getDefaultRelays().includes(r.url)));
-        return updatedList;
+    setRelayList((prevRelayList) => {
+      if (prevRelayList.some((relay) => relay.url === url)) {
+        message.warning(`Relay URL ${url} already exists.`);
+        return prevRelayList;
+      }
+      const newRelay: RelayItem = { url, tempId: makeTag(6) };
+      const updatedList = [...prevRelayList, newRelay];
+      setItem(
+        LOCAL_STORAGE_CUSTOM_RELAYS_KEY,
+        updatedList.filter((r) => !getDefaultRelays().includes(r.url))
+      );
+      return updatedList;
     });
   }, []);
 
   const editRelayInList = useCallback((tempId: string, newUrl: string) => {
-    setRelayList(prevRelayList => {
-        if (prevRelayList.some(relay => relay.url === newUrl && relay.tempId !== tempId)) {
-            message.warning(`Relay URL ${newUrl} already exists.`);
-            return prevRelayList;
-        }
-        const updatedList = prevRelayList.map(relay =>
-            relay.tempId === tempId ? { ...relay, url: newUrl } : relay
-        );
-        setItem(LOCAL_STORAGE_CUSTOM_RELAYS_KEY, updatedList.filter(r => !getDefaultRelays().includes(r.url)));
-        return updatedList;
+    setRelayList((prevRelayList) => {
+      if (
+        prevRelayList.some(
+          (relay) => relay.url === newUrl && relay.tempId !== tempId
+        )
+      ) {
+        message.warning(`Relay URL ${newUrl} already exists.`);
+        return prevRelayList;
+      }
+      const updatedList = prevRelayList.map((relay) =>
+        relay.tempId === tempId ? { ...relay, url: newUrl } : relay
+      );
+      setItem(
+        LOCAL_STORAGE_CUSTOM_RELAYS_KEY,
+        updatedList.filter((r) => !getDefaultRelays().includes(r.url))
+      );
+      return updatedList;
     });
   }, []);
 
@@ -335,10 +367,10 @@ export default function FormBuilderProvider({
     let formSpec: Tag[] = [];
     formSpec.push(["d", formSettings.formId || ""]);
     formSpec.push(["name", formName]);
-    
+
     const settingsWithSections = {
       ...formSettings,
-      sections: sections
+      sections: sections,
     };
     formSpec.push(["settings", JSON.stringify(settingsWithSections)]);
     formSpec = [...formSpec, ...questionsList];
@@ -427,13 +459,13 @@ export default function FormBuilderProvider({
     setIsLeftMenuOpen(false);
     const newQuestion = generateQuestion(primitive, label, [], answerSettings);
     setQuestionsList([...questionsList, newQuestion]);
-    
+
     // If sections are enabled and exist, add to the last section
     if (!!sections.length) {
       const lastSection = sections[sections.length - 1];
       moveQuestionToSection(newQuestion[1], lastSection.id);
     }
-    
+
     setTimeout(() => {
       bottomElement?.current?.scrollIntoView({ behavior: "smooth" });
     }, 200);
@@ -443,17 +475,13 @@ export default function FormBuilderProvider({
     if (questionIdInFocus === tempId) {
       setQuestionIdInFocus(undefined);
     }
-    
+
     // Remove from sections
     moveQuestionToSection(tempId, undefined);
-    
+
     setQuestionsList((preQuestions) => {
       return preQuestions.filter((question) => question[1] !== tempId);
     });
-  };
-
-  const updateQuestionsList = (newQuestionsList: Field[]) => {
-    setQuestionsList(newQuestionsList);
   };
 
   const updateFormSetting = (settings: IFormSettings) => {
@@ -473,12 +501,12 @@ export default function FormBuilderProvider({
       form.spec.filter((f) => f[0] === "settings")?.[0]?.[1] || "{}"
     );
     settingsFromFile = { ...InitialFormSettings, ...settingsFromFile };
-    
+
     // Load sections if they exist
     if (settingsFromFile.sections && Array.isArray(settingsFromFile.sections)) {
       setSections(settingsFromFile.sections);
     }
-    
+
     let fields = form.spec.filter((f) => f[0] === "field") as Field[];
     setFormSettings((currentSettings) => ({
       ...currentSettings,
@@ -506,7 +534,7 @@ export default function FormBuilderProvider({
         updateFormSetting({ description: processedData.description });
       }
       if (processedData.fields && processedData.fields.length > 0) {
-        updateQuestionsList(processedData.fields);
+        setQuestionsList(processedData.fields);
         setQuestionIdInFocus(undefined);
       } else {
         message.warning("AI generated data, but no fields were created.");
@@ -542,7 +570,7 @@ export default function FormBuilderProvider({
         setIsLeftMenuOpen,
         formName,
         updateFormName: setFormName,
-        updateQuestionsList,
+        updateQuestionsList: setQuestionsList,
         getFormSpec,
         saveDraft,
         selectedTab,

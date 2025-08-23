@@ -62,7 +62,7 @@ export interface IFormBuilderContext {
   toggleSettingsWindow: () => void;
   formName: string;
   updateFormName: (formName: string) => void;
-  updateQuestionsList: (list: Field[]) => void;
+  updateQuestionsList: React.Dispatch<React.SetStateAction<Field[]>>;
   getFormSpec: () => Tag[];
   saveDraft: () => void;
   selectedTab: string;

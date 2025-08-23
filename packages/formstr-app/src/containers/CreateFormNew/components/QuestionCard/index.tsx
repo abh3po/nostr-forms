@@ -16,7 +16,6 @@ type QuestionCardProps = {
   onReorderKey: (keyType: "UP" | "DOWN", tempId: string) => void;
   firstQuestion: boolean;
   lastQuestion: boolean;
-  dragControls: undefined;
 };
 
 const QuestionCard: React.FC<QuestionCardProps> = ({

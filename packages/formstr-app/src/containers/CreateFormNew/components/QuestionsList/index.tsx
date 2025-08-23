@@ -20,6 +20,8 @@ interface FloatingButtonProps {
 const FloatingButton = ({ onClick }: FloatingButtonProps) => {
   return (
     <motion.div
+      drag
+      dragMomentum={false}
       whileTap={{ scale: 0.95 }}
       whileHover={{ scale: 1.05 }}
       style={{
@@ -27,6 +29,7 @@ const FloatingButton = ({ onClick }: FloatingButtonProps) => {
         right: "30px",
         bottom: "30px",
         zIndex: 1000,
+        cursor: "grab",
       }}
     >
       <Button
@@ -42,6 +45,7 @@ const FloatingButton = ({ onClick }: FloatingButtonProps) => {
           alignItems: "center",
           justifyContent: "center",
           boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
+          paddingTop: 15,
         }}
       />
     </motion.div>
@@ -78,7 +82,6 @@ const QuestionItem: React.FC<QuestionItemProps> = ({
         onReorderKey={onReorderKey}
         firstQuestion={firstQuestion}
         lastQuestion={lastQuestion}
-        dragControls={undefined}
       />
     </motion.div>
   );

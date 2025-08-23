@@ -6,6 +6,7 @@ import { Tag } from "../../../nostr/types";
 import { FormEventCard } from "./FormEventCard";
 import { Spin } from "antd";
 import { LoadingOutlined } from "@ant-design/icons";
+import { signerManager } from "../../../signer";
 
 export const MyForms = () => {
   type FormEventMetadata = {
@@ -73,6 +74,7 @@ export const MyForms = () => {
     setRefreshing(true);
     const pool = existingPool || new SimplePool();
 
+    const signer = await signerManager.getSigner();
     try {
       let existingListFilter = {
         kinds: [14083],
@@ -86,10 +88,7 @@ export const MyForms = () => {
         return;
       }
 
-      let forms = await window.nostr.nip44.decrypt(
-        userPub,
-        myFormsList.content
-      );
+      let forms = await signer.nip44Decrypt!(userPub, myFormsList.content);
 
       await fetchFormEvents(JSON.parse(forms), pool);
     } catch (error) {
@@ -107,6 +106,7 @@ export const MyForms = () => {
     extractedFormPubkey: string
   ) => {
     if (!userPub) return;
+    const signer = await signerManager.getSigner();
     setRefreshing(true);
     const pool = new SimplePool();
 
@@ -127,7 +127,7 @@ export const MyForms = () => {
       }
 
       const forms = JSON.parse(
-        await window.nostr.nip44.decrypt(userPub, myFormsList.content)
+        await signer.nip44Decrypt!(userPub, myFormsList.content)
       );
 
       const updatedForms = forms.filter((f: Tag) => {
@@ -139,7 +139,7 @@ export const MyForms = () => {
 
       const event = {
         kind: 14083,
-        content: await window.nostr.nip44.encrypt(
+        content: await signer.nip44Encrypt!(
           userPub,
           JSON.stringify(updatedForms)
         ),
@@ -148,8 +148,8 @@ export const MyForms = () => {
         pubkey: userPub,
       };
 
-      const signedEvent = await window.nostr.signEvent(event);
-      await pool.publish(getDefaultRelays(), signedEvent);
+      const signedEvent = await signer.signEvent(event);
+      pool.publish(getDefaultRelays(), signedEvent);
       await fetchMyForms();
     } catch (error) {
       console.error("Error handling form deletion:", error);

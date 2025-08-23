@@ -7,6 +7,7 @@ import {
 import { ILocalForm } from "../../../providers/FormBuilder/typeDefs";
 import { getDefaultRelays } from "../../../../../nostr/common";
 import { KINDS, Tag } from "../../../../../nostr/types";
+import { signerManager } from "../../../../../signer";
 
 export const saveToDevice = (
   formAuthorPub: string,
@@ -60,7 +61,8 @@ export const saveToMyForms = async (
   const newRelays = relays && relays.length !== 0 ? relays : getDefaultRelays();
 
   try {
-    if (!window.nostr) {
+    const signer = await signerManager.getSigner();
+    if (!signer) {
       throw new Error("Nostr client not available");
     }
 
@@ -78,7 +80,7 @@ export const saveToMyForms = async (
 
           let forms: Tag[] = [];
           if (existingList[0]) {
-            const formsString = await window.nostr.nip44.decrypt(
+            const formsString = await signer.nip44Decrypt!(
               userPub,
               existingList[0].content
             );
@@ -115,7 +117,7 @@ export const saveToMyForms = async (
     const forms = setupResult.forms;
     forms.push(["f", `${formAuthorPub}:${formId}`, relays[0], secrets]);
 
-    const encryptedString = await window.nostr.nip44.encrypt(
+    const encryptedString = await signer.nip44Encrypt!(
       userPub,
       JSON.stringify(forms)
     );
@@ -128,7 +130,7 @@ export const saveToMyForms = async (
       created_at: Math.round(Date.now() / 1000),
     };
 
-    const signedEvent = await window.nostr.signEvent(myFormEvent);
+    const signedEvent = await signer.signEvent(myFormEvent);
     await Promise.allSettled(pool.publish(relays, signedEvent));
 
     callback("saved");

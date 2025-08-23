@@ -1,7 +1,6 @@
 import { nip07Signer } from "./NIP07Signer";
 import { createNip46Signer } from "./NIP46Signer";
 import { NostrSigner } from "./types";
-import { Event, EventTemplate } from "nostr-tools";
 import {
   getBunkerUriInLocalStorage,
   getKeysFromLocalStorage,
@@ -11,7 +10,6 @@ import {
   removeBunkerUriFromLocalStorage,
   removeAppSecretFromLocalStorage,
 } from "./utils";
-import { pool } from "../pool";
 import { createLocalSigner } from "./LocalSigner";
 
 class Signer {

@@ -1,6 +1,7 @@
 import { Modal } from "antd";
 import { Event, UnsignedEvent } from "nostr-tools";
 import { useEffect, useState } from "react";
+import { signerManager } from "../../signer";
 
 export enum Actions {
   GET_PUBKEY,
@@ -33,18 +34,19 @@ export const NIP07Interactions: React.FC<NIP07InteractionProps> = ({
   senderPubKey,
 }) => {
   const executeAction = async () => {
+    const signer = await signerManager.getSigner();
     setShowModal(true);
     let returnValue: string | Event = "";
     if (action === Actions.GET_PUBKEY) {
-      returnValue = await window.nostr.getPublicKey();
+      returnValue = await signer.getPublicKey();
     } else if (action === Actions.SIGN_EVENT) {
-      returnValue = await window.nostr.signEvent(event);
+      returnValue = await signer.signEvent(event!);
     } else if (action === Actions.NIP44_ENCRYPT) {
-      let pubKey = await window.nostr.getPublicKey();
+      let pubKey = await signer.getPublicKey();
       if (!plainText) {
         throw Error("No message provided to encrypt");
       }
-      returnValue = await window.nostr.nip44.encrypt(pubKey, plainText);
+      returnValue = await signer.nip44Encrypt!(pubKey, plainText);
     } else if (action === Actions.NIP44_DECRYPT) {
       if (!cipherText) {
         throw Error("No message provided to decrypt");
@@ -53,7 +55,7 @@ export const NIP07Interactions: React.FC<NIP07InteractionProps> = ({
         throw Error("No message provided to decrypt");
       }
       console.log("Sender pubkey,", senderPubKey);
-      returnValue = await window.nostr.nip44.decrypt(senderPubKey, cipherText);
+      returnValue = await signer.nip44Decrypt!(senderPubKey, cipherText);
     } else if (action === Actions.NIP04_DECRYPT) {
       if (!cipherText) {
         throw Error("No message provided to decrypt");
@@ -61,13 +63,13 @@ export const NIP07Interactions: React.FC<NIP07InteractionProps> = ({
       if (!senderPubKey) {
         throw Error("No message provided to decrypt");
       }
-      returnValue = await window.nostr.nip04.decrypt(senderPubKey, cipherText);
+      returnValue = await signer.decrypt!(senderPubKey, cipherText);
     } else if (action === Actions.NIP04_ENCRYPT) {
-      let pubKey = await window.nostr.getPublicKey();
+      let pubKey = await signer.getPublicKey();
       if (!plainText) {
         throw Error("No message provided to decrypt");
       }
-      returnValue = await window.nostr.nip04.encrypt(pubKey, plainText);
+      returnValue = await signer.encrypt!(pubKey, plainText);
     } else {
       throw Error("NOT A RECOGNIZED ACTION");
     }

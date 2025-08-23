@@ -11,6 +11,7 @@ import { Modal } from "antd";
 import { Filter } from "nostr-tools";
 import { useApplicationContext } from "../hooks/useApplicationContext";
 import { getDefaultRelays } from "../nostr/common";
+import { signerManager } from "../signer";
 
 interface ProfileProviderProps {
   children?: ReactNode;
@@ -69,7 +70,7 @@ export const ProfileProvider: FC<ProfileProviderProps> = ({ children }) => {
 
   const requestPubkey = async () => {
     setUsingNip07(true);
-    let publicKey = await window.nostr.getPublicKey();
+    let publicKey = await (await signerManager.getSigner()).getPublicKey();
     setPubkey(publicKey);
     setItem(LOCAL_STORAGE_KEYS.PROFILE, { pubkey: publicKey });
     setUsingNip07(false);

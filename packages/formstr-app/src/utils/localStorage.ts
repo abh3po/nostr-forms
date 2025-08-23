@@ -41,21 +41,3 @@ export const setItem = (
     console.log("Error in setItem: ", e);
   }
 };
-
-export const useLocalStorageItems = <T>(
-  key: string,
-  { parseAsJson = true } = {}
-): T | null => {
-  const [item, updateItem] = useState(getItem<T>(key, { parseAsJson }));
-  useEffect(() => {
-    const listener = () => {
-      updateItem(getItem<T>(key, { parseAsJson }));
-    };
-    window.addEventListener("storage", listener);
-    return () => {
-      window.removeEventListener("storage", listener);
-    };
-    //eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-  return item;
-};

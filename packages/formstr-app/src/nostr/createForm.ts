@@ -81,7 +81,7 @@ export const createForm = async (
       ...tags,
       ...form.filter((tag: Tag) => !["d", "name"].includes(tag[0])),
     ];
-    tags.push(["t", "public"])
+    tags.push(["t", "public"]);
   }
   relayList.forEach((r: string) => tags.push(["relay", r]));
   const baseTemplateEvent: UnsignedEvent = {
@@ -111,7 +111,7 @@ export const createForm = async (
   const templateEvent = await signEvent(baseTemplateEvent, signingKey);
   await sendWraps(wraps);
   await Promise.allSettled(
-    customPublish(relayList, templateEvent, (url: string) => {
+    customPublish(relayList, templateEvent!, (url: string) => {
       acceptedRelays.push(url);
       onRelayAccepted?.(url);
     })

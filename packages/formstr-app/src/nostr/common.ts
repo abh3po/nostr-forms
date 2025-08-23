@@ -25,18 +25,7 @@ declare global {
       viewKey?: string;
       formContent?: string;
     };
-    nostr: {
-      getPublicKey: () => Promise<string>;
-      signEvent: (event: EventTemplate) => Promise<Event>;
-      nip04: {
-        encrypt: (pubKey: string, message: string) => Promise<string>;
-        decrypt: (pubkey: string, message: string) => Promise<string>;
-      };
-      nip44: {
-        encrypt: (pubKey: string, message: string) => Promise<string>;
-        decrypt: (pubkey: string, mssage: string) => Promise<string>;
-      };
-    };
+    nostr: any;
   }
 }
 
@@ -98,7 +87,7 @@ export async function signEvent(
   if (userSecretKey) {
     nostrEvent = finalizeEvent(baseEvent, userSecretKey);
   } else {
-    (await signerManager.getSigner()).signEvent(baseEvent);
+    return (await signerManager.getSigner()).signEvent(baseEvent);
   }
   return nostrEvent;
 }

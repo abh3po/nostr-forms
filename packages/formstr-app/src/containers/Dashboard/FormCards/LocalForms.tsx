@@ -3,8 +3,9 @@ import { ILocalForm } from "../../CreateFormNew/providers/FormBuilder/typeDefs";
 import { LocalFormCard } from "./LocalFormCard";
 import { useApplicationContext } from "../../../hooks/useApplicationContext";
 import { getDefaultRelays } from "../../../nostr/common";
-import { Event, SubCloser } from "nostr-tools";
+import { Event } from "nostr-tools";
 import { FormEventCard } from "./FormEventCard";
+import { SubCloser } from "nostr-tools/abstract-pool";
 
 interface LocaLFormsProps {
   localForms: ILocalForm[];

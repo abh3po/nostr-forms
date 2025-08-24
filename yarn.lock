@@ -8547,6 +8547,19 @@ normalize-url@^6.0.1:
   resolved "https://registry.npmjs.org/normalize-url/-/normalize-url-6.1.0.tgz"
   integrity sha512-DlL+XwOy3NxAQ8xuC0okPgK46iuVNAK01YN7RueYBqqFeGsBjV9XmCAzAdgt+667bCl5kPh9EqKKDwnaPG1I7A==
 
+nostr-tools@^2.16.2:
+  version "2.16.2"
+  resolved "https://registry.yarnpkg.com/nostr-tools/-/nostr-tools-2.16.2.tgz#eca1e0ed24428afcdd74708c6fd7f42ed8194101"
+  integrity sha512-ZxH9EbSt5ypURZj2TGNJxZd0Omb5ag5KZSu8IyJMCdLyg2KKz+2GA0sP/cSawCQEkyviIN4eRT4G2gB/t9lMRw==
+  dependencies:
+    "@noble/ciphers" "^0.5.1"
+    "@noble/curves" "1.2.0"
+    "@noble/hashes" "1.3.1"
+    "@scure/base" "1.1.1"
+    "@scure/bip32" "1.3.1"
+    "@scure/bip39" "1.2.1"
+    nostr-wasm "0.1.0"
+
 nostr-tools@^2.3.2:
   version "2.3.2"
   resolved "https://registry.npmjs.org/nostr-tools/-/nostr-tools-2.3.2.tgz"
@@ -8561,7 +8574,7 @@ nostr-tools@^2.3.2:
   optionalDependencies:
     nostr-wasm v0.1.0
 
-nostr-wasm@v0.1.0:
+nostr-wasm@0.1.0, nostr-wasm@v0.1.0:
   version "0.1.0"
   resolved "https://registry.npmjs.org/nostr-wasm/-/nostr-wasm-0.1.0.tgz"
   integrity sha512-78BTryCLcLYv96ONU8Ws3Q1JzjlAt+43pWQhIl86xZmWeegYCNLPml7yQ+gG3vR6V5h4XGj+TxO+SS5dsThQIA==

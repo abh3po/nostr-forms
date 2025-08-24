@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { Event, getPublicKey, nip19, SubCloser } from "nostr-tools";
+import { Event, getPublicKey, nip19 } from "nostr-tools";
 import { useParams, useSearchParams } from "react-router-dom";
 import { fetchFormResponses } from "../../nostr/responses";
 import SummaryStyle from "./summary.style";
@@ -25,6 +25,7 @@ import {
 import AIAnalysisChat from "./components/AIAnalysisChat";
 import { ResponseHeader } from "./components/ResponseHeader";
 import { AddressPointer } from "nostr-tools/nip19";
+import { SubCloser } from "nostr-tools/abstract-pool";
 
 const { Text } = Typography;
 
@@ -300,7 +301,7 @@ export const Response = () => {
       let [_, fieldId, __, label] = field;
       columns.push({
         key: fieldId,
-        title: label || `Question: ${fieldId.substring(0,5)}...`,
+        title: label || `Question: ${fieldId.substring(0, 5)}...`,
         dataIndex: fieldId,
         width: 150,
       });
@@ -414,7 +415,7 @@ export const Response = () => {
           <Table
             columns={getColumns()}
             dataSource={getData()}
-            pagination={{ pageSize: 10 }} 
+            pagination={{ pageSize: 10 }}
             loading={{
               spinning: responses === undefined,
               tip: "🔎 Looking for responses...",

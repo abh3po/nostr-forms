@@ -1,7 +1,5 @@
 import {
-  AbstractRelay,
   Event,
-  EventTemplate,
   finalizeEvent,
   generateSecretKey,
   getPublicKey,
@@ -17,6 +15,7 @@ import { normalizeURL } from "nostr-tools/utils";
 import { Field, Response, Tag } from "./types";
 import { IFormSettings } from "../containers/CreateFormNew/components/FormSettings/types";
 import { signerManager } from "../signer";
+import { AbstractRelay } from "nostr-tools/abstract-relay";
 
 declare global {
   interface Window {
@@ -214,7 +213,7 @@ const encryptResponse = async (
     return await signer.nip44Encrypt!(receiverPublicKey, message);
   }
   const conversationKey = nip44.v2.utils.getConversationKey(
-    bytesToHex(senderPrivateKey),
+    senderPrivateKey,
     receiverPublicKey
   );
   return nip44.v2.encrypt(message, conversationKey);

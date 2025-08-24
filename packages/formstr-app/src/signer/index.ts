@@ -77,6 +77,7 @@ class Signer {
     setBunkerUriInLocalStorage(bunkerUri);
     this.signer = remoteSigner;
     this.notify();
+    console.log("LOGIN WITH BUNKER COMPLETE");
   }
 
   logout() {

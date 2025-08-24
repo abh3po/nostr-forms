@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useLocation } from "react-router-dom";
 import { FormDetails } from "../CreateFormNew/components/FormDetails";
-import { Event, SubCloser } from "nostr-tools";
+import { Event } from "nostr-tools";
 import { useProfileContext } from "../../hooks/useProfileContext";
 import { getDefaultRelays } from "@formstr/sdk";
 import { FormEventCard } from "./FormCards/FormEventCard";
@@ -21,6 +21,7 @@ import { ROUTES } from "../../constants/routes";
 import { FormInitData } from "../CreateFormNew/providers/FormBuilder/typeDefs";
 import { createFormSpecFromTemplate } from "../../utils/formUtils";
 import { Purchases } from "./FormCards/Purchases";
+import { SubCloser } from "nostr-tools/abstract-pool";
 
 const MENU_OPTIONS = {
   local: "On this device",

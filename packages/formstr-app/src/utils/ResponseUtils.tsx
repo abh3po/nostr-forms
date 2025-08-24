@@ -1,6 +1,7 @@
 import { Event, nip44 } from "nostr-tools";
-import { Field, Tag } from '../nostr/types'; 
+import { Field, Tag } from "../nostr/types";
 import { getDefaultRelays } from "../nostr/common";
+import { hexToBytes } from "nostr-tools/utils";
 
 export const getResponseRelays = (formEvent: Event): string[] => {
   let formRelays = formEvent.tags
@@ -21,7 +22,7 @@ export const getInputsFromResponseEvent = (
   } else if (editKey) {
     try {
       const conversationKey = nip44.v2.utils.getConversationKey(
-        editKey,
+        hexToBytes(editKey),
         responseEvent.pubkey
       );
       const decryptedContent = nip44.v2.decrypt(
@@ -54,35 +55,37 @@ export interface DisplayableAnswerDetail {
 
 export const getResponseLabels = (
   inputTag: Tag,
-  formSpec: Tag[] 
+  formSpec: Tag[]
 ): DisplayableAnswerDetail => {
   const [_resPlaceholder, fieldId, answerValue, metadataString] = inputTag;
-  let questionLabel = `Question ID: ${fieldId}`; 
+  let questionLabel = `Question ID: ${fieldId}`;
   let responseLabel = answerValue ?? "N/A";
   const questionField = formSpec.find(
     (tag): tag is Field => tag[0] === "field" && tag[1] === fieldId
   );
 
   if (questionField) {
-    questionLabel = questionField[3] || questionLabel; 
+    questionLabel = questionField[3] || questionLabel;
     if (questionField[2] === "option" && answerValue) {
       try {
         const choices = JSON.parse(questionField[4] || "[]") as Tag[];
-        const selectedChoiceIds = answerValue.split(';');
+        const selectedChoiceIds = answerValue.split(";");
         const choiceLabels = choices
-          .filter(choice => selectedChoiceIds.includes(choice[0]))
-          .map(choice => choice[1]);
+          .filter((choice) => selectedChoiceIds.includes(choice[0]))
+          .map((choice) => choice[1]);
 
         if (choiceLabels.length > 0) {
-          responseLabel = choiceLabels.join(', ');
+          responseLabel = choiceLabels.join(", ");
         }
-        
+
         const metadata = JSON.parse(metadataString || "{}");
         if (metadata.message) {
-          const otherChoice = choices.find(c => {
+          const otherChoice = choices.find((c) => {
             try {
-              return JSON.parse(c[2] || '{}')?.isOther === true;
-            } catch { return false; }
+              return JSON.parse(c[2] || "{}")?.isOther === true;
+            } catch {
+              return false;
+            }
           });
           if (otherChoice && selectedChoiceIds.includes(otherChoice[0])) {
             responseLabel += ` (${metadata.message})`;

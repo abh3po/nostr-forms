@@ -1,5 +1,5 @@
 // nip46.ts
-import { EventTemplate, generateSecretKey, UnsignedEvent } from "nostr-tools";
+import { EventTemplate, UnsignedEvent } from "nostr-tools";
 import {
   BunkerSignerParams,
   BunkerPointer,
@@ -7,7 +7,6 @@ import {
   BunkerSigner,
 } from "nostr-tools/nip46";
 import { NostrSigner } from "./types";
-import { bytesToHex, hexToBytes } from "@noble/hashes/utils";
 import { getAppSecretKeyFromLocalStorage } from "./utils";
 
 export async function createNip46Signer(
@@ -19,11 +18,12 @@ export async function createNip46Signer(
   if (!bp) throw new Error("Invalid NIP-46 URI");
 
   const clientSecretKey: Uint8Array = getAppSecretKeyFromLocalStorage();
-
+  console.log("CLIENT SECRET IS", clientSecretKey, bp);
   const bunker = new BunkerSigner(clientSecretKey, bp, params);
   console.log("BUNKER Created", bunker);
 
   await bunker.connect();
+  console.log("BUNKER CONNECTED");
   const wrapper: NostrSigner = {
     getPublicKey: async () => await bunker.getPublicKey(),
     signEvent: async (event: EventTemplate) => {

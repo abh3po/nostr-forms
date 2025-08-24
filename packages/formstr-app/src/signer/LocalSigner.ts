@@ -23,7 +23,7 @@ export function createLocalSigner(privkey: string): NostrSigner {
 
     nip44Encrypt: async (peerPubkey, plaintext) => {
       let conversationKey = nip44.v2.utils.getConversationKey(
-        privkey,
+        hexToBytes(privkey),
         peerPubkey
       );
       return nip44.v2.encrypt(plaintext, conversationKey);
@@ -31,7 +31,7 @@ export function createLocalSigner(privkey: string): NostrSigner {
 
     nip44Decrypt: async (peerPubkey, ciphertext) => {
       let conversationKey = nip44.v2.utils.getConversationKey(
-        privkey,
+        hexToBytes(privkey),
         peerPubkey
       );
       return nip44.v2.decrypt(ciphertext, conversationKey);

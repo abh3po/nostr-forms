@@ -193,8 +193,6 @@ const LoginModal: React.FC<LoginModalProps> = ({ open, onClose }) => {
     }
   };
 
-  console.log("NIP07Loading is", loadingNip07);
-
   return (
     <Modal open={open} onCancel={onClose} footer={null} centered width={420}>
       <div style={{ textAlign: "center", marginBottom: 16 }}>

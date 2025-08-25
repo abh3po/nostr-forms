@@ -18,10 +18,7 @@ export async function createNip46Signer(
   if (parsedUri.protocol === "bunker:") {
     const bp: BunkerPointer | null = await parseBunkerInput(uri);
     if (!bp) throw new Error("Invalid NIP-46 URI");
-    console.log("CLIENT SECRET IS", clientSecretKey, bp);
     const bunker = BunkerSigner.fromBunker(clientSecretKey, bp, params);
-    console.log("BUNKER Created", bunker);
-
     await bunker.connect();
     console.log("BUNKER CONNECTED");
     return wrapBunkerSigner(bunker);

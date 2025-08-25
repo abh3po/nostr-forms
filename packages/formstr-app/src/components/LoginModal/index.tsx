@@ -5,6 +5,7 @@ import QRCode from "qrcode.react";
 import { signerManager } from "../../signer";
 import { getAppSecretKeyFromLocalStorage } from "../../signer/utils";
 import { getPublicKey } from "nostr-tools";
+import { createNostrConnectURI } from "../../signer/nip46";
 
 const { Title, Text } = Typography;
 const { TabPane } = Tabs;
@@ -15,7 +16,8 @@ const LoginOptionButton: React.FC<{
   text: string;
   onClick: () => void;
   type?: "primary" | "default";
-}> = ({ icon, text, onClick, type = "default" }) => (
+  loading?: boolean;
+}> = ({ icon, text, onClick, type = "default", loading = false }) => (
   <Button
     type={type}
     icon={icon}
@@ -23,34 +25,84 @@ const LoginOptionButton: React.FC<{
     size="large"
     onClick={onClick}
     style={{ marginBottom: 8 }}
+    loading={loading}
   >
     {text}
   </Button>
 );
 
 // NIP-46 Section (Manual + QR)
-const Nip46Section: React.FC = () => {
+interface Nip46SectionProps {
+  onSuccess: () => void;
+}
+const Nip46Section: React.FC<Nip46SectionProps> = ({ onSuccess }) => {
   const [activeTab, setActiveTab] = useState("manual");
   const [bunkerUri, setBunkerUri] = useState("");
-  const [qrPayload] = useState(() => {
-    // generate ephemeral key for demo
+  const [loadingConnect, setLoadingConnect] = useState(false);
+
+  const [qrPayload] = useState(() => generateNostrConnectURI());
+
+  function generateNostrConnectURI() {
     const clientSecretKey = getAppSecretKeyFromLocalStorage();
-    const clientPubKey = getPublicKey(clientSecretKey);
-    return `nostr+connect://${clientPubKey}?relay=wss://relay.nsec.app`;
-  });
+    const clientPubkey = getPublicKey(clientSecretKey);
+
+    // Required secret (short random string)
+    const secret = Math.random().toString(36).slice(2, 10);
+
+    // Permissions you want (optional, but usually good to ask explicitly)
+    const perms = [
+      "nip44_encrypt",
+      "nip44_decrypt",
+      "sign_event",
+      "get_public_key",
+    ];
+
+    // Build query params
+    const params = {
+      clientPubkey,
+      relays: ["wss://relay.nsec.app"],
+      secret,
+      perms,
+      name: "Formstr",
+      url: window.location.origin,
+    };
+
+    const finalUrl = createNostrConnectURI(params);
+    console.log("FINAL URL is", finalUrl);
+    return finalUrl;
+  }
+
+  const connectToBunkerUri = async (bunkerUri: string) => {
+    await signerManager.loginWithNip46(bunkerUri);
+    message.success("Connected to Remote Signer");
+    onSuccess();
+  };
 
   const handleConnectManual = async () => {
     if (!bunkerUri) {
       message.error("Please enter a bunker URI.");
       return;
     }
-    await signerManager.loginWithNip46(bunkerUri);
-    message.success(`Connected to bunker: ${bunkerUri}`);
+    setLoadingConnect(true);
+    try {
+      await connectToBunkerUri(bunkerUri);
+    } catch (err) {
+      message.error("Connection failed.");
+    } finally {
+      setLoadingConnect(false);
+    }
   };
-
   return (
     <div style={{ marginTop: 16 }}>
-      <Tabs activeKey={activeTab} onChange={setActiveTab}>
+      <Tabs
+        activeKey={activeTab}
+        onChange={(tab: string) => {
+          setActiveTab(tab);
+          if (tab === "qr") {
+            connectToBunkerUri(qrPayload);
+          }
+        }}
+      >
         <TabPane tab="Paste URI" key="manual">
           <Space direction="vertical" style={{ width: "100%" }}>
             <Input
@@ -58,7 +110,11 @@ const Nip46Section: React.FC = () => {
               value={bunkerUri}
               onChange={(e) => setBunkerUri(e.target.value)}
             />
-            <Button type="primary" onClick={handleConnectManual}>
+            <Button
+              type="primary"
+              onClick={handleConnectManual}
+              loading={loadingConnect}
+            >
               Connect
             </Button>
           </Space>
@@ -82,8 +138,7 @@ const Nip46Section: React.FC = () => {
 const FooterInfo: React.FC = () => (
   <div style={{ marginTop: 24, textAlign: "center" }}>
     <Text type="secondary" style={{ fontSize: 12 }}>
-      Your keys never leave your control. Formstr will never store your
-      credentials.
+      Your keys never leave your control.
     </Text>
     <br />
     <a href="/docs" style={{ fontSize: 12 }}>
@@ -100,19 +155,27 @@ interface LoginModalProps {
 const LoginModal: React.FC<LoginModalProps> = ({ open, onClose }) => {
   const [showNip46, setShowNip46] = useState(false);
 
-  const handleNip07 = () => {
+  const [loadingNip07, setLoadingNip07] = useState(false);
+
+  const handleNip07 = async () => {
+    console.log("handle nip07 called");
     if ((window as any).nostr) {
-      message.success("NIP-07 extension detected. Proceeding to login...");
-      signerManager.loginWithNip07();
+      setLoadingNip07(true);
+      try {
+        await signerManager.loginWithNip07();
+        message.success("Logged in with NIP-07");
+        onClose();
+      } catch (err) {
+        message.error("Login failed.");
+      } finally {
+        setLoadingNip07(false);
+      }
     } else {
       message.error("No NIP-07 extension found.");
     }
   };
 
-  const handleGuest = () => {
-    message.success("Continuing as Guest.");
-    // TODO: implement guest session
-  };
+  console.log("NIP07Loading is", loadingNip07);
 
   return (
     <Modal open={open} onCancel={onClose} footer={null} centered width={420}>
@@ -120,28 +183,20 @@ const LoginModal: React.FC<LoginModalProps> = ({ open, onClose }) => {
         <Title level={4}>Sign in to Formstr</Title>
         <Text type="secondary">Choose your preferred login method</Text>
       </div>
-
       <Space direction="vertical" style={{ width: "100%" }}>
         <LoginOptionButton
           icon={<KeyOutlined />}
           text="Sign in with Nostr Extension (NIP-07)"
           type="primary"
           onClick={handleNip07}
+          loading={loadingNip07}
         />
-
         <LoginOptionButton
           icon={<LinkOutlined />}
           text="Connect with Remote Signer (NIP-46)"
           onClick={() => setShowNip46(!showNip46)}
         />
-
-        {showNip46 && <Nip46Section />}
-
-        <LoginOptionButton
-          icon={<UserOutlined />}
-          text="Continue as Guest"
-          onClick={handleGuest}
-        />
+        {showNip46 && <Nip46Section onSuccess={onClose} />}
       </Space>
 
       <FooterInfo />

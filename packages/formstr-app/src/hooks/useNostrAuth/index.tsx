@@ -1,4 +1,6 @@
 import { useState } from "react";
+import { signerManager } from "../../signer";
+import { sign } from "crypto";
 
 /**
  * React hook for generating a NIP-98 Authorization header.
@@ -18,11 +20,9 @@ export function useNostrAuth() {
     method: string,
     body?: Record<string, any> | string
   ): Promise<string> {
+    const signer = await signerManager.getSigner();
     // Ensure a Nostr signer is available (Alby, nos2x, etc.).
-    if (
-      !(window as any).nostr ||
-      typeof (window as any).nostr.signEvent !== "function"
-    ) {
+    if (!signer) {
       const msg =
         "No Nostr signer available (install/enable a browser extension)";
       setError(msg);
@@ -64,7 +64,7 @@ export function useNostrAuth() {
 
       // Sign the event with the user's Nostr key. This will add id, pubkey, sig.
       // window.nostr.signEvent is defined by NIP-07 extensions:contentReference[oaicite:10]{index=10}:contentReference[oaicite:11]{index=11}.
-      const signedEvent = await (window as any).nostr.signEvent(event);
+      const signedEvent = signer.signEvent(event);
 
       // Base64-encode the JSON of the signed event.
       const eventJson = JSON.stringify(signedEvent);

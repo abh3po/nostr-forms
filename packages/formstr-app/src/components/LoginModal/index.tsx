@@ -6,6 +6,7 @@ import { signerManager } from "../../signer";
 import { getAppSecretKeyFromLocalStorage } from "../../signer/utils";
 import { getPublicKey } from "nostr-tools";
 import { createNostrConnectURI } from "../../signer/nip46";
+import ThemedUniversalModal from "../UniversalMarkdownModal";
 
 const { Title, Text } = Typography;
 const { TabPane } = Tabs;
@@ -135,17 +136,34 @@ const Nip46Section: React.FC<Nip46SectionProps> = ({ onSuccess }) => {
 };
 
 // Footer info component
-const FooterInfo: React.FC = () => (
-  <div style={{ marginTop: 24, textAlign: "center" }}>
-    <Text type="secondary" style={{ fontSize: 12 }}>
-      Your keys never leave your control.
-    </Text>
-    <br />
-    <a href="/docs" style={{ fontSize: 12 }}>
-      Need help?
-    </a>
-  </div>
-);
+const FooterInfo: React.FC = () => {
+  const [isFAQModalVisible, setIsFAQModalVisible] = useState(false);
+
+  return (
+    <div style={{ marginTop: 24, textAlign: "center" }}>
+      <Text type="secondary" style={{ fontSize: 12 }}>
+        Your keys never leave your control.
+      </Text>
+      <br />
+      <a
+        style={{ fontSize: 12 }}
+        onClick={() => {
+          setIsFAQModalVisible(true);
+        }}
+      >
+        Need help?
+      </a>
+      <ThemedUniversalModal
+        visible={isFAQModalVisible}
+        onClose={() => {
+          setIsFAQModalVisible(false);
+        }}
+        filePath="/docs/faq.md"
+        title="Frequently Asked Questions"
+      />
+    </div>
+  );
+};
 
 interface LoginModalProps {
   open: boolean;

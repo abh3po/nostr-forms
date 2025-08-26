@@ -18,6 +18,7 @@ import { useProfileContext } from "../../../../../hooks/useProfileContext";
 import { ZapQRCodeModal } from "./zapQRModal";
 import { useNavigate } from "react-router-dom";
 import UniversalMarkdownModal from "../../../../../components/UniversalMarkdownModal";
+import { base64 } from "@scure/base";
 
 const { Text } = Typography;
 
@@ -119,6 +120,10 @@ export const CustomSlugForm = ({
         relays,
         viewKey,
       });
+      console.log("AUTH HEADER GENERATED IS", authHeader);
+      const decodedString = base64.decode(authHeader);
+      console.log("DECODED AUTH HEADER IS", decodedString);
+      console.log;
       const res = await axios.post(
         apiUrl,
         { slug, formId, formPubkey, relays, viewKey },
@@ -258,14 +263,22 @@ export const CustomSlugForm = ({
                       <Alert
                         message={
                           <>
-                            <Text style={{fontSize: 10}}>
-                            Your current current form visitibilty is set to "Anyone with the link can access your form", if you proceed with customized links with this setting Formstr Inc will also be able to access this form.
-                            To change it, so that only fixed participants can access the form, please click 
+                            <Text style={{ fontSize: 10 }}>
+                              Your current current form visitibilty is set to
+                              "Anyone with the link can access your form", if
+                              you proceed with customized links with this
+                              setting Formstr Inc will also be able to access
+                              this form. To change it, so that only fixed
+                              participants can access the form, please click
                             </Text>
                             {onEditClick && (
                               <Button
                                 type="link"
-                                style={{ marginLeft: 2, padding: 0, fontSize: 10 }}
+                                style={{
+                                  marginLeft: 2,
+                                  padding: 0,
+                                  fontSize: 10,
+                                }}
                                 onClick={onEditClick}
                               >
                                 here

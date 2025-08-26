@@ -32,6 +32,7 @@ export const SubmitButton: React.FC<SubmitButtonProps> = ({
   const [acceptedRelays, setAcceptedRelays] = useState<string[]>([]);
 
   const saveResponse = async (anonymous: boolean = true) => {
+    console.log("Save Responses called");
     let formId = formEvent.tags.find((t) => t[0] === "d")?.[1];
     if (!formId) {
       alert("FORM ID NOT FOUND");
@@ -51,6 +52,8 @@ export const SubmitButton: React.FC<SubmitButtonProps> = ({
     if (anonymous) {
       anonUser = generateSecretKey();
     }
+
+    console.log("Send reponses", responses, anonUser);
     sendResponses(
       pubKey,
       formId,

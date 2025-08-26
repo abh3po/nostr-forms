@@ -82,7 +82,6 @@ export async function signEvent(
   baseEvent: UnsignedEvent,
   userSecretKey: Uint8Array | null
 ) {
-  console.log("RECEIVED KEY?", userSecretKey);
   let nostrEvent;
   if (userSecretKey) {
     nostrEvent = finalizeEvent(baseEvent, userSecretKey);
@@ -209,7 +208,6 @@ const encryptResponse = async (
   receiverPublicKey: string,
   senderPrivateKey: Uint8Array | null
 ) => {
-  console.log("On Encrypt Responses", senderPrivateKey);
   if (!senderPrivateKey) {
     const signer = await signerManager.getSigner();
     return await signer.nip44Encrypt!(receiverPublicKey, message);
@@ -230,7 +228,6 @@ export const sendResponses = async (
   relays: string[] = [],
   onAcceptedRelays?: (url: string) => void
 ) => {
-  console.log("Inside Send Responses");
   if (!formId) {
     alert("FORM ID NOT FOUND");
     return;
@@ -242,7 +239,6 @@ export const sendResponses = async (
   if (!encryptResponses) {
     tags = [...tags, ...responses];
   } else {
-    console.log("Calling encrypt response");
     content = await encryptResponse(
       JSON.stringify(responses),
       formAuthorPub,
@@ -256,9 +252,7 @@ export const sendResponses = async (
     content: content,
     created_at: Math.floor(Date.now() / 1000),
   };
-  console.log("Calling signevent");
   const fullEvent = await signEvent(baseEvent, responderSecretKey);
-  console.log("called signevent", fullEvent);
   let relayList = relays;
   if (relayList.length === 0) {
     relayList = defaultRelays;

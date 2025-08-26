@@ -121,9 +121,6 @@ export const CustomSlugForm = ({
         viewKey,
       });
       console.log("AUTH HEADER GENERATED IS", authHeader);
-      const decodedString = base64.decode(authHeader);
-      console.log("DECODED AUTH HEADER IS", decodedString);
-      console.log;
       const res = await axios.post(
         apiUrl,
         { slug, formId, formPubkey, relays, viewKey },

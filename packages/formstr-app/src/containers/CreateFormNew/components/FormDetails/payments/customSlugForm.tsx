@@ -18,7 +18,6 @@ import { useProfileContext } from "../../../../../hooks/useProfileContext";
 import { ZapQRCodeModal } from "./zapQRModal";
 import { useNavigate } from "react-router-dom";
 import UniversalMarkdownModal from "../../../../../components/UniversalMarkdownModal";
-import { base64 } from "@scure/base";
 
 const { Text } = Typography;
 
@@ -120,7 +119,6 @@ export const CustomSlugForm = ({
         relays,
         viewKey,
       });
-      console.log("AUTH HEADER GENERATED IS", authHeader);
       const res = await axios.post(
         apiUrl,
         { slug, formId, formPubkey, relays, viewKey },
@@ -128,7 +126,6 @@ export const CustomSlugForm = ({
           headers: { Authorization: authHeader },
         }
       );
-      console.log("APIR RESULT", res);
       const { invoice, paymentHash } = res.data;
       const { amount } = res.data;
       setAmount(amount);

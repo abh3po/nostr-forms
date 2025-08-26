@@ -66,13 +66,11 @@ export function useNostrAuth() {
       // Sign the event with the user's Nostr key. This will add id, pubkey, sig.
       // window.nostr.signEvent is defined by NIP-07 extensions:contentReference[oaicite:10]{index=10}:contentReference[oaicite:11]{index=11}.
       const signedEvent = await signer.signEvent(event);
-      console.log("SIGNED AUTH EVENT is", signedEvent);
       // Base64-encode the JSON of the signed event.
       const eventJson = JSON.stringify(signedEvent);
       const token = btoa(eventJson);
 
       // Return with "Nostr " prefix as required in the Authorization header:contentReference[oaicite:12]{index=12}.
-      console.log("Authtoken is", token);
       return `Nostr ${token}`;
     } catch (err: any) {
       // Handle user cancel or other errors.

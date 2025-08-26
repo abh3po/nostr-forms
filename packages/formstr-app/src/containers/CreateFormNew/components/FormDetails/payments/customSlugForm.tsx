@@ -51,7 +51,7 @@ export const CustomSlugForm = ({
   const navigate = useNavigate();
   const { generateAuthHeader, error: authError } = useNostrAuth();
   const { pubkey } = useProfileContext();
-
+  console.log("custom slug is", slug);
   useEffect(() => {
     const checkServer = async () => {
       try {

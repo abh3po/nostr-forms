@@ -5,6 +5,7 @@ import ReactMarkdown from "react-markdown";
 import { CaretRightOutlined } from "@ant-design/icons";
 import styled from "styled-components";
 import { useToken } from "antd/es/theme/internal";
+import SafeMarkdown from "../SafeMarkdown";
 
 const { Panel } = Collapse;
 
@@ -210,7 +211,7 @@ const FAQModal: React.FC<FAQModalProps> = ({ visible, onClose }) => {
                   key={String(index + 1)}
                   token={token}
                 >
-                  <ReactMarkdown
+                  <SafeMarkdown
                     components={{
                       p: ({ children }) => (
                         <PanelContent token={token}>{children}</PanelContent>
@@ -223,7 +224,7 @@ const FAQModal: React.FC<FAQModalProps> = ({ visible, onClose }) => {
                     }}
                   >
                     {item.answer}
-                  </ReactMarkdown>
+                  </SafeMarkdown>
                 </StyledPanel>
               ))}
             </StyledCollapse>

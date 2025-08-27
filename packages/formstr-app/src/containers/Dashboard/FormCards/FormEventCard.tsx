@@ -15,7 +15,6 @@ import {
   getFormData,
   responsePath,
 } from "../../../utils/formUtils";
-import ReactMarkdown from "react-markdown";
 import {
   DownloadOutlined,
   EditOutlined,
@@ -28,6 +27,7 @@ import { constructDraftUrl } from "./Drafts";
 import { useApplicationContext } from "../../../hooks/useApplicationContext";
 import { FormDetails } from "../../CreateFormNew/components/FormDetails";
 import { getDefaultRelays } from "@formstr/sdk";
+import SafeMarkdown from "../../../components/SafeMarkdown";
 
 interface FormEventCardProps {
   event: Event;
@@ -231,11 +231,11 @@ export const FormEventCard: React.FC<FormEventCardProps> = ({
           marginBottom: 30,
         }}
       >
-        <ReactMarkdown>
+        <SafeMarkdown>
           {settings.description
             ? settings.description?.trim().substring(0, 200) + "..."
             : "Encrypted Content"}
-        </ReactMarkdown>
+        </SafeMarkdown>
       </div>
       <Divider />
       <div

@@ -1,10 +1,10 @@
 import { Card, Divider, Typography } from "antd";
-import ReactMarkdown from "react-markdown";
 import { naddrUrl } from "../../utils/utility";
 import { useNavigate } from "react-router-dom";
 import { getDefaultRelays } from "../../nostr/common";
 import { Event } from "nostr-tools";
 import { IFormSettings } from "../CreateFormNew/components/FormSettings/types";
+import SafeMarkdown from "../../components/SafeMarkdown";
 
 export default function PublicFormCard({ event }: { event: Event }) {
   const navigate = useNavigate();
@@ -77,15 +77,34 @@ export default function PublicFormCard({ event }: { event: Event }) {
             padding: 20,
           }}
         >
-          <Typography.Title level={4} style={{ color: "white", margin: 0, textShadow: "2px 2px 4px rgba(0,0,0,0.7)" }}>
+          <Typography.Title
+            level={4}
+            style={{
+              color: "white",
+              margin: 0,
+              textShadow: "2px 2px 4px rgba(0,0,0,0.7)",
+            }}
+          >
             {name}
           </Typography.Title>
           <Divider style={{ borderColor: "rgba(255,255,255,0.2)" }} />
-          <div style={{ color: "white", opacity: "80%",  textShadow: "2px 2px 4px rgba(0,0,0,0.7)" }}>
-            <ReactMarkdown>{truncatedDescription}</ReactMarkdown>
+          <div
+            style={{
+              color: "white",
+              opacity: "80%",
+              textShadow: "2px 2px 4px rgba(0,0,0,0.7)",
+            }}
+          >
+            <SafeMarkdown>{truncatedDescription}</SafeMarkdown>
           </div>
           <Divider style={{ borderColor: "rgba(255,255,255,0.2)" }} />
-          <div style={{ display: "flex", justifyContent: "space-between",  textShadow: "2px 2px 4px rgba(0,0,0,0.7)" }}>
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              textShadow: "2px 2px 4px rgba(0,0,0,0.7)",
+            }}
+          >
             <Typography.Text style={{ color: "white", marginTop: 5 }}>
               {new Date(event.created_at * 1000).toLocaleDateString()}
             </Typography.Text>

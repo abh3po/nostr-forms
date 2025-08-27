@@ -1,10 +1,10 @@
 // src/components/UniversalMarkdownModal.tsx
 import { Modal, Collapse, Typography, Spin, ConfigProvider } from "antd";
 import { useEffect, useState } from "react";
-import ReactMarkdown from "react-markdown";
 import { CaretRightOutlined } from "@ant-design/icons";
 import styled from "styled-components";
 import { useToken } from "antd/es/theme/internal";
+import SafeMarkdown from "../SafeMarkdown";
 
 const { Panel } = Collapse;
 
@@ -147,7 +147,7 @@ const UniversalMarkdownModal: React.FC<Props> = ({
                 key={String(idx)}
                 token={token}
               >
-                <ReactMarkdown
+                <SafeMarkdown
                   components={{
                     p: ({ children }) => (
                       <PanelContent token={token}>{children}</PanelContent>
@@ -160,12 +160,12 @@ const UniversalMarkdownModal: React.FC<Props> = ({
                   }}
                 >
                   {item.body}
-                </ReactMarkdown>
+                </SafeMarkdown>
               </StyledPanel>
             ))}
           </StyledCollapse>
         ) : (
-          <ReactMarkdown>{rawContent}</ReactMarkdown>
+          <SafeMarkdown>{rawContent}</SafeMarkdown>
         )}
       </ModalBody>
     </Modal>

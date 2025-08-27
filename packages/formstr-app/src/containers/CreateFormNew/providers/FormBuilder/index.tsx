@@ -25,6 +25,7 @@ import { Field } from "../../../../nostr/types";
 import { message } from "antd";
 import { ProcessedFormData } from "../../components/AIFormGeneratorModal/aiProcessor";
 import { AnswerSettings } from "@formstr/sdk/dist/interfaces";
+import { sampleBackgrounds } from "../../components/FormSettings/constants";
 
 const LOCAL_STORAGE_CUSTOM_RELAYS_KEY = "formstr:customRelays";
 
@@ -77,8 +78,7 @@ export const FormBuilderContext = React.createContext<IFormBuilderContext>({
 });
 
 const InitialFormSettings: IFormSettings = {
-  titleImageUrl:
-    "https://images.pexels.com/photos/733857/pexels-photo-733857.jpeg",
+  titleImageUrl: sampleBackgrounds[0],
   description:
     "This is the description, you can use markdown while editing it!" +
     " tap anywhere on the form to edit, including this description.",

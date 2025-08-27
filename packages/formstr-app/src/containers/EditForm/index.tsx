@@ -3,7 +3,6 @@ import FormBuilder from "../CreateFormNew/FormBuilder";
 import useFormBuilderContext from "../CreateFormNew/hooks/useFormBuilderContext";
 import { useEffect, useState } from "react";
 import { HEADER_MENU_KEYS } from "../CreateFormNew/components/Header/config";
-import { FormFiller } from "../FormFillerNew";
 import { getPublicKey, nip19, SimplePool } from "nostr-tools";
 import { hexToBytes } from "@noble/hashes/utils";
 import { getDefaultRelays } from "@formstr/sdk";
@@ -12,6 +11,7 @@ import { getFormSpec as formSpecFromEvent } from "../../utils/formUtils";
 import { useProfileContext } from "../../hooks/useProfileContext";
 import { LoadingOutlined } from "@ant-design/icons";
 import { AddressPointer } from "nostr-tools/nip19";
+import { FormRenderer } from "../FormFillerNew/FormRenderer";
 
 function EditForm() {
   const { naddr } = useParams();
@@ -112,8 +112,15 @@ function EditForm() {
     return <FormBuilder />;
   }
   if (selectedTab === HEADER_MENU_KEYS.PREVIEW) {
-    return <FormFiller formSpec={getFormSpec()} />;
-  }
+      return (
+        <FormRenderer
+          formTemplate={getFormSpec()}
+          form={null}
+          footer={null}
+          onInput={() => {}}
+        />
+      );
+    }
 
   return <></>;
 }

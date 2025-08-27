@@ -9,6 +9,7 @@ import QuestionTextStyle from "./question.style";
 import { Choice } from "./InputElements/OptionTypes/types";
 import UploadImage from "./UploadImage";
 import { Field } from "../../../../nostr/types";
+import { ColorfulMarkdownTextarea } from "../../../../components/SafeMarkdown/ColorfulMarkdownInput";
 
 type QuestionCardProps = {
   question: Field;
@@ -38,10 +39,9 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
 
   const currentSectionId = getSectionForQuestion(question[1]);
 
-  const handleTextChange = (event: ChangeEvent<HTMLTextAreaElement>) => {
-    event.stopPropagation();
+  const handleTextChange = (value: string) => {
     let field = question;
-    field[3] = event.target.value;
+    field[3] = value;
     onEdit(field, question[1]);
   };
 
@@ -116,15 +116,12 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
           style={{ justifyContent: "space-between", display: "flex" }}
         >
           <QuestionTextStyle style={{ width: "100%" }}>
-            <label>
-              <Input.TextArea
+            <label style={{ width: "100%" }}>
+              <ColorfulMarkdownTextarea
                 key={question[1]}
-                className="question-input"
-                onChange={handleTextChange}
-                defaultValue={"Click to edit"}
                 value={question[3] || ""}
+                onChange={handleTextChange}
                 placeholder="Enter a Question"
-                autoSize
               />
             </label>
           </QuestionTextStyle>

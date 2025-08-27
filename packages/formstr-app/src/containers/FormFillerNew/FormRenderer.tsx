@@ -1,6 +1,5 @@
 import { Form, Typography, Steps, Button, Space, Progress, Card } from "antd";
-import { useState, useEffect } from "react";
-import Markdown from "react-markdown";
+import { useState } from "react";
 import { FormFields } from "./FormFields";
 import { Field, Tag } from "../../nostr/types";
 import FillerStyle from "./formFiller.style";
@@ -11,6 +10,7 @@ import { Link } from "react-router-dom";
 import { isMobile } from "../../utils/utility";
 import { ReactComponent as CreatedUsingFormstr } from "../../Images/created-using-formstr.svg";
 import { LeftOutlined, RightOutlined } from "@ant-design/icons";
+import SafeMarkdown from "../../components/SafeMarkdown";
 
 const { Text, Title } = Typography;
 const { Step } = Steps;
@@ -209,7 +209,7 @@ export const FormRenderer: React.FC<FormRendererProps> = ({
               <Title level={4}>{currentItem.title}</Title>
               {currentItem.description && (
                 <Text type="secondary">
-                  <Markdown>{currentItem.description}</Markdown>
+                  <SafeMarkdown>{currentItem.description}</SafeMarkdown>
                 </Text>
               )}
               {currentItem.type === "questions" && (
@@ -276,7 +276,7 @@ export const FormRenderer: React.FC<FormRendererProps> = ({
           {!hideDescription && settings?.description && (
             <div className="form-description">
               <Text>
-                <Markdown>{settings.description}</Markdown>
+                <SafeMarkdown>{settings.description}</SafeMarkdown>
               </Text>
             </div>
           )}

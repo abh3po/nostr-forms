@@ -9,6 +9,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { Field } from "../../../../nostr/types";
 import AIFormGeneratorModal from "../AIFormGeneratorModal";
 import Section from "../SectionManager/Section";
+import { ColorfulMarkdownTextarea } from "../../../../components/SafeMarkdown/ColorfulMarkdownInput";
 
 const { Text } = Typography;
 
@@ -106,8 +107,8 @@ export const QuestionsList = () => {
     getSectionForQuestion,
   } = useFormBuilderContext();
 
-  const handleDescriptionChange = (e: ChangeEvent<HTMLTextAreaElement>) => {
-    updateFormSetting({ description: e.target.value });
+  const handleDescriptionChange = (newDescr: string) => {
+    updateFormSetting({ description: newDescr });
   };
 
   const onReorderKey = (keyType: "UP" | "DOWN", tempId: string) => {
@@ -236,11 +237,9 @@ export const QuestionsList = () => {
         <FormTitle className="form-title" />
         <DescriptionStyle>
           <div className="form-description">
-            <Input.TextArea
-              key="description"
-              value={formSettings.description}
+            <ColorfulMarkdownTextarea
+              value={formSettings.description || ""}
               onChange={handleDescriptionChange}
-              autoSize
               placeholder="Add a form description (optional, supports Markdown)"
             />
           </div>

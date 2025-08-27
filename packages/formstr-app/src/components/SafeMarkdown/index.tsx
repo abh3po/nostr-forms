@@ -11,7 +11,7 @@ const schema = {
   attributes: {
     ...defaultSchema.attributes,
     span: [
-      ["style", /^color\s*:\s*#[0-9a-fA-F]{3,6}$/], 
+      ["style", /^color\s*:\s*#[0-9a-fA-F]{3,6}$/],
       // ✅ only allow hex colors for text
     ],
   },

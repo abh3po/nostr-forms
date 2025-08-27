@@ -1,4 +1,12 @@
-import { Button, Divider, Switch, Tooltip, Typography } from "antd";
+import {
+  Button,
+  Divider,
+  Drawer,
+  Input,
+  Switch,
+  Tooltip,
+  Typography,
+} from "antd";
 import StyleWrapper from "./style";
 import useFormBuilderContext from "../../hooks/useFormBuilderContext";
 import TitleImage from "./TitleImage";
@@ -6,7 +14,9 @@ import { Sharing } from "./Sharing";
 import FormIdentifier from "./FormIdentifier";
 import { Notifications } from "./Notifications";
 import { isMobile } from "../../../../utils/utility";
-import RelayManagerModal from './RelayManagerModal';
+import RelayManagerModal from "./RelayManagerModal";
+import { BackgroundImagePicker } from "../BackgroundImagePicker";
+import { BackgroundImageSetting } from "./BackgroundImage";
 
 const { Text } = Typography;
 
@@ -87,15 +97,28 @@ function FormSettings() {
       <Divider className="divider" />
       <div className="form-setting">
         <div className="property-setting">
-            <Text className="property-name" style={{marginBottom: '8px'}}>Relay Configuration</Text>
+          <Text className="property-name" style={{ marginBottom: "8px" }}>
+            Relay Configuration
+          </Text>
         </div>
-        <Button 
-          onClick={toggleRelayManagerModal} 
-          type="default" 
-          style={{ width: '100%', marginBottom: '10px' }}
+        <Button
+          onClick={toggleRelayManagerModal}
+          type="default"
+          style={{ width: "100%", marginBottom: "10px" }}
         >
           Manage Relays
         </Button>
+      </div>
+      <Divider className="divider" />
+      <div className="form-setting">
+        <BackgroundImageSetting
+          value={formSettings.backgroundImageUrl}
+          onChange={(url: string) => {
+            updateFormSetting({
+              backgroundImageUrl: url,
+            });
+          }}
+        />
       </div>
 
       {isRelayManagerModalOpen && (

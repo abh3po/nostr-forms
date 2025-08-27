@@ -1,8 +1,15 @@
 import styled from "styled-components";
 import { MEDIA_QUERY_MOBILE } from "../../../../utils/css";
 
-export default styled.div`
+export default styled.div<{
+  $bgImage?: string;
+}>`
   background-color: #dedede;
+  background-image: ${(props) =>
+    props.$bgImage ? `url(${props.$bgImage})` : "none"};
+  background-repeat: repeat;
+  background-position: center top;
+  background-size: auto;
   padding-left: 32px;
   padding-right: 32px;
   overflow: scroll;

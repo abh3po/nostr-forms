@@ -264,8 +264,10 @@ export const FormRenderer: React.FC<FormRendererProps> = ({
     </div>
   );
 
+  console.log("GOT SETTINGSD AS", settings.backgroundImageUrl);
+
   return (
-    <FillerStyle>
+    <FillerStyle $bgImage={settings.backgroundImageUrl}>
       <div className="filler-container">
         <div className="form-filler">
           {!hideTitleImage && settings?.titleImageUrl && (

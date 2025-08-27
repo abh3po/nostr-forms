@@ -230,6 +230,7 @@ export const QuestionsList = () => {
       onClick={() => setQuestionIdInFocus()}
       ref={containerRef}
       style={{ position: "relative" }}
+      $bgImage={formSettings.backgroundImageUrl}
     >
       <div>
         <FormTitle className="form-title" />

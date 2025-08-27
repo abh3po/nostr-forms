@@ -11,4 +11,5 @@ export interface IFormSettings {
   viewKeyInUrl?: boolean;
   formId?: string;
   sections?: SectionData[];
+  backgroundImageUrl?: string;
 }

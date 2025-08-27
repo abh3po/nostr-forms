@@ -73,7 +73,7 @@ export const ColorfulMarkdownTextarea: React.FC<Props> = ({
           value={value}
           onChange={(e) => onChange(e.target.value)}
           placeholder={placeholder}
-          autoSize={{ minRows, maxRows }}
+          autoSize
         />
       )}
 
@@ -121,6 +121,8 @@ export const ColorfulMarkdownTextarea: React.FC<Props> = ({
         {/* Preview toggle button */}
         {preview ? (
           <EditOutlined
+            style={{ color: color }}
+            color={color}
             onClick={(e) => {
               e.stopPropagation(); // ✅ prevents Popover or parent from re-firing
               setPreview(false); // ✅ safe toggle
@@ -128,6 +130,8 @@ export const ColorfulMarkdownTextarea: React.FC<Props> = ({
           />
         ) : (
           <EyeOutlined
+            style={{ color: color }}
+            color={color}
             onClick={(e) => {
               e.stopPropagation(); // ✅ prevents Popover or parent from re-firing
               setPreview(true); // ✅ safe toggle

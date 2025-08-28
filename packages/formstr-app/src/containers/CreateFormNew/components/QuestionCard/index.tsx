@@ -35,6 +35,7 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
     sections,
     getSectionForQuestion,
     moveQuestionToSection,
+    formSettings
   } = useFormBuilderContext();
 
   const currentSectionId = getSectionForQuestion(question[1]);
@@ -79,7 +80,9 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
 
   return (
     <StyledWrapper>
-      <Card type="inner" className="question-card" onClick={onCardClick}>
+      <Card type="inner" className="question-card" onClick={onCardClick} style={{
+        backgroundColor: `rgba(255, 255, 255,${formSettings.cardTransparency})`, // 0.5 is opacity
+      }}>
         <CardHeader
           required={answerSettings.required}
           onRequired={handleRequiredChange}

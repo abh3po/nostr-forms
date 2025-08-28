@@ -2,6 +2,7 @@ import {
   Button,
   Collapse,
   Divider,
+  Slider,
   Switch,
   Tooltip,
   Typography,
@@ -94,6 +95,24 @@ function FormSettings() {
               updateFormSetting({ backgroundImageUrl: url });
             }}
           />
+          <div className="property-setting">
+            <div style={{display: "flex", flexDirection: "column"}}>
+            <Text>Card Transparency</Text>
+              <Slider
+                min={0.5}
+                max={1}
+                step={0.01}
+                value={formSettings.cardTransparency}
+                onChange={(value) =>
+                  updateFormSetting({ cardTransparency: value })
+                }
+              />
+              <Text type="secondary" style={{ fontSize: 12 }}>
+                Adjust transparency of form cards (0 = fully transparent, 1 =
+                fully opaque)
+              </Text>
+            </div>
+          </div>
         </Panel>
 
         <Panel header="Relay Configuration" key="relays">

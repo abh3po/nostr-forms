@@ -266,10 +266,10 @@ export const FormRenderer: React.FC<FormRendererProps> = ({
   );
 
   return (
-    <FillerStyle $bgImage={settings.backgroundImageUrl}>
+    <FillerStyle $bgImage={settings.backgroundImageUrl} $titleImageUrl={settings.titleImageUrl}>
       <div className="filler-container">
         <div className="form-filler">
-          {!hideTitleImage && settings?.titleImageUrl && (
+          {!hideTitleImage && (
             <FormBanner imageUrl={settings.titleImageUrl} formTitle={name} />
           )}
           {!hideDescription && settings?.description && (

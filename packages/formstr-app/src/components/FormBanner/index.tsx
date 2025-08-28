@@ -1,12 +1,13 @@
 import { Typography } from "antd";
 import StyleWrapper from "./style";
+import SafeMarkdown from "../SafeMarkdown";
 const { Text } = Typography;
 
 function FormBanner({
   imageUrl,
   formTitle,
 }: {
-  imageUrl: string;
+  imageUrl?: string;
   formTitle: string;
 }) {
   const settings = {
@@ -16,7 +17,7 @@ function FormBanner({
 
   return (
     <StyleWrapper className="form-title" $titleImageUrl={settings.image}>
-      {<Text className="title-text">{settings.name}</Text>}
+      <Text className="title-text"><SafeMarkdown>{settings.name}</SafeMarkdown></Text>
     </StyleWrapper>
   );
 }

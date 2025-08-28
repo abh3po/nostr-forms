@@ -3,6 +3,7 @@ import { MEDIA_QUERY_MOBILE } from "../../utils/css";
 export default styled.div<{
   $isPreview?: boolean;
   $bgImage?: string;
+  $titleImageUrl?: string;
 }>`
   .form-filler {
     background-color: transparent;
@@ -60,11 +61,22 @@ export default styled.div<{
 
   .form-title {
     position: relative;
-    height: 250px;
-    background-color: #ff5733;
-    border-radius: 10px;
     margin-top: 30px;
+    border-radius: 10px;
     overflow: hidden;
+
+    ${({ $titleImageUrl }) =>
+      $titleImageUrl
+        ? `
+        height: 250px;
+        background-color: #ff5733; /* or use gradient/image from FormBanner */
+      `
+        : `
+        height: auto;
+        background-color: transparent;
+        border-radius: 0;
+        margin-top: 16px;
+      `}
   }
 
   .filler-question {

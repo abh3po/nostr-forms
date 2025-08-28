@@ -71,6 +71,7 @@ export const ColorfulMarkdownTextarea: React.FC<Props> = ({
       ) : (
         <Input.TextArea
           value={value}
+          style={{color: color}}
           onChange={(e) => onChange(e.target.value)}
           placeholder={placeholder}
           autoSize

@@ -87,6 +87,7 @@ const InitialFormSettings: IFormSettings = {
   encryptForm: true,
   viewKeyInUrl: true,
   sections: [],
+  cardTransparency: 1
 };
 
 export default function FormBuilderProvider({

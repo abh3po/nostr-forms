@@ -230,6 +230,7 @@ export const FormRenderer: React.FC<FormRendererProps> = ({
             handleInput={onInput}
             disabled={disabled}
             values={initialValues}
+            formSettings={settings}
           />
         </>
       )}
@@ -263,8 +264,6 @@ export const FormRenderer: React.FC<FormRendererProps> = ({
       {!showStepper && footer}
     </div>
   );
-
-  console.log("GOT SETTINGSD AS", settings.backgroundImageUrl);
 
   return (
     <FillerStyle $bgImage={settings.backgroundImageUrl}>

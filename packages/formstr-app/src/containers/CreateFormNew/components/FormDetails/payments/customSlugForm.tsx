@@ -36,7 +36,7 @@ export const CustomSlugForm = ({
   showAccessWarning?: boolean;
   onEditClick?: () => void;
 }) => {
-  const [slug, setSlug] = useState(formId);
+  const [slug, setSlug] = useState(formId?.toLocaleLowerCase().trim());
   const [checking, setChecking] = useState(false);
   const [available, setAvailable] = useState<boolean | null>(null);
   const [error, setError] = useState<string | null>(null);

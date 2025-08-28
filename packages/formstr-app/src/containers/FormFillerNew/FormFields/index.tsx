@@ -2,6 +2,7 @@ import { Field, Option } from "@formstr/sdk/dist/formstr/nip101";
 import { getValidationRules } from "../validations";
 import { Form } from "antd";
 import { QuestionNode } from "../QuestionNode/QuestionNode";
+import { IFormSettings } from "../../CreateFormNew/components/FormSettings/types";
 
 interface FormFieldsProps {
   fields: Array<Field>;
@@ -9,6 +10,7 @@ interface FormFieldsProps {
   disabled?: boolean;
   values?: { [fieldId: string]: any };
   testId? : string;
+  formSettings: IFormSettings
 }
 
 export const FormFields: React.FC<FormFieldsProps> = ({
@@ -17,6 +19,7 @@ export const FormFields: React.FC<FormFieldsProps> = ({
   disabled = false,
   values = {},
   testId = "form-fields",
+  formSettings
 }) => {
   return fields.map((field) => {
     let [_, fieldId, type, label, optionsString, config] = field;
@@ -41,6 +44,7 @@ export const FormFields: React.FC<FormFieldsProps> = ({
           disabled={disabled}
           value={values[fieldId]}
           testId={`${testId}:question-${fieldId}`}
+          formSettings={formSettings}
         />
       </Form.Item>
     );

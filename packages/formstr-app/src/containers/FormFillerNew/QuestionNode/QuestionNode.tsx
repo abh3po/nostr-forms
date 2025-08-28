@@ -3,6 +3,8 @@ import { InputFiller } from "./InputFiller";
 import { AnswerTypes } from "../../../constants";
 import { Option } from "@formstr/sdk/dist/formstr/nip101";
 import SafeMarkdown from "../../../components/SafeMarkdown";
+import { IFormSettings } from "../../CreateFormNew/components/FormSettings/types";
+import FormSettings from "../../CreateFormNew/components/FormSettings";
 
 interface QuestionProps {
   label: string;
@@ -14,6 +16,7 @@ interface QuestionProps {
   disabled?: boolean;
   value?: any;
   testId: string;
+  formSettings: IFormSettings
 }
 
 export const QuestionNode: React.FC<QuestionProps> = ({
@@ -26,6 +29,7 @@ export const QuestionNode: React.FC<QuestionProps> = ({
   disabled = false,
   value,
   testId,
+  formSettings
 }) => {
   const answerHandler = (questionId: string) => {
     return (answer: string, message?: string) => {
@@ -38,6 +42,9 @@ export const QuestionNode: React.FC<QuestionProps> = ({
       type="inner"
       className="filler-question"
       data-testid={`${testId}:card`}
+      style={{
+        backgroundColor: `rgba(255, 255, 255,${formSettings.cardTransparency})`, // 0.5 is opacity
+      }}
     >
       {required && <span style={{ color: "#ea8dea" }}>* &nbsp;</span>}
       <div className="question-text">

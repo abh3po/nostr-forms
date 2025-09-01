@@ -46,6 +46,7 @@ export const FormRenderer: React.FC<FormRendererProps> = ({
   disabled = false,
   initialValues,
 }) => {
+  console.log("INSIDE FORM RENDERER");
   const name = formTemplate.find((tag) => tag[0] === "name")?.[1] || "";
   const settings = JSON.parse(
     formTemplate.find((tag) => tag[0] === "settings")?.[1] || "{}"
@@ -58,6 +59,7 @@ export const FormRenderer: React.FC<FormRendererProps> = ({
 
   const sections = settings.sections || [];
   const enableSections = !!sections.length;
+  console.log("FIELDS", fields);
 
   // Create mixed content flow
   const createContentFlow = (): ContentItem[] => {

@@ -14,7 +14,7 @@ interface InputFillerProps {
   onChange: (answer: string, message?: string) => void;
   defaultValue?: string | number | boolean;
   disabled?: boolean;
-  testId? : string;
+  testId?: string;
 }
 
 export const InputFiller: React.FC<InputFillerProps> = ({
@@ -36,10 +36,7 @@ export const InputFiller: React.FC<InputFillerProps> = ({
     onChange(value, message);
   };
 
-  const getInput = (
-    answerType: AnswerTypes,
-    answerSettings: any
-  ) => {
+  const getInput = (answerType: AnswerTypes, answerSettings: any) => {
     const INPUT_TYPE_COMPONENT_MAP: { [key in AnswerTypes]?: JSX.Element } = {
       [AnswerTypes.label]: <></>,
       [AnswerTypes.shortText]: (
@@ -117,7 +114,17 @@ export const InputFiller: React.FC<InputFillerProps> = ({
       ),
     };
 
-    return INPUT_TYPE_COMPONENT_MAP[answerType];
+    return (
+      INPUT_TYPE_COMPONENT_MAP[answerType] || (
+        <Input
+          value={defaultValue as string}
+          onChange={handleInputChange}
+          placeholder="Please enter your response"
+          disabled={disabled}
+          data-testid={`${testId}:text-input`}
+        />
+      )
+    );
   };
 
   return <>{getInput(fieldConfig.renderElement, fieldConfig)}</>;

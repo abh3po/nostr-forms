@@ -30,19 +30,21 @@ export const FormFiller: React.FC<FormFillerProps> = ({
   viewKey: _viewKey,
 }) => {
   let { naddr } = useParams();
+  console.log("Received naddr", naddr);
   naddr = naddr || _naddr;
   const isPreview = !!formSpec;
   if (!isPreview && !naddr)
     return <Text> Not enough data to render this url </Text>;
   let decodedData;
   if (!isPreview) decodedData = nip19.decode(naddr!).data as AddressPointer;
+  console.log("Decoded datar", decodedData);
   const pubKey = decodedData?.pubkey;
   const formId = decodedData?.identifier;
   const relays = decodedData?.relays;
   const { pubkey: userPubKey, requestPubkey } = useProfileContext();
   const [formSubmitted, setFormSubmitted] = useState(false);
   const [formEvent, setFormEvent] = useState<Event | undefined>(
-    preFetchedFormContent,
+    preFetchedFormContent
   );
   const [searchParams] = useSearchParams();
   const hideTitleImage = searchParams.get("hideTitleImage") === "true";
@@ -59,7 +61,7 @@ export const FormFiller: React.FC<FormFillerProps> = ({
   const initialize = async (
     formAuthor: string,
     formId: string,
-    relays?: string[],
+    relays?: string[]
   ) => {
     const form = await fetchFormTemplate(
       formAuthor,
@@ -68,7 +70,7 @@ export const FormFiller: React.FC<FormFillerProps> = ({
       (event: Event) => {
         setFormEvent(event);
       },
-      relays,
+      relays
     );
   };
 

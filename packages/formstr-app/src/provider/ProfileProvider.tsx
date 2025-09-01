@@ -1,18 +1,10 @@
-import React, {
-  createContext,
-  useState,
-  useContext,
-  FC,
-  ReactNode,
-  useEffect,
-} from "react";
+import { createContext, useState, FC, ReactNode, useEffect } from "react";
 import { LOCAL_STORAGE_KEYS, getItem, setItem } from "../utils/localStorage";
-import { Modal } from "antd";
 import { Filter } from "nostr-tools";
-import { useApplicationContext } from "../hooks/useApplicationContext";
 import { getDefaultRelays } from "../nostr/common";
 import { signerManager } from "../signer";
 import LoginModal from "../components/LoginModal";
+import { pool } from "../pool";
 
 interface ProfileProviderProps {
   children?: ReactNode;
@@ -37,15 +29,13 @@ export const ProfileProvider: FC<ProfileProviderProps> = ({ children }) => {
   const [pubkey, setPubkey] = useState<string | undefined>(undefined);
   const [userRelays, setUserRelays] = useState<string[]>([]);
   const [showLooginModal, setShowLoginModal] = useState<boolean>(false);
-  const { poolRef } = useApplicationContext();
 
   const fetchUserRelays = async (pubkey: string) => {
-    if (!poolRef) return;
     let filter: Filter = {
       kinds: [10002],
       authors: [pubkey],
     };
-    let relayEvent = await poolRef.current.get(getDefaultRelays(), filter);
+    let relayEvent = await pool.get(getDefaultRelays(), filter);
     if (!relayEvent) return;
     let relayUrls = relayEvent.tags
       .filter((t) => t[0] === "r")
@@ -69,10 +59,8 @@ export const ProfileProvider: FC<ProfileProviderProps> = ({ children }) => {
     if (profile) {
       setPubkey(profile.pubkey);
       fetchUserRelays(profile.pubkey);
-    } else {
-      console.log("Couldn't find npub");
     }
-  }, [poolRef]);
+  }, []);
 
   const logout = () => {
     setItem(LOCAL_STORAGE_KEYS.PROFILE, null);

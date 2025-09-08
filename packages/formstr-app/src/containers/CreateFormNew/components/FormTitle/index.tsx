@@ -52,7 +52,6 @@ function FormTitle({
           value={formName || ""}
           onChange={handleTitleChange}
           fontSize={24}
-          defaultColor="#ffffff"
         />
       )}
     </StyleWrapper>

@@ -10,7 +10,6 @@ type Props = {
   placeholder?: string;
   minRows?: number;
   maxRows?: number;
-  defaultColor?: string;
   fontSize?: number;
   className?: string;
 };
@@ -24,31 +23,24 @@ export const ColorfulMarkdownTextarea: React.FC<Props> = ({
   placeholder,
   fontSize,
   className,
-  defaultColor
 }) => {
   const [pickerOpen, setPickerOpen] = React.useState(false);
   const [color, setColor] = React.useState("#000000");
   const [preview, setPreview] = React.useState(true);
   const wrapperRef = React.useRef<HTMLDivElement>(null);
-  const defaultApplied = React.useRef(false);
 
   React.useEffect(() => {
-    // Only run if defaultColor exists and hasn't been applied yet
-    if (!defaultApplied.current && defaultColor && value) {
-      applyColor(defaultColor);
-      defaultApplied.current = true; // mark as applied
-    }
-  }, [defaultColor, value]); 
-  
-  React.useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (wrapperRef.current?.contains && !wrapperRef.current.contains(event.target as Node)) {
+      if (
+        wrapperRef.current?.contains &&
+        !wrapperRef.current.contains(event.target as Node)
+      ) {
         setPreview(true); // switch to preview mode
       }
     };
-  
+
     document.addEventListener("mousedown", handleClickOutside);
-  
+
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };

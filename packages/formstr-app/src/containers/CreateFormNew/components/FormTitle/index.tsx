@@ -3,6 +3,7 @@ import { SettingOutlined } from "@ant-design/icons";
 import useFormBuilderContext from "../../hooks/useFormBuilderContext";
 import StyleWrapper from "./style";
 import { ChangeEvent } from "react";
+import { ColorfulMarkdownTextarea } from "../../../../components/SafeMarkdown/ColorfulMarkdownInput";
 
 const { Text } = Typography;
 
@@ -25,8 +26,8 @@ function FormTitle({
     image: edit ? formSettings.titleImageUrl : imageUrl,
   };
 
-  const handleTitleChange = (e: ChangeEvent<HTMLTextAreaElement>) => {
-    updateFormName(e.target.value);
+  const handleTitleChange = (name: string) => {
+    updateFormName(name);
   };
 
   return (
@@ -46,11 +47,12 @@ function FormTitle({
       </div>
       {!edit && <Text className="title-text">{settings.name}</Text>}
       {edit && (
-        <Input.TextArea
+        <ColorfulMarkdownTextarea
           className="title-text"
-          value={settings.name}
+          value={formName || ""}
           onChange={handleTitleChange}
-          autoSize={true}
+          fontSize={24}
+          defaultColor="#ffffff"
         />
       )}
     </StyleWrapper>

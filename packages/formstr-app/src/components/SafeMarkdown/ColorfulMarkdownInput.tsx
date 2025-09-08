@@ -10,6 +10,9 @@ type Props = {
   placeholder?: string;
   minRows?: number;
   maxRows?: number;
+  defaultColor?: string;
+  fontSize?: number;
+  className?: string;
 };
 
 const SPAN_WRAPPER_REGEX =
@@ -19,12 +22,37 @@ export const ColorfulMarkdownTextarea: React.FC<Props> = ({
   value = "",
   onChange,
   placeholder,
-  minRows = 3,
-  maxRows = 12,
+  fontSize,
+  className,
+  defaultColor
 }) => {
   const [pickerOpen, setPickerOpen] = React.useState(false);
   const [color, setColor] = React.useState("#000000");
-  const [preview, setPreview] = React.useState(false);
+  const [preview, setPreview] = React.useState(true);
+  const wrapperRef = React.useRef<HTMLDivElement>(null);
+  const defaultApplied = React.useRef(false);
+
+  React.useEffect(() => {
+    // Only run if defaultColor exists and hasn't been applied yet
+    if (!defaultApplied.current && defaultColor && value) {
+      applyColor(defaultColor);
+      defaultApplied.current = true; // mark as applied
+    }
+  }, [defaultColor, value]); 
+  
+  React.useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (wrapperRef.current?.contains && !wrapperRef.current.contains(event.target as Node)) {
+        setPreview(true); // switch to preview mode
+      }
+    };
+  
+    document.addEventListener("mousedown", handleClickOutside);
+  
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
 
   React.useEffect(() => {
     const m = value?.match(/^<span style="color:\s*([^";]+)[";]?\s*">/i);
@@ -53,25 +81,61 @@ export const ColorfulMarkdownTextarea: React.FC<Props> = ({
     setPickerOpen(false);
   };
 
-  const handleColorChange = (c: ColorResult) => applyColor(c.hex);
-  console.log("preview is? ", preview);
+  const handleColorChange = (c: ColorResult) => {
+    applyColor(c.hex);
+    setPreview(true);
+  };
   return (
-    <div style={{ display: "flex", flexDirection: "column" }}>
+    <div
+      className={className}
+      style={{ display: "flex", flexDirection: "column" }}
+    >
       {/* Content area */}
       {preview ? (
         <div
           style={{
             whiteSpace: "pre-wrap",
             wordBreak: "break-word",
-            fontSize: 14,
+            fontSize: fontSize || 14,
+            padding: 0,
+            margin: 0,
+            cursor: "text",
           }}
+          onClick={() => setPreview(false)}
         >
-          <SafeMarkdown>{value}</SafeMarkdown>
+          <SafeMarkdown
+            children={value}
+            components={{
+              p: ({ node, ...props }) => <p style={{ margin: 0 }} {...props} />,
+              h1: ({ node, ...props }) => (
+                <h1 style={{ margin: 0 }} {...props} />
+              ),
+              h2: ({ node, ...props }) => (
+                <h2 style={{ margin: 0 }} {...props} />
+              ),
+              h3: ({ node, ...props }) => (
+                <h3 style={{ margin: 0 }} {...props} />
+              ),
+              ul: ({ node, ...props }) => (
+                <ul style={{ margin: 0, paddingLeft: 16 }} {...props} />
+              ),
+              ol: ({ node, ...props }) => (
+                <ol style={{ margin: 0, paddingLeft: 16 }} {...props} />
+              ),
+              li: ({ node, ...props }) => (
+                <li style={{ margin: 0 }} {...props} />
+              ),
+              span: ({ node, ...props }) => (
+                <span style={{ display: "inline-block" }} {...props} />
+              ),
+            }}
+          />
         </div>
       ) : (
         <Input.TextArea
           value={value}
-          style={{color: color}}
+          ref={wrapperRef}
+          style={{ color: color, fontSize: fontSize }}
           onChange={(e) => onChange(e.target.value)}
           placeholder={placeholder}
           autoSize

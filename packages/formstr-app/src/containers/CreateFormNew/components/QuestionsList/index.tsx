@@ -232,6 +232,7 @@ export const QuestionsList = () => {
       ref={containerRef}
       style={{ position: "relative" }}
       $bgImage={formSettings.backgroundImageUrl}
+      $titleImageUrl={formSettings.titleImageUrl}
     >
       <div>
         <FormTitle className="form-title" />

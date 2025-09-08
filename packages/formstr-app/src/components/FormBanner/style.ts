@@ -18,7 +18,6 @@ export default styled.div<{ $titleImageUrl?: string }>`
     font-size: 24px;
     font-weight: 500;
     max-width: 95%;
-    color: ${({ $titleImageUrl }) => ($titleImageUrl ? "white" : "black")};
     position: ${({ $titleImageUrl }) => ($titleImageUrl ? "absolute" : "static")};
     bottom: ${({ $titleImageUrl }) => ($titleImageUrl ? "10px" : "auto")};
     left: ${({ $titleImageUrl }) => ($titleImageUrl ? "16px" : "auto")};

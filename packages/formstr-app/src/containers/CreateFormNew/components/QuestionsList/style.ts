@@ -3,6 +3,7 @@ import { MEDIA_QUERY_MOBILE } from "../../../../utils/css";
 
 export default styled.div<{
   $bgImage?: string;
+  $titleImageUrl?: string
 }>`
   background-color: #dedede;
   background-image: ${(props) =>
@@ -16,13 +17,24 @@ export default styled.div<{
   height: calc(100dvh - 67px);
   width: calc(100vw - 482px);
 
-  .form-title {
+    .form-title {
     position: relative;
-    height: 250px;
-    background-color: #ff5733;
-    border-radius: 10px;
     margin-top: 30px;
+    border-radius: 10px;
     overflow: hidden;
+
+    ${({ $titleImageUrl }) =>
+      $titleImageUrl
+        ? `
+        height: 250px;
+        background-color: #ff5733; /* or use gradient/image from FormBanner */
+      `
+        : `
+        height: auto;
+        background-color: transparent;
+        border-radius: 0;
+        margin-top: 16px;
+      `}
   }
 
   .form-description {

@@ -12,7 +12,7 @@ Your forms are stored as encrypted events on the Nostr relays and here’s the c
 
 Each form gets its own private key for privacy and sharing, they are stored locally in your browser. If logged in, those keys are also encrypted and synced in a Nostr list event, so your forms are accessible from any device, on the relays you’ve chosen.
 
-Formstr itself is only a UI, we store your forms on the relays of your chosing.
+Formstr itself is only a UI, we store your forms on the relays of your choosing.
 
 ## Do I need to login to use Formstr?
 
@@ -28,4 +28,4 @@ Yes! responses are encrypted with [NIP-44](https://github.com/nostr-protocol/nip
 
 ## Are forms private?
 
-It's upto you, you can make a form private, public, accessible via link, or only accessible to a select few. You control who gets to access your forms.
+It's up to you, you can make a form private, public, accessible via link, or only accessible to a select few. You control who gets to access your forms.

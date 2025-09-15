@@ -498,7 +498,7 @@ export default function FormBuilderProvider({
 
   const initializeForm = (form: FormInitData) => {
     let formInitName = form.spec.filter((f) => f[0] === "name")?.[0]?.[1] || "";
-    setFormName(`<span style="color:#ffffff">${formInitName}</span>`);
+    setFormName(formInitName);
     let settingsFromFile = JSON.parse(
       form.spec.filter((f) => f[0] === "settings")?.[0]?.[1] || "{}"
     );

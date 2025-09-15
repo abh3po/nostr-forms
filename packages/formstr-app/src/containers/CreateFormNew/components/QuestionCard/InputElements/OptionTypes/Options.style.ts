@@ -4,7 +4,7 @@ export default styled.div`
   .radioButtonItem {
     display: flex;
     flex-direction: row;
-    justify-content: space-between;
+    margin: 10;
   }
 
   .addOptionButtons {
@@ -24,7 +24,7 @@ export default styled.div`
 
   .choice-input {
     border-bottom: 1px;
-    top: 2px;
+    margin: 10px;
   }
   .dropdown {
     margin-top: 5px;

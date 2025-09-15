@@ -6,6 +6,7 @@ import { AddOption } from "./AddOption";
 import { handleDelete, handleLabelChange, hasOtherOption } from "./utils";
 import { Choice, ChoiceSettings } from "./types";
 import { makeTag } from "../../../../../../utils/utility";
+import { ColorfulMarkdownTextarea } from "../../../../../../components/SafeMarkdown/ColorfulMarkdownInput";
 
 interface RadioButtonCreatorProps {
   initialValues?: Array<Choice>;
@@ -32,7 +33,7 @@ export const RadioButtonCreator: React.FC<RadioButtonCreatorProps> = ({
         return (
           <div className="radioButtonItem" key={choiceId}>
             <Radio disabled key={choiceId + "choice"} />
-            <Input
+            {/* <Input
               key={choiceId + "input"}
               defaultValue={label}
               onChange={(e) => {
@@ -43,6 +44,16 @@ export const RadioButtonCreator: React.FC<RadioButtonCreatorProps> = ({
                   handleNewChoices
                 );
               }}
+              placeholder="Enter an option"
+              className="choice-input"
+              disabled={settings.isOther}
+            /> */}
+            <ColorfulMarkdownTextarea
+              key={choiceId + "input"}
+              onChange={(val) => {
+                handleLabelChange(val, choiceId!, choices, handleNewChoices);
+              }}
+              value={label}
               placeholder="Enter an option"
               className="choice-input"
               disabled={settings.isOther}

@@ -5,6 +5,7 @@ import OptionsStyle from "./Options.style";
 import { AddOption } from "./AddOption";
 import { handleDelete, handleLabelChange, hasOtherOption } from "./utils";
 import { Choice, ChoiceSettings } from "./types";
+import { ColorfulMarkdownTextarea } from "../../../../../../components/SafeMarkdown/ColorfulMarkdownInput";
 
 interface CheckboxCreatorProps {
   initialValues?: Array<Choice>;
@@ -30,7 +31,7 @@ export const CheckboxCreator: React.FC<CheckboxCreatorProps> = ({
         return (
           <div className="radioButtonItem" key={choiceId}>
             <Checkbox disabled key={choiceId + "checkbox"} />
-            <Input
+            {/* <Input
               key={choiceId + "input"}
               defaultValue={label}
               onChange={(e) => {
@@ -44,6 +45,16 @@ export const CheckboxCreator: React.FC<CheckboxCreatorProps> = ({
               placeholder="Enter an option"
               className="choice-input"
               disabled={settings.isOther}
+            /> */}
+            <ColorfulMarkdownTextarea
+              key={choiceId + "input"}
+              onChange={(val) => {
+                handleLabelChange(val, choiceId!, choices, handleNewChoices);
+              }}
+              placeholder="Enter an option"
+              className="choice-input"
+              disabled={settings.isOther}
+              value={label}
             />
             {choices.length >= 2 && (
               <CloseOutlined

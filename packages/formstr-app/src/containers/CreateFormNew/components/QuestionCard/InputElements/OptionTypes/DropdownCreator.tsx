@@ -43,8 +43,8 @@ export const DropdownCreator: React.FC<RadioButtonCreatorProps> = ({
                   handleNewChoices
                 );
               }}
-              placeholder="Enter an option"
               className="choice-input"
+              placeholder="Enter an option"
               disabled={settings.isOther}
             />
             <div>

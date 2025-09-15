@@ -6,7 +6,7 @@ interface DropdownFillerProps {
   onChange: (text: string) => void;
   defaultValue?: string;
   disabled?: boolean;
-  testId? : string;
+  testId?: string;
 }
 
 export const DropdownFiller: React.FC<DropdownFillerProps> = ({

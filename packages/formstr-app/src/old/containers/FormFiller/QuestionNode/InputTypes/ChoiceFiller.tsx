@@ -10,6 +10,7 @@ import { CheckboxGroupProps } from "antd/es/checkbox";
 import { CheckboxValueType } from "antd/es/checkbox/Group";
 import Markdown from "react-markdown";
 import ChoiceFillerStyle from "./choiceFiller.style";
+import SafeMarkdown from "../../../../../components/SafeMarkdown";
 
 interface ChoiceFillerProps {
   answerType: AnswerTypes.checkboxes | AnswerTypes.radioButton;
@@ -36,21 +37,23 @@ export const ChoiceFiller: React.FC<ChoiceFillerProps> = ({
     onChange(e.target.value);
   }
 
-  let ElementConfig: {
-    Element: typeof Radio,
-    defaultValue?: RadioGroupProps['defaultValue']
-  } | {
-    Element: typeof Checkbox,
-    defaultValue?: CheckboxGroupProps['defaultValue']
-  } = {
+  let ElementConfig:
+    | {
+        Element: typeof Radio;
+        defaultValue?: RadioGroupProps["defaultValue"];
+      }
+    | {
+        Element: typeof Checkbox;
+        defaultValue?: CheckboxGroupProps["defaultValue"];
+      } = {
     Element: Radio,
-    defaultValue: defaultValue
-  }
- if (answerType === AnswerTypes.checkboxes) {
-   ElementConfig = {
-     Element: Checkbox,
-     defaultValue: defaultValue?.split(";")
-   }
+    defaultValue: defaultValue,
+  };
+  if (answerType === AnswerTypes.checkboxes) {
+    ElementConfig = {
+      Element: Checkbox,
+      defaultValue: defaultValue?.split(";"),
+    };
   }
   return (
     //@ts-ignore
@@ -62,8 +65,11 @@ export const ChoiceFiller: React.FC<ChoiceFillerProps> = ({
         <Space direction="vertical">
           {answerSettings.choices?.map((choice) => {
             return (
-              <ElementConfig.Element key={choice.choiceId} value={choice.choiceId}>
-                <Markdown>{choice.label}</Markdown>
+              <ElementConfig.Element
+                key={choice.choiceId}
+                value={choice.choiceId}
+              >
+                <SafeMarkdown>{choice.label}</SafeMarkdown>
               </ElementConfig.Element>
             );
           })}

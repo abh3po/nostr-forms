@@ -5,24 +5,26 @@ import { EditOutlined, EyeOutlined } from "@ant-design/icons";
 import SafeMarkdown from ".";
 
 type Props = {
-  value: string;
+  value?: string;
   onChange: (val: string) => void;
   placeholder?: string;
   minRows?: number;
   maxRows?: number;
   fontSize?: number;
   className?: string;
+  disabled?: boolean;
 };
 
 const SPAN_WRAPPER_REGEX =
   /^<span style="color:\s*[^"]+">\s*([\s\S]*?)\s*<\/span>$/i;
 
 export const ColorfulMarkdownTextarea: React.FC<Props> = ({
-  value = "",
+  value,
   onChange,
   placeholder,
   fontSize,
   className,
+  disabled,
 }) => {
   const [pickerOpen, setPickerOpen] = React.useState(false);
   const [color, setColor] = React.useState("#000000");
@@ -53,8 +55,8 @@ export const ColorfulMarkdownTextarea: React.FC<Props> = ({
 
   const applyColor = (hex: string) => {
     let updated: string;
-    if (SPAN_WRAPPER_REGEX.test(value)) {
-      updated = value.replace(
+    if (SPAN_WRAPPER_REGEX.test(value || "")) {
+      updated = value!.replace(
         /^<span style="color:\s*[^"]+">/,
         `<span style="color:${hex}">`
       );
@@ -66,8 +68,8 @@ export const ColorfulMarkdownTextarea: React.FC<Props> = ({
   };
 
   const clearColor = () => {
-    if (SPAN_WRAPPER_REGEX.test(value)) {
-      const plain = value.replace(SPAN_WRAPPER_REGEX, "$1");
+    if (SPAN_WRAPPER_REGEX.test(value || "  ")) {
+      const plain = value!.replace(SPAN_WRAPPER_REGEX, "$1");
       onChange(plain);
     }
     setPickerOpen(false);
@@ -79,6 +81,7 @@ export const ColorfulMarkdownTextarea: React.FC<Props> = ({
   };
   return (
     <div
+      ref={wrapperRef}
       className={className}
       style={{ display: "flex", flexDirection: "column" }}
     >
@@ -126,10 +129,10 @@ export const ColorfulMarkdownTextarea: React.FC<Props> = ({
       ) : (
         <Input.TextArea
           value={value}
-          ref={wrapperRef}
           style={{ color: color, fontSize: fontSize }}
           onChange={(e) => onChange(e.target.value)}
           placeholder={placeholder}
+          disabled={disabled}
           autoSize
         />
       )}

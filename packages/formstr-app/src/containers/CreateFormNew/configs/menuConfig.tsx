@@ -3,8 +3,8 @@ import {
   INPUTS_TYPES,
   PRE_BUILT_MENU_KEYS,
 } from "./constants";
-import { AnswerTypes } from "@formstr/sdk/dist/interfaces";
 import { ReactComponent as InputIcon } from "../../../Images/Frame.svg";
+import { AnswerTypes } from "../../../nostr/types";
 
 export const BASIC_MENU = [
   {

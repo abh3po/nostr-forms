@@ -2,7 +2,7 @@ import {
   AnswerSettings,
   AnswerTypes,
   ValidationRuleTypes,
-} from "@formstr/sdk/dist/interfaces";
+} from "../../../../nostr/types";
 
 export interface IProps {
   answerType: AnswerTypes;

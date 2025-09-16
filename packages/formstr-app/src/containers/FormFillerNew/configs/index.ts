@@ -1,4 +1,4 @@
-import { AnswerTypes } from "@formstr/sdk/dist/interfaces";
+import { AnswerTypes } from "../../../nostr/types";
 
 export const ANSWER_TYPE_MAP = {
   [AnswerTypes.shortText]: "string",
@@ -9,4 +9,4 @@ export const ANSWER_TYPE_MAP = {
   [AnswerTypes.dropdown]: "number",
   [AnswerTypes.date]: "number",
   [AnswerTypes.label]: "number",
-}
+};

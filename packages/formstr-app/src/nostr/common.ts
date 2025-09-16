@@ -10,7 +10,6 @@ import {
   SimplePool,
   UnsignedEvent,
 } from "nostr-tools";
-import { bytesToHex } from "@noble/hashes/utils";
 import { normalizeURL } from "nostr-tools/utils";
 import { Field, Response, Tag } from "./types";
 import { IFormSettings } from "../containers/CreateFormNew/components/FormSettings/types";

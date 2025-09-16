@@ -17,8 +17,8 @@ import {
   CopyOutlined,
   UserOutlined,
 } from "@ant-design/icons";
-import { getDefaultRelays } from "@formstr/sdk";
 import { useApplicationContext } from "../../../../../hooks/useApplicationContext";
+import { getDefaultRelays } from "../../../../../nostr/common";
 
 interface NpubListProps {
   NpubList: Set<string> | null;

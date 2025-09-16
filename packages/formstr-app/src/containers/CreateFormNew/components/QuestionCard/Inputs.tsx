@@ -1,10 +1,10 @@
-import { AnswerSettings, AnswerTypes } from "@formstr/sdk/dist/interfaces";
 import ShortText from "./InputElements/ShortText";
 import { RadioButtonCreator } from "./InputElements/OptionTypes/RadioButtonCreator";
 import { CheckboxCreator } from "./InputElements/OptionTypes/CheckBoxCreator";
 import { DropdownCreator } from "./InputElements/OptionTypes/DropdownCreator";
 import { DatePicker, Input, InputNumber, TimePicker } from "antd";
 import { Choice } from "./InputElements/OptionTypes/types";
+import { AnswerSettings, AnswerTypes } from "../../../../nostr/types";
 
 interface InputsProps {
   inputType: string;

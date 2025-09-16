@@ -1,4 +1,3 @@
-import { constructFormUrl as constructFormUrlSDK } from "@formstr/sdk";
 import { DEVICE_TYPE, DEVICE_WIDTH } from "../constants/index";
 import { getItem, LOCAL_STORAGE_KEYS, setItem } from "./localStorage";
 import { nip19 } from "nostr-tools";

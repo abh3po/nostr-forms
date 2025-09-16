@@ -5,7 +5,6 @@
   "dependencies": {
     "@ant-design/icons": "^5.2.6",
     "@babel/core": "^7.16.0",
-    "@formstr/sdk": "^0.0.4-alpha",
     "@pmmmwh/react-refresh-webpack-plugin": "^0.5.3",
     "@svgr/webpack": "^5.5.0",
     "@testing-library/jest-dom": "^5.17.0",
@@ -82,9 +81,7 @@
   "scripts": {
     "predeploy": "npm run build",
     "deploy": "gh-pages -d build --dotfiles",
-    "prestart": "yarn workspace @formstr/sdk build",
     "start": "node scripts/start.js",
-    "prebuild": "yarn workspace @formstr/sdk build",
     "build": "node scripts/build.js && cp -r \".well-known\" build/ && cp _config.yml build/ && cp .nojekyll build/",
     "test": "node scripts/test.js",
     "lint": "eslint src/",

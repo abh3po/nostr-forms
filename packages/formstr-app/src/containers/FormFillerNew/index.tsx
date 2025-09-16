@@ -1,4 +1,3 @@
-import { Tag, Response } from "@formstr/sdk/dist/formstr/nip101";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { Button, Spin, Typography } from "antd";
@@ -12,6 +11,7 @@ import { FormRendererContainer } from "./FormRendererContainer";
 import { useApplicationContext } from "../../hooks/useApplicationContext";
 import { ThankYouScreen } from "./ThankYouScreen";
 import { ROUTES } from "../../constants/routes";
+import { Response, Tag } from "../../nostr/types";
 
 const { Text } = Typography;
 
@@ -42,7 +42,7 @@ export const FormFiller: React.FC<FormFillerProps> = ({
   const { pubkey: userPubKey, requestPubkey } = useProfileContext();
   const [formSubmitted, setFormSubmitted] = useState(false);
   const [formEvent, setFormEvent] = useState<Event | undefined>(
-    preFetchedFormContent,
+    preFetchedFormContent
   );
   const [searchParams] = useSearchParams();
   const hideTitleImage = searchParams.get("hideTitleImage") === "true";
@@ -59,7 +59,7 @@ export const FormFiller: React.FC<FormFillerProps> = ({
   const initialize = async (
     formAuthor: string,
     formId: string,
-    relays?: string[],
+    relays?: string[]
   ) => {
     const form = await fetchFormTemplate(
       formAuthor,
@@ -68,7 +68,7 @@ export const FormFiller: React.FC<FormFillerProps> = ({
       (event: Event) => {
         setFormEvent(event);
       },
-      relays,
+      relays
     );
   };
 

@@ -1,6 +1,6 @@
 import React from "react";
 import { Form, Input, Row, Tooltip, InputRef } from "antd";
-import { NumberConstraint } from "@formstr/sdk/dist/interfaces";
+import { NumberConstraint } from "../../../../../nostr/types";
 
 interface Constraints {
   max?: number;

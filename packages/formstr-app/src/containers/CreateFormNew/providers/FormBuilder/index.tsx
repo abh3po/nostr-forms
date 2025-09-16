@@ -6,11 +6,9 @@ import {
   SectionData,
 } from "./typeDefs";
 import { generateQuestion } from "../../utils";
-import { getDefaultRelays } from "@formstr/sdk";
 import { makeTag } from "../../../../utils/utility";
 import { HEADER_MENU_KEYS } from "../../components/Header/config";
 import { IFormSettings } from "../../components/FormSettings/types";
-import { Tag } from "@formstr/sdk/dist/formstr/nip101";
 import { bytesToHex } from "@noble/hashes/utils";
 import { getPublicKey } from "nostr-tools";
 import { useNavigate } from "react-router-dom";
@@ -21,11 +19,11 @@ import {
   LOCAL_STORAGE_KEYS,
   setItem,
 } from "../../../../utils/localStorage";
-import { Field } from "../../../../nostr/types";
+import { AnswerSettings, Field, Tag } from "../../../../nostr/types";
 import { message } from "antd";
 import { ProcessedFormData } from "../../components/AIFormGeneratorModal/aiProcessor";
-import { AnswerSettings } from "@formstr/sdk/dist/interfaces";
 import { sampleBackgrounds } from "../../components/FormSettings/constants";
+import { getDefaultRelays } from "../../../../nostr/common";
 
 const LOCAL_STORAGE_CUSTOM_RELAYS_KEY = "formstr:customRelays";
 

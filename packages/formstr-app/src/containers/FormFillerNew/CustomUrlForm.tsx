@@ -47,7 +47,6 @@ export const CustomUrlForm: React.FC<CustomUrlFormProps> = ({ formSpec }) => {
   useEffect(() => {
     if (!isPreview && formSlug) {
       setLoading(true);
-      console.log("URL IS,", `${appConfig.apiBaseUrl}/api/forms/${formSlug}`);
       fetch(`${appConfig.apiBaseUrl}/api/forms/${formSlug}`)
         .then((res) => res.json())
         .then((data) => setMetadata(data))

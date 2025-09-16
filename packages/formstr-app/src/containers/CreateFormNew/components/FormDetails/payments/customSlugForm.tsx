@@ -220,8 +220,8 @@ export const CustomSlugForm = ({
                         <Button
                           type="primary"
                           onClick={handlePay}
-                          disabled={!available || !isLoggedIn}
-                          loading={paying} // ✅ AntD shows spinner
+                          disabled={!available || !isLoggedIn || paying}
+                          loading={paying}
                         >
                           Pay to Claim
                         </Button>

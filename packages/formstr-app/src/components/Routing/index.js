@@ -1,12 +1,10 @@
 import { Routes, Route, Navigate } from "react-router-dom";
 import PublicForms from "../../containers/PublicForms";
 import { ROUTES } from "../../constants/routes";
-import { FormFillerOld } from "../../old/containers/FormFiller";
 import { FormFiller } from "../../containers/FormFillerNew";
 import { NostrHeader } from "../Header";
 import { CreateFormHeader as CreateFormHeaderNew } from "../../containers/CreateFormNew/components/Header/Header";
 import NewFormBuilderProvider from "../../containers/CreateFormNew/providers/FormBuilder";
-import { ResponsesOld } from "../../old/containers/Responses/Responses";
 import { Response } from "../../containers/ResponsesNew";
 import { V1DraftsController } from "../../containers/Drafts";
 import CreateForm from "../../containers/CreateFormNew";
@@ -37,10 +35,6 @@ const withNewCreateFormHeaderWrapper = (Component, props) => {
 function Routing() {
   return (
     <Routes>
-      <Route
-        path="forms/:formSecret/responses"
-        element={withNostrHeaderWrapper(ResponsesOld)}
-      />
       <Route index element={<Navigate replace to={ROUTES.DASHBOARD} />} />
       <Route
         path={`${ROUTES.CREATE_FORMS_NEW}/*`}
@@ -54,15 +48,9 @@ function Routing() {
         path={`${ROUTES.PUBLIC_FORMS}/*`}
         element={withNostrHeaderWrapper(PublicForms)}
       />
-      <Route path={`${ROUTES.FORM_FILLER}/*`} element={<FormFillerOld />} />
-      <Route path={`${ROUTES.FORM_FILLER_OLD}/*`} element={<FormFillerOld />} />
       <Route
         path={`${ROUTES.EMBEDDED}/*`}
         element={<FormFillerOld embedded={true} />}
-      />
-      <Route
-        path={`${ROUTES.RESPONSES}/*`}
-        element={withNostrHeaderWrapper(ResponsesOld)}
       />
       <Route
         path={`${ROUTES.RESPONSES_NEW}/*`}

@@ -1,7 +1,5 @@
 import { FormTemplate } from "../templates";
 import { makeFormNAddr, makeTag } from "./utility";
-import { getDefaultRelays } from "@formstr/sdk";
-import { Tag } from "@formstr/sdk/dist/formstr/nip101";
 import {
   nip44,
   Event,
@@ -16,6 +14,8 @@ import { naddrUrl } from "./utility";
 import { AddressPointer } from "nostr-tools/nip19";
 import { fetchFormTemplate } from "../nostr/fetchFormTemplate";
 import { signerManager } from "../signer";
+import { Tag } from "../nostr/types";
+import { getDefaultRelays } from "../nostr/common";
 
 export const createFormSpecFromTemplate = (
   template: FormTemplate

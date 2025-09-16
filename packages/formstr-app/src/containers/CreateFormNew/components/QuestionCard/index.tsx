@@ -3,12 +3,11 @@ import { ChangeEvent } from "react";
 import useFormBuilderContext from "../../hooks/useFormBuilderContext";
 import CardHeader from "./CardHeader";
 import Inputs from "./Inputs";
-import { AnswerSettings } from "@formstr/sdk/dist/interfaces";
 import StyledWrapper from "./index.style";
 import QuestionTextStyle from "./question.style";
 import { Choice } from "./InputElements/OptionTypes/types";
 import UploadImage from "./UploadImage";
-import { Field } from "../../../../nostr/types";
+import { AnswerSettings, Field } from "../../../../nostr/types";
 import { ColorfulMarkdownTextarea } from "../../../../components/SafeMarkdown/ColorfulMarkdownInput";
 
 type QuestionCardProps = {
@@ -35,7 +34,7 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
     sections,
     getSectionForQuestion,
     moveQuestionToSection,
-    formSettings
+    formSettings,
   } = useFormBuilderContext();
 
   const currentSectionId = getSectionForQuestion(question[1]);
@@ -80,9 +79,14 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
 
   return (
     <StyledWrapper>
-      <Card type="inner" className="question-card" onClick={onCardClick} style={{
-        backgroundColor: `rgba(255, 255, 255,${formSettings.cardTransparency})`, // 0.5 is opacity
-      }}>
+      <Card
+        type="inner"
+        className="question-card"
+        onClick={onCardClick}
+        style={{
+          backgroundColor: `rgba(255, 255, 255,${formSettings.cardTransparency})`, // 0.5 is opacity
+        }}
+      >
         <CardHeader
           required={answerSettings.required}
           onRequired={handleRequiredChange}

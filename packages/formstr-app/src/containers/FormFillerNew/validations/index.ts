@@ -1,3 +1,4 @@
+import { Rule } from "antd/es/form";
 import {
   AnswerSettings,
   AnswerTypes,
@@ -7,8 +8,7 @@ import {
   RangeRule,
   RegexRule,
   ValidationRuleTypes,
-} from "@formstr/sdk/dist/interfaces";
-import { Rule } from "antd/es/form";
+} from "../../../nostr/types";
 
 //TODO: Find a method better than "any" with overloads for dynamic types
 function NumRange(rule: any): Rule;
@@ -84,9 +84,7 @@ function Match(rule: MatchRule): Rule {
         return Promise.resolve();
       }
 
-      return Promise.reject(
-        `This is not the correct answer for this question`
-      );
+      return Promise.reject(`This is not the correct answer for this question`);
     },
   };
 }

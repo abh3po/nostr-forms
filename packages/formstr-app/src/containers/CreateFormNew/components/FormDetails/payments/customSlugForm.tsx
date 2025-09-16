@@ -48,6 +48,8 @@ export const CustomSlugForm = ({
   const [serverAvailable, setServerAvailable] = useState<boolean | null>(null);
   const [showCustomForm, setShowCustomForm] = useState(false);
   const { pubkey: userPub, requestPubkey } = useProfileContext();
+  const [paying, setPaying] = useState(false);
+
   const navigate = useNavigate();
   const { generateAuthHeader, error: authError } = useNostrAuth();
   const { pubkey } = useProfileContext();
@@ -109,12 +111,13 @@ export const CustomSlugForm = ({
   };
 
   const handlePay = async () => {
+    setPaying(true);
     const payPath = `/api/generateInvoice`;
     const apiUrl = `${appConfig.apiBaseUrl}${payPath}`;
     try {
       const authHeader = await generateAuthHeader(apiUrl, "POST", {
-        slug: slug,
-        formId: formId,
+        slug,
+        formId,
         formPubkey,
         relays,
         viewKey,
@@ -122,18 +125,17 @@ export const CustomSlugForm = ({
       const res = await axios.post(
         apiUrl,
         { slug, formId, formPubkey, relays, viewKey },
-        {
-          headers: { Authorization: authHeader },
-        }
+        { headers: { Authorization: authHeader } }
       );
-      const { invoice, paymentHash } = res.data;
-      const { amount } = res.data;
+
+      const { invoice, paymentHash, amount } = res.data;
       setAmount(amount);
       setInvoice(invoice);
       setHash(paymentHash);
-      setSlug(slug);
     } catch (err: any) {
       setError(err.response?.data?.error || `Payment error: ${err}`);
+    } finally {
+      setPaying(false); // ✅ stop loading no matter what
     }
   };
 
@@ -219,6 +221,7 @@ export const CustomSlugForm = ({
                           type="primary"
                           onClick={handlePay}
                           disabled={!available || !isLoggedIn}
+                          loading={paying} // ✅ AntD shows spinner
                         >
                           Pay to Claim
                         </Button>

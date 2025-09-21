@@ -3,7 +3,6 @@ import FormBuilder from "./FormBuilder";
 import useFormBuilderContext from "./hooks/useFormBuilderContext";
 import { useEffect, useState } from "react";
 import { HEADER_MENU_KEYS } from "./components/Header/config";
-import { FormFiller } from "../FormFillerNew";
 import { FormRenderer } from "../FormFillerNew/FormRenderer";
 
 function CreateForm() {

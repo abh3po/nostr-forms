@@ -191,6 +191,50 @@ export const sendNotification = async (
   pool.close(defaultRelays);
 };
 
+export const sendNRPCWebhook = async (form: Tag[], responses: Response[]) => {
+  const settings = JSON.parse(
+    form.filter((f) => f[0] === "settings")?.[0][1] || "{}"
+  ) as IFormSettings;
+
+  const nrpcPubkey = settings?.nrpcPubkey;
+  const nrpcMethod = settings?.nrpcMethod;
+  if (!nrpcPubkey || !nrpcMethod) return; // no webhook configured
+
+  const newSk = generateSecretKey();
+  const newPk = getPublicKey(newSk);
+  const pool = new SimplePool();
+
+  const tags: string[][] = [
+    ["p", nrpcPubkey],
+    ["method", nrpcMethod],
+  ];
+
+  const questionMap = createQuestionMap(form);
+
+  responses.forEach((r) => {
+    if (r[0] !== "response") return;
+    const question = questionMap[r[1]];
+    if (!question) return;
+    const questionText = question[3]; // same field used in sendNotification
+    const answer = getDisplayAnswer(r[2], question);
+    tags.push(["param", questionText, answer]);
+  });
+
+  const baseEvent: Event = {
+    kind: 22068,
+    pubkey: newPk,
+    tags,
+    content: "",
+    created_at: Math.floor(Date.now() / 1000),
+    id: "",
+    sig: "",
+  };
+
+  const nrpcEvent = finalizeEvent(baseEvent, newSk);
+  pool.publish(defaultRelays, nrpcEvent);
+  pool.close(defaultRelays);
+};
+
 export const ensureRelay = async (
   url: string,
   params?: { connectionTimeout?: number }

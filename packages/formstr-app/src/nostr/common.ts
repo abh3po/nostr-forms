@@ -8,15 +8,14 @@ import {
   nip19,
   nip44,
   Relay,
-  SimplePool,
   UnsignedEvent,
 } from "nostr-tools";
-import { bytesToHex } from "@noble/hashes/utils";
 import { normalizeURL } from "nostr-tools/utils";
 import { Field, Response, Tag } from "./types";
 import { IFormSettings } from "../containers/CreateFormNew/components/FormSettings/types";
 import { signerManager } from "../signer";
 import { AbstractRelay } from "nostr-tools/abstract-relay";
+import { pool } from "../pool";
 
 declare global {
   interface Window {
@@ -83,11 +82,16 @@ export async function signEvent(
   baseEvent: UnsignedEvent,
   userSecretKey: Uint8Array | null
 ) {
+  console.log("INSIDE SIGNEVENT", baseEvent, userSecretKey)
   let nostrEvent;
   if (userSecretKey) {
     nostrEvent = finalizeEvent(baseEvent, userSecretKey);
   } else {
-    return (await signerManager.getSigner()).signEvent(baseEvent);
+    console.log("Trying to get singer")
+    const singer = await signerManager.getSigner()
+    console.log("GOT SIGNER", singer)
+    nostrEvent = await singer.signEvent(baseEvent);
+    console.log("FINALIZED EVENT", nostrEvent)
   }
   return nostrEvent;
 }
@@ -173,7 +177,6 @@ export const sendNotification = async (
   message += "Visit https://formstr.app to view the responses.";
   const newSk = generateSecretKey();
   const newPk = getPublicKey(newSk);
-  const pool = new SimplePool();
   settings.notifyNpubs?.forEach(async (npub) => {
     const hexNpub = toHexNpub(npub);
     const encryptedMessage = await nip04.encrypt(newSk, hexNpub, message);
@@ -189,7 +192,6 @@ export const sendNotification = async (
     const kind4Event = finalizeEvent(baseKind4Event, newSk);
     pool.publish(defaultRelays, kind4Event);
   });
-  pool.close(defaultRelays);
 };
 
 export const sendNRPCWebhook = async (
@@ -206,8 +208,6 @@ export const sendNRPCWebhook = async (
   const nrpcMethod = settings?.nrpcMethod;
   console.log("NRPCS settings are", nrpcPubkey, nrpcMethod);
   if (!nrpcPubkey || !nrpcMethod) return; // no webhook configured
-
-  const pool = new SimplePool();
 
   const tags: string[][] = [
     ["p", nrpcPubkey],
@@ -236,6 +236,7 @@ export const sendNRPCWebhook = async (
     baseEvent as UnsignedEvent,
     privateKey || null
   );
+  console.log("NRPC EVENT BEFORE SENDING", nrpcEvent)
   customPublish(defaultRelays, nrpcEvent!);
   console.log("Webhook request", nrpcEvent.id);
   return nrpcEvent;

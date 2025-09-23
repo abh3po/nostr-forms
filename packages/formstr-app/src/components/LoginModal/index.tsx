@@ -168,9 +168,10 @@ const FooterInfo: React.FC = () => {
 interface LoginModalProps {
   open: boolean;
   onClose: () => void;
+  onLogin: () => void;
 }
 
-const LoginModal: React.FC<LoginModalProps> = ({ open, onClose }) => {
+const LoginModal: React.FC<LoginModalProps> = ({ open, onClose, onLogin }) => {
   const [showNip46, setShowNip46] = useState(false);
 
   const [loadingNip07, setLoadingNip07] = useState(false);
@@ -182,9 +183,10 @@ const LoginModal: React.FC<LoginModalProps> = ({ open, onClose }) => {
       try {
         await signerManager.loginWithNip07();
         message.success("Logged in with NIP-07");
-        onClose();
+        onLogin();
       } catch (err) {
         message.error("Login failed.");
+        onClose();
       } finally {
         setLoadingNip07(false);
       }
@@ -212,7 +214,7 @@ const LoginModal: React.FC<LoginModalProps> = ({ open, onClose }) => {
           text="Connect with Remote Signer (NIP-46)"
           onClick={() => setShowNip46(!showNip46)}
         />
-        {showNip46 && <Nip46Section onSuccess={onClose} />}
+        {showNip46 && <Nip46Section onSuccess={() => {onLogin()}} />}
       </Space>
 
       <FooterInfo />

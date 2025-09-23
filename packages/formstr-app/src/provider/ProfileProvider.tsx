@@ -37,6 +37,7 @@ export const ProfileProvider: FC<ProfileProviderProps> = ({ children }) => {
   const [pubkey, setPubkey] = useState<string | undefined>(undefined);
   const [userRelays, setUserRelays] = useState<string[]>([]);
   const [showLooginModal, setShowLoginModal] = useState<boolean>(false);
+  const [loginHandler, setLoginHandler] = useState<(() => void) | null>(null);
   const { poolRef } = useApplicationContext();
 
   const fetchUserRelays = async (pubkey: string) => {
@@ -57,6 +58,14 @@ export const ProfileProvider: FC<ProfileProviderProps> = ({ children }) => {
     signerManager.registerLoginModal(() => {
       return new Promise<void>((resolve) => {
         setShowLoginModal(true);
+    
+        // Pass a function to LoginModal to call on successful login
+        const handleLoginSuccess = () => {
+          setShowLoginModal(false);
+          resolve(); // This finally unblocks getSigner
+        };
+    
+        setLoginHandler(() => handleLoginSuccess);
       });
     });
     signerManager.onChange(async () => {
@@ -110,6 +119,11 @@ export const ProfileProvider: FC<ProfileProviderProps> = ({ children }) => {
       <LoginModal
         open={showLooginModal}
         onClose={() => setShowLoginModal(false)}
+        onLogin={() => {
+          loginHandler?.(); // this resolves the promise in getSigner
+          setLoginHandler(null); // clean up
+          setShowLoginModal(false);
+        }}
       />
     </ProfileContext.Provider>
   );

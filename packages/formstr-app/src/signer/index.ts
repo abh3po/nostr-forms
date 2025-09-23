@@ -93,7 +93,9 @@ class Signer {
     if (this.signer) return this.signer;
 
     if (this.loginModalCallback) {
+      console.log("GOING TO CALL LOGINMODALCALLBACK")
       await this.loginModalCallback();
+      console.log("AFTER CALLING loginModal Callback", this.signer)
       if (this.signer) return this.signer;
     }
 

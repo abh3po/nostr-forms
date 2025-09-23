@@ -8,6 +8,7 @@ import { FormRenderer } from "./FormRenderer";
 import { useEffect, useState } from "react";
 import { getResponseRelays } from "../../utils/ResponseUtils";
 import { IFormSettings } from "../CreateFormNew/components/FormSettings/types";
+import { sendNRPCWebhook } from "../../nostr/common";
 
 const { Text } = Typography;
 
@@ -30,19 +31,21 @@ export const FormRendererContainer: React.FC<FormRendererContainerProps> = ({
   const [form] = Form.useForm();
   const [formTemplate, setFormTemplate] = useState<Tag[]>();
   const [settings, setSettings] = useState<IFormSettings>();
-  
+
   useEffect(() => {
     const initialize = async () => {
       if (formEvent.content === "") {
         setFormTemplate(formEvent.tags);
         const settingsTag = formEvent.tags.find((tag) => tag[0] === "settings");
         if (settingsTag) {
-          const parsedSettings = JSON.parse(settingsTag[1] || "{}") as IFormSettings;
+          const parsedSettings = JSON.parse(
+            settingsTag[1] || "{}"
+          ) as IFormSettings;
           setSettings(parsedSettings);
         }
         return;
       }
-      
+
       const formSpec = await getFormSpec(
         formEvent,
         userPubKey,
@@ -74,17 +77,16 @@ export const FormRendererContainer: React.FC<FormRendererContainerProps> = ({
 
   const onSubmit = async () => {
     try {
-      // Validate all fields before submission
-      await form.validateFields();
-      
       const formResponses = form.getFieldsValue(true);
-      const responses: Response[] = Object.keys(formResponses).map((fieldId) => {
-        let answer = null;
-        let message = null;
-        if (formResponses[fieldId]) [answer, message] = formResponses[fieldId];
-        return ["response", fieldId, answer, JSON.stringify({ message })];
-      });
-      
+      const responses: Response[] = Object.keys(formResponses).map(
+        (fieldId) => {
+          let answer = null;
+          let message = null;
+          if (formResponses[fieldId])
+            [answer, message] = formResponses[fieldId];
+          return ["response", fieldId, answer, JSON.stringify({ message })];
+        }
+      );
       onSubmitClick(responses, formTemplate!);
     } catch (error) {
       console.error("Form validation failed:", error);
@@ -104,6 +106,7 @@ export const FormRendererContainer: React.FC<FormRendererContainerProps> = ({
         form={form}
         relays={getResponseRelays(formEvent)}
         formEvent={formEvent}
+        formTemplate={formTemplate!}
       />
     );
   } else if (!userPubKey) {
@@ -114,8 +117,8 @@ export const FormRendererContainer: React.FC<FormRendererContainerProps> = ({
     );
   } else if (!allowedUsers.includes(userPubKey)) {
     footer = (
-      <div style={{ textAlign: 'center', padding: '20px' }}>
-        <Text type="warning" style={{ fontSize: '16px' }}>
+      <div style={{ textAlign: "center", padding: "20px" }}>
+        <Text type="warning" style={{ fontSize: "16px" }}>
           You do not have permission to view this form
         </Text>
       </div>
@@ -129,21 +132,24 @@ export const FormRendererContainer: React.FC<FormRendererContainerProps> = ({
         form={form}
         relays={getResponseRelays(formEvent)}
         formEvent={formEvent}
+        formTemplate={formTemplate!}
       />
     );
   }
 
   if (!formTemplate) {
     return (
-      <div style={{ 
-        display: 'flex', 
-        justifyContent: 'center', 
-        alignItems: 'center', 
-        minHeight: '200px',
-        flexDirection: 'column',
-        gap: '16px'
-      }}>
-        <Typography.Text style={{ fontSize: '16px' }}>
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          minHeight: "200px",
+          flexDirection: "column",
+          gap: "16px",
+        }}
+      >
+        <Typography.Text style={{ fontSize: "16px" }}>
           This form is encrypted and requires access keys to view
         </Typography.Text>
         {!userPubKey && (

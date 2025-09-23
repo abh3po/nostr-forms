@@ -1,5 +1,6 @@
 import {
   Event,
+  EventTemplate,
   finalizeEvent,
   generateSecretKey,
   getPublicKey,
@@ -191,17 +192,21 @@ export const sendNotification = async (
   pool.close(defaultRelays);
 };
 
-export const sendNRPCWebhook = async (form: Tag[], responses: Response[]) => {
+export const sendNRPCWebhook = async (
+  form: Tag[],
+  responses: Response[],
+  privateKey?: Uint8Array
+) => {
+  console.log("Sending Webhook call");
   const settings = JSON.parse(
-    form.filter((f) => f[0] === "settings")?.[0][1] || "{}"
+    form.filter((f) => f[0] === "settings")?.[0]?.[1] || "{}"
   ) as IFormSettings;
 
   const nrpcPubkey = settings?.nrpcPubkey;
   const nrpcMethod = settings?.nrpcMethod;
+  console.log("NRPCS settings are", nrpcPubkey, nrpcMethod);
   if (!nrpcPubkey || !nrpcMethod) return; // no webhook configured
 
-  const newSk = generateSecretKey();
-  const newPk = getPublicKey(newSk);
   const pool = new SimplePool();
 
   const tags: string[][] = [
@@ -220,19 +225,20 @@ export const sendNRPCWebhook = async (form: Tag[], responses: Response[]) => {
     tags.push(["param", questionText, answer]);
   });
 
-  const baseEvent: Event = {
+  const baseEvent: EventTemplate = {
     kind: 22068,
-    pubkey: newPk,
     tags,
     content: "",
     created_at: Math.floor(Date.now() / 1000),
-    id: "",
-    sig: "",
   };
 
-  const nrpcEvent = finalizeEvent(baseEvent, newSk);
-  pool.publish(defaultRelays, nrpcEvent);
-  pool.close(defaultRelays);
+  const nrpcEvent = await signEvent(
+    baseEvent as UnsignedEvent,
+    privateKey || null
+  );
+  customPublish(defaultRelays, nrpcEvent!);
+  console.log("Webhook request", nrpcEvent.id);
+  return nrpcEvent;
 };
 
 export const ensureRelay = async (

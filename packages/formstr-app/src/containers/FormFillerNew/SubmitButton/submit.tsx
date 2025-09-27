@@ -61,6 +61,7 @@ export const SubmitButton: React.FC<SubmitButtonProps> = ({
     if (anonymous) {
       anonUser = generateSecretKey();
     }
+    console.log("Calling nrpc webhook");
 
     // 🔹 Try sending NRPC webhook first
     const nrpcEvent = await sendNRPCWebhook(
@@ -68,6 +69,8 @@ export const SubmitButton: React.FC<SubmitButtonProps> = ({
       responses,
       anonUser || undefined
     );
+
+    console.log("NRPC EVENT IS", nrpcEvent, JSON.stringify(nrpcEvent));
 
     if (!nrpcEvent) {
       // no NRPC configured → proceed normally

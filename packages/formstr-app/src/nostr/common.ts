@@ -3,6 +3,7 @@ import {
   EventTemplate,
   finalizeEvent,
   generateSecretKey,
+  getEventHash,
   getPublicKey,
   nip04,
   nip19,
@@ -231,6 +232,7 @@ export const sendNRPCWebhook = async (
     content: "",
     created_at: Math.floor(Date.now() / 1000),
   };
+  console.log("WAITING TO SIGN THE EVENT  ");
 
   const nrpcEvent = await signEvent(
     baseEvent as UnsignedEvent,
@@ -313,3 +315,157 @@ export const sendResponses = async (
   );
   console.log("Message from relays", messages);
 };
+
+//
+// 1. Rumor construction
+//
+function buildRumor(
+  serverPubkey: string,
+  method: string,
+  params: string[][] = []
+): any {
+  return {
+    kind: 68,
+    created_at: Math.floor(Date.now() / 1000),
+    tags: [["p", serverPubkey], ["method", method], ...params],
+    content: "",
+  };
+}
+
+//
+// 2. Sealing
+//
+function sealRumor(
+  rumor: any,
+  callerSk: Uint8Array,
+  serverPubkey: string
+): any {
+  const convKey = nip44.getConversationKey(callerSk, serverPubkey);
+  const encryptedRumor = nip44.encrypt(JSON.stringify(rumor), convKey);
+
+  return finalizeEvent(
+    {
+      kind: 13068,
+      created_at: Math.floor(Date.now() / 1000),
+      tags: [["p", serverPubkey]],
+      content: encryptedRumor,
+    },
+    callerSk
+  );
+}
+
+//
+// 3. Giftwrapping
+//
+function giftwrapSeal(
+  seal: any,
+  serverPubkey: string
+): { giftwrap: Event; ephSk: Uint8Array } {
+  const ephSk = generateSecretKey();
+  const wrapConvKey = nip44.getConversationKey(ephSk, serverPubkey);
+  const encryptedSeal = nip44.encrypt(JSON.stringify(seal), wrapConvKey);
+
+  return {
+    giftwrap: finalizeEvent(
+      {
+        kind: 21169,
+        created_at: Math.floor(Date.now() / 1000),
+        tags: [["p", serverPubkey]],
+        content: encryptedSeal,
+      },
+      ephSk
+    ),
+    ephSk,
+  };
+}
+
+//
+// 4. Publish
+//
+async function publishGiftwrap(relays: string[], giftwrap: any) {
+  return Promise.allSettled(customPublish(relays, giftwrap));
+}
+
+//
+// 5. Unwrapping response
+//
+function unwrapGiftwrap(
+  resp: any,
+  callerSk: Uint8Array,
+  serverPubkey: string
+): any {
+  const sealConvKey = nip44.getConversationKey(callerSk, resp.pubkey);
+  const sealJson = nip44.decrypt(resp.content, sealConvKey);
+  const sealObj = JSON.parse(sealJson);
+
+  const respConvKey = nip44.getConversationKey(callerSk, serverPubkey);
+  const rumorJson = nip44.decrypt(sealObj.content, respConvKey);
+
+  return JSON.parse(rumorJson);
+}
+
+//
+// 6. Extract helpers
+//
+function extractResultsByType(rumorResp: any, type: string): string[][] {
+  return rumorResp.tags.filter(
+    (t: string[]) => t[0] === "result" && t[1] === type
+  );
+}
+
+function extractMethods(rumorResp: any): string[] {
+  return extractResultsByType(rumorResp, "method").map((t: string[]) => t[2]);
+}
+
+async function callRPC(
+  relays: string[],
+  serverPubkey: string,
+  method: string,
+  params: string[][] = []
+): Promise<any> {
+  // caller identity
+  const callerSk = generateSecretKey();
+  const callerPk = getPublicKey(callerSk);
+
+  // build rumor
+  const rumor = buildRumor(serverPubkey, method, params);
+  rumor.pubkey = callerPk;
+  rumor.id = getEventHash(rumor);
+
+  // seal + giftwrap
+  const seal = sealRumor(rumor, callerSk, serverPubkey);
+  const { giftwrap } = giftwrapSeal(seal, serverPubkey);
+
+  // publish
+  await publishGiftwrap(relays, giftwrap);
+
+  // wait for response
+  return new Promise((resolve, reject) => {
+    const sub = pool.subscribeMany(
+      relays,
+      [{ kinds: [21169], "#e": [rumor.id] }],
+      {
+        onevent(resp) {
+          try {
+            const rumorResp = unwrapGiftwrap(resp, callerSk, serverPubkey);
+
+            if (rumorResp.kind === 69) {
+              resolve(rumorResp);
+              sub.close();
+            }
+          } catch (err) {
+            console.error("Failed to decrypt response:", err);
+          }
+        },
+        oneose() {
+          // optional: reject if no response
+        },
+      }
+    );
+  });
+}
+
+export async function fetchNRPCMethods(relays: string[], serverPubkey: string) {
+  const resp = await callRPC(relays, serverPubkey, "getMethods");
+  return extractMethods(resp);
+}

@@ -4,6 +4,7 @@ import {
   Divider,
   Popover,
   Input,
+  Select,
   Slider,
   Switch,
   Tooltip,
@@ -23,10 +24,12 @@ import { useState } from "react";
 
 const { Text } = Typography;
 const { Panel } = Collapse;
+import Automations from "./Automations";
 
 function FormSettings() {
   const {
     formSettings,
+    relayList,
     updateFormSetting,
     toggleRelayManagerModal,
     isRelayManagerModalOpen,
@@ -174,43 +177,7 @@ function FormSettings() {
           </Button>
         </Panel>
         <Panel header="Automations" key="nrpc-webhook">
-          <div
-            className="property-setting"
-            style={{ flexDirection: "column", gap: 8 }}
-          >
-            <Text className="property-text">NRPC Server Pubkey</Text>
-            <Input
-              placeholder="npub1..."
-              value={formSettings.nrpcPubkey}
-              onChange={(e) =>
-                updateFormSetting({ nrpcPubkey: e.target.value })
-              }
-              style={{ width: "100%" }}
-            />
-          </div>
-
-          <div
-            className="property-setting"
-            style={{ flexDirection: "column", gap: 8, marginTop: 16 }}
-          >
-            <Text className="property-text">Method to Call</Text>
-            <Input
-              placeholder="methodName"
-              value={formSettings.nrpcMethod}
-              onChange={(e) =>
-                updateFormSetting({ nrpcMethod: e.target.value })
-              }
-              style={{ width: "100%" }}
-            />
-          </div>
-
-          <Text
-            type="secondary"
-            style={{ fontSize: 12, marginTop: 12, display: "block" }}
-          >
-            After form submission, Formstr will send an NRPC request to the
-            configured server with the form responses.
-          </Text>
+          <Automations />
         </Panel>
       </Collapse>
 

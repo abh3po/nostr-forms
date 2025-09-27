@@ -16,4 +16,5 @@ export interface IFormSettings {
   globalColor?: string;
   nrpcPubkey?: string;
   nrpcMethod?: string;
+  requireWebhookPass?: boolean;
 }

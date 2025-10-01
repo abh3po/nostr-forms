@@ -80,19 +80,19 @@ export async function getUserPublicKey(userSecretKey: Uint8Array | null) {
 }
 
 export async function signEvent(
-  baseEvent: UnsignedEvent,
+  baseEvent: EventTemplate,
   userSecretKey: Uint8Array | null
 ) {
-  console.log("INSIDE SIGNEVENT", baseEvent, userSecretKey)
+  console.log("INSIDE SIGNEVENT", baseEvent, userSecretKey);
   let nostrEvent;
   if (userSecretKey) {
     nostrEvent = finalizeEvent(baseEvent, userSecretKey);
   } else {
-    console.log("Trying to get singer")
-    const singer = await signerManager.getSigner()
-    console.log("GOT SIGNER", singer)
+    console.log("Trying to get singer");
+    const singer = await signerManager.getSigner();
+    console.log("GOT SIGNER", singer);
     nostrEvent = await singer.signEvent(baseEvent);
-    console.log("FINALIZED EVENT", nostrEvent)
+    console.log("FINALIZED EVENT", nostrEvent);
   }
   return nostrEvent;
 }
@@ -198,50 +198,46 @@ export const sendNotification = async (
 export const sendNRPCWebhook = async (
   form: Tag[],
   responses: Response[],
+  relays: string[],
   privateKey?: Uint8Array
 ) => {
-  console.log("Sending Webhook call");
-  const settings = JSON.parse(
-    form.filter((f) => f[0] === "settings")?.[0]?.[1] || "{}"
-  ) as IFormSettings;
+  const settingsTag = form.find((f) => f[0] === "settings");
+  let settings: IFormSettings = {} as IFormSettings;
+  try {
+    settings = settingsTag ? JSON.parse(settingsTag[1]) : ({} as IFormSettings);
+  } catch (err) {
+    console.error("Invalid settings json", err);
+    return;
+  }
 
-  const nrpcPubkey = settings?.nrpcPubkey;
   const nrpcMethod = settings?.nrpcMethod;
-  console.log("NRPCS settings are", nrpcPubkey, nrpcMethod);
+  const nrpcPubkey = settings?.nrpcPubkey;
   if (!nrpcPubkey || !nrpcMethod) return; // no webhook configured
 
-  const tags: string[][] = [
-    ["p", nrpcPubkey],
-    ["method", nrpcMethod],
-  ];
-
+  // collect params
   const questionMap = createQuestionMap(form);
-
-  responses.forEach((r) => {
-    if (r[0] !== "response") return;
+  const params: string[][] = [];
+  for (const r of responses) {
+    if (r[0] !== "response") continue;
     const question = questionMap[r[1]];
-    if (!question) return;
-    const questionText = question[3]; // same field used in sendNotification
-    const answer = getDisplayAnswer(r[2], question);
-    tags.push(["param", questionText, answer]);
-  });
+    if (!question) continue;
+    params.push(["param", question[3], getDisplayAnswer(r[2], question)]);
+  }
 
-  const baseEvent: EventTemplate = {
-    kind: 22068,
-    tags,
-    content: "",
-    created_at: Math.floor(Date.now() / 1000),
-  };
-  console.log("WAITING TO SIGN THE EVENT  ");
-
-  const nrpcEvent = await signEvent(
-    baseEvent as UnsignedEvent,
-    privateKey || null
-  );
-  console.log("NRPC EVENT BEFORE SENDING", nrpcEvent)
-  customPublish(defaultRelays, nrpcEvent!);
-  console.log("Webhook request", nrpcEvent.id);
-  return nrpcEvent;
+  // reuse the existing RPC flow
+  try {
+    const resp = await callRPC(
+      relays,
+      nrpcPubkey,
+      nrpcMethod,
+      params,
+      !privateKey
+    );
+    return resp;
+  } catch (err) {
+    console.error("Webhook RPC call failed:", err);
+    throw err;
+  }
 };
 
 export const ensureRelay = async (
@@ -335,22 +331,28 @@ function buildRumor(
 //
 // 2. Sealing
 //
-function sealRumor(
+async function sealRumor(
   rumor: any,
-  callerSk: Uint8Array,
-  serverPubkey: string
-): any {
-  const convKey = nip44.getConversationKey(callerSk, serverPubkey);
-  const encryptedRumor = nip44.encrypt(JSON.stringify(rumor), convKey);
-
-  return finalizeEvent(
+  serverPubkey: string,
+  callerSk?: Uint8Array
+): Promise<Event> {
+  let encryptedRumor;
+  if (callerSk) {
+    const convKey = nip44.getConversationKey(callerSk, serverPubkey);
+    encryptedRumor = nip44.encrypt(JSON.stringify(rumor), convKey);
+  } else {
+    encryptedRumor = await (
+      await signerManager.getSigner()
+    ).nip44Encrypt!(serverPubkey, JSON.stringify(rumor));
+  }
+  return signEvent(
     {
-      kind: 13068,
+      kind: 25,
       created_at: Math.floor(Date.now() / 1000),
       tags: [["p", serverPubkey]],
       content: encryptedRumor,
     },
-    callerSk
+    callerSk || null
   );
 }
 
@@ -358,7 +360,7 @@ function sealRumor(
 // 3. Giftwrapping
 //
 function giftwrapSeal(
-  seal: any,
+  seal: Event,
   serverPubkey: string
 ): { giftwrap: Event; ephSk: Uint8Array } {
   const ephSk = generateSecretKey();
@@ -389,18 +391,31 @@ async function publishGiftwrap(relays: string[], giftwrap: any) {
 //
 // 5. Unwrapping response
 //
-function unwrapGiftwrap(
+async function unwrapGiftwrap(
   resp: any,
-  callerSk: Uint8Array,
-  serverPubkey: string
-): any {
-  const sealConvKey = nip44.getConversationKey(callerSk, resp.pubkey);
-  const sealJson = nip44.decrypt(resp.content, sealConvKey);
+  serverPubkey: string,
+  callerSk?: Uint8Array
+): Promise<any> {
+  let sealJson;
+  if (callerSk) {
+    const sealConvKey = nip44.getConversationKey(callerSk, resp.pubkey);
+    sealJson = nip44.decrypt(resp.content, sealConvKey);
+  } else {
+    sealJson = await (
+      await signerManager.getSigner()
+    ).nip44Decrypt!(resp.pubkey, resp.content);
+  }
   const sealObj = JSON.parse(sealJson);
 
-  const respConvKey = nip44.getConversationKey(callerSk, serverPubkey);
-  const rumorJson = nip44.decrypt(sealObj.content, respConvKey);
-
+  let rumorJson;
+  if (callerSk) {
+    const respConvKey = nip44.getConversationKey(callerSk, serverPubkey);
+    rumorJson = nip44.decrypt(sealObj.content, respConvKey);
+  } else {
+    rumorJson = await (
+      await signerManager.getSigner()
+    ).nip44Decrypt!(serverPubkey, sealObj.content);
+  }
   return JSON.parse(rumorJson);
 }
 
@@ -421,19 +436,25 @@ async function callRPC(
   relays: string[],
   serverPubkey: string,
   method: string,
-  params: string[][] = []
-): Promise<any> {
+  params: string[][] = [],
+  anonymous = true
+): Promise<UnsignedEvent> {
   // caller identity
-  const callerSk = generateSecretKey();
-  const callerPk = getPublicKey(callerSk);
-
+  let callerPk;
+  let callerSk: Uint8Array | undefined;
+  if (anonymous) {
+    callerSk = generateSecretKey();
+    callerPk = getPublicKey(callerSk);
+  } else {
+    callerPk = await (await signerManager.getSigner()).getPublicKey();
+  }
   // build rumor
   const rumor = buildRumor(serverPubkey, method, params);
   rumor.pubkey = callerPk;
   rumor.id = getEventHash(rumor);
 
   // seal + giftwrap
-  const seal = sealRumor(rumor, callerSk, serverPubkey);
+  const seal = await sealRumor(rumor, serverPubkey, callerSk);
   const { giftwrap } = giftwrapSeal(seal, serverPubkey);
 
   // publish
@@ -445,9 +466,13 @@ async function callRPC(
       relays,
       [{ kinds: [21169], "#e": [rumor.id] }],
       {
-        onevent(resp) {
+        async onevent(resp) {
           try {
-            const rumorResp = unwrapGiftwrap(resp, callerSk, serverPubkey);
+            const rumorResp = await unwrapGiftwrap(
+              resp,
+              serverPubkey,
+              callerSk
+            );
 
             if (rumorResp.kind === 69) {
               resolve(rumorResp);
@@ -458,7 +483,7 @@ async function callRPC(
           }
         },
         oneose() {
-          // optional: reject if no response
+          console.log("Relay reports EOSE");
         },
       }
     );

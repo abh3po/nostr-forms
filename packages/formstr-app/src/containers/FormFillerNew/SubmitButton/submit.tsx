@@ -3,13 +3,10 @@ import { Button, FormInstance, Dropdown, MenuProps } from "antd";
 import React, { useState } from "react";
 import { sendNRPCWebhook, sendResponses } from "../../../nostr/common";
 import { RelayPublishModal } from "../../../components/RelayPublishModal/RelaysPublishModal";
-import { Event, generateSecretKey } from "nostr-tools";
+import { Event, EventTemplate, generateSecretKey } from "nostr-tools";
 import { Response, Tag } from "../../../nostr/types";
 import { pool } from "../../../pool";
-import { useProfileContext } from "../../../hooks/useProfileContext";
-import { getFormSpec } from "../../../utils/formUtils";
-import FormSettings from "../../CreateFormNew/components/FormSettings";
-import { IFormSettings } from "../../CreateFormNew/components/FormSettings/types";
+import { getFormSettings } from "./utils";
 
 interface SubmitButtonProps {
   selfSign: boolean | undefined;
@@ -37,47 +34,49 @@ export const SubmitButton: React.FC<SubmitButtonProps> = ({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isDisabled, setIsDisabled] = useState(false);
   const [acceptedRelays, setAcceptedRelays] = useState<string[]>([]);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  const saveResponse = async (anonymous: boolean = true) => {
+  // --- Helpers ---
+  const buildResponses = (form: FormInstance): Response[] => {
+    const formResponses = form.getFieldsValue(true);
+    return Object.keys(formResponses).map((fieldId: string) => {
+      let answer = null;
+      let message = null;
+      if (formResponses[fieldId]) [answer, message] = formResponses[fieldId];
+      return ["response", fieldId, answer, JSON.stringify({ message })];
+    });
+  };
+
+  const fireWebhook = async (
+    formTemplate: Tag[],
+    responses: Response[],
+    anonUser?: Uint8Array
+  ) => {
+    const relays = formEvent.tags
+      .filter((value: Tag) => value[0] === "relay")
+      .map((t) => t[1]);
+    return await sendNRPCWebhook(formTemplate, responses, relays, anonUser);
+  };
+  // --- Main ---
+  const saveResponse = async (anonymous: boolean) => {
     let formId = formEvent.tags.find((t) => t[0] === "d")?.[1];
     if (!formId) {
       alert("FORM ID NOT FOUND");
       return;
     }
 
-    let pubKey = formEvent.pubkey;
-    let formResponses = form.getFieldsValue(true);
+    const pubKey = formEvent.pubkey;
+    const responses = buildResponses(form);
+    const anonUser = anonymous ? generateSecretKey() : null;
 
-    const responses: Response[] = Object.keys(formResponses).map(
-      (fieldId: string) => {
-        let answer = null;
-        let message = null;
-        if (formResponses[fieldId]) [answer, message] = formResponses[fieldId];
-        return ["response", fieldId, answer, JSON.stringify({ message })];
-      }
-    );
+    const settings = getFormSettings(formTemplate);
+    const requireWebhookPass = settings?.requireWebhookPass ?? false;
 
-    let anonUser: Uint8Array | null = null;
-    if (anonymous) {
-      anonUser = generateSecretKey();
-    }
-    console.log("Calling nrpc webhook");
-
-    // 🔹 Try sending NRPC webhook first
-    const nrpcEvent = await sendNRPCWebhook(
-      formTemplate,
-      responses,
-      anonUser || undefined
-    );
-
-    console.log("NRPC EVENT IS", nrpcEvent, JSON.stringify(nrpcEvent));
-
-    if (!nrpcEvent) {
-      // no NRPC configured → proceed normally
+    const sendAllResponses = async () => {
       setIsSubmitting(true);
       await sendResponses(
         pubKey,
-        formId,
+        formId!,
         responses,
         anonUser,
         true,
@@ -86,69 +85,50 @@ export const SubmitButton: React.FC<SubmitButtonProps> = ({
       );
       setIsSubmitting(false);
       onSubmit();
+    };
+
+    if (!requireWebhookPass) {
+      // fire-and-forget
+      console.log("Webhook fired (fire-and-forget)");
+      await sendAllResponses();
+      fireWebhook(formTemplate, responses, anonUser || undefined);
       return;
     }
 
-    // 🔹 If NRPC exists, wait for response
+    const nrpcResponse = await fireWebhook(
+      formTemplate,
+      responses,
+      anonUser || undefined
+    );
+    let result = processNRPCResponse(nrpcResponse);
+    if (result) await sendAllResponses();
+  };
 
-    return new Promise<void>((resolve, reject) => {
-      const relays = formEvent.tags
-        .filter((value: Tag) => value[0] === "relay")
-        .map((t) => t[1]);
-      console.log("Webhook listening for", nrpcEvent.id, "on relays", relays);
-      const sub = pool.subscribeMany(
-        relays,
-        [
-          {
-            "#e": [nrpcEvent.id],
-          },
-        ],
-        {
-          onevent: (ev: Event) => {
-            const status = ev.tags.find((t) => t[0] === "status")?.[1];
-            console.log("GOT EVENT", ev);
-            if (!status) return;
+  const processNRPCResponse = (nrpcResponse?: EventTemplate) => {
+    if (!nrpcResponse) {
+      setErrorMessage("No Message ");
+      setIsSubmitting(false);
+      setIsDisabled(false);
+      return false;
+    }
+    const status = nrpcResponse.tags.find((t) => t[0] === "status")?.[1];
+    if (!status) return true;
 
-            if (parseInt(status) >= 400) {
-              const errorTag = ev.tags.find((t) => t[0] === "error");
-              const msg = errorTag?.[2] || "Unknown NRPC error";
-
-              // 🔹 Show NRPC error as global form error
-              form.setFields([
-                {
-                  name: "global",
-                  errors: [msg],
-                },
-              ]);
-              setIsSubmitting(false);
-              setIsDisabled(false);
-              sub.close();
-              reject(new Error(msg));
-              return;
-            }
-            setIsSubmitting(true);
-            // ✅ Success → now call sendResponses
-            sub.close();
-            sendResponses(
-              pubKey,
-              formId!,
-              responses,
-              anonUser,
-              true,
-              relays,
-              (url: string) => setAcceptedRelays((prev) => [...prev, url])
-            ).then(() => {
-              setIsSubmitting(false);
-              onSubmit();
-              resolve();
-            });
-          },
-        }
-      );
-    });
+    if (parseInt(status) >= 400) {
+      const errorTags = nrpcResponse.tags.filter((t) => t[0] === "error");
+      const msg =
+        errorTags.map((tag: string[]) => tag[2]).join(",") ||
+        "Unknown NRPC error";
+      setErrorMessage(msg);
+      setIsSubmitting(false);
+      setIsDisabled(false);
+      return false;
+    }
+    return true;
   };
 
   const submitForm = async (anonymous: boolean = true) => {
+    setErrorMessage(null);
     try {
       await form.validateFields();
       let errors = form.getFieldsError().filter((e) => e.errors.length > 0);
@@ -216,6 +196,15 @@ export const SubmitButton: React.FC<SubmitButtonProps> = ({
           "Submit"
         )}
       </Dropdown.Button>
+      {errorMessage && (
+        <div
+          style={{ color: "red", marginTop: 8 }}
+          className="submit-button"
+          data-testid="submit-error"
+        >
+          Error: {errorMessage}
+        </div>
+      )}
       <RelayPublishModal
         relays={relays}
         acceptedRelays={acceptedRelays}

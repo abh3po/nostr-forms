@@ -17,6 +17,8 @@ export default function Automations() {
       if (!formSettings.nrpcPubkey) return;
       setLoadingMethods(true);
       try {
+        console.log("Server pubkey is", formSettings.nrpcPubkey);
+
         const result = await fetchNRPCMethods(
           relayList.map((url) => url.url),
           formSettings.nrpcPubkey

@@ -231,7 +231,7 @@ export const sendNRPCWebhook = async (
       nrpcPubkey,
       nrpcMethod,
       params,
-      !privateKey
+      privateKey
     );
     return resp;
   } catch (err) {
@@ -385,7 +385,9 @@ function giftwrapSeal(
 // 4. Publish
 //
 async function publishGiftwrap(relays: string[], giftwrap: any) {
-  return Promise.allSettled(customPublish(relays, giftwrap));
+  const messages = await Promise.allSettled(customPublish(relays, giftwrap));
+  console.log("Webhook event: Relay messages", messages);
+  return messages;
 }
 
 //
@@ -437,13 +439,13 @@ async function callRPC(
   serverPubkey: string,
   method: string,
   params: string[][] = [],
-  anonymous = true
+  anonUser?: Uint8Array | null
 ): Promise<UnsignedEvent> {
   // caller identity
   let callerPk;
   let callerSk: Uint8Array | undefined;
-  if (anonymous) {
-    callerSk = generateSecretKey();
+  if (anonUser) {
+    callerSk = anonUser;
     callerPk = getPublicKey(callerSk);
   } else {
     callerPk = await (await signerManager.getSigner()).getPublicKey();
@@ -458,8 +460,9 @@ async function callRPC(
   const { giftwrap } = giftwrapSeal(seal, serverPubkey);
 
   // publish
+  console.log("Publishing gift wraps");
   await publishGiftwrap(relays, giftwrap);
-
+  console.log("Waiting for NRPC Response");
   // wait for response
   return new Promise((resolve, reject) => {
     const sub = pool.subscribeMany(

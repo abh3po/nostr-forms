@@ -471,6 +471,7 @@ async function callRPC(
       {
         async onevent(resp) {
           try {
+            console.log("Got reply");
             const rumorResp = await unwrapGiftwrap(
               resp,
               serverPubkey,
@@ -494,6 +495,12 @@ async function callRPC(
 }
 
 export async function fetchNRPCMethods(relays: string[], serverPubkey: string) {
-  const resp = await callRPC(relays, serverPubkey, "getMethods");
+  const resp = await callRPC(
+    relays,
+    serverPubkey,
+    "getMethods",
+    [],
+    generateSecretKey()
+  );
   return extractMethods(resp);
 }

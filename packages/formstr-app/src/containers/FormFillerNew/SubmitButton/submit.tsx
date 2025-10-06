@@ -137,7 +137,18 @@ export const SubmitButton: React.FC<SubmitButtonProps> = ({
       let errors = form.getFieldsError().filter((e) => e.errors.length > 0);
       if (errors.length === 0) {
         setIsDisabled(true);
-        await saveResponse(anonymous);
+
+        const responses = buildResponses(form);
+        const anonUser = anonymous ? generateSecretKey() : null;
+
+        if (requireWebhookPass) {
+          // When webhook is required, we already validated before
+          await saveResponse(anonymous);
+        } else {
+          // Fire-and-forget webhook after saving
+          await saveResponse(anonymous);
+          fireWebhook(formTemplate, responses, anonUser || undefined);
+        }
       }
     } catch (err) {
       setIsSubmitting(false);

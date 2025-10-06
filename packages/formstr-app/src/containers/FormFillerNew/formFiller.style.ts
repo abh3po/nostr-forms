@@ -95,6 +95,12 @@ export default styled.div<{
     justify-content: flex-end;
     align-items: flex-end;
   }
+  .validate-button {
+    display: flex;
+    justify-content: flex-end;
+    align-items: flex-end;
+    background: #009933;
+  }
 
   .foss-link {
     text-decoration: none;

@@ -1,4 +1,3 @@
-import { Tag } from "@formstr/sdk/dist/formstr/nip101";
 import { Button, Card, Divider, Dropdown, MenuProps } from "antd";
 import { Event } from "nostr-tools";
 import { useNavigate } from "react-router-dom";
@@ -26,8 +25,8 @@ import { useEffect, useState } from "react";
 import { constructDraftUrl } from "./Drafts";
 import { useApplicationContext } from "../../../hooks/useApplicationContext";
 import { FormDetails } from "../../CreateFormNew/components/FormDetails";
-import { getDefaultRelays } from "@formstr/sdk";
 import SafeMarkdown from "../../../components/SafeMarkdown";
+import { Tag } from "../../../nostr/types";
 
 interface FormEventCardProps {
   event: Event;

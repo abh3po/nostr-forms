@@ -1,4 +1,3 @@
-import { Tag, Response } from "@formstr/sdk/dist/formstr/nip101";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { Button, Spin, Typography } from "antd";
@@ -12,6 +11,7 @@ import { useApplicationContext } from "../../hooks/useApplicationContext";
 import { ThankYouScreen } from "./ThankYouScreen";
 import { ROUTES } from "../../constants/routes";
 import { appConfig } from "../../config";
+import { Response, Tag } from "../../nostr/types";
 
 const { Text } = Typography;
 

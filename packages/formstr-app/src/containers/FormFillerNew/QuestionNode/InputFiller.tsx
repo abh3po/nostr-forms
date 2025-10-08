@@ -5,8 +5,7 @@ import { ChoiceFiller } from "./InputTypes/ChoiceFiller";
 import { DropdownFiller } from "./InputTypes/DropdownFiller";
 import { DateFiller } from "./InputTypes/DateFiller";
 import { TimeFiller } from "./InputTypes/TimeFiller";
-import { Option } from "@formstr/sdk/dist/formstr/nip101";
-import { AnswerTypes } from "@formstr/sdk/dist/interfaces";
+import { AnswerTypes, Option } from "../../../nostr/types";
 
 interface InputFillerProps {
   fieldConfig: any;
@@ -14,7 +13,7 @@ interface InputFillerProps {
   onChange: (answer: string, message?: string) => void;
   defaultValue?: string | number | boolean;
   disabled?: boolean;
-  testId? : string;
+  testId?: string;
 }
 
 export const InputFiller: React.FC<InputFillerProps> = ({
@@ -36,10 +35,7 @@ export const InputFiller: React.FC<InputFillerProps> = ({
     onChange(value, message);
   };
 
-  const getInput = (
-    answerType: AnswerTypes,
-    answerSettings: any
-  ) => {
+  const getInput = (answerType: AnswerTypes, answerSettings: any) => {
     const INPUT_TYPE_COMPONENT_MAP: { [key in AnswerTypes]?: JSX.Element } = {
       [AnswerTypes.label]: <></>,
       [AnswerTypes.shortText]: (

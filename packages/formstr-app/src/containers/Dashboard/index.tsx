@@ -3,7 +3,6 @@ import { useLocation } from "react-router-dom";
 import { FormDetails } from "../CreateFormNew/components/FormDetails";
 import { Event } from "nostr-tools";
 import { useProfileContext } from "../../hooks/useProfileContext";
-import { getDefaultRelays } from "@formstr/sdk";
 import { FormEventCard } from "./FormCards/FormEventCard";
 import DashboardStyleWrapper from "./index.style";
 import EmptyScreen from "../../components/EmptyScreen";
@@ -22,6 +21,7 @@ import { FormInitData } from "../CreateFormNew/providers/FormBuilder/typeDefs";
 import { createFormSpecFromTemplate } from "../../utils/formUtils";
 import { Purchases } from "./FormCards/Purchases";
 import { SubCloser } from "nostr-tools/abstract-pool";
+import { getDefaultRelays } from "../../nostr/common";
 
 const MENU_OPTIONS = {
   local: "On this device",

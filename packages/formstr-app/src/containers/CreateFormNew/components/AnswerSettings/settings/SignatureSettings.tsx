@@ -28,7 +28,7 @@ export const SignatureSettings: React.FC<SignatureSettingsProps> = ({
         <Text className="property-name">Event Kind</Text>
         <InputNumber
           min={0}
-          value={sig.kind || 0}
+          value={sig.kind === 0 ? 0 : 22157}
           onChange={(v) => updateSignature("kind", v)}
         />
       </div>

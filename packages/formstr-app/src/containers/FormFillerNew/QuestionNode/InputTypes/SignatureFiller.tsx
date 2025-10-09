@@ -31,7 +31,7 @@ export const SignatureFiller: React.FC<SignatureFillerProps> = ({
     }
 
     const event = {
-      kind: sig.kind || 0,
+      kind: sig.kind || 22157,
       created_at: Math.floor(Date.now() / 1000),
       content,
       tags: [],

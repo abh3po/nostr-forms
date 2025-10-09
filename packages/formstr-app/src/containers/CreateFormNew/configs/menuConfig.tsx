@@ -3,8 +3,8 @@ import {
   INPUTS_TYPES,
   PRE_BUILT_MENU_KEYS,
 } from "./constants";
-import { AnswerTypes } from "@formstr/sdk/dist/interfaces";
 import { ReactComponent as InputIcon } from "../../../Images/Frame.svg";
+import { AnswerTypes } from "../../../nostr/types";
 
 export const BASIC_MENU = [
   {
@@ -96,6 +96,18 @@ export const INPUTS_MENU = [
     primitive: "text",
     answerSettings: {
       renderElement: AnswerTypes.time,
+    },
+  },
+  {
+    key: INPUTS_TYPES.SIGNATURE,
+    label: "Signature",
+    icon: <InputIcon style={{ color: "#FFD580", fill: "#FFD580" }} />,
+    primitive: "text",
+    answerSettings: {
+      renderElement: AnswerTypes.signature,
+      signature: {
+        prefilledContent: "I confirm  that all the data filled is true",
+      },
     },
   },
 ];

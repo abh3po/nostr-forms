@@ -1,22 +1,15 @@
-import React, { useState } from "react";
+import React from "react";
 import { Input, Button, Typography, Space } from "antd";
-import { AnswerSettings } from "@formstr/sdk/dist/interfaces";
+import { IAnswerSettings } from "../../AnswerSettings/types";
 
 const { Text, Paragraph } = Typography;
 
 interface SignatureInputProps {
-  answerSettings: AnswerSettings & {
-    signature?: {
-      kind?: number;
-      editableContent?: boolean;
-      prefilledContent?: string;
-    };
-  };
+  answerSettings: IAnswerSettings;
 }
 
 const SignatureInput: React.FC<SignatureInputProps> = ({ answerSettings }) => {
   const sig = answerSettings.signature ?? {};
-  const [signedEvent, setSignedEvent] = useState<string>("");
 
   return (
     <Space direction="vertical" style={{ width: "100%" }}>
@@ -49,22 +42,8 @@ const SignatureInput: React.FC<SignatureInputProps> = ({ answerSettings }) => {
       )}
 
       <Button type="primary" onClick={() => {}}>
-        Sign
+        Attach Signature
       </Button>
-
-      {signedEvent && (
-        <pre
-          style={{
-            background: "#f6f8fa",
-            border: "1px solid #eaeaea",
-            padding: "8px",
-            borderRadius: "6px",
-            overflowX: "auto",
-          }}
-        >
-          {signedEvent}
-        </pre>
-      )}
     </Space>
   );
 };

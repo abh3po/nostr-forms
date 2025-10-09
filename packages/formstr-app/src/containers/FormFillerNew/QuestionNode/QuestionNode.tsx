@@ -16,7 +16,7 @@ interface QuestionProps {
   disabled?: boolean;
   value?: any;
   testId: string;
-  formSettings: IFormSettings
+  formSettings: IFormSettings;
 }
 
 export const QuestionNode: React.FC<QuestionProps> = ({
@@ -29,7 +29,7 @@ export const QuestionNode: React.FC<QuestionProps> = ({
   disabled = false,
   value,
   testId,
-  formSettings
+  formSettings,
 }) => {
   const answerHandler = (questionId: string) => {
     return (answer: string, message?: string) => {
@@ -50,7 +50,9 @@ export const QuestionNode: React.FC<QuestionProps> = ({
       <div className="question-text">
         <SafeMarkdown>{label}</SafeMarkdown>
       </div>
-      {fieldConfig.renderElement === AnswerTypes.label ? null : <Divider />}
+      {fieldConfig.renderElement === AnswerTypes.label ? null : (
+        <Divider style={{ marginTop: 0, marginBottom: 24 }} />
+      )}
       <InputFiller
         fieldConfig={fieldConfig}
         options={options}

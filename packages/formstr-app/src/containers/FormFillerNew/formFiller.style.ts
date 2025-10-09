@@ -129,6 +129,7 @@ export default styled.div<{
     }
     word-wrap: break-word;
     overflow: auto;
+    height: auto;
   }
 
   /* Section-specific styles */

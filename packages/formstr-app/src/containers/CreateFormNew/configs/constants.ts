@@ -13,6 +13,7 @@ export const INPUTS_TYPES = {
   DATE: "DATE",
   TIME: "TIME",
   SIGNATURE: "SIGNATURE",
+  DATETIME: "DATETIME",
 };
 
 export const PRE_BUILT_MENU_KEYS = {

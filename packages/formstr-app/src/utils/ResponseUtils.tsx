@@ -60,12 +60,15 @@ export const getResponseLabels = (
   const [_resPlaceholder, fieldId, answerValue, metadataString] = inputTag;
   let questionLabel = `Question ID: ${fieldId}`;
   let responseLabel = answerValue ?? "N/A";
+
   const questionField = formSpec.find(
     (tag): tag is Field => tag[0] === "field" && tag[1] === fieldId
   );
 
   if (questionField) {
     questionLabel = questionField[3] || questionLabel;
+
+    // ✅ Handle option-type fields (multiple choice)
     if (questionField[2] === "option" && answerValue) {
       try {
         const choices = JSON.parse(questionField[4] || "[]") as Tag[];
@@ -95,6 +98,24 @@ export const getResponseLabels = (
         console.warn("Error processing options for fieldId:", fieldId, e);
       }
     }
+
+    // ✅ Handle datetime-type fields
+    if (questionField[2] === "datetime" && answerValue) {
+      const epoch = Number(answerValue);
+      if (!isNaN(epoch)) {
+        const date = new Date(epoch * 1000); // convert seconds → ms
+        const formatted = date.toLocaleString(undefined, {
+          year: "numeric",
+          month: "short",
+          day: "numeric",
+          hour: "2-digit",
+          minute: "2-digit",
+        });
+        const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+        responseLabel = `${formatted} (${timezone})`;
+      }
+    }
   }
+
   return { questionLabel, responseLabel, fieldId };
 };

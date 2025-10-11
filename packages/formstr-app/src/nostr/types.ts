@@ -54,4 +54,5 @@ export enum AnswerTypes {
   label = "label",
   time = "time",
   signature = "signature",
+  datetime = "datetime",
 }

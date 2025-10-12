@@ -35,8 +35,9 @@ export default styled.div<{
     min-height: 100dvh;
     display: flex;
     flex-direction: column;
-
-    div:last-of-type {
+    justify-content: flex-start;
+    
+    .branding-container {
       margin-top: auto;
     }
   }

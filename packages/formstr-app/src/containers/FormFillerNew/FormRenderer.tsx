@@ -24,6 +24,7 @@ interface FormRendererProps {
   hideDescription?: boolean;
   disabled?: boolean;
   initialValues?: Record<string, any>;
+  formstrBranding?: boolean;
   isPreview?: boolean;
 }
 
@@ -46,6 +47,7 @@ export const FormRenderer: React.FC<FormRendererProps> = ({
   hideDescription,
   disabled = false,
   initialValues,
+  formstrBranding,
   isPreview = false,
 }) => {
   const name = formTemplate.find((tag) => tag[0] === "name")?.[1] || "";
@@ -291,7 +293,8 @@ export const FormRenderer: React.FC<FormRendererProps> = ({
           </Form>
         </div>
 
-        <div className="branding-container">
+        {formstrBranding && (
+          <div className="branding-container">
           <Link to="/">
             <CreatedUsingFormstr />
           </Link>
@@ -306,6 +309,7 @@ export const FormRenderer: React.FC<FormRendererProps> = ({
             </a>
           )}
         </div>
+        )}
       </div>
     </FillerStyle>
   );

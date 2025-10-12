@@ -13,6 +13,7 @@ import {
   fetchKeys,
   getAllowedUsers,
   getFormSpec as getFormSpecFromEventUtil,
+  getformstrBranding
 } from "../../utils/formUtils";
 import { Field, Tag } from "../../nostr/types";
 import { useApplicationContext } from "../../hooks/useApplicationContext";
@@ -466,6 +467,7 @@ export const Response = () => {
             formSpec={formSpec}
             processedInputs={selectedResponseInputsForModal}
             responseMetadataEvent={selectedEventForModal}
+            formstrBranding={getformstrBranding(formSpec)}
           />
         )}
     </div>

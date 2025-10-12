@@ -8,7 +8,7 @@ import { FormRenderer } from "../FormFillerNew/FormRenderer";
 
 function CreateForm() {
   const { state } = useLocation();
-  const { initializeForm, saveDraft, selectedTab, getFormSpec } =
+  const { initializeForm, saveDraft, selectedTab, getFormSpec , formSettings} =
     useFormBuilderContext();
   const [initialized, setInitialized] = useState(false);
   const [form] = Form.useForm();
@@ -35,6 +35,7 @@ function CreateForm() {
         form={form}
         footer={null}
         onInput={() => {}}
+        formstrBranding={formSettings.formstrBranding}
         isPreview={true}
       />
     );

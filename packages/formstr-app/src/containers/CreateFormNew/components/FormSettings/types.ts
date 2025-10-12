@@ -13,6 +13,8 @@ export interface IFormSettings {
   sections?: SectionData[];
   backgroundImageUrl?: string;
   cardTransparency?: number;
+  thankYouScreenImageUrl? : string;
+  formstrBranding?: boolean;
   nrpcPubkey?: string;
   nrpcMethod?: string;
   requireWebhookPass?: boolean;

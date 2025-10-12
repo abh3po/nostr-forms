@@ -1,8 +1,7 @@
 import React, { useState } from "react";
 import { Input, Drawer, Button, Typography } from "antd";
 import { ImagePicker } from "../../BackgroundImagePicker";
-import { FileImageOutlined } from "@ant-design/icons";
-import { sampleBackgrounds } from "../constants";
+import { sampleThankYouScreens } from "../constants";
 const { Text } = Typography;
 
 interface Props {
@@ -10,7 +9,7 @@ interface Props {
   onChange: (url: string) => void;
 }
 
-export const BackgroundImageSetting: React.FC<Props> = ({
+export const ThankYouScreenImageSetting: React.FC<Props> = ({
   value,
   onChange,
 }) => {
@@ -18,7 +17,7 @@ export const BackgroundImageSetting: React.FC<Props> = ({
 
   return (
     <div style={{ marginTop: 16 }}>
-      <Text className="property-name">Background Image</Text>
+      <Text className="property-name">ThankYou Screen Image</Text>
       <div
         style={{
           display: "flex",
@@ -41,7 +40,7 @@ export const BackgroundImageSetting: React.FC<Props> = ({
         width={500}
       >
         <ImagePicker
-          options={sampleBackgrounds}
+          options={sampleThankYouScreens}
           selectedUrl={value}
           onSelect={(url) => {
             onChange(url);

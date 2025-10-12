@@ -24,7 +24,7 @@ function EditForm() {
     relays = relaysArray;
   }
   const formSecret = window.location.hash.replace(/^#/, "");
-  const { initializeForm, saveDraft, selectedTab, getFormSpec } =
+  const { initializeForm, saveDraft, selectedTab, getFormSpec , formSettings} =
     useFormBuilderContext();
   const [initialized, setInitialized] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -115,16 +115,16 @@ function EditForm() {
     return <FormBuilder />;
   }
   if (selectedTab === HEADER_MENU_KEYS.PREVIEW) {
-    return (
-      <FormRenderer
-        formTemplate={getFormSpec()}
-        form={null}
-        footer={null}
-        onInput={() => {}}
-      />
-    );
-  }
-
+      return (
+        <FormRenderer
+          formTemplate={getFormSpec()}
+          form={null}
+          footer={null}
+          onInput={() => {}}
+          formstrBranding={formSettings.formstrBranding}
+        />
+      );
+    }
   return <></>;
 }
 

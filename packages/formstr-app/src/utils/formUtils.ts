@@ -135,6 +135,21 @@ export const getAllowedUsers = (formEvent: Event) => {
   return formEvent.tags.filter((t) => t[0] === "allowed").map((t) => t[1]);
 };
 
+export const getformstrBranding = (formSpec : Tag[] | null | undefined): boolean => {
+  try {
+    const settingsTag = formSpec?.find((t) => t[0] === "settings");
+    if (!settingsTag || !settingsTag[1]) return true;
+    
+    const settingsJson = JSON.parse(settingsTag[1]);
+    return settingsJson.formstrBranding !== undefined 
+      ? settingsJson.formstrBranding 
+      : true;
+  } catch (error) {
+    console.error("Failed to parse settings:", error);
+    return true;
+  }
+};
+
 export const constructFormUrl = (
   pubkey: string,
   formId: string,

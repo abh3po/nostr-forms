@@ -15,6 +15,7 @@ export interface IAnswerSettings {
     kind?: number;
     editableContent?: boolean;
     prefilledContent?: string;
+    editableCreatedAt?: boolean;
   };
   validationRules?: {
     [ValidationRuleTypes.range]?: RangeRule;

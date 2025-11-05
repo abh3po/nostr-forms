@@ -17,23 +17,6 @@ import { nip19 } from "nostr-tools";
 
 const { Text } = Typography;
 
-const npubToHex = (npub: string): string | null => {
-  try {
-    const { type, data } = nip19.decode(npub);
-    return type === "npub" ? (data as string) : null;
-  } catch {
-    return null;
-  }
-};
-
-const hexToNpub = (hex: string): string | null => {
-  try {
-    return nip19.npubEncode(hex);
-  } catch {
-    return null;
-  }
-};
-
 export default function Automations() {
   const { formSettings, relayList, updateFormSetting } =
     useFormBuilderContext();

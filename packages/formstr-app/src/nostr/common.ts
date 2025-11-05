@@ -1,6 +1,7 @@
 import {
   Event,
   EventTemplate,
+  Filter,
   finalizeEvent,
   generateSecretKey,
   getEventHash,
@@ -495,6 +496,7 @@ async function callRPC(
 }
 
 export async function fetchNRPCMethods(relays: string[], serverPubkey: string) {
+  console.log("Calling", relays, serverPubkey);
   const resp = await callRPC(
     relays,
     serverPubkey,
@@ -503,4 +505,42 @@ export async function fetchNRPCMethods(relays: string[], serverPubkey: string) {
     generateSecretKey()
   );
   return extractMethods(resp);
+}
+export async function fetchKind0Events(
+  relayUrls: string[],
+  tag: string,
+  limit = 100,
+  timeoutMs = 8000
+): Promise<Event[]> {
+  const filter: Filter = {
+    kinds: [0],
+    "#t": [tag], // 🔹 Proper tag filter — let relays handle filtering
+    limit,
+  };
+
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), timeoutMs);
+
+  try {
+    const events = await pool.querySync(relayUrls, filter);
+    clearTimeout(timeout);
+
+    // ✅ Deduplicate by pubkey: keep only the newest event per pubkey
+    const latestByPubkey = new Map<string, Event>();
+
+    for (const ev of events) {
+      const existing = latestByPubkey.get(ev.pubkey);
+      if (!existing || ev.created_at > existing.created_at) {
+        latestByPubkey.set(ev.pubkey, ev);
+      }
+    }
+
+    // Return newest first
+    return Array.from(latestByPubkey.values()).sort(
+      (a, b) => b.created_at - a.created_at
+    );
+  } catch (err) {
+    clearTimeout(timeout);
+    throw err;
+  }
 }

@@ -6,6 +6,7 @@ import {
   Typography,
   message,
   Alert,
+  Collapse,
 } from "antd";
 import { useState, useEffect } from "react";
 import useFormBuilderContext from "../../../hooks/useFormBuilderContext";
@@ -15,7 +16,9 @@ import {
 } from "../../../../../nostr/common";
 import { nip19 } from "nostr-tools";
 
-const { Text } = Typography;
+const { Text, Paragraph, Link } = Typography;
+
+const { Panel } = Collapse;
 
 export default function Automations() {
   const { formSettings, relayList, updateFormSetting } =
@@ -107,11 +110,16 @@ export default function Automations() {
   }, [formSettings.nrpcPubkey, relayList]);
 
   return (
-    <>
+    <div style={{ alignItems: "flex-start", alignContent: "flex-start" }}>
       {/* Select Existing Server */}
       <div
         className="property-setting"
-        style={{ flexDirection: "column", gap: 8 }}
+        style={{
+          flexDirection: "column",
+          gap: 8,
+          alignContent: "flex-start",
+          alignItems: "flex-start",
+        }}
       >
         <Text className="property-text">Select an Existing NRPC Server</Text>
         <Select
@@ -128,14 +136,16 @@ export default function Automations() {
           onChange={(val) => updateFormSetting({ nrpcPubkey: val })}
         />
       </div>
-
-      {/* Manual Pubkey Input */}
-      <Divider plain>Or enter custom NRPC pubkey</Divider>
       <div
         className="property-setting"
-        style={{ flexDirection: "column", gap: 8 }}
+        style={{
+          flexDirection: "column",
+          gap: 8,
+          alignContent: "flex-start",
+          alignItems: "flex-start",
+        }}
       >
-        <Text className="property-text">NRPC Server Pubkey</Text>
+        <Text className="property-text">Or enter NRPC server pubkey</Text>
         <Input
           placeholder="npub1..."
           value={
@@ -175,11 +185,15 @@ export default function Automations() {
           style={{ width: "100%" }}
         />
       </div>
-
       {/* Methods */}
       <div
         className="property-setting"
-        style={{ flexDirection: "column", gap: 8, marginTop: 16 }}
+        style={{
+          flexDirection: "column",
+          gap: 8,
+          marginTop: 16,
+          alignItems: "flex-start",
+        }}
       >
         <Text className="property-text">Method to Call</Text>
         <Select
@@ -192,7 +206,6 @@ export default function Automations() {
           onChange={(val) => updateFormSetting({ nrpcMethod: val })}
         />
       </div>
-
       {/* Introspection Warning */}
       {introspectionError && (
         <Alert
@@ -202,7 +215,6 @@ export default function Automations() {
           style={{ marginTop: 12 }}
         />
       )}
-
       {/* Require Webhook */}
       <div
         className="property-setting"
@@ -216,7 +228,6 @@ export default function Automations() {
           }
         />
       </div>
-
       <Text
         type="secondary"
         style={{ fontSize: 12, marginTop: 12, display: "block" }}
@@ -226,8 +237,38 @@ export default function Automations() {
         {formSettings.requireWebhookPass &&
           " Submissions will only be accepted if the server responds successfully."}
       </Text>
-
-      <Divider className="divider" />
-    </>
+      <Collapse ghost style={{ textAlign: "left", marginTop: 8 }}>
+        <Panel header="💡 Learn more" key="1">
+          <Paragraph type="secondary" style={{ fontSize: 12, marginBottom: 0 }}>
+            NRPC (Nostr Remote Procedure Calls) lets you connect your form to
+            your own nostr based server. You can:
+          </Paragraph>
+          <ul style={{ fontSize: 12, paddingLeft: 20, marginTop: 8 }}>
+            <li>
+              Read the{" "}
+              <Link
+                href="https://github.com/nostr-protocol/nips/blob/9deb067debca268a79c60bff50b42dcf090f2745/N1.md"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                NRPC specification
+              </Link>{" "}
+              to understand the protocol.
+            </li>
+            <li>
+              Try running a{" "}
+              <Link
+                href="https://github.com/abh3po/nrpc_server"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                demo NRPC server
+              </Link>{" "}
+              to tinker with locally.
+            </li>
+          </ul>
+        </Panel>
+      </Collapse>
+    </div>
   );
 }

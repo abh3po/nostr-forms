@@ -14,4 +14,9 @@ export default styled.div`
     display: "flex";
     flex-direction: "column";
   }
+
+  .formstr-button-container {
+    text-align: center;
+    margin-top: 1.2rem;
+  }
 `;

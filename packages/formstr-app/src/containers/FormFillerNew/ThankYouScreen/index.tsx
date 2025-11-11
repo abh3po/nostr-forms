@@ -1,15 +1,22 @@
-import { Modal } from "antd";
+import { Modal, Button } from "antd";
 import ThankYouStyle from "./thankyou.style";
 
 export const ThankYouScreen = ({
   isOpen,
   onClose,
+  hideCloseButton = false,
 }: {
   isOpen: boolean;
   onClose: () => void;
+  hideCloseButton?: boolean;
 }) => {
   return (
-    <Modal open={isOpen} onCancel={onClose} closable={true} footer={null}>
+    <Modal
+      open={isOpen}
+      onCancel={onClose}
+      closable={!hideCloseButton}
+      footer={null}
+    >
       <ThankYouStyle>
         <div className="thank-you-image-container">
           <img
@@ -17,6 +24,17 @@ export const ThankYouScreen = ({
             className="thank-you-image"
             alt="Thank you"
           />
+        </div>
+
+        <div className="formstr-button-container">
+          <Button
+            type="primary"
+            onClick={() => {
+              window.location.href = "https://formstr.app";
+            }}
+          >
+            Continue to Formstr
+          </Button>
         </div>
       </ThankYouStyle>
     </Modal>

@@ -1,4 +1,3 @@
-import { AnswerTypes } from "@formstr/sdk/dist/interfaces";
 import { Option } from "@formstr/sdk/dist/formstr/nip101";
 import {
   Checkbox,
@@ -13,6 +12,7 @@ import { CheckboxValueType } from "antd/es/checkbox/Group";
 import ChoiceFillerStyle from "./choiceFiller.style";
 import { ChangeEvent, useState } from "react";
 import SafeMarkdown from "../../../../components/SafeMarkdown";
+import { AnswerTypes } from "../../../../nostr/types";
 
 interface ChoiceFillerProps {
   answerType: AnswerTypes.checkboxes | AnswerTypes.radioButton;

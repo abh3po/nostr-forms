@@ -6,8 +6,8 @@ import { DropdownFiller } from "./InputTypes/DropdownFiller";
 import { DateFiller } from "./InputTypes/DateFiller";
 import { TimeFiller } from "./InputTypes/TimeFiller";
 import { Option } from "@formstr/sdk/dist/formstr/nip101";
-import { AnswerTypes } from "@formstr/sdk/dist/interfaces";
 import { SignatureFiller } from "./InputTypes/SignatureFiller";
+import { AnswerTypes } from "../../../nostr/types";
 
 interface InputFillerProps {
   fieldConfig: any;

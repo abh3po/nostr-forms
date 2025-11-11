@@ -110,6 +110,15 @@ export const INPUTS_MENU = [
       },
     },
   },
+  {
+    key: INPUTS_TYPES.DATETIME,
+    label: "Date & Time",
+    icon: <InputIcon style={{ color: "#FFD580", fill: "#FFD580" }} />,
+    primitive: "datetime",
+    answerSettings: {
+      renderElement: AnswerTypes.datetime,
+    },
+  },
 ];
 
 export const PRE_BUILT_MENU = [

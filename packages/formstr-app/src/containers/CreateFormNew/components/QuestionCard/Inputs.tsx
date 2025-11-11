@@ -66,6 +66,8 @@ const Inputs: React.FC<InputsProps> = ({
         return <TimePicker disabled={true} />;
       case AnswerTypes.signature:
         return <SignatureInput answerSettings={answerSettings} />;
+      case AnswerTypes.datetime:
+        return <DatePicker disabled={true} placeholder="Pick Date & Time" />;
       default:
         <></>;
         break;

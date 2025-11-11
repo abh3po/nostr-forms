@@ -91,4 +91,5 @@ export const ANSWER_TYPE_RULES_MENU: ANSWER_TYPE_RULES_MENU_TYPE = {
   [AnswerTypes.date]: [],
   [AnswerTypes.time]: [],
   [AnswerTypes.signature]: [],
+  [AnswerTypes.datetime]: [],
 };

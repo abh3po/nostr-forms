@@ -95,6 +95,22 @@ export const getResponseLabels = (
         console.warn("Error processing options for fieldId:", fieldId, e);
       }
     }
+
+    if (questionField[2] === "datetime" && answerValue) {
+      const epoch = Number(answerValue);
+      if (!isNaN(epoch)) {
+        const date = new Date(epoch * 1000); // convert seconds → ms
+        const formatted = date.toLocaleString(undefined, {
+          year: "numeric",
+          month: "short",
+          day: "numeric",
+          hour: "2-digit",
+          minute: "2-digit",
+        });
+        const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+        responseLabel = `${formatted} (${timezone})`;
+      }
+    }
   }
   return { questionLabel, responseLabel, fieldId };
 };

@@ -7,6 +7,7 @@ import { DateFiller } from "./InputTypes/DateFiller";
 import { TimeFiller } from "./InputTypes/TimeFiller";
 import { Option } from "@formstr/sdk/dist/formstr/nip101";
 import { SignatureFiller } from "./InputTypes/SignatureFiller";
+import { DateTimeFiller } from "./InputTypes/DateTimeFiller";
 import { AnswerTypes } from "../../../nostr/types";
 
 interface InputFillerProps {
@@ -119,6 +120,9 @@ export const InputFiller: React.FC<InputFillerProps> = ({
           onChange={onChange}
           disabled={disabled}
         />
+      ),
+      [AnswerTypes.datetime]: (
+        <DateTimeFiller onChange={handleValueChange} disabled={disabled} />
       ),
     };
 

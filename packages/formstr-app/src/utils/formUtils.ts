@@ -201,3 +201,18 @@ export const getFormData = async (naddr: string, poolRef: SimplePool) => {
     );
   });
 };
+
+export const getformstrBranding = (formSpec: Tag[] | null | undefined): boolean => {
+  try {
+    const settingsTag = formSpec?.find((t) => t[0] === "settings");
+    if (!settingsTag || !settingsTag[1]) return true;
+
+    const settingsJson = JSON.parse(settingsTag[1]);
+    return settingsJson.formstrBranding !== undefined
+      ? settingsJson.formstrBranding
+      : true;
+  } catch (error) {
+    console.error("Failed to parse settings:", error);
+    return true;
+  }
+};

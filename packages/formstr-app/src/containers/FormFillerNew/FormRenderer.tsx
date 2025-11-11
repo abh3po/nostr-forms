@@ -25,6 +25,7 @@ interface FormRendererProps {
   disabled?: boolean;
   initialValues?: Record<string, any>;
   isPreview?: boolean;
+  formstrBranding?: boolean;
 }
 
 // Content item can be either a section or individual questions
@@ -46,6 +47,7 @@ export const FormRenderer: React.FC<FormRendererProps> = ({
   hideDescription,
   disabled = false,
   initialValues,
+  formstrBranding,
   isPreview = false,
 }) => {
   const name = formTemplate.find((tag) => tag[0] === "name")?.[1] || "";
@@ -294,21 +296,23 @@ export const FormRenderer: React.FC<FormRendererProps> = ({
           </Form>
         </div>
 
-        <div className="branding-container">
-          <Link to="/">
-            <CreatedUsingFormstr />
-          </Link>
-          {!isMobile() && (
-            <a
-              href="https://github.com/abhay-raizada/nostr-forms"
-              className="foss-link"
-            >
-              <Text className="text-style">
-                Formstr is free and Open Source
-              </Text>
-            </a>
-          )}
-        </div>
+        {formstrBranding && (
+          <div className="branding-container">
+            <Link to="/">
+              <CreatedUsingFormstr />
+            </Link>
+            {!isMobile() && (
+              <a
+                href="https://github.com/abhay-raizada/nostr-forms"
+                className="foss-link"
+              >
+                <Text className="text-style">
+                  Formstr is free and Open Source
+                </Text>
+              </a>
+            )}
+          </div>
+        )}
       </div>
     </FillerStyle>
   );

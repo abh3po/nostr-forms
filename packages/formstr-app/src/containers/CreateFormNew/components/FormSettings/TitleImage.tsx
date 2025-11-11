@@ -1,6 +1,6 @@
 import { Button, Drawer, Typography } from "antd";
 import useFormBuilderContext from "../../hooks/useFormBuilderContext";
-import { BackgroundImagePicker } from "../BackgroundImagePicker";
+import { ImagePicker } from "../BackgroundImagePicker";
 import { sampleBackgrounds } from "./constants";
 import { useState } from "react";
 
@@ -36,7 +36,7 @@ function TitleImage({ titleImageUrl }: { titleImageUrl?: string }) {
         onClose={() => setDrawerOpen(false)}
         width={500}
       >
-        <BackgroundImagePicker
+        <ImagePicker
           options={sampleBackgrounds}
           selectedUrl={titleImageUrl}
           onSelect={(url: string) => {

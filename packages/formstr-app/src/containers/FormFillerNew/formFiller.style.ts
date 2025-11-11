@@ -20,14 +20,14 @@ export default styled.div<{
   .filler-container {
     width: 100%;
     ${({ $bgImage }) =>
-      $bgImage
-        ? `
+    $bgImage
+      ? `
           background-image: url(${$bgImage});
           background-repeat: repeat;        /* allow tiling if small */
           background-position: center top;  /* anchor it nicely */
           background-size: auto;
         `
-        : `
+      : `
           background-color: #dedede;
         `}
 
@@ -36,7 +36,9 @@ export default styled.div<{
     display: flex;
     flex-direction: column;
 
-    div:last-of-type {
+    justify-content: flex-start;
+    
+    .branding-container {
       margin-top: auto;
     }
   }
@@ -66,12 +68,12 @@ export default styled.div<{
     overflow: hidden;
 
     ${({ $titleImageUrl }) =>
-      $titleImageUrl
-        ? `
+    $titleImageUrl
+      ? `
         height: 250px;
         background-color: #ff5733; /* or use gradient/image from FormBanner */
       `
-        : `
+      : `
         height: auto;
         background-color: transparent;
         border-radius: 0;

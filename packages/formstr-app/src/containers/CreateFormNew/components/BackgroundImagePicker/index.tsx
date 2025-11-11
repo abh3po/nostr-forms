@@ -39,13 +39,13 @@ const SelectableCard = styled(Card)<{ $selected?: boolean }>`
   }
 `;
 
-interface BackgroundImagePickerProps {
+interface ImagePickerProps {
   options: string[];
   selectedUrl?: string;
   onSelect: (url: string) => void;
 }
 
-export const BackgroundImagePicker: React.FC<BackgroundImagePickerProps> = ({
+export const ImagePicker: React.FC<ImagePickerProps> = ({
   options,
   selectedUrl,
   onSelect,

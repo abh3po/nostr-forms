@@ -25,7 +25,10 @@ import { Field } from "../../../../nostr/types";
 import { message } from "antd";
 import { ProcessedFormData } from "../../components/AIFormGeneratorModal/aiProcessor";
 import { AnswerSettings } from "@formstr/sdk/dist/interfaces";
-import { sampleBackgrounds } from "../../components/FormSettings/constants";
+import {
+  sampleBackgrounds,
+  sampleThankYouScreens,
+} from "../../components/FormSettings/constants";
 
 const LOCAL_STORAGE_CUSTOM_RELAYS_KEY = "formstr:customRelays";
 
@@ -88,6 +91,8 @@ const InitialFormSettings: IFormSettings = {
   viewKeyInUrl: true,
   sections: [],
   cardTransparency: 1,
+  formstrBranding: true,
+  thankYouScreenImageUrl: sampleThankYouScreens[0],
 };
 
 export default function FormBuilderProvider({

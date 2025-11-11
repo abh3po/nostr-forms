@@ -150,6 +150,8 @@ export const FormFiller: React.FC<FormFillerProps> = ({
           hideDescription={hideDescription}
         />
         <ThankYouScreen
+          viewKey={viewKeyParams}
+          formEvent={formEvent}
           isOpen={formSubmitted}
           onClose={() => navigate(ROUTES.DASHBOARD)}
         />

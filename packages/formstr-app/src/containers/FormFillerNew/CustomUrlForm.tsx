@@ -121,6 +121,8 @@ export const CustomUrlForm: React.FC<CustomUrlFormProps> = ({ formSpec }) => {
           hideDescription={hideDescription}
         />
         <ThankYouScreen
+          viewKey={metadata?.viewKey || null}
+          formEvent={formEvent}
           isOpen={formSubmitted}
           onClose={() => navigate(ROUTES.DASHBOARD)}
         />

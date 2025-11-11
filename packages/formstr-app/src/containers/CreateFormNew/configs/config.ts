@@ -3,7 +3,6 @@ import {
   RangeRule,
   MinRule,
   MaxRule,
-  AnswerTypes,
 } from "@formstr/sdk/dist/interfaces";
 import { isGreaterThanOrEqual, isLessThanOrEqual, getNumValue } from "../utils";
 import RangeComponent from "../components/Validation/Range";
@@ -11,6 +10,7 @@ import MaxComponent from "../components/Validation/Max";
 import MinComponent from "../components/Validation/Min";
 import RegexComponent from "../components/Validation/Regex";
 import MatchComponent from "../components/Validation/Match";
+import { AnswerTypes } from "../../../nostr/types";
 
 export const RULE_CONFIG = {
   [ValidationRuleTypes.range]: {
@@ -90,4 +90,5 @@ export const ANSWER_TYPE_RULES_MENU: ANSWER_TYPE_RULES_MENU_TYPE = {
   [AnswerTypes.label]: [],
   [AnswerTypes.date]: [],
   [AnswerTypes.time]: [],
+  [AnswerTypes.signature]: [],
 };

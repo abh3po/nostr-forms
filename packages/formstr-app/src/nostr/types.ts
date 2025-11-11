@@ -42,3 +42,16 @@ export const KINDS = {
   myFormsList: 14083,
   formTemplate: 30168,
 };
+
+export enum AnswerTypes {
+  shortText = "shortText",
+  paragraph = "paragraph",
+  radioButton = "radioButton",
+  checkboxes = "checkboxes",
+  dropdown = "dropdown",
+  number = "number",
+  date = "date",
+  label = "label",
+  time = "time",
+  signature = "signature",
+}

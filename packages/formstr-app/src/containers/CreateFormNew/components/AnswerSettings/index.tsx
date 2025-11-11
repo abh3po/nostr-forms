@@ -6,7 +6,8 @@ import { INPUTS_MENU } from "../../configs/menuConfig";
 import StyleWrapper from "./style";
 import { RightAnswer } from "./RightAnswer";
 import { IAnswerSettings } from "./types";
-import { Field } from "../../../../nostr/types";
+import { AnswerTypes, Field } from "../../../../nostr/types";
+import { SignatureSettings } from "./settings/SignatureSettings";
 
 const { Text } = Typography;
 
@@ -44,6 +45,22 @@ function AnswerSettings() {
     };
     field[5] = JSON.stringify(newAnswerSettings);
     editQuestion(field, field[1]);
+  };
+
+  const renderExtraSettings = () => {
+    switch (answerSettings.renderElement) {
+      case AnswerTypes.signature:
+        return (
+          <SignatureSettings
+            answerSettings={answerSettings}
+            handleAnswerSettings={handleAnswerSettings}
+          />
+        );
+      // other case blocks like:
+      // case AnswerTypes.shortText: return <ShortTextSettings ... />
+      default:
+        return null;
+    }
   };
 
   const updateAnswerType: MenuProps["onClick"] = ({ key }) => {
@@ -86,13 +103,14 @@ function AnswerSettings() {
             </Text>
           </Dropdown>
         </div>
-        {answerType && (<div className="property-setting">
-          <Text className="property-name">Required</Text>
-          <Switch
-            checked={answerSettings.required}
-            onChange={updateIsRequired}
-          />
-        </div>
+        {answerType && (
+          <div className="property-setting">
+            <Text className="property-name">Required</Text>
+            <Switch
+              checked={answerSettings.required}
+              onChange={updateIsRequired}
+            />
+          </div>
         )}
       </div>
       <Divider className="divider" />
@@ -104,15 +122,18 @@ function AnswerSettings() {
         handleAnswerSettings={handleAnswerSettings}
       />
       <Divider className="divider" />
-      {answerType && (<RightAnswer
-        key={question[1] + "rightAnswer"}
-        answerType={answerSettings.renderElement}
-        answerSettings={answerSettings}
-        choices={question[4]}
-        onChange={handleRightAnswer}
-      />
+      {answerType && (
+        <RightAnswer
+          key={question[1] + "rightAnswer"}
+          answerType={answerSettings.renderElement}
+          answerSettings={answerSettings}
+          choices={question[4]}
+          onChange={handleRightAnswer}
+        />
       )}
       <Divider className="divider" />
+      <div className="input-property">{renderExtraSettings()}</div>
+      <Divider />
       <Button
         danger
         type="text"

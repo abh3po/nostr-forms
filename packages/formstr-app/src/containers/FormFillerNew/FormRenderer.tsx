@@ -24,6 +24,7 @@ interface FormRendererProps {
   hideDescription?: boolean;
   disabled?: boolean;
   initialValues?: Record<string, any>;
+  isPreview?: boolean;
 }
 
 // Content item can be either a section or individual questions
@@ -45,6 +46,7 @@ export const FormRenderer: React.FC<FormRendererProps> = ({
   hideDescription,
   disabled = false,
   initialValues,
+  isPreview = false,
 }) => {
   const name = formTemplate.find((tag) => tag[0] === "name")?.[1] || "";
   const settings = JSON.parse(
@@ -128,6 +130,10 @@ export const FormRenderer: React.FC<FormRendererProps> = ({
 
   // Validate current step
   const validateCurrentStep = async (): Promise<boolean> => {
+    if (isPreview) {
+      return true;
+    }
+
     try {
       const fieldNames = currentItem?.fields.map((field) => field[1]) || [];
       await form.validateFields(fieldNames);
@@ -266,7 +272,10 @@ export const FormRenderer: React.FC<FormRendererProps> = ({
   );
 
   return (
-    <FillerStyle $bgImage={settings.backgroundImageUrl} $titleImageUrl={settings.titleImageUrl}>
+    <FillerStyle
+      $bgImage={settings.backgroundImageUrl}
+      $titleImageUrl={settings.titleImageUrl}
+    >
       <div className="filler-container">
         <div className="form-filler">
           {!hideTitleImage && (

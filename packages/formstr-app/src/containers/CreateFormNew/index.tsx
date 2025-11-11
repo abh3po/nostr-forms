@@ -4,12 +4,14 @@ import useFormBuilderContext from "./hooks/useFormBuilderContext";
 import { useEffect, useState } from "react";
 import { HEADER_MENU_KEYS } from "./components/Header/config";
 import { FormRenderer } from "../FormFillerNew/FormRenderer";
+import { Form } from "antd";
 
 function CreateForm() {
   const { state } = useLocation();
   const { initializeForm, saveDraft, selectedTab, getFormSpec } =
     useFormBuilderContext();
   const [initialized, setInitialized] = useState(false);
+  const [form] = Form.useForm();
 
   useEffect(() => {
     if (state && !initialized) {
@@ -30,9 +32,10 @@ function CreateForm() {
     return (
       <FormRenderer
         formTemplate={getFormSpec()}
-        form={null}
+        form={form}
         footer={null}
         onInput={() => {}}
+        isPreview={true}
       />
     );
   }

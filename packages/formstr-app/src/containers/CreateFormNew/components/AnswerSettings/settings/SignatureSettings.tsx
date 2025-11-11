@@ -50,6 +50,13 @@ export const SignatureSettings: React.FC<SignatureSettingsProps> = ({
           placeholder="Default content to sign"
         />
       </div>
+      <div className="property-setting">
+        <Text className="property-name">Editable Created At</Text>
+        <Switch
+          checked={sig.editableCreatedAt}
+          onChange={(v) => updateSignature("editableCreatedAt", v)}
+        />
+      </div>
     </Space>
   );
 };

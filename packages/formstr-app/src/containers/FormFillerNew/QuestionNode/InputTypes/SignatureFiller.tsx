@@ -31,11 +31,6 @@ export const SignatureFiller: React.FC<SignatureFillerProps> = ({
   const [createdAt, setCreatedAt] = useState<Dayjs>(initialCreatedAt);
 
   const handleSign = async () => {
-    if (!window.nostr) {
-      alert("Nostr signer not available");
-      return;
-    }
-
     const event = {
       kind: sig.kind || 22157,
       created_at: sig.editableCreatedAt

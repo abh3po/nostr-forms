@@ -5,7 +5,7 @@ import { sendResponses } from "../../../nostr/common";
 import { RelayPublishModal } from "../../../components/RelayPublishModal/RelaysPublishModal";
 import { Event, generateSecretKey } from "nostr-tools";
 import { Response } from "../../../nostr/types";
-
+import { useApplicationContext } from "../../../hooks/useApplicationContext";
 interface SubmitButtonProps {
   selfSign: boolean | undefined;
   edit: boolean;
@@ -15,7 +15,7 @@ interface SubmitButtonProps {
   disabled?: boolean;
   disabledMessage?: string;
   relays: string[];
-}
+  }
 
 export const SubmitButton: React.FC<SubmitButtonProps> = ({
   selfSign,
@@ -65,10 +65,17 @@ export const SubmitButton: React.FC<SubmitButtonProps> = ({
       onSubmit();
     });
   };
-
+  const { requestLogin } = useApplicationContext();
   const submitForm = async (anonymous: boolean = true) => {
-    setIsSubmitting(true);
-    try {
+       setIsSubmitting(true);
+        if (!anonymous) {
+           if(!requestLogin()){
+                setIsSubmitting(false);
+                return false;
+          }
+        }
+      
+   try {
       await form.validateFields();
       let errors = form.getFieldsError().filter((e) => e.errors.length > 0);
       if (errors.length === 0) {

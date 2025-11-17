@@ -178,7 +178,11 @@ export const FormEventCard: React.FC<FormEventCardProps> = ({
 
   return (
     <Card
-      title={name[1] || "Hidden Form"}
+      title={
+        <SafeMarkdown forceColor="#0000">
+          {name[1] || "Hidden Form"}
+        </SafeMarkdown>
+      }
       className="form-card"
       extra={
         <div

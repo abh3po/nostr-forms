@@ -28,6 +28,7 @@ import { ResponseHeader } from "./components/ResponseHeader";
 import { AddressPointer } from "nostr-tools/nip19";
 import { SubCloser } from "nostr-tools/abstract-pool";
 import SafeMarkdown from "../../components/SafeMarkdown";
+import { ExportOutlined } from "@ant-design/icons";
 
 const { Text } = Typography;
 
@@ -287,6 +288,23 @@ export const Response = () => {
         dataIndex: "createdAt",
         width: isMobile() ? 100 : 130,
       },
+      {
+        key: "action",
+        title: "Action",
+        dataIndex: "action",
+        fixed: "right",
+        width: 40,
+        render: (_: string, record: any) => (
+          <div
+            onClick={(e) => {
+              e.stopPropagation();
+              handleRowClick(record);
+            }}
+          >
+            <ExportOutlined />
+          </div>
+        ),
+      },
     ];
     let uniqueQuestionIdsInResponses: Set<string> = new Set();
     responses?.forEach((response: Event) => {
@@ -429,24 +447,6 @@ export const Response = () => {
               tip: "🔎 Looking for responses...",
             }}
             scroll={{ x: isMobile() ? 900 : 1500, y: "calc(65% - 400px)" }}
-            onRow={(record) => {
-              return {
-                onClick: (event) => {
-                  event.stopPropagation();
-                  if (formSpec && formSpec.length > 0) {
-                    handleRowClick(record);
-                  } else {
-                    console.warn(
-                      "Form specification not ready, cannot open details modal."
-                    );
-                  }
-                },
-                style: {
-                  cursor:
-                    formSpec && formSpec.length > 0 ? "pointer" : "default",
-                },
-              };
-            }}
           />
         </div>
         <div ref={chatRef}>

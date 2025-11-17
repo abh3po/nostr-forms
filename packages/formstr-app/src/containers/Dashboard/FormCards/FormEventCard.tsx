@@ -178,7 +178,11 @@ export const FormEventCard: React.FC<FormEventCardProps> = ({
 
   return (
     <Card
-      title={<SafeMarkdown components={{ p: "span" }}>{name[1] || "Hidden Form"}</SafeMarkdown>}
+      title={
+        <SafeMarkdown forceColor="#0000">
+          {name[1] || "Hidden Form"}
+        </SafeMarkdown>
+      }
       className="form-card"
       extra={
         <div
@@ -231,7 +235,7 @@ export const FormEventCard: React.FC<FormEventCardProps> = ({
           marginBottom: 30,
         }}
       >
-        <SafeMarkdown>
+        <SafeMarkdown forceColor="#0000">
           {settings.description
             ? settings.description?.trim().substring(0, 200) + "..."
             : "Encrypted Content"}

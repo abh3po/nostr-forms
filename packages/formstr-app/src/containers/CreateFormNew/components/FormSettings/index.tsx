@@ -88,7 +88,7 @@ function FormSettings() {
             />
           </div>
           {formSettings.disallowAnonymous && (
-            <Text className="warning-text">
+            <Text type="secondary" style={{ fontSize: 12, display: "block" }}>
               *This will require participants to have a nostr profile with a{" "}
               <a
                 href="https://nostrcheck.me/register/browser-extension.php"
@@ -97,6 +97,27 @@ function FormSettings() {
               >
                 nip-07 extension
               </a>
+            </Text>
+          )}
+          <Divider className="divider" />
+          <Tooltip
+            title="If enabled, Formstr servers can access your form to generate previews."
+            trigger={isMobile() ? "click" : "hover"}
+          >
+            <div className="property-setting">
+              <Text className="property-text">Disable Link Previews</Text>
+              <Switch
+                checked={formSettings.disablePreview} // default on
+                onChange={(checked) =>
+                  updateFormSetting({ disablePreview: checked })
+                }
+              />
+            </div>
+          </Tooltip>
+          {!formSettings.disablePreview && (
+            <Text type="secondary" style={{ fontSize: 12, display: "block" }}>
+              *Link preview generation is enabled. Formstr servers will be able
+              to see the form template.
             </Text>
           )}
         </Panel>

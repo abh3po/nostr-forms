@@ -31,7 +31,7 @@ export const LocalFormCard: React.FC<LocalFormCardProps> = ({
     : `/response/${form.privateKey}`;
   let formUrl =
     form.publicKey && form.formId
-      ? naddrUrl(form.publicKey, form.formId, [form.relay], form.viewKey)
+      ? naddrUrl(form.publicKey, form.formId, [form.relay], form.viewKey, true)
       : `/fill/${form.publicKey}`;
   const menuItems: MenuProps["items"] = [
     {
@@ -55,7 +55,9 @@ export const LocalFormCard: React.FC<LocalFormCardProps> = ({
 
   return (
     <Card
-      title={<SafeMarkdown components={{ p: "span" }}>{form.name}</SafeMarkdown>}
+      title={
+        <SafeMarkdown components={{ p: "span" }}>{form.name}</SafeMarkdown>
+      }
       className="form-card"
       extra={
         <div>

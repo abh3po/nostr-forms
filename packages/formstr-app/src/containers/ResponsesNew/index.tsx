@@ -28,6 +28,7 @@ import { ResponseHeader } from "./components/ResponseHeader";
 import { AddressPointer } from "nostr-tools/nip19";
 import { SubCloser } from "nostr-tools/abstract-pool";
 import SafeMarkdown from "../../components/SafeMarkdown";
+import { decodeNKeys } from "../../utils/nkeys";
 
 const { Text } = Typography;
 
@@ -50,12 +51,20 @@ export const Response = () => {
     pubkey = decodedPubkey;
     relays = decodedRelays;
   }
-  const secretKey = formSecret || window.location.hash.replace(/^#/, "");
+  // Try decoding secretKey and viewKey from nkeys first
+  let secretKey = formSecret || window.location.hash.replace(/^#/, "");
+  let decodedNKeys;
+  if (secretKey.startsWith("nkeys")) {
+    decodedNKeys = decodeNKeys(secretKey);
+    secretKey = decodedNKeys?.editKey || "";
+  }
+
   if (!pubkey && secretKey) pubkey = getPublicKey(hexToBytes(secretKey));
 
   let [searchParams] = useSearchParams();
   const { pubkey: userPubkey, requestPubkey } = useProfileContext();
-  const viewKeyParams = searchParams.get("viewKey");
+  let viewKeyParams = searchParams.get("viewKey");
+  if (!viewKeyParams) viewKeyParams = decodedNKeys?.viewKey || "";
   const [responseCloser, setResponsesCloser] = useState<SubCloser | null>(null);
   const [selectedEventForModal, setSelectedEventForModal] =
     useState<Event | null>(null);
@@ -400,7 +409,9 @@ export const Response = () => {
         <div className="summary-container">
           <Card>
             <Text className="heading">
-              <SafeMarkdown components={{ p: "span" }}>{getFormName()}</SafeMarkdown>
+              <SafeMarkdown components={{ p: "span" }}>
+                {getFormName()}
+              </SafeMarkdown>
             </Text>
             <Divider />
             <div className="response-count-container">

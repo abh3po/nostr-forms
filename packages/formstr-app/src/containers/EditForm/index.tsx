@@ -12,6 +12,7 @@ import { useProfileContext } from "../../hooks/useProfileContext";
 import { LoadingOutlined } from "@ant-design/icons";
 import { AddressPointer } from "nostr-tools/nip19";
 import { FormRenderer } from "../FormFillerNew/FormRenderer";
+import { decodeNKeys } from "../../utils/nkeys";
 
 function EditForm() {
   const { naddr } = useParams();
@@ -23,14 +24,24 @@ function EditForm() {
     formId = identifier;
     relays = relaysArray;
   }
-  const formSecret = window.location.hash.replace(/^#/, "");
+  const [searchParams] = useSearchParams();
+  let formSecret = window.location.hash.replace(/^#/, "");
+  let viewKeyParams = searchParams.get("viewKey");
+
+  // Decode nkeys if applicable
+  if (formSecret.startsWith("nkeys")) {
+    const decoded = decodeNKeys(formSecret);
+    console.log("Decoded keys are", decoded);
+    formSecret = decoded?.secretKey || formSecret; // fallback to original if decoding fails
+    if (!viewKeyParams) viewKeyParams = decoded?.viewKey || null;
+  }
+
   const { initializeForm, saveDraft, selectedTab, getFormSpec, formSettings } =
     useFormBuilderContext();
   const [initialized, setInitialized] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [searchParams] = useSearchParams();
+
   const { pubkey: userPub } = useProfileContext();
-  const viewKeyParams = searchParams.get("viewKey");
 
   const fetchFormDataWithFormSecret = async (secret: string, dTag: string) => {
     let formPubkey = getPublicKey(hexToBytes(secret));

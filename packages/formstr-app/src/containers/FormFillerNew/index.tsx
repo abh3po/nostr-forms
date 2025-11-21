@@ -13,6 +13,37 @@ import { useApplicationContext } from "../../hooks/useApplicationContext";
 import { ThankYouScreen } from "./ThankYouScreen";
 import { ROUTES } from "../../constants/routes";
 
+import { decodeNKeys } from "../../utils/nkeys";
+
+function getViewKeyFromUrl(explicitProp?: string | null): string | null {
+  let viewKey: string | undefined;
+
+  //
+  // 1️⃣ Highest priority – #nkeys... in hash
+  //
+  const rawHash = window.location.hash.replace(/^#/, "");
+  if (rawHash.startsWith("nkeys")) {
+    try {
+      const decoded = decodeNKeys(rawHash);
+      if (decoded.viewKey) return decoded.viewKey;
+    } catch (e) {
+      console.warn("Invalid nkeys payload in hash:", e);
+    }
+  }
+
+  //
+  // 2️⃣ Next – standard `?viewKey=xyz`
+  //
+  const search = new URLSearchParams(window.location.search);
+  const paramViewKey = search.get("viewKey");
+  if (paramViewKey) return paramViewKey;
+
+  //
+  // 3️⃣ Finally – explicit prop passed into component
+  //
+  return explicitProp ?? null;
+}
+
 const { Text } = Typography;
 
 interface FormFillerProps {
@@ -46,7 +77,7 @@ export const FormFiller: React.FC<FormFillerProps> = ({
   );
   const [searchParams] = useSearchParams();
   const hideTitleImage = searchParams.get("hideTitleImage") === "true";
-  const viewKeyParams = searchParams.get("viewKey") || _viewKey || "";
+  const viewKeyParams = getViewKeyFromUrl(_viewKey);
   const hideDescription = searchParams.get("hideDescription") === "true";
   const navigate = useNavigate();
 

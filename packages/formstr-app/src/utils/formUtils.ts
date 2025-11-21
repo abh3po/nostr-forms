@@ -16,6 +16,7 @@ import { naddrUrl } from "./utility";
 import { AddressPointer } from "nostr-tools/nip19";
 import { fetchFormTemplate } from "../nostr/fetchFormTemplate";
 import { signerManager } from "../signer";
+import { encodeNKeys } from "./nkeys";
 
 export const createFormSpecFromTemplate = (
   template: FormTemplate
@@ -139,9 +140,11 @@ export const constructFormUrl = (
   pubkey: string,
   formId: string,
   relays: string[],
-  viewKey?: string
+  viewKey?: string,
+  disablePreview: boolean = false
 ) => {
-  const naddr = naddrUrl(pubkey, formId, relays, viewKey);
+  console.log("Construct form url called with", disablePreview);
+  const naddr = naddrUrl(pubkey, formId, relays, viewKey, disablePreview);
   const baseUrl = `${window.location.origin}${naddr}`;
   return baseUrl;
 };
@@ -149,37 +152,64 @@ export const constructFormUrl = (
 export const editPath = (
   formSecret: string,
   naddr: string,
-  viewKey?: string | null
+  viewKey?: string | null,
+  disablePreview = true
 ) => {
-  const params = new URLSearchParams();
-  if (viewKey) params.set("viewKey", viewKey);
+  const base = `/edit/${naddr}`;
 
-  const query = params.toString() ? `?${params.toString()}` : "";
-  return `/edit/${naddr}${query}#${formSecret}`;
+  if (!disablePreview) {
+    const params = new URLSearchParams();
+    if (viewKey) params.set("viewKey", viewKey);
+    const query = params.toString() ? `?${params}` : "";
+    return `${base}${query}#${formSecret}`;
+  }
+
+  // NEW: private links
+  const nkey = encodeNKeys({
+    ...(viewKey && { viewKey }),
+    secretKey: formSecret,
+  });
+
+  return `${base}#${nkey}`;
 };
+
 export const responsePath = (
   secretKey: string,
   naddr: string,
-  viewKey?: string | null
+  viewKey?: string | null,
+  disablePreview = false // true -> server-visible
 ) => {
-  const params = new URLSearchParams();
-  if (viewKey) params.set("viewKey", viewKey);
+  const base = `/s/${naddr}`;
 
-  const query = params.toString() ? `?${params.toString()}` : "";
-  return `/s/${naddr}${query}#${secretKey}`;
+  if (!disablePreview) {
+    const params = new URLSearchParams();
+    if (viewKey) params.set("viewKey", viewKey);
+    const query = params.toString() ? `?${params.toString()}` : "";
+    return `${base}${query}#${secretKey}`;
+  }
+
+  // Private: encode into nkeys
+  const nkey = encodeNKeys({
+    ...(viewKey ? { viewKey } : {}),
+    secretKey,
+  });
+
+  return `${base}#${nkey}`;
 };
 
 export const constructNewResponseUrl = (
   secretKey: string,
   formId: string,
   relays?: string[],
-  viewKey?: string
+  viewKey?: string,
+  disablePreview: boolean = false
 ) => {
   const baseUrl = `${window.location.origin}`;
   const responsePart = responsePath(
     secretKey,
     makeFormNAddr(getPublicKey(hexToBytes(secretKey)), formId, relays),
-    viewKey
+    viewKey,
+    disablePreview
   );
   return `${baseUrl}${responsePart}`;
 };
@@ -202,7 +232,9 @@ export const getFormData = async (naddr: string, poolRef: SimplePool) => {
   });
 };
 
-export const getformstrBranding = (formSpec: Tag[] | null | undefined): boolean => {
+export const getformstrBranding = (
+  formSpec: Tag[] | null | undefined
+): boolean => {
   try {
     const settingsTag = formSpec?.find((t) => t[0] === "settings");
     if (!settingsTag || !settingsTag[1]) return true;

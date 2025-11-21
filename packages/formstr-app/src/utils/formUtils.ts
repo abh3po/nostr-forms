@@ -143,7 +143,6 @@ export const constructFormUrl = (
   viewKey?: string,
   disablePreview: boolean = false
 ) => {
-  console.log("Construct form url called with", disablePreview);
   const naddr = naddrUrl(pubkey, formId, relays, viewKey, disablePreview);
   const baseUrl = `${window.location.origin}${naddr}`;
   return baseUrl;

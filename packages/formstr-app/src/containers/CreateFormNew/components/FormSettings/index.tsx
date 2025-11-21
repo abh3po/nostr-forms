@@ -107,7 +107,7 @@ function FormSettings() {
             <div className="property-setting">
               <Text className="property-text">Disable Link Previews</Text>
               <Switch
-                checked={formSettings.disablePreview} // default on
+                checked={formSettings.disablePreview}
                 onChange={(checked) =>
                   updateFormSetting({ disablePreview: checked })
                 }

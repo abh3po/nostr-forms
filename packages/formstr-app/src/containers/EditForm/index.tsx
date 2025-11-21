@@ -31,7 +31,6 @@ function EditForm() {
   // Decode nkeys if applicable
   if (formSecret.startsWith("nkeys")) {
     const decoded = decodeNKeys(formSecret);
-    console.log("Decoded keys are", decoded);
     formSecret = decoded?.secretKey || formSecret; // fallback to original if decoding fails
     if (!viewKeyParams) viewKeyParams = decoded?.viewKey || null;
   }

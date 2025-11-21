@@ -56,7 +56,7 @@ export const Response = () => {
   let decodedNKeys;
   if (secretKey.startsWith("nkeys")) {
     decodedNKeys = decodeNKeys(secretKey);
-    secretKey = decodedNKeys?.editKey || "";
+    secretKey = decodedNKeys?.secretKey || "";
   }
 
   if (!pubkey && secretKey) pubkey = getPublicKey(hexToBytes(secretKey));

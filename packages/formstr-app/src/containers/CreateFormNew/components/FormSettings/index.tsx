@@ -117,7 +117,8 @@ function FormSettings() {
           {!formSettings.disablePreview && (
             <Text type="secondary" style={{ fontSize: 12, display: "block" }}>
               *Link preview generation is enabled. Formstr servers will be able
-              to see the form template.
+              to see the form template. This is required to generate the preview
+              of the form.
             </Text>
           )}
         </Panel>

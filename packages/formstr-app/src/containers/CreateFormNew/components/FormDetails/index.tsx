@@ -1,4 +1,3 @@
-// FormDetails.tsx
 import { Modal, Card, Divider, Typography, Button, Alert } from "antd";
 import { useEffect, useState } from "react";
 import FormDetailsStyle from "./FormDetails.style";
@@ -25,6 +24,7 @@ export const FormDetails = ({
   name,
   relays,
   onClose,
+  disablePreview,
 }: {
   isOpen: boolean;
   pubKey: string;
@@ -34,6 +34,7 @@ export const FormDetails = ({
   name: string;
   relays: string[];
   onClose: () => void;
+  disablePreview?: boolean;
 }) => {
   const [savedLocally, setSavedLocally] = useState(false);
   const [savedOnNostr, setSavedOnNostr] = useState<null | "saving" | "saved">(
@@ -66,12 +67,19 @@ export const FormDetails = ({
       );
   }, [userPub]);
 
-  const formUrl = constructFormUrl(pubKey, formId, relays, viewKey);
+  const formUrl = constructFormUrl(
+    pubKey,
+    formId,
+    relays,
+    viewKey,
+    disablePreview
+  );
   const responsesUrl = constructNewResponseUrl(
     secretKey,
     formId,
     relays,
-    viewKey
+    viewKey,
+    disablePreview
   );
 
   const [activeTab, setActiveTab] = useState<"share" | "embed">("share");
@@ -93,7 +101,7 @@ export const FormDetails = ({
           ]}
           onTabChange={(key) => setActiveTab(key as "share" | "embed")}
           style={{
-            width: '100%',
+            width: "100%",
             minWidth: 0,
           }}
         >
@@ -119,7 +127,8 @@ export const FormDetails = ({
                 editPath(
                   secretKey,
                   makeFormNAddr(pubKey, formId, relays),
-                  viewKey
+                  viewKey,
+                  disablePreview
                 )
               )
             }

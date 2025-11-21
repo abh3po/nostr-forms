@@ -26,8 +26,8 @@ import { useEffect, useState } from "react";
 import { constructDraftUrl } from "./Drafts";
 import { useApplicationContext } from "../../../hooks/useApplicationContext";
 import { FormDetails } from "../../CreateFormNew/components/FormDetails";
-import { getDefaultRelays } from "@formstr/sdk";
 import SafeMarkdown from "../../../components/SafeMarkdown";
+import { IFormSettings } from "../../CreateFormNew/components/FormSettings/types";
 
 interface FormEventCardProps {
   event: Event;
@@ -71,7 +71,7 @@ export const FormEventCard: React.FC<FormEventCardProps> = ({
     return <Card title="Invalid Form Event">{JSON.stringify(event)}</Card>;
   }
   const formKey = `${pubKey}:${formId}`;
-  let settings: { description?: string } = {};
+  let settings: IFormSettings = {};
   if (publicForm || viewKey) {
     settings = JSON.parse(
       tags.filter((t) => t[0] === "settings")?.[0]?.[1] || "{}"
@@ -143,8 +143,13 @@ export const FormEventCard: React.FC<FormEventCardProps> = ({
             navigate(
               editPath(
                 secretKey,
-                makeFormNAddr(pubKey, formId, relay ? [relay] : undefined),
-                viewKey
+                makeFormNAddr(
+                  pubKey,
+                  formId,
+                  relays.length !== 0 ? relays : undefined
+                ),
+                viewKey,
+                settings.disablePreview
               )
             ),
         },
@@ -218,6 +223,7 @@ export const FormEventCard: React.FC<FormEventCardProps> = ({
               viewKey={viewKey || ""}
               name={name[1] || ""}
               relays={relays}
+              disablePreview={settings.disablePreview}
             />
           )}
         </div>

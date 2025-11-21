@@ -2,6 +2,7 @@ import { constructFormUrl as constructFormUrlSDK } from "@formstr/sdk";
 import { DEVICE_TYPE, DEVICE_WIDTH } from "../constants/index";
 import { getItem, LOCAL_STORAGE_KEYS, setItem } from "./localStorage";
 import { nip19 } from "nostr-tools";
+import { encodeNKeys } from "./nkeys";
 
 export function makeTag(length: number) {
   let result = "";
@@ -48,30 +49,26 @@ export const naddrUrl = (
   publicKey: string,
   formId: string,
   relaysEncode?: string[],
-  viewKey?: string | null
+  viewKey?: string | null,
+  disablePreview = false
 ) => {
-  let formUrl = `/f/${makeFormNAddr(
+  const base = `/f/${makeFormNAddr(
     publicKey,
     formId,
     relaysEncode || ["wss://relay.damus.io"]
   )}`;
-  if (viewKey) formUrl = formUrl + `?viewKey=${viewKey}`;
-  return formUrl;
-};
 
-export function constructFormUrl(
-  publicKey: string,
-  formIdentifier: string | null = null
-) {
-  let hostname = window.location.host;
-  if (hostname.includes("abhay-raizada")) {
-    hostname += "/nostr-forms";
+  // OLD behavior
+  if (!disablePreview) {
+    return viewKey ? `${base}?viewKey=${viewKey}` : base;
   }
-  if (!formIdentifier) `http://${hostname}/fill/${publicKey}/`;
-  return !formIdentifier
-    ? `http://${hostname}/fill/${publicKey}`
-    : `http://${hostname}/f/${publicKey}/${formIdentifier}`;
-}
+
+  // NEW behavior: encode hash
+  if (!viewKey) return base;
+
+  const nkey = encodeNKeys({ viewKey });
+  return `${base}#${nkey}`;
+};
 
 export function constructDraftUrl(
   draft: { formSpec: unknown; tempId: string } | null

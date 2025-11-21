@@ -93,6 +93,7 @@ const InitialFormSettings: IFormSettings = {
   cardTransparency: 1,
   formstrBranding: true,
   thankYouScreenImageUrl: sampleThankYouScreens[0],
+  disablePreview: false,
 };
 
 export default function FormBuilderProvider({
@@ -414,6 +415,7 @@ export default function FormBuilderProvider({
             viewKey: formSettings.viewKeyInUrl ? bytesToHex(formViewKey) : null,
             name: formName,
             relays: relayUrls,
+            disablePreview: formSettings.disablePreview,
           },
         });
       },

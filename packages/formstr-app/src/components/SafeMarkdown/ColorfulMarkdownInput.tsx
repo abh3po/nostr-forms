@@ -47,7 +47,7 @@ export const ColorfulMarkdownTextarea: React.FC<Props> = ({
   const [globalColor, setGlobalColor] = React.useState<string | null>(
     formSettings.globalColor ?? null
   );
-  
+
   const isParsingRef = React.useRef(false);
   const prevGlobalColorRef = React.useRef(globalColor);
 
@@ -59,13 +59,13 @@ export const ColorfulMarkdownTextarea: React.FC<Props> = ({
 
   React.useEffect(() => {
     isParsingRef.current = true;
-    
+
     if (!value) {
       setEditableText("");
       isParsingRef.current = false;
       return;
     }
-    
+
     const match = value.match(SPAN_WRAPPER_REGEX);
     if (match) {
       const [, attrs = "", inner] = match;
@@ -74,7 +74,7 @@ export const ColorfulMarkdownTextarea: React.FC<Props> = ({
         /\bdata-global-color\b/i.test(attrs);
       const colorMatch = attrs.match(/style="[^"]*color:\s*([^;"]+)/i);
       const extractedColor = colorMatch ? colorMatch[1].trim() : null;
-      
+
       if (isGlobalColor) {
         setColor(null);
       } else if (extractedColor) {
@@ -84,7 +84,7 @@ export const ColorfulMarkdownTextarea: React.FC<Props> = ({
     } else {
       setEditableText(unescapeHtml(value));
     }
-    
+
     setTimeout(() => {
       isParsingRef.current = false;
     }, 0);
@@ -93,11 +93,11 @@ export const ColorfulMarkdownTextarea: React.FC<Props> = ({
   React.useEffect(() => {
     const globalColorChanged = prevGlobalColorRef.current !== globalColor;
     prevGlobalColorRef.current = globalColor;
-    
+
     if (
-      color === null && 
-      editableText && 
-      globalColorChanged && 
+      color === null &&
+      editableText &&
+      globalColorChanged &&
       !isParsingRef.current
     ) {
       const colorToUse = globalColor ?? "#000000";
@@ -111,9 +111,7 @@ export const ColorfulMarkdownTextarea: React.FC<Props> = ({
   const handleColorChange = (c: ColorResult) => {
     setColor(c.hex);
     setPickerOpen(false);
-    onChange(
-      `<span style="color:${c.hex}">${escapeHtml(editableText)}</span>`
-    );
+    onChange(`<span style="color:${c.hex}">${escapeHtml(editableText)}</span>`);
   };
 
   const clearColor = () => {
@@ -127,22 +125,18 @@ export const ColorfulMarkdownTextarea: React.FC<Props> = ({
     );
   };
 
-  const handleTextChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+  const handleTextChange = (e: any) => {
     const newText = e.target.value;
     setEditableText(newText);
-    
-    if (color === null) {
-      const colorToUse = effectiveColor;
-      onChange(
-        `<span style="color:${colorToUse}" data-global-color="1">${escapeHtml(
-          newText
-        )}</span>`
-      );
-    } else {
-      onChange(
-        `<span style="color:${effectiveColor}">${escapeHtml(newText)}</span>`
-      );
-    }
+  };
+
+  const handleBlur = () => {
+    const colorToUse = effectiveColor;
+    onChange(
+      `<span style="color:${colorToUse}" ${
+        color === null ? 'data-global-color="1"' : ""
+      }>${escapeHtml(editableText)}</span>`
+    );
   };
 
   return (
@@ -157,6 +151,7 @@ export const ColorfulMarkdownTextarea: React.FC<Props> = ({
         onChange={handleTextChange}
         placeholder={placeholder}
         disabled={disabled}
+        onBlur={handleBlur}
         autoSize
       />
 
@@ -175,7 +170,10 @@ export const ColorfulMarkdownTextarea: React.FC<Props> = ({
           onOpenChange={(open) => setPickerOpen(open)}
           content={
             <div style={{ padding: 4 }}>
-              <SketchPicker color={effectiveColor} onChange={handleColorChange} />
+              <SketchPicker
+                color={effectiveColor}
+                onChange={handleColorChange}
+              />
               <div style={{ marginTop: 8, textAlign: "right" }}>
                 <Button size="small" onClick={clearColor}>
                   Clear
@@ -195,9 +193,10 @@ export const ColorfulMarkdownTextarea: React.FC<Props> = ({
               height: 18,
               borderRadius: "50%",
               background: effectiveColor,
-              boxShadow: color === null 
-                ? "0 0 0 1px #fff, 0 1px 3px rgba(0,0,0,.2), inset 0 0 0 2px rgba(255,255,255,0.3)" 
-                : "0 0 0 1px #fff, 0 1px 3px rgba(0,0,0,.2)",
+              boxShadow:
+                color === null
+                  ? "0 0 0 1px #fff, 0 1px 3px rgba(0,0,0,.2), inset 0 0 0 2px rgba(255,255,255,0.3)"
+                  : "0 0 0 1px #fff, 0 1px 3px rgba(0,0,0,.2)",
               cursor: "pointer",
             }}
           />

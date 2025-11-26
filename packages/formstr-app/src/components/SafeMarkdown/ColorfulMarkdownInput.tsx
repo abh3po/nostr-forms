@@ -125,7 +125,7 @@ export const ColorfulMarkdownTextarea: React.FC<Props> = ({
     );
   };
 
-  const handleTextChange = (e: any) => {
+  const handleTextChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const newText = e.target.value;
     setEditableText(newText);
   };

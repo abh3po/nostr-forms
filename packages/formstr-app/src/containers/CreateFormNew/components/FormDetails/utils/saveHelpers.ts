@@ -8,6 +8,7 @@ import { ILocalForm } from "../../../providers/FormBuilder/typeDefs";
 import { getDefaultRelays } from "../../../../../nostr/common";
 import { KINDS, Tag } from "../../../../../nostr/types";
 import { signerManager } from "../../../../../signer";
+import { pool } from "../../../../../pool";
 
 export const saveToDevice = (
   formAuthorPub: string,
@@ -57,7 +58,6 @@ export const saveToMyForms = async (
   if (!userPub) return;
 
   callback("saving");
-  const pool = new SimplePool();
   const newRelays = relays && relays.length !== 0 ? relays : getDefaultRelays();
 
   try {

@@ -103,34 +103,14 @@ export const customPublish = (
   event: Event,
   onAcceptedRelays?: (relay: string) => void
 ): Promise<string>[] => {
-  return relays.map(normalizeURL).map(async (url, i, arr) => {
-    if (arr.indexOf(url) !== i) {
-      return Promise.reject("duplicate url");
-    }
+  // remove duplicate URLs
+  console.log("Hopefully calling overriden relays");
+  const urls = relays
+    .map(normalizeURL)
+    .filter((url, i, arr) => arr.indexOf(url) === i);
 
-    let relay: AbstractRelay | null = null;
-    try {
-      relay = await ensureRelay(url, { connectionTimeout: 5000 });
-      return await Promise.race<string>([
-        relay.publish(event).then((reason) => {
-          // console.log("accepted relays", url);
-          onAcceptedRelays?.(url);
-          return reason;
-        }),
-        new Promise<string>((_, reject) =>
-          setTimeout(() => reject("timeout"), 5000)
-        ),
-      ]);
-    } finally {
-      if (relay) {
-        try {
-          await relay.close();
-        } catch {
-          // Ignore closing errors
-        }
-      }
-    }
-  });
+  // delegate to AuthPool.publish
+  return pool.publish(urls, event, { timeout: 5000, onAcceptedRelays } as any);
 };
 
 function createQuestionMap(form: Tag[]) {

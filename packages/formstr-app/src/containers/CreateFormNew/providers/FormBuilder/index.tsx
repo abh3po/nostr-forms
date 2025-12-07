@@ -407,17 +407,23 @@ export default function FormBuilderProvider({
         acceptedRelays: string[];
       }) => {
         const { signingKey, viewKey: formViewKey, acceptedRelays } = artifacts;
-        navigate("/dashboard", {
-          state: {
-            pubKey: getPublicKey(signingKey),
-            formId: formSettings.formId,
-            secretKey: bytesToHex(signingKey),
-            viewKey: formSettings.viewKeyInUrl ? bytesToHex(formViewKey) : null,
-            name: formName,
-            relays: relayUrls,
-            disablePreview: formSettings.disablePreview,
-          },
-        });
+        if (acceptedRelays.length > 0)
+          navigate("/dashboard", {
+            state: {
+              pubKey: getPublicKey(signingKey),
+              formId: formSettings.formId,
+              secretKey: bytesToHex(signingKey),
+              viewKey: formSettings.viewKeyInUrl
+                ? bytesToHex(formViewKey)
+                : null,
+              name: formName,
+              relays: relayUrls,
+              disablePreview: formSettings.disablePreview,
+            },
+          });
+        else {
+          console.log("No relays accepted your event", acceptedRelays);
+        }
       },
       (error) => {
         console.error("Error creating form:", error);

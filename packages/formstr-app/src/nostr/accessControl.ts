@@ -13,6 +13,7 @@ import { nip44Encrypt } from "./utils";
 import { bytesToHex, hexToBytes } from "@noble/hashes/utils";
 import { getDefaultRelays } from "./common";
 import { sha256 } from "@noble/hashes/sha256";
+import { pool } from "../pool";
 
 const now = () => Math.round(Date.now() / 1000);
 
@@ -81,7 +82,6 @@ const createWrap = (
 };
 
 const sendToUserRelays = async (wrap: Event, pubkey: string) => {
-  let pool = new SimplePool();
   const defaultRelays = getDefaultRelays();
   // console.log("Sending event to relays", defaultRelays, wrap);
   let messages = await Promise.allSettled(pool.publish(defaultRelays, wrap));
@@ -172,7 +172,6 @@ export const acceptAccessRequests = async (
   newFormEvent.created_at = Math.floor(Date.now() / 1000);
   let finalEvent = finalizeEvent(newFormEvent, hexToBytes(signingKey));
   console.log("FINAL EDITED EVENT IS", finalEvent);
-  const pool = new SimplePool();
   let a = await Promise.allSettled(pool.publish(defaultRelays, finalEvent));
   console.log("Published!!!", a);
   pool.close(defaultRelays);

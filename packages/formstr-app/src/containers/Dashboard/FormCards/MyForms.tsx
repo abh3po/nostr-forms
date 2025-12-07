@@ -7,6 +7,7 @@ import { FormEventCard } from "./FormEventCard";
 import { Spin } from "antd";
 import { LoadingOutlined } from "@ant-design/icons";
 import { signerManager } from "../../../signer";
+import { pool } from "../../../pool";
 
 export const MyForms = () => {
   type FormEventMetadata = {
@@ -31,8 +32,6 @@ export const MyForms = () => {
         "#d": dTags,
         authors: pubkeys,
       };
-
-      const pool = existingPool || new SimplePool();
       let myForms = await pool.querySync(getDefaultRelays(), myFormsFilter);
 
       // Create a new map to store the form events
@@ -72,7 +71,6 @@ export const MyForms = () => {
     if (!userPub) return;
 
     setRefreshing(true);
-    const pool = existingPool || new SimplePool();
 
     const signer = await signerManager.getSigner();
     try {
@@ -108,7 +106,6 @@ export const MyForms = () => {
     if (!userPub) return;
     const signer = await signerManager.getSigner();
     setRefreshing(true);
-    const pool = new SimplePool();
 
     try {
       const existingListFilter = {

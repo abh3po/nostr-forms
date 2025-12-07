@@ -3,6 +3,7 @@ import { getDefaultRelays } from "@formstr/sdk";
 import { Avatar } from "antd";
 import { SimplePool } from "nostr-tools";
 import { FC, useEffect, useState } from "react";
+import { pool } from "../../pool";
 
 const defaultRelays = getDefaultRelays();
 
@@ -21,7 +22,6 @@ export const NostrAvatar: FC<NostrAvatarProps> = ({ pubkey }) => {
       kinds: [0],
       authors: [pubkey!],
     };
-    let pool = new SimplePool();
     const profile = await pool.get(defaultRelays, filter);
     if (profile) setProfile(JSON.parse(profile.content) as Profile);
     pool.close(defaultRelays);

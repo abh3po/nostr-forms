@@ -160,7 +160,7 @@ export const Response = () => {
       let formRelays = getResponseRelays(formEvent);
       const newCloser = await fetchFormResponses(
         formEvent.pubkey,
-        formId,
+        formId!,
         poolRef.current,
         handleResponseEvent,
         allowedPubkeys,

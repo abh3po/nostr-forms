@@ -7,8 +7,8 @@ export const getOnAuthed = async () => {
   const signer = await signerManager.getSigner();
   if (signer) {
     return async (ev: EventTemplate) => {
-      await signer.signEvent(ev);
-      return ev as VerifiedEvent;
+      const signed = await signer.signEvent(ev);
+      return signed as VerifiedEvent;
     };
   }
   return undefined;

@@ -252,7 +252,7 @@ export class BunkerSigner implements Signer {
     if (bp.relays.length === 0) {
       throw new Error("No relays specified for this bunker");
     }
-
+    console.log("INSIDE CREATE BUNKER");
     const signer = new BunkerSigner(clientSecretKey, params);
 
     signer.conversationKey = getConversationKey(clientSecretKey, bp.pubkey);
@@ -272,11 +272,12 @@ export class BunkerSigner implements Signer {
     params: BunkerSignerParams = {},
     maxWait: number = 300_000
   ): Promise<BunkerSigner> {
+    console.log("NO PROBLEMS TILL HERE 1");
     const signer = new BunkerSigner(clientSecretKey, params);
     const parsedURI = parseNostrConnectURI(connectionURI);
     const clientPubkey = getPublicKey(clientSecretKey);
-
-    return new Promise(async (resolve, reject) => {
+    console.log("NO PROBLEMS TILL HERE");
+    return new Promise((resolve, reject) => {
       const timer = setTimeout(() => {
         sub.close();
         reject(
@@ -326,14 +327,13 @@ export class BunkerSigner implements Signer {
               )
             );
           },
-          onauth: await getOnAuthed(),
           maxWait,
         }
       );
     });
   }
 
-  private async setupSubscription(params: BunkerSignerParams) {
+  private setupSubscription(params: BunkerSignerParams) {
     const listeners = this.listeners;
     const waitingForAuth = this.waitingForAuth;
     const convKey = this.conversationKey;
@@ -373,7 +373,6 @@ export class BunkerSigner implements Signer {
         onclose: () => {
           this.subCloser = undefined;
         },
-        onauth: await getOnAuthed(),
       }
     );
     this.isOpen = true;
@@ -416,11 +415,7 @@ export class BunkerSigner implements Signer {
         this.waitingForAuth[id] = true;
 
         // publish the event
-        await Promise.any(
-          this.pool.publish(this.bp.relays, verifiedEvent, {
-            onauth: await getOnAuthed(),
-          })
-        );
+        await Promise.any(this.pool.publish(this.bp.relays, verifiedEvent));
       } catch (err) {
         reject(err);
       }

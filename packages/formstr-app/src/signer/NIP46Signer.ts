@@ -16,14 +16,16 @@ export async function createNip46Signer(
   const parsedUri = new URL(uri);
   const clientSecretKey: Uint8Array = getAppSecretKeyFromLocalStorage();
   if (parsedUri.protocol === "bunker:") {
+    console.log("BUNKER INITIATED");
     const bp: BunkerPointer | null = await parseBunkerInput(uri);
     if (!bp) throw new Error("Invalid NIP-46 URI");
+    console.log("BUNKER INITIATED 2");
     const bunker = BunkerSigner.fromBunker(clientSecretKey, bp, params);
     await bunker.connect();
     console.log("BUNKER CONNECTED");
     return wrapBunkerSigner(bunker);
   } else if (parsedUri.protocol === "nostrconnect:") {
-    return await BunkerSigner.fromURI(clientSecretKey, uri, params);
+    return BunkerSigner.fromURI(clientSecretKey, uri, params);
   } else {
     console.log("URL PROTOCOL IS", parsedUri.protocol);
     throw new Error("INVALID URI");

@@ -276,7 +276,7 @@ export class BunkerSigner implements Signer {
     const parsedURI = parseNostrConnectURI(connectionURI);
     const clientPubkey = getPublicKey(clientSecretKey);
 
-    return new Promise((resolve, reject) => {
+    return new Promise(async (resolve, reject) => {
       const timer = setTimeout(() => {
         sub.close();
         reject(
@@ -326,13 +326,14 @@ export class BunkerSigner implements Signer {
               )
             );
           },
+          onauth: await getOnAuthed(),
           maxWait,
         }
       );
     });
   }
 
-  private setupSubscription(params: BunkerSignerParams) {
+  private async setupSubscription(params: BunkerSignerParams) {
     const listeners = this.listeners;
     const waitingForAuth = this.waitingForAuth;
     const convKey = this.conversationKey;
@@ -372,6 +373,7 @@ export class BunkerSigner implements Signer {
         onclose: () => {
           this.subCloser = undefined;
         },
+        onauth: await getOnAuthed(),
       }
     );
     this.isOpen = true;

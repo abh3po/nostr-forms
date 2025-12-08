@@ -48,7 +48,6 @@ export const fetchKeys = async (
   };
 
   const accessKeyEvents = await querySyncAuthed(defaultRelays, giftWrapsFilter);
-  pool.close(defaultRelays);
   let keys: Tag[] | undefined;
   await Promise.allSettled(
     accessKeyEvents.map(async (keyEvent: Event) => {

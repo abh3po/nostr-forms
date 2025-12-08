@@ -192,7 +192,7 @@ export const sendNotification = async (
       sig: "",
     };
     const kind4Event = finalizeEvent(baseKind4Event, newSk);
-    pool.publish(defaultRelays, kind4Event);
+    pool.publish(defaultRelays, kind4Event, { onauth: await getOnAuthed() });
   });
 };
 

@@ -8,7 +8,7 @@ import { ILocalForm } from "../../../providers/FormBuilder/typeDefs";
 import { getDefaultRelays } from "../../../../../nostr/common";
 import { KINDS, Tag } from "../../../../../nostr/types";
 import { signerManager } from "../../../../../signer";
-import { pool } from "../../../../../pool";
+import { pool, querySyncAuthed } from "../../../../../pool";
 
 export const saveToDevice = (
   formAuthorPub: string,
@@ -73,7 +73,7 @@ export const saveToMyForms = async (
         }, 10000);
 
         try {
-          const existingList = await pool.querySync(newRelays, {
+          const existingList = await querySyncAuthed(newRelays, {
             kinds: [KINDS.myFormsList],
             authors: [userPub],
           });

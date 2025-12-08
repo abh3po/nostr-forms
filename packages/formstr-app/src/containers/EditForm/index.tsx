@@ -13,7 +13,7 @@ import { LoadingOutlined } from "@ant-design/icons";
 import { AddressPointer } from "nostr-tools/nip19";
 import { FormRenderer } from "../FormFillerNew/FormRenderer";
 import { decodeNKeys } from "../../utils/nkeys";
-import { pool } from "../../pool";
+import { getAuthed, pool } from "../../pool";
 
 function EditForm() {
   const { naddr } = useParams();
@@ -50,7 +50,7 @@ function EditForm() {
       "#d": [dTag],
       kinds: [30168],
     };
-    let formEvent = await pool.get(
+    let formEvent = await getAuthed(
       Array.from(new Set([...(relays || []), ...getDefaultRelays()]) || []),
       filter
     );

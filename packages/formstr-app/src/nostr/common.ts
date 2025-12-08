@@ -17,7 +17,7 @@ import { Field, Response, Tag } from "./types";
 import { IFormSettings } from "../containers/CreateFormNew/components/FormSettings/types";
 import { signerManager } from "../signer";
 import { AbstractRelay } from "nostr-tools/abstract-relay";
-import { getOnAuthed, pool } from "../pool";
+import { getOnAuthed, pool, querySyncAuthed } from "../pool";
 
 declare global {
   interface Window {
@@ -523,7 +523,7 @@ export async function fetchKind0Events(
   const timeout = setTimeout(() => controller.abort(), timeoutMs);
 
   try {
-    const events = await pool.querySync(relayUrls, filter);
+    const events = await querySyncAuthed(relayUrls, filter);
     clearTimeout(timeout);
 
     // ✅ Deduplicate by pubkey: keep only the newest event per pubkey

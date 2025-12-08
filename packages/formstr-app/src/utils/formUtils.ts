@@ -17,7 +17,7 @@ import { AddressPointer } from "nostr-tools/nip19";
 import { fetchFormTemplate } from "../nostr/fetchFormTemplate";
 import { signerManager } from "../signer";
 import { encodeNKeys } from "./nkeys";
-import { pool } from "../pool";
+import { pool, querySyncAuthed } from "../pool";
 
 export const createFormSpecFromTemplate = (
   template: FormTemplate
@@ -47,7 +47,7 @@ export const fetchKeys = async (
     "#p": [aliasPubKey],
   };
 
-  const accessKeyEvents = await pool.querySync(defaultRelays, giftWrapsFilter);
+  const accessKeyEvents = await querySyncAuthed(defaultRelays, giftWrapsFilter);
   pool.close(defaultRelays);
   let keys: Tag[] | undefined;
   await Promise.allSettled(

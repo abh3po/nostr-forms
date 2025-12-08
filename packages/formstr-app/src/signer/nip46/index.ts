@@ -11,7 +11,7 @@ import { NIP05_REGEX } from "nostr-tools/nip05";
 import { SimplePool } from "nostr-tools";
 import { Handlerinformation, NostrConnect } from "nostr-tools/kinds";
 import { Signer } from "nostr-tools/signer";
-import { getOnAuthed, pool } from "../../pool";
+import { getOnAuthed, pool, querySyncAuthed } from "../../pool";
 
 var _fetch: any;
 
@@ -563,7 +563,7 @@ export async function fetchBunkerProviders(
   pool: AbstractSimplePool,
   relays: string[]
 ): Promise<BunkerProfile[]> {
-  const events = await pool.querySync(relays, {
+  const events = await querySyncAuthed(relays, {
     kinds: [Handlerinformation],
     "#k": [NostrConnect.toString()],
   });

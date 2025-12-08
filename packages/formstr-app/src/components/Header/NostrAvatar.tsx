@@ -2,7 +2,7 @@ import { UserOutlined } from "@ant-design/icons";
 import { getDefaultRelays } from "@formstr/sdk";
 import { Avatar } from "antd";
 import { FC, useEffect, useState } from "react";
-import { pool } from "../../pool";
+import { getAuthed } from "../../pool";
 
 const defaultRelays = getDefaultRelays();
 
@@ -21,7 +21,7 @@ export const NostrAvatar: FC<NostrAvatarProps> = ({ pubkey }) => {
       kinds: [0],
       authors: [pubkey!],
     };
-    const profile = await pool.get(defaultRelays, filter);
+    const profile = await getAuthed(defaultRelays, filter);
     if (profile) setProfile(JSON.parse(profile.content) as Profile);
   }
   useEffect(() => {

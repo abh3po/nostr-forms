@@ -22,6 +22,7 @@ import { FormInitData } from "../CreateFormNew/providers/FormBuilder/typeDefs";
 import { createFormSpecFromTemplate } from "../../utils/formUtils";
 import { Purchases } from "./FormCards/Purchases";
 import { SubCloser } from "nostr-tools/abstract-pool";
+import { getOnAuthed } from "../../pool";
 
 const MENU_OPTIONS = {
   local: "On this device",
@@ -82,7 +83,7 @@ export const Dashboard = () => {
     });
   };
 
-  const fetchNostrForms = () => {
+  const fetchNostrForms = async () => {
     if (!pubkey) return;
     const queryFilter = {
       kinds: [30168],
@@ -97,6 +98,7 @@ export const Dashboard = () => {
         onclose() {
           subCloserRef.current?.close();
         },
+        onauth: await getOnAuthed(),
       }
     );
   };

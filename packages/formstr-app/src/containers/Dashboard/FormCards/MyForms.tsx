@@ -7,6 +7,7 @@ import { FormEventCard } from "./FormEventCard";
 import { Spin } from "antd";
 import { LoadingOutlined } from "@ant-design/icons";
 import { signerManager } from "../../../signer";
+import { pool } from "../../../pool";
 
 export const MyForms = () => {
   type FormEventMetadata = {
@@ -31,8 +32,6 @@ export const MyForms = () => {
         "#d": dTags,
         authors: pubkeys,
       };
-
-      const pool = existingPool || new SimplePool();
       let myForms = await pool.querySync(getDefaultRelays(), myFormsFilter);
 
       // Create a new map to store the form events
@@ -57,10 +56,6 @@ export const MyForms = () => {
         }
       });
       setFormEvents(newFormEvents);
-
-      if (!existingPool) {
-        pool.close(getDefaultRelays());
-      }
     } catch (error) {
       console.error("Error fetching form events:", error);
     } finally {
@@ -72,7 +67,6 @@ export const MyForms = () => {
     if (!userPub) return;
 
     setRefreshing(true);
-    const pool = existingPool || new SimplePool();
 
     const signer = await signerManager.getSigner();
     try {
@@ -94,10 +88,6 @@ export const MyForms = () => {
     } catch (error) {
       console.error("Error fetching forms:", error);
       setRefreshing(false);
-    } finally {
-      if (!existingPool) {
-        pool.close(getDefaultRelays());
-      }
     }
   };
 
@@ -108,7 +98,6 @@ export const MyForms = () => {
     if (!userPub) return;
     const signer = await signerManager.getSigner();
     setRefreshing(true);
-    const pool = new SimplePool();
 
     try {
       const existingListFilter = {
@@ -149,13 +138,14 @@ export const MyForms = () => {
       };
 
       const signedEvent = await signer.signEvent(event);
-      pool.publish(getDefaultRelays(), signedEvent);
+      pool.publish(getDefaultRelays(), signedEvent, {
+        onauth: getOnAuthed(),
+      });
       await fetchMyForms();
     } catch (error) {
       console.error("Error handling form deletion:", error);
     } finally {
       setRefreshing(false);
-      pool.close(getDefaultRelays());
     }
   };
 
@@ -197,3 +187,10 @@ export const MyForms = () => {
     </>
   );
 };
+function getOnAuthed():
+  | ((
+      evt: import("nostr-tools").EventTemplate
+    ) => Promise<import("nostr-tools").VerifiedEvent>)
+  | undefined {
+  throw new Error("Function not implemented.");
+}

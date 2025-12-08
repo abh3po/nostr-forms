@@ -17,7 +17,7 @@ import { Field, Response, Tag } from "./types";
 import { IFormSettings } from "../containers/CreateFormNew/components/FormSettings/types";
 import { signerManager } from "../signer";
 import { AbstractRelay } from "nostr-tools/abstract-relay";
-import { pool } from "../pool";
+import { getOnAuthed, pool } from "../pool";
 
 declare global {
   interface Window {
@@ -465,7 +465,7 @@ async function callRPC(
   await publishGiftwrap(relays, giftwrap);
   console.log("Waiting for NRPC Response");
   // wait for response
-  return new Promise((resolve, reject) => {
+  return new Promise(async (resolve, reject) => {
     const sub = pool.subscribeMany(
       relays,
       [{ kinds: [21169], "#e": [rumor.id] }],
@@ -490,6 +490,7 @@ async function callRPC(
         oneose() {
           console.log("Relay reports EOSE");
         },
+        onauth: await getOnAuthed(),
       }
     );
   });

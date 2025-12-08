@@ -17,6 +17,7 @@ import { AddressPointer } from "nostr-tools/nip19";
 import { fetchFormTemplate } from "../nostr/fetchFormTemplate";
 import { signerManager } from "../signer";
 import { encodeNKeys } from "./nkeys";
+import { pool } from "../pool";
 
 export const createFormSpecFromTemplate = (
   template: FormTemplate
@@ -37,7 +38,6 @@ export const fetchKeys = async (
   userPub: string
 ) => {
   const signer = await signerManager.getSigner();
-  const pool = new SimplePool();
   const defaultRelays = getDefaultRelays();
   const aliasPubKey = bytesToHex(
     sha256(`${30168}:${formAuthor}:${formId}:${userPub}`)

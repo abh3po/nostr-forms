@@ -1,4 +1,4 @@
-import { SimplePool, UnsignedEvent } from "nostr-tools";
+import { UnsignedEvent } from "nostr-tools";
 import {
   getItem,
   LOCAL_STORAGE_KEYS,
@@ -8,6 +8,7 @@ import { ILocalForm } from "../../../providers/FormBuilder/typeDefs";
 import { getDefaultRelays } from "../../../../../nostr/common";
 import { KINDS, Tag } from "../../../../../nostr/types";
 import { signerManager } from "../../../../../signer";
+import { pool } from "../../../../../pool";
 
 export const saveToDevice = (
   formAuthorPub: string,
@@ -57,7 +58,6 @@ export const saveToMyForms = async (
   if (!userPub) return;
 
   callback("saving");
-  const pool = new SimplePool();
   const newRelays = relays && relays.length !== 0 ? relays : getDefaultRelays();
 
   try {
@@ -131,13 +131,20 @@ export const saveToMyForms = async (
     };
 
     const signedEvent = await signer.signEvent(myFormEvent);
-    await Promise.allSettled(pool.publish(relays, signedEvent));
+    await Promise.allSettled(
+      pool.publish(relays, signedEvent, { onauth: getOnAuthed() })
+    );
 
     callback("saved");
   } catch (error) {
     console.error("Failed to save to nostr:", error);
     callback(null);
-  } finally {
-    pool.close(relays);
   }
 };
+function getOnAuthed():
+  | ((
+      evt: import("nostr-tools").EventTemplate
+    ) => Promise<import("nostr-tools").VerifiedEvent>)
+  | undefined {
+  throw new Error("Function not implemented.");
+}

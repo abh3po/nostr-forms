@@ -7,7 +7,7 @@ import { FormEventCard } from "./FormEventCard";
 import { Spin } from "antd";
 import { LoadingOutlined } from "@ant-design/icons";
 import { signerManager } from "../../../signer";
-import { getAuthed, pool, querySyncAuthed } from "../../../pool";
+import { getAuthed, getOnAuthed, pool, querySyncAuthed } from "../../../pool";
 
 export const MyForms = () => {
   type FormEventMetadata = {
@@ -139,7 +139,7 @@ export const MyForms = () => {
 
       const signedEvent = await signer.signEvent(event);
       pool.publish(getDefaultRelays(), signedEvent, {
-        onauth: getOnAuthed(),
+        onauth: await getOnAuthed(),
       });
       await fetchMyForms();
     } catch (error) {
@@ -187,10 +187,3 @@ export const MyForms = () => {
     </>
   );
 };
-function getOnAuthed():
-  | ((
-      evt: import("nostr-tools").EventTemplate
-    ) => Promise<import("nostr-tools").VerifiedEvent>)
-  | undefined {
-  throw new Error("Function not implemented.");
-}

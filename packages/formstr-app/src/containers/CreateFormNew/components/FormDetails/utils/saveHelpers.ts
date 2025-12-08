@@ -8,7 +8,7 @@ import { ILocalForm } from "../../../providers/FormBuilder/typeDefs";
 import { getDefaultRelays } from "../../../../../nostr/common";
 import { KINDS, Tag } from "../../../../../nostr/types";
 import { signerManager } from "../../../../../signer";
-import { pool, querySyncAuthed } from "../../../../../pool";
+import { getOnAuthed, pool, querySyncAuthed } from "../../../../../pool";
 
 export const saveToDevice = (
   formAuthorPub: string,
@@ -132,7 +132,7 @@ export const saveToMyForms = async (
 
     const signedEvent = await signer.signEvent(myFormEvent);
     await Promise.allSettled(
-      pool.publish(relays, signedEvent, { onauth: getOnAuthed() })
+      pool.publish(relays, signedEvent, { onauth: await getOnAuthed() })
     );
 
     callback("saved");
@@ -141,10 +141,3 @@ export const saveToMyForms = async (
     callback(null);
   }
 };
-function getOnAuthed():
-  | ((
-      evt: import("nostr-tools").EventTemplate
-    ) => Promise<import("nostr-tools").VerifiedEvent>)
-  | undefined {
-  throw new Error("Function not implemented.");
-}

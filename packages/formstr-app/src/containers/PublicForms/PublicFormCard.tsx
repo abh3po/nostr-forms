@@ -85,7 +85,7 @@ export default function PublicFormCard({ event }: { event: Event }) {
               textShadow: "2px 2px 4px rgba(0,0,0,0.7)",
             }}
           >
-            {name}
+            <SafeMarkdown>{name}</SafeMarkdown>
           </Typography.Title>
           <Divider style={{ borderColor: "rgba(255,255,255,0.2)" }} />
           <div

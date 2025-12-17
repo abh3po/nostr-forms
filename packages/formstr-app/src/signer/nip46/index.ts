@@ -11,6 +11,7 @@ import { NIP05_REGEX } from "nostr-tools/nip05";
 import { SimplePool } from "nostr-tools";
 import { Handlerinformation, NostrConnect } from "nostr-tools/kinds";
 import { Signer } from "nostr-tools/signer";
+import { getOnAuthed, pool, querySyncAuthed } from "../../pool";
 
 var _fetch: any;
 
@@ -230,7 +231,7 @@ export class BunkerSigner implements Signer {
    */
   private constructor(clientSecretKey: Uint8Array, params: BunkerSignerParams) {
     this.params = params;
-    this.pool = params.pool || new SimplePool();
+    this.pool = params.pool || pool;
     this.secretKey = clientSecretKey;
     this.isOpen = false;
     this.idPrefix = Math.random().toString(36).substring(7);
@@ -251,7 +252,7 @@ export class BunkerSigner implements Signer {
     if (bp.relays.length === 0) {
       throw new Error("No relays specified for this bunker");
     }
-
+    console.log("INSIDE CREATE BUNKER");
     const signer = new BunkerSigner(clientSecretKey, params);
 
     signer.conversationKey = getConversationKey(clientSecretKey, bp.pubkey);
@@ -271,10 +272,11 @@ export class BunkerSigner implements Signer {
     params: BunkerSignerParams = {},
     maxWait: number = 300_000
   ): Promise<BunkerSigner> {
+    console.log("NO PROBLEMS TILL HERE 1");
     const signer = new BunkerSigner(clientSecretKey, params);
     const parsedURI = parseNostrConnectURI(connectionURI);
     const clientPubkey = getPublicKey(clientSecretKey);
-
+    console.log("NO PROBLEMS TILL HERE");
     return new Promise((resolve, reject) => {
       const timer = setTimeout(() => {
         sub.close();
@@ -558,7 +560,7 @@ export async function fetchBunkerProviders(
   pool: AbstractSimplePool,
   relays: string[]
 ): Promise<BunkerProfile[]> {
-  const events = await pool.querySync(relays, {
+  const events = await querySyncAuthed(relays, {
     kinds: [Handlerinformation],
     "#k": [NostrConnect.toString()],
   });

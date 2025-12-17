@@ -74,7 +74,9 @@ const Nip46Section: React.FC<Nip46SectionProps> = ({ onSuccess }) => {
   }
 
   const connectToBunkerUri = async (bunkerUri: string) => {
+    console.log("Connecting to bunker uri");
     await signerManager.loginWithNip46(bunkerUri);
+    console.log("Connecting to bunker uri 2 ");
     message.success("Connected to Remote Signer");
     onSuccess();
   };
@@ -214,7 +216,13 @@ const LoginModal: React.FC<LoginModalProps> = ({ open, onClose, onLogin }) => {
           text="Connect with Remote Signer (NIP-46)"
           onClick={() => setShowNip46(!showNip46)}
         />
-        {showNip46 && <Nip46Section onSuccess={() => {onLogin()}} />}
+        {showNip46 && (
+          <Nip46Section
+            onSuccess={() => {
+              onLogin();
+            }}
+          />
+        )}
       </Space>
 
       <FooterInfo />

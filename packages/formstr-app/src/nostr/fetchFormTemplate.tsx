@@ -1,5 +1,6 @@
 import { Event, SimplePool } from "nostr-tools";
 import { getDefaultRelays } from "./common";
+import { getOnAuthed } from "../pool";
 
 export const fetchFormTemplate = async (
   pubKey: string,
@@ -20,5 +21,6 @@ export const fetchFormTemplate = async (
       onEvent(event);
       subCloer.close();
     },
+    onauth: await getOnAuthed(),
   });
 };

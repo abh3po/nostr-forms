@@ -154,22 +154,24 @@ export const Response = () => {
     if (!formEvent || !formId || !poolRef.current) {
       return;
     }
-    let allowedPubkeys;
-    let pubkeys = getAllowedUsers(formEvent);
-    if (pubkeys.length !== 0) allowedPubkeys = pubkeys;
-    let formRelays = getResponseRelays(formEvent);
-    const newCloser = fetchFormResponses(
-      formEvent.pubkey,
-      formId,
-      poolRef.current,
-      handleResponseEvent,
-      allowedPubkeys,
-      formRelays
-    );
-    setResponsesCloser(newCloser);
-
+    const initialize = async () => {
+      let allowedPubkeys;
+      let pubkeys = getAllowedUsers(formEvent);
+      if (pubkeys.length !== 0) allowedPubkeys = pubkeys;
+      let formRelays = getResponseRelays(formEvent);
+      const newCloser = await fetchFormResponses(
+        formEvent.pubkey,
+        formId!,
+        poolRef.current,
+        handleResponseEvent,
+        allowedPubkeys,
+        formRelays
+      );
+      setResponsesCloser(newCloser);
+    };
+    initialize();
     return () => {
-      newCloser.close();
+      if (responseCloser) responseCloser.close();
     };
   }, [formEvent, formId, poolRef.current]);
 

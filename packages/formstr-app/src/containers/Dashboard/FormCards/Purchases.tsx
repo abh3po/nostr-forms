@@ -8,6 +8,7 @@ import { SubCloser } from "nostr-tools/abstract-pool";
 import { Event } from "nostr-tools";
 import { useProfileContext } from "../../../hooks/useProfileContext";
 import { getDefaultRelays } from "../../../nostr/common";
+import { getOnAuthed } from "../../../pool";
 
 const { Text } = Typography;
 
@@ -76,26 +77,28 @@ export const Purchases: React.FC = () => {
   // Step 2: Fetch events from nostr for these slugs
   useEffect(() => {
     if (!formsWithEvents.length || !poolRef.current) return;
-    const useRelays = userRelays.length !== 0 ? userRelays : getDefaultRelays();
-    console.log("User relays", useRelays);
-    const filters = formsWithEvents.map(({ form }) => ({
-      kinds: [30168],
-      authors: [form.pubkey],
-    }));
-
-    console.log("Final filters are", filters, poolRef.current);
-    subCloserRef.current = poolRef.current.subscribeMany(useRelays, filters, {
-      onevent: (event: Event) => {
-        console.log("GOT EVENT", event);
-        setNostrEvents((prev) => {
-          const exists = prev.find((e) => e.id === event.id);
-          return exists ? prev : [...prev, event];
-        });
-      },
-      onclose() {
-        subCloserRef.current?.close();
-      },
-    });
+    const initialize = async () => {
+      const useRelays =
+        userRelays.length !== 0 ? userRelays : getDefaultRelays();
+      console.log("User relays", useRelays);
+      const filters = formsWithEvents.map(({ form }) => ({
+        kinds: [30168],
+        authors: [form.pubkey],
+      }));
+      subCloserRef.current = poolRef.current.subscribeMany(useRelays, filters, {
+        onevent: (event: Event) => {
+          setNostrEvents((prev) => {
+            const exists = prev.find((e) => e.id === event.id);
+            return exists ? prev : [...prev, event];
+          });
+        },
+        onclose() {
+          subCloserRef.current?.close();
+        },
+        onauth: await getOnAuthed(),
+      });
+      initialize();
+    };
 
     return () => {
       subCloserRef.current?.close();

@@ -7,6 +7,7 @@ import { FormEventCard } from "./FormEventCard";
 import { Spin } from "antd";
 import { LoadingOutlined } from "@ant-design/icons";
 import { signerManager } from "../../../signer";
+import { getAuthed, getOnAuthed, pool, querySyncAuthed } from "../../../pool";
 
 export const MyForms = () => {
   type FormEventMetadata = {
@@ -31,9 +32,7 @@ export const MyForms = () => {
         "#d": dTags,
         authors: pubkeys,
       };
-
-      const pool = existingPool || new SimplePool();
-      let myForms = await pool.querySync(getDefaultRelays(), myFormsFilter);
+      let myForms = await querySyncAuthed(getDefaultRelays(), myFormsFilter);
 
       // Create a new map to store the form events
       const newFormEvents = new Map<string, FormEventMetadata>();
@@ -57,10 +56,6 @@ export const MyForms = () => {
         }
       });
       setFormEvents(newFormEvents);
-
-      if (!existingPool) {
-        pool.close(getDefaultRelays());
-      }
     } catch (error) {
       console.error("Error fetching form events:", error);
     } finally {
@@ -72,7 +67,6 @@ export const MyForms = () => {
     if (!userPub) return;
 
     setRefreshing(true);
-    const pool = existingPool || new SimplePool();
 
     const signer = await signerManager.getSigner();
     try {
@@ -81,7 +75,7 @@ export const MyForms = () => {
         authors: [userPub],
       };
 
-      let myFormsList = await pool.get(getDefaultRelays(), existingListFilter);
+      let myFormsList = await getAuthed(getDefaultRelays(), existingListFilter);
 
       if (!myFormsList) {
         setRefreshing(false);
@@ -94,10 +88,6 @@ export const MyForms = () => {
     } catch (error) {
       console.error("Error fetching forms:", error);
       setRefreshing(false);
-    } finally {
-      if (!existingPool) {
-        pool.close(getDefaultRelays());
-      }
     }
   };
 
@@ -108,7 +98,6 @@ export const MyForms = () => {
     if (!userPub) return;
     const signer = await signerManager.getSigner();
     setRefreshing(true);
-    const pool = new SimplePool();
 
     try {
       const existingListFilter = {
@@ -116,7 +105,7 @@ export const MyForms = () => {
         authors: [userPub],
       };
 
-      const myFormsList = await pool.get(
+      const myFormsList = await getAuthed(
         getDefaultRelays(),
         existingListFilter
       );
@@ -149,13 +138,14 @@ export const MyForms = () => {
       };
 
       const signedEvent = await signer.signEvent(event);
-      pool.publish(getDefaultRelays(), signedEvent);
+      pool.publish(getDefaultRelays(), signedEvent, {
+        onauth: await getOnAuthed(),
+      });
       await fetchMyForms();
     } catch (error) {
       console.error("Error handling form deletion:", error);
     } finally {
       setRefreshing(false);
-      pool.close(getDefaultRelays());
     }
   };
 

@@ -17,7 +17,7 @@ import { Field, Response, Tag } from "./types";
 import { IFormSettings } from "../containers/CreateFormNew/components/FormSettings/types";
 import { signerManager } from "../signer";
 import { AbstractRelay } from "nostr-tools/abstract-relay";
-import { pool } from "../pool";
+import { getOnAuthed, pool, querySyncAuthed } from "../pool";
 
 declare global {
   interface Window {
@@ -192,7 +192,7 @@ export const sendNotification = async (
       sig: "",
     };
     const kind4Event = finalizeEvent(baseKind4Event, newSk);
-    pool.publish(defaultRelays, kind4Event);
+    pool.publish(defaultRelays, kind4Event, { onauth: await getOnAuthed() });
   });
 };
 
@@ -465,7 +465,7 @@ async function callRPC(
   await publishGiftwrap(relays, giftwrap);
   console.log("Waiting for NRPC Response");
   // wait for response
-  return new Promise((resolve, reject) => {
+  return new Promise(async (resolve, reject) => {
     const sub = pool.subscribeMany(
       relays,
       [{ kinds: [21169], "#e": [rumor.id] }],
@@ -490,6 +490,7 @@ async function callRPC(
         oneose() {
           console.log("Relay reports EOSE");
         },
+        onauth: await getOnAuthed(),
       }
     );
   });
@@ -522,7 +523,7 @@ export async function fetchKind0Events(
   const timeout = setTimeout(() => controller.abort(), timeoutMs);
 
   try {
-    const events = await pool.querySync(relayUrls, filter);
+    const events = await querySyncAuthed(relayUrls, filter);
     clearTimeout(timeout);
 
     // ✅ Deduplicate by pubkey: keep only the newest event per pubkey

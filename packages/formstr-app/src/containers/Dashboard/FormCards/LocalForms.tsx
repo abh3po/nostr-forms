@@ -6,6 +6,7 @@ import { getDefaultRelays } from "../../../nostr/common";
 import { Event } from "nostr-tools";
 import { FormEventCard } from "./FormEventCard";
 import { SubCloser } from "nostr-tools/abstract-pool";
+import { getOnAuthed } from "../../../pool";
 
 interface LocaLFormsProps {
   localForms: ILocalForm[];
@@ -30,7 +31,7 @@ export const LocalForms: React.FC<LocaLFormsProps> = ({
 
   useEffect(() => {
     let closer: SubCloser;
-    const initialize = () => {
+    const initialize = async () => {
       let pubkeys = localForms.map((l) => l.publicKey);
       let dTags = localForms.map((f) => f.formId);
       let filter = {
@@ -40,6 +41,7 @@ export const LocalForms: React.FC<LocaLFormsProps> = ({
       };
       closer = poolRef.current.subscribeMany(getDefaultRelays(), [filter], {
         onevent: onFormEvent,
+        onauth: await getOnAuthed(),
       });
     };
     initialize();

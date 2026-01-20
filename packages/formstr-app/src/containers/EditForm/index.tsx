@@ -5,7 +5,6 @@ import { useEffect, useState } from "react";
 import { HEADER_MENU_KEYS } from "../CreateFormNew/components/Header/config";
 import { getPublicKey, nip19, SimplePool } from "nostr-tools";
 import { hexToBytes } from "@noble/hashes/utils";
-import { getDefaultRelays } from "@formstr/sdk";
 import { Spin, Typography } from "antd";
 import { getFormSpec as formSpecFromEvent } from "../../utils/formUtils";
 import { useProfileContext } from "../../hooks/useProfileContext";
@@ -13,6 +12,7 @@ import { LoadingOutlined } from "@ant-design/icons";
 import { AddressPointer } from "nostr-tools/nip19";
 import { FormRenderer } from "../FormFillerNew/FormRenderer";
 import { decodeNKeys } from "../../utils/nkeys";
+import { getDefaultRelays } from "../../nostr/common";
 
 function EditForm() {
   const { naddr } = useParams();
@@ -52,7 +52,7 @@ function EditForm() {
     let pool = new SimplePool();
     let formEvent = await pool.get(
       Array.from(new Set([...(relays || []), ...getDefaultRelays()]) || []),
-      filter
+      filter,
     );
     if (!formEvent) {
       setError("Form Not Found :(");

@@ -5,14 +5,13 @@ import { ChoiceFiller } from "./InputTypes/ChoiceFiller";
 import { DropdownFiller } from "./InputTypes/DropdownFiller";
 import { DateFiller } from "./InputTypes/DateFiller";
 import { TimeFiller } from "./InputTypes/TimeFiller";
-import { Option } from "@formstr/sdk/dist/formstr/nip101";
 import { SignatureFiller } from "./InputTypes/SignatureFiller";
 import { DateTimeFiller } from "./InputTypes/DateTimeFiller";
-import { AnswerTypes } from "../../../nostr/types";
+import { AnswerTypes, Choice, Option } from "../../../nostr/types";
 
 interface InputFillerProps {
   fieldConfig: any;
-  options: Option[];
+  options: Choice[];
   onChange: (answer: string, message?: string) => void;
   defaultValue?: string | number | boolean;
   disabled?: boolean;
@@ -28,7 +27,7 @@ export const InputFiller: React.FC<InputFillerProps> = ({
   testId = "input-filler",
 }) => {
   const handleInputChange = (
-    e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+    e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
   ) => {
     onChange(e.target.value);
   };
@@ -127,7 +126,7 @@ export const InputFiller: React.FC<InputFillerProps> = ({
           fieldConfig={fieldConfig}
           defaultValue={defaultValue as string}
           onChange={handleValueChange}
-          disabled={disabled} 
+          disabled={disabled}
           testId={`${testId}:datetime`}
         />
       ),

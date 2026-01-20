@@ -1,7 +1,6 @@
 import React from "react";
 import { Dropdown, MenuProps } from "antd";
 import { DownOutlined } from "@ant-design/icons";
-import { V1Field } from "@formstr/sdk/dist/interfaces";
 
 export const Export: React.FC<{
   responsesData: Array<{ [key: string]: string }>;
@@ -15,44 +14,39 @@ export const Export: React.FC<{
       return;
     }
 
-   try {
-    const XLSX = await import("xlsx");
-    const SheetName = `Responses for ${formName}`.substring(0, 16) + "...";
-    const workSheet = XLSX.utils.json_to_sheet(responsesData);
-    const workBook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workBook, workSheet, `${SheetName}`);
+    try {
+      const XLSX = await import("xlsx");
+      const SheetName = `Responses for ${formName}`.substring(0, 16) + "...";
+      const workSheet = XLSX.utils.json_to_sheet(responsesData);
+      const workBook = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(workBook, workSheet, `${SheetName}`);
 
-    const fileExtension = type === "excel" ? ".xlsx" : ".csv";
-    XLSX.writeFile(workBook, `${SheetName}.${fileExtension}`);
-    
-   } catch (error : unknown) {
+      const fileExtension = type === "excel" ? ".xlsx" : ".csv";
+      XLSX.writeFile(workBook, `${SheetName}.${fileExtension}`);
+    } catch (error: unknown) {
       if (error instanceof Error) {
         const errorMessage = error.message;
 
         if (errorMessage.includes("Cannot find module 'xlsx'")) {
-          alert(
-            "XLSX module not found. Please install the required package."
-          );
+          alert("XLSX module not found. Please install the required package.");
           console.error("Error exporting data:", error.message);
         } else if (errorMessage.includes("json_to_sheet")) {
-          alert( 
-            "Failed to convert data to sheet. Please check the data format."
+          alert(
+            "Failed to convert data to sheet. Please check the data format.",
           );
         } else if (errorMessage.includes("writeFile")) {
           alert(
-            "Failed to generate file. Please check your file system permissions."
+            "Failed to generate file. Please check your file system permissions.",
           );
         } else {
           console.error("Unhandled export error:", error);
           alert(`Export failed: ${errorMessage}`);
         }
-      }else {
+      } else {
         console.error("Error exporting data:", error);
         alert("An unknown error occurred. Please try again.");
       }
-      
     }
-
   };
 
   const items = [

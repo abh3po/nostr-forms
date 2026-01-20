@@ -1,8 +1,8 @@
 import { UserOutlined } from "@ant-design/icons";
-import { getDefaultRelays } from "@formstr/sdk";
 import { Avatar } from "antd";
 import { SimplePool } from "nostr-tools";
 import { FC, useEffect, useState } from "react";
+import { getDefaultRelays } from "../../nostr/common";
 
 const defaultRelays = getDefaultRelays();
 

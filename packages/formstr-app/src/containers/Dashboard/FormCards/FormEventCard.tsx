@@ -1,4 +1,3 @@
-import { Tag } from "@formstr/sdk/dist/formstr/nip101";
 import { Button, Card, Divider, Dropdown, MenuProps } from "antd";
 import { Event } from "nostr-tools";
 import { useNavigate } from "react-router-dom";
@@ -28,6 +27,7 @@ import { useApplicationContext } from "../../../hooks/useApplicationContext";
 import { FormDetails } from "../../CreateFormNew/components/FormDetails";
 import SafeMarkdown from "../../../components/SafeMarkdown";
 import { IFormSettings } from "../../CreateFormNew/components/FormSettings/types";
+import { Tag } from "../../../nostr/types";
 
 interface FormEventCardProps {
   event: Event;
@@ -74,7 +74,7 @@ export const FormEventCard: React.FC<FormEventCardProps> = ({
   let settings: IFormSettings = {};
   if (publicForm || viewKey) {
     settings = JSON.parse(
-      tags.filter((t) => t[0] === "settings")?.[0]?.[1] || "{}"
+      tags.filter((t) => t[0] === "settings")?.[0]?.[1] || "{}",
     );
   }
 
@@ -82,7 +82,7 @@ export const FormEventCard: React.FC<FormEventCardProps> = ({
     const naddr = makeFormNAddr(
       pubKey,
       formId,
-      relays.length ? relays : ["wss://relay.damus.io"]
+      relays.length ? relays : ["wss://relay.damus.io"],
     );
     const formData = JSON.stringify(await getFormData(naddr, poolRef.current));
     const formFillerUI = (await (await fetch("/api/form-filler-ui")).text())
@@ -104,7 +104,7 @@ export const FormEventCard: React.FC<FormEventCardProps> = ({
     localStorage.setItem("formstr:draftForms", JSON.stringify(updatedDrafts));
     window.open(
       constructDraftUrl(duplicatedForm, window.location.origin),
-      "_blank"
+      "_blank",
     );
   };
 
@@ -146,11 +146,11 @@ export const FormEventCard: React.FC<FormEventCardProps> = ({
                 makeFormNAddr(
                   pubKey,
                   formId,
-                  relays.length !== 0 ? relays : undefined
+                  relays.length !== 0 ? relays : undefined,
                 ),
                 viewKey,
-                settings.disablePreview
-              )
+                settings.disablePreview,
+              ),
             ),
         },
         {
@@ -263,8 +263,8 @@ export const FormEventCard: React.FC<FormEventCardProps> = ({
                     responsePath(
                       secretKey,
                       makeFormNAddr(pubKey, formId, relays),
-                      viewKey
-                    )
+                      viewKey,
+                    ),
                   )
                 : navigate(`/r/${pubKey}/${formId}`);
             }}
@@ -287,8 +287,8 @@ export const FormEventCard: React.FC<FormEventCardProps> = ({
                     pubKey,
                     formId,
                     relays.length ? relays : ["wss://relay.damus.io"],
-                    viewKey
-                  )
+                    viewKey,
+                  ),
                 );
               }
             }}

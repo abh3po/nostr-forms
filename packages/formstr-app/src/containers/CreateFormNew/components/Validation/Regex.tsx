@@ -1,8 +1,8 @@
-import { ValidationRuleTypes, RegexRule } from "@formstr/sdk/dist/interfaces";
 import { Tooltip, Typography } from "antd";
 import { InputStyle } from "./validation.style";
 import { ChangeEvent, useState } from "react";
 import { isMobile } from "../../../../utils/utility";
+import { RegexRule, ValidationRuleTypes } from "../../../../nostr/types";
 
 const { Text } = Typography;
 

@@ -1,6 +1,6 @@
-import { ValidationRuleTypes, MaxRule } from "@formstr/sdk/dist/interfaces";
 import { Typography } from "antd";
 import { InputStyle } from "./validation.style";
+import { MaxRule, ValidationRuleTypes } from "../../../../nostr/types";
 
 const { Text } = Typography;
 

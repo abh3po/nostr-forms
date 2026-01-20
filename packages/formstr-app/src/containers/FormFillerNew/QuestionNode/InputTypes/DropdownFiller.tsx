@@ -1,8 +1,8 @@
-import { Option } from "@formstr/sdk/dist/formstr/nip101";
 import { Select } from "antd";
+import { Choice } from "../../../../nostr/types";
 
 interface DropdownFillerProps {
-  options: Option[];
+  options: Choice[];
   onChange: (text: string) => void;
   defaultValue?: string;
   disabled?: boolean;
@@ -21,7 +21,7 @@ export const DropdownFiller: React.FC<DropdownFillerProps> = ({
       <Select
         onChange={onChange}
         options={options.map((choice) => {
-          let [choiceId, label] = choice;
+          let { choiceId, label } = choice;
           return { value: choiceId, label: label };
         })}
         value={defaultValue}

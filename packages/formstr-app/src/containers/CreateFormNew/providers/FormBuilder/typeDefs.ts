@@ -1,7 +1,5 @@
-import { AnswerSettings } from "@formstr/sdk/dist/interfaces";
 import { IFormSettings } from "../../components/FormSettings/types";
-import { Tag } from "@formstr/sdk/dist/formstr/nip101";
-import { Field } from "../../../../nostr/types";
+import { AnswerSettings, Field, Tag } from "../../../../nostr/types";
 import { ProcessedFormData } from "../../components/AIFormGeneratorModal/aiProcessor";
 
 export type RelayStatus = "connected" | "pending" | "error" | "unknown";
@@ -48,7 +46,7 @@ export interface IFormBuilderContext {
   addQuestion: (
     primitive?: string,
     label?: string,
-    answerSettings?: AnswerSettings
+    answerSettings?: AnswerSettings,
   ) => void;
   deleteQuestion: (tempId: string) => void;
   questionIdInFocus?: string;

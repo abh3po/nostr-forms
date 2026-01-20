@@ -6,11 +6,9 @@ import {
   SectionData,
 } from "./typeDefs";
 import { generateQuestion } from "../../utils";
-import { getDefaultRelays } from "@formstr/sdk";
 import { makeTag } from "../../../../utils/utility";
 import { HEADER_MENU_KEYS } from "../../components/Header/config";
 import { IFormSettings } from "../../components/FormSettings/types";
-import { Tag } from "@formstr/sdk/dist/formstr/nip101";
 import { bytesToHex } from "@noble/hashes/utils";
 import { getPublicKey } from "nostr-tools";
 import { useNavigate } from "react-router-dom";
@@ -21,14 +19,14 @@ import {
   LOCAL_STORAGE_KEYS,
   setItem,
 } from "../../../../utils/localStorage";
-import { Field } from "../../../../nostr/types";
+import { AnswerSettings, Field, Tag } from "../../../../nostr/types";
 import { message } from "antd";
 import { ProcessedFormData } from "../../components/AIFormGeneratorModal/aiProcessor";
-import { AnswerSettings } from "@formstr/sdk/dist/interfaces";
 import {
   sampleBackgrounds,
   sampleThankYouScreens,
 } from "../../components/FormSettings/constants";
+import { getDefaultRelays } from "../../../../nostr/common";
 
 const LOCAL_STORAGE_CUSTOM_RELAYS_KEY = "formstr:customRelays";
 
@@ -114,16 +112,16 @@ export default function FormBuilderProvider({
   const [isRightSettingsOpen, setIsRightSettingsOpen] = useState(false);
   const [isLeftMenuOpen, setIsLeftMenuOpen] = useState(false);
   const [formName, setFormName] = useState<string>(
-    "This is the title of your form! Tap to edit."
+    "This is the title of your form! Tap to edit.",
   );
   const bottomElement = useRef<HTMLDivElement>(null);
   const { pubkey: userPubkey } = useProfileContext();
   const [editList, setEditList] = useState<Set<string>>(
-    new Set(userPubkey ? [userPubkey] : [])
+    new Set(userPubkey ? [userPubkey] : []),
   );
   const [viewList, setViewList] = useState<Set<string>>(new Set([]));
   const [selectedTab, setSelectedTab] = useState<string>(
-    HEADER_MENU_KEYS.BUILDER
+    HEADER_MENU_KEYS.BUILDER,
   );
   const [secretKey, setSecretKey] = useState<string | null>(null);
   const [viewKey, setViewKey] = useState<string | null | undefined>(null);
@@ -137,13 +135,13 @@ export default function FormBuilderProvider({
   useEffect(() => {
     let baseList: RelayItem[];
     const storedUserManagedRelays = getItem<RelayItem[]>(
-      LOCAL_STORAGE_CUSTOM_RELAYS_KEY
+      LOCAL_STORAGE_CUSTOM_RELAYS_KEY,
     );
 
     if (userRelays && userRelays.length > 0) {
       baseList = userRelays.map((url) => {
         const existingStoredRelay = storedUserManagedRelays?.find(
-          (r) => r.url === url
+          (r) => r.url === url,
         );
         return existingStoredRelay || { url, tempId: makeTag(6) };
       });
@@ -160,7 +158,7 @@ export default function FormBuilderProvider({
     defaultRelayUrls.forEach((defaultUrl) => {
       if (!baseListUrls.has(defaultUrl)) {
         const existingStoredDefault = storedUserManagedRelays?.find(
-          (r) => r.url === defaultUrl
+          (r) => r.url === defaultUrl,
         );
         if (existingStoredDefault) {
           finalRelayList.push(existingStoredDefault);
@@ -205,18 +203,18 @@ export default function FormBuilderProvider({
 
       return newSection;
     },
-    [sections.length]
+    [sections.length],
   );
 
   const updateSection = useCallback(
     (id: string, updates: Partial<SectionData>) => {
       setSections((prev) =>
         prev.map((section) =>
-          section.id === id ? { ...section, ...updates } : section
-        )
+          section.id === id ? { ...section, ...updates } : section,
+        ),
       );
     },
-    []
+    [],
   );
 
   const removeSection = useCallback((id: string) => {
@@ -272,7 +270,7 @@ export default function FormBuilderProvider({
         return updated;
       });
     },
-    []
+    [],
   );
 
   const getSectionForQuestion = useCallback(
@@ -280,7 +278,7 @@ export default function FormBuilderProvider({
       const section = sections.find((s) => s.questionIds.includes(questionId));
       return section ? section.id : null;
     },
-    [sections]
+    [sections],
   );
 
   const reorderSections = useCallback((newOrder: SectionData[]) => {
@@ -297,7 +295,7 @@ export default function FormBuilderProvider({
           title: newTitle,
           order: index,
         };
-      })
+      }),
     );
   }, []);
 
@@ -316,7 +314,7 @@ export default function FormBuilderProvider({
       const updatedList = [...prevRelayList, newRelay];
       setItem(
         LOCAL_STORAGE_CUSTOM_RELAYS_KEY,
-        updatedList.filter((r) => !getDefaultRelays().includes(r.url))
+        updatedList.filter((r) => !getDefaultRelays().includes(r.url)),
       );
       return updatedList;
     });
@@ -326,18 +324,18 @@ export default function FormBuilderProvider({
     setRelayList((prevRelayList) => {
       if (
         prevRelayList.some(
-          (relay) => relay.url === newUrl && relay.tempId !== tempId
+          (relay) => relay.url === newUrl && relay.tempId !== tempId,
         )
       ) {
         message.warning(`Relay URL ${newUrl} already exists.`);
         return prevRelayList;
       }
       const updatedList = prevRelayList.map((relay) =>
-        relay.tempId === tempId ? { ...relay, url: newUrl } : relay
+        relay.tempId === tempId ? { ...relay, url: newUrl } : relay,
       );
       setItem(
         LOCAL_STORAGE_CUSTOM_RELAYS_KEY,
-        updatedList.filter((r) => !getDefaultRelays().includes(r.url))
+        updatedList.filter((r) => !getDefaultRelays().includes(r.url)),
       );
       return updatedList;
     });
@@ -348,11 +346,11 @@ export default function FormBuilderProvider({
       const relayToDelete = prevRelayList.find((r) => r.tempId === tempId);
       if (!relayToDelete) return prevRelayList;
       let updatedList = prevRelayList.filter(
-        (relay) => relay.tempId !== tempId
+        (relay) => relay.tempId !== tempId,
       );
       setItem(
         LOCAL_STORAGE_CUSTOM_RELAYS_KEY,
-        updatedList.filter((r) => !getDefaultRelays().includes(r.url))
+        updatedList.filter((r) => !getDefaultRelays().includes(r.url)),
       ); // Only store custom relays
       return updatedList;
     });
@@ -399,7 +397,7 @@ export default function FormBuilderProvider({
       formSettings.encryptForm,
       onRelayAccepted,
       secretKey,
-      viewKey
+      viewKey,
     ).then(
       (artifacts: {
         signingKey: Uint8Array;
@@ -423,9 +421,9 @@ export default function FormBuilderProvider({
         console.error("Error creating form:", error);
         message.error(
           "Error creating the form: " +
-            (error instanceof Error ? error.message : String(error))
+            (error instanceof Error ? error.message : String(error)),
         );
-      }
+      },
     );
   };
 
@@ -462,7 +460,7 @@ export default function FormBuilderProvider({
   const addQuestion = (
     primitive?: string,
     label?: string,
-    answerSettings?: AnswerSettings
+    answerSettings?: AnswerSettings,
   ) => {
     setIsLeftMenuOpen(false);
     const newQuestion = generateQuestion(primitive, label, [], answerSettings);
@@ -507,7 +505,7 @@ export default function FormBuilderProvider({
     let formInitName = form.spec.filter((f) => f[0] === "name")?.[0]?.[1] || "";
     setFormName(formInitName);
     let settingsFromFile = JSON.parse(
-      form.spec.filter((f) => f[0] === "settings")?.[0]?.[1] || "{}"
+      form.spec.filter((f) => f[0] === "settings")?.[0]?.[1] || "{}",
     );
     settingsFromFile = { ...InitialFormSettings, ...settingsFromFile };
 

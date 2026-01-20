@@ -1,16 +1,16 @@
-import {
-  ValidationRuleTypes,
-  RangeRule,
-  MinRule,
-  MaxRule,
-} from "@formstr/sdk/dist/interfaces";
 import { isGreaterThanOrEqual, isLessThanOrEqual, getNumValue } from "../utils";
 import RangeComponent from "../components/Validation/Range";
 import MaxComponent from "../components/Validation/Max";
 import MinComponent from "../components/Validation/Min";
 import RegexComponent from "../components/Validation/Regex";
 import MatchComponent from "../components/Validation/Match";
-import { AnswerTypes } from "../../../nostr/types";
+import {
+  AnswerTypes,
+  MaxRule,
+  MinRule,
+  RangeRule,
+  ValidationRuleTypes,
+} from "../../../nostr/types";
 
 export const RULE_CONFIG = {
   [ValidationRuleTypes.range]: {

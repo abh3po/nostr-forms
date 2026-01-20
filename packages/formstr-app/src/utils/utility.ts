@@ -1,4 +1,3 @@
-import { constructFormUrl as constructFormUrlSDK } from "@formstr/sdk";
 import { DEVICE_TYPE, DEVICE_WIDTH } from "../constants/index";
 import { getItem, LOCAL_STORAGE_KEYS, setItem } from "./localStorage";
 import { nip19 } from "nostr-tools";
@@ -35,7 +34,7 @@ export const downloadHTMLToDevice = (fileContent: string, name = "form") => {
 export const makeFormNAddr = (
   publicKey: string,
   formId: string,
-  relaysEncode?: string[]
+  relaysEncode?: string[],
 ) => {
   return nip19.naddrEncode({
     pubkey: publicKey,
@@ -50,12 +49,12 @@ export const naddrUrl = (
   formId: string,
   relaysEncode?: string[],
   viewKey?: string | null,
-  disablePreview = false
+  disablePreview = false,
 ) => {
   const base = `/f/${makeFormNAddr(
     publicKey,
     formId,
-    relaysEncode || ["wss://relay.damus.io"]
+    relaysEncode || ["wss://relay.damus.io"],
   )}`;
 
   // OLD behavior
@@ -71,7 +70,7 @@ export const naddrUrl = (
 };
 
 export function constructDraftUrl(
-  draft: { formSpec: unknown; tempId: string } | null
+  draft: { formSpec: unknown; tempId: string } | null,
 ) {
   if (!draft) {
     return;

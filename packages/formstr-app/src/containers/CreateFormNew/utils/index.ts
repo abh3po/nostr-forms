@@ -1,13 +1,12 @@
-import { AnswerTypes } from "@formstr/sdk/dist/interfaces";
 import { makeTag } from "../../../utils/utility";
 import { IAnswerSettings } from "../components/AnswerSettings/types";
-import { Field } from "../../../nostr/types";
+import { AnswerTypes, Field } from "../../../nostr/types";
 
 export const generateQuestion = (
   primitive: string = "text",
   label: string | null = null,
   choices: string[][] = [],
-  answerSettings: IAnswerSettings = { renderElement: AnswerTypes.shortText }
+  answerSettings: IAnswerSettings = { renderElement: AnswerTypes.shortText },
 ): Field => {
   return [
     "field",

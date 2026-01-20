@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
-import { ValidationRuleTypes } from "@formstr/sdk/dist/interfaces";
 import { Typography, Select } from "antd";
 import { IProps } from "./validation.type";
 import { ANSWER_TYPE_RULES_MENU, RULE_CONFIG } from "../../configs/config";
 import StyleWrapper from "./validation.style";
+import { ValidationRuleTypes } from "../../../../nostr/types";
 
 const { Text } = Typography;
 
@@ -35,7 +35,7 @@ function Validation(props: IProps) {
   };
 
   let rules = ANSWER_TYPE_RULES_MENU[answerType].filter(
-    (rule) => !selected.includes(rule.value)
+    (rule) => !selected.includes(rule.value),
   );
 
   return (

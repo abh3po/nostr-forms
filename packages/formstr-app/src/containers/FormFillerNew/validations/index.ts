@@ -1,3 +1,4 @@
+import { Rule } from "antd/es/form";
 import {
   AnswerSettings,
   AnswerTypes,
@@ -7,8 +8,7 @@ import {
   RangeRule,
   RegexRule,
   ValidationRuleTypes,
-} from "@formstr/sdk/dist/interfaces";
-import { Rule } from "antd/es/form";
+} from "../../../nostr/types";
 
 //TODO: Find a method better than "any" with overloads for dynamic types
 function NumRange(rule: any): Rule;
@@ -64,7 +64,7 @@ function Regex(rule: RegexRule): Rule {
       if (!rule.pattern) return Promise.resolve();
       if (!new RegExp(rule.pattern).test(value[0])) {
         return Promise.reject(
-          rule.errorMessage || `Did not match the pattern: ${rule.pattern}`
+          rule.errorMessage || `Did not match the pattern: ${rule.pattern}`,
         );
       }
       return Promise.resolve();
@@ -84,9 +84,7 @@ function Match(rule: MatchRule): Rule {
         return Promise.resolve();
       }
 
-      return Promise.reject(
-        `This is not the correct answer for this question`
-      );
+      return Promise.reject(`This is not the correct answer for this question`);
     },
   };
 }
@@ -101,7 +99,7 @@ const RuleValidatorMap = {
 
 function createRule(
   ruleType: ValidationRuleTypes,
-  validationRules: AnswerSettings["validationRules"]
+  validationRules: AnswerSettings["validationRules"],
 ): Rule {
   if (!validationRules) return {};
   const ruleCreator = RuleValidatorMap[ruleType];
@@ -112,7 +110,7 @@ function createRule(
 
 export const getValidationRules = (
   answerType: AnswerTypes,
-  answerSettings: AnswerSettings
+  answerSettings: AnswerSettings,
 ) => {
   let rules: Rule[] = [];
   let validationRules = answerSettings.validationRules;

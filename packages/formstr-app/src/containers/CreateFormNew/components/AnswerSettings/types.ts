@@ -6,7 +6,7 @@ import {
   RangeRule,
   RegexRule,
   ValidationRuleTypes,
-} from "@formstr/sdk/dist/interfaces";
+} from "../../../../nostr/types";
 
 export interface IAnswerSettings {
   numberConstraints?: NumberConstraint;

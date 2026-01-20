@@ -3,7 +3,6 @@ import { useLocation } from "react-router-dom";
 import { FormDetails } from "../CreateFormNew/components/FormDetails";
 import { Event } from "nostr-tools";
 import { useProfileContext } from "../../hooks/useProfileContext";
-import { getDefaultRelays } from "@formstr/sdk";
 import { FormEventCard } from "./FormCards/FormEventCard";
 import DashboardStyleWrapper from "./index.style";
 import EmptyScreen from "../../components/EmptyScreen";
@@ -22,6 +21,7 @@ import { FormInitData } from "../CreateFormNew/providers/FormBuilder/typeDefs";
 import { createFormSpecFromTemplate } from "../../utils/formUtils";
 import { Purchases } from "./FormCards/Purchases";
 import { SubCloser } from "nostr-tools/abstract-pool";
+import { getDefaultRelays } from "../../nostr/common";
 
 const MENU_OPTIONS = {
   local: "On this device",
@@ -54,7 +54,7 @@ export const Dashboard = () => {
   const { pubkey } = useProfileContext();
   const [showFormDetails, setShowFormDetails] = useState<boolean>(!!state);
   const [localForms, setLocalForms] = useState<ILocalForm[]>(
-    getItem(LOCAL_STORAGE_KEYS.LOCAL_FORMS) || []
+    getItem(LOCAL_STORAGE_KEYS.LOCAL_FORMS) || [],
   );
   const [nostrForms, setNostrForms] = useState<Map<string, Event>>(new Map());
 
@@ -97,7 +97,7 @@ export const Dashboard = () => {
         onclose() {
           subCloserRef.current?.close();
         },
-      }
+      },
     );
   };
 

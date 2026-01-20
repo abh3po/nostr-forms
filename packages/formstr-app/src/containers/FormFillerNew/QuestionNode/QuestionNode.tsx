@@ -1,15 +1,16 @@
 import { Card, Divider } from "antd";
 import { InputFiller } from "./InputFiller";
 import { AnswerTypes } from "../../../constants";
+import { Option } from "@formstr/sdk/dist/formstr/nip101";
 import SafeMarkdown from "../../../components/SafeMarkdown";
 import { IFormSettings } from "../../CreateFormNew/components/FormSettings/types";
-import { Option } from "../../../nostr/types";
+import { Choice } from "../../../nostr/types";
 
 interface QuestionProps {
   label: string;
   fieldConfig: any;
   fieldId: string;
-  options: Option[];
+  options: Choice[];
   inputHandler: (questionId: string, answer: string, message?: string) => void;
   required: boolean;
   disabled?: boolean;

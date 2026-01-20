@@ -44,9 +44,14 @@ export const RightAnswer: React.FC<RightAnswerProps> = ({
           options={
             choices
               ? JSON.parse(choices).map(
-                  ([choiceId, label]: [string, string]) => ({
+                  ([choiceId, label, configString]: [
+                    string,
+                    string,
+                    string,
+                  ]) => ({
                     choiceId,
                     label,
+                    configString,
                   }),
                 )
               : []

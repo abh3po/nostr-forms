@@ -79,6 +79,7 @@ export interface Choice {
   choiceId: string;
   label: string;
   isOther?: boolean;
+  configString?: string;
 }
 export interface V1Choice {
   choiceId: string;
@@ -89,7 +90,7 @@ export interface NumberConstraint {
   min: number;
   max: number;
 }
-export declare enum ValidationRuleTypes {
+export enum ValidationRuleTypes {
   range = "range",
   max = "max",
   min = "min",

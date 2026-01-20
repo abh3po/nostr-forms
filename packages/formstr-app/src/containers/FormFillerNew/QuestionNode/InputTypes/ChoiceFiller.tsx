@@ -11,11 +11,11 @@ import { CheckboxValueType } from "antd/es/checkbox/Group";
 import ChoiceFillerStyle from "./choiceFiller.style";
 import { ChangeEvent, useState } from "react";
 import SafeMarkdown from "../../../../components/SafeMarkdown";
-import { AnswerTypes, Option } from "../../../../nostr/types";
+import { AnswerTypes, Choice, Option } from "../../../../nostr/types";
 
 interface ChoiceFillerProps {
   answerType: AnswerTypes.checkboxes | AnswerTypes.radioButton;
-  options: Option[];
+  options: Choice[];
   onChange: (value: string, message: string) => void;
   defaultValue?: string;
   disabled?: boolean;
@@ -30,6 +30,7 @@ export const ChoiceFiller: React.FC<ChoiceFillerProps> = ({
   disabled = false,
   testId = "choice-filler",
 }) => {
+  console.log("Received Options", options);
   const [otherMessage, setOtherMessage] = useState("");
 
   function handleChoiceChange(e: RadioChangeEvent): void;
@@ -77,7 +78,8 @@ export const ChoiceFiller: React.FC<ChoiceFillerProps> = ({
       >
         <Space direction="vertical">
           {options.map((choice) => {
-            let [choiceId, label, configString] = choice;
+            console.log("choice is ", choice);
+            let { choiceId, label, configString } = choice;
             let config = JSON.parse(configString || "{}");
             return (
               <ElementConfig.Element

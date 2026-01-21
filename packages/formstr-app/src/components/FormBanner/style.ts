@@ -4,7 +4,7 @@ export default styled.div<{ $titleImageUrl?: string }>`
   ${({ $titleImageUrl }) => {
     return $titleImageUrl
       ? `
-    background-image: linear-gradient(180deg, rgb(243 239 239 / 0%), rgb(4 3 3) 150%), url(${$titleImageUrl});
+    background-image: linear-gradient(180deg, rgb(0 0 0 / 0%), rgb(200 200 200) 110%), url(${$titleImageUrl});
     background-repeat: no-repeat;
     background-size: cover;
     background-position: center;

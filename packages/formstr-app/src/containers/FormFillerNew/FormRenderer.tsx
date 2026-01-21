@@ -289,7 +289,7 @@ export const FormRenderer: React.FC<FormRendererProps> = ({
           )}
           {!hideDescription && settings?.description && (
             <div className="form-description">
-              <Text style={{ color: settings.globalColor || "black" }}>
+              <Text style={{ color: settings.globalColor }}>
                 <SafeMarkdown>{settings.description}</SafeMarkdown>
               </Text>
             </div>

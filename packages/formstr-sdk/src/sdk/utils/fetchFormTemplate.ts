@@ -1,8 +1,7 @@
 import { Event, SimplePool, nip19, nip44 } from "nostr-tools";
 import { AddressPointer } from "nostr-tools/lib/types/nip19";
 import { decodeNKeys } from "./nkeys.js";
-
-type Tag = string[];
+import { Tag } from "../types.js";
 
 const defaultRelays = [
   "wss://relay.damus.io/",
@@ -61,7 +60,6 @@ export const fetchFormTemplate = async (
   } catch {
     throw Error("Malformed Form Event, could not parse");
   }
-  decryptedTags.push(nameTag);
   return decryptedTags;
 };
 function hexToBytes(viewKey: string): string {

@@ -1,17 +1,28 @@
 export interface NormalizedForm {
+  settings: any;
   id: string;
-  pubkey: string;
   name: string;
-  settings: FormSettings;
+  description?: string;
   fields: Record<string, NormalizedField>;
-  fieldOrder: string[];
+  html?: {
+    form: string;
+    attachSubmit?: (callback: (values: Record<string, any>) => void) => void;
+  };
   sections?: SectionData[];
-  html?: { form: string };
+  fieldOrder: string[];
+}
+
+export interface Field {
+  id: string;
+  type: string; // "text", "option", "label", etc
+  label: string;
+  options?: { id: string; label: string }[];
+  settings?: Record<string, any>;
 }
 
 export interface NormalizedField {
   id: string;
-  type: "text" | "option" | "label";
+  type: string;
   labelHtml: string;
   options?: NormalizedOption[];
   config: FieldConfig;
@@ -53,3 +64,5 @@ export interface SectionData {
 export interface ResponseSubmission {
   [fieldId: string]: string | string[];
 }
+
+export type Tag = string[];

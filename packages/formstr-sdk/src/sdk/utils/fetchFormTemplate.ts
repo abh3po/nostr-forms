@@ -50,16 +50,21 @@ export const fetchFormTemplate = async (
     throw Error(
       `Event not found on given relays: ${JSON.stringify(relayList)}`,
     );
-  if (nostrEvent?.content === "") return nostrEvent.tags;
+  if (nostrEvent?.content === "") {
+    const returnTags = [...nostrEvent.tags, ["pubkey", nostrEvent.pubkey]];
+  }
+
   const decryptedEvent = decryptFormEvent(nostrEvent, nkeys);
   const nameTag = nostrEvent.tags.find((t) => t[0] === "name");
+  const relayTags = nostrEvent.tags.filter((t) => t[0] === "relay");
   if (!decryptedEvent)
     throw Error(`Could not decrypt form with supplied keys: ${nkeys}`);
-  let decryptedTags;
+  let decryptedTags: Tag[];
   try {
     decryptedTags = JSON.parse(decryptedEvent);
   } catch {
     throw Error("Malformed Form Event, could not parse");
   }
+  decryptedTags.push(...relayTags, ["pubkey", nostrEvent.pubkey]);
   return decryptedTags;
 };

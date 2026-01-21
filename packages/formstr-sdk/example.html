@@ -175,15 +175,16 @@
        Submit Button (fixed)
        =========================== */
       #submit-container {
-        position: sticky;
+        position: sticky; /* keeps it visible while scrolling sections */
         bottom: 0;
         display: flex;
         justify-content: center;
         padding: 1rem 0;
-        background: #fafafa;
+        background: #fafafa; /* can match form background */
         border-top: 1px solid #e5e7eb;
         z-index: 10;
       }
+
       #submit-container button {
         padding: 0.8rem 1.25rem;
         font-size: 0.95rem;
@@ -205,16 +206,24 @@
         transform: translateY(0);
         box-shadow: 0 4px 14px rgba(79, 70, 229, 0.22);
       }
+      #submit-container {
+        position: sticky; /* keeps it visible while scrolling sections */
+        bottom: 0;
+        display: flex;
+        justify-content: center;
+        padding: 1rem 0;
+        background: #fafafa; /* can match form background */
+        border-top: 1px solid #e5e7eb;
+        z-index: 10;
+      }
     </style>
   </head>
   <body>
     <div class="form-container">
       <h1>Formstr SDK Demo</h1>
       <div class="formstr-theme">
-        <form id="form-demo">
-          <div id="container"></div>
-          <div id="submit-container"></div>
-        </form>
+        <div id="container"></div>
+        <div id="submit-container"></div>
         <!-- scroll arrows -->
         <div class="scroll-arrow scroll-left" id="scroll-left">
           <svg viewBox="0 0 20 20">
@@ -247,10 +256,7 @@
         sdk.renderHtml(form);
 
         document.getElementById("container").innerHTML = form.html.form;
-
-        // Move submit button out of sections wrapper
-        const submitBtn = document.getElementById(`form-submit-${form.id}`);
-        document.getElementById("submit-container").appendChild(submitBtn);
+        sdk.attachSubmitListener(form);
 
         // Scroll arrows logic
         const body = document.querySelector(".form-body");

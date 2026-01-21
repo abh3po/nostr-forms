@@ -2,6 +2,7 @@ export interface NormalizedForm {
   settings: any;
   id: string;
   name: string;
+  pubkey: string;
   description?: string;
   fields: Record<string, NormalizedField>;
   html?: {

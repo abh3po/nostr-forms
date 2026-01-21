@@ -13,6 +13,10 @@ export default {
   plugins: [
     resolve({ browser: true }), // resolve npm packages for browser
     commonjs(), // convert CJS dependencies to ESM
-    terser(), // optional: minify
+    terser({
+      compress: {
+        drop_console: false, // KEEP console.logs
+      },
+    }), // optional: minify
   ],
 };

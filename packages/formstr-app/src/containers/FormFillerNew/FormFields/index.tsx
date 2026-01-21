@@ -2,7 +2,7 @@ import { getValidationRules } from "../validations";
 import { Form } from "antd";
 import { QuestionNode } from "../QuestionNode/QuestionNode";
 import { IFormSettings } from "../../CreateFormNew/components/FormSettings/types";
-import { Choice, Field, Option } from "../../../nostr/types";
+import { Field, Option } from "../../../nostr/types";
 
 interface FormFieldsProps {
   fields: Array<Field>;
@@ -24,7 +24,7 @@ export const FormFields: React.FC<FormFieldsProps> = ({
   return fields.map((field) => {
     let [_, fieldId, type, label, optionsString, config] = field;
     let fieldConfig = JSON.parse(config);
-    let options = JSON.parse(optionsString || "[]") as Choice[];
+    let options = JSON.parse(optionsString || "[]") as Option[];
     let rules = [
       {
         required: fieldConfig.required,

@@ -41,21 +41,7 @@ export const RightAnswer: React.FC<RightAnswerProps> = ({
         </Text>
         <InputFiller
           defaultValue={answerSettings?.validationRules?.match?.answer}
-          options={
-            choices
-              ? JSON.parse(choices).map(
-                  ([choiceId, label, configString]: [
-                    string,
-                    string,
-                    string,
-                  ]) => ({
-                    choiceId,
-                    label,
-                    configString,
-                  }),
-                )
-              : []
-          }
+          options={JSON.parse(choices || "[]")}
           fieldConfig={processedAnswerSettings}
           onChange={onChange}
         />

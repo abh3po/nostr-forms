@@ -3,13 +3,13 @@ import { InputFiller } from "./InputFiller";
 import { AnswerTypes } from "../../../constants";
 import SafeMarkdown from "../../../components/SafeMarkdown";
 import { IFormSettings } from "../../CreateFormNew/components/FormSettings/types";
-import { Choice } from "../../../nostr/types";
+import { Option } from "../../../nostr/types";
 
 interface QuestionProps {
   label: string;
   fieldConfig: any;
   fieldId: string;
-  options: Choice[];
+  options: Option[];
   inputHandler: (questionId: string, answer: string, message?: string) => void;
   required: boolean;
   disabled?: boolean;

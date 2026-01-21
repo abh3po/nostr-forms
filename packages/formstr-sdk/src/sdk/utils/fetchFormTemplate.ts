@@ -1,0 +1,69 @@
+import { Event, SimplePool, nip19, nip44 } from "nostr-tools";
+import { AddressPointer } from "nostr-tools/lib/types/nip19";
+import { decodeNKeys } from "./nkeys.js";
+
+type Tag = string[];
+
+const defaultRelays = [
+  "wss://relay.damus.io/",
+  "wss://relay.primal.net/",
+  "wss://nos.lol",
+  "wss://relay.nostr.wirednet.jp/",
+  "wss://nostr-01.yakihonne.com",
+  "wss://relay.snort.social",
+  "wss://relay.nostr.band",
+  "wss://nostr21.com",
+];
+
+export const getDefaultRelays = () => {
+  return defaultRelays;
+};
+
+const decryptFormEvent = (event: Event, nkeys?: string) => {
+  if (!nkeys) return null;
+  const { viewKey, editKey } = decodeNKeys(nkeys);
+  if (!viewKey) return null;
+  const conversationKey = nip44.v2.utils.getConversationKey(
+    hexToBytes(viewKey),
+    event.pubkey,
+  );
+  return nip44.v2.decrypt(event.content, conversationKey);
+};
+
+export const fetchFormTemplate = async (
+  naddr: string,
+  nkeys?: string,
+): Promise<Tag[] | null> => {
+  const pool = new SimplePool();
+  const { pubkey, kind, identifier, relays } = nip19.decode(naddr)
+    .data as AddressPointer;
+
+  let formIdPubkey = pubkey;
+  let relayList = relays?.length ? relays : getDefaultRelays();
+  const filter = {
+    kinds: [30168],
+    authors: [formIdPubkey],
+    "#d": [identifier],
+  };
+  const nostrEvent = await pool.get(relayList, filter);
+  if (!nostrEvent)
+    throw Error(
+      `Event not found on given relays: ${JSON.stringify(relayList)}`,
+    );
+  if (nostrEvent?.content === "") return nostrEvent.tags;
+  const decryptedEvent = decryptFormEvent(nostrEvent, nkeys);
+  const nameTag = nostrEvent.tags.find((t) => t[0] === "name");
+  if (!decryptedEvent)
+    throw Error(`Could not decrypt form with supplied keys: ${nkeys}`);
+  let decryptedTags;
+  try {
+    decryptedTags = JSON.parse(decryptedEvent);
+  } catch {
+    throw Error("Malformed Form Event, could not parse");
+  }
+  decryptedTags.push(nameTag);
+  return decryptedTags;
+};
+function hexToBytes(viewKey: string): string {
+  throw new Error("Function not implemented.");
+}

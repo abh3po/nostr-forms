@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Formstr SDK Demo</title>
+    <style>
+      body {
+        font-family: "Inter", sans-serif;
+        background-color: #f5f5f5;
+        color: #111;
+        padding: 2rem;
+      }
+      .form-container {
+        max-width: 700px;
+        margin: 0 auto;
+        background: #fff;
+        border-radius: 12px;
+        padding: 2rem;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+      }
+      h1 {
+        text-align: center;
+        margin-bottom: 1rem;
+      }
+      form > div {
+        margin-bottom: 1.5rem;
+      }
+      label {
+        display: block;
+        margin-bottom: 0.25rem;
+        font-weight: 500;
+      }
+      input[type="text"],
+      textarea {
+        width: 100%;
+        padding: 0.5rem;
+        border: 1px solid #ccc;
+        border-radius: 6px;
+        font-size: 1rem;
+      }
+      textarea {
+        min-height: 80px;
+        resize: vertical;
+      }
+      .options {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+      }
+      button {
+        display: block;
+        width: 100%;
+        padding: 0.75rem;
+        font-size: 1rem;
+        background-color: #4f46e5;
+        color: white;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: 0.2s;
+      }
+      button:hover {
+        background-color: #4338ca;
+      }
+      .section-title {
+        font-size: 1.25rem;
+        font-weight: 600;
+        margin-top: 1.5rem;
+        margin-bottom: 0.75rem;
+        color: #4f46e5;
+      }
+      p {
+        margin: 0.25rem 0 1rem 0;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="form-container">
+      <h1>Formstr SDK Demo</h1>
+      <div id="container"></div>
+    </div>
+
+    <script src="./dist/formstr.bundle.js"></script>
+    <script>
+      const sdk = new FormstrSDK.FormstrSDK();
+      const signer = async (event) => event; // placeholder signer
+
+      const naddr =
+        "naddr1qvzqqqr4mqpzpssxaejy0t8pr0zfum94q29trdgqj5zs3emk4pqt5anwnq7reuxgqy2hwumn8ghj7un9d3shjtnyv9kh2uewd9hj7qghwaehxw309aex2mrp0yh8qunfd4skctnwv46z7qgdwaehxw309ahx7uewd3hkcqg7waehxw309aex2mrp0yhxummnw3ezuamfwfjkgmn9wshx5up0qyw8wumn8ghj7mn0wd68ytfsxyh8jcttd95x7mnwv5hxxmmdqyv8wumn8ghj7un9d3shjtnndehhyapwwdhkx6tpdsq3vamnwvaz7tmjv4kxz7fwdehhxarj9e3xzmnyqyghwumn8ghj7mn0wd68yv339e3k7mgqqe4hywt0w4tsr6xr0p";
+
+      async function main() {
+        const form = await sdk.fetchForm(naddr);
+
+        // Render form HTML with SDK
+        sdk.renderHtml(form);
+        console.log("FOrm is", form.html, form.name);
+        document.getElementById("container").innerHTML = form.html.form;
+
+        // Attach submit callback
+        form.html.attachSubmit(async (values) => {
+          console.log("Form submitted values:", values);
+          await sdk.submit(form, values, signer);
+          alert("Form submitted successfully!");
+        });
+      }
+
+      main();
+    </script>
+  </body>
+</html>

@@ -2,6 +2,7 @@ import { Event, SimplePool, nip19, nip44 } from "nostr-tools";
 import { AddressPointer } from "nostr-tools/lib/types/nip19";
 import { decodeNKeys } from "./nkeys.js";
 import { Tag } from "../types.js";
+import { hexToBytes } from "@noble/hashes/utils.js";
 
 const defaultRelays = [
   "wss://relay.damus.io/",
@@ -23,7 +24,7 @@ const decryptFormEvent = (event: Event, nkeys?: string) => {
   const { viewKey, editKey } = decodeNKeys(nkeys);
   if (!viewKey) return null;
   const conversationKey = nip44.v2.utils.getConversationKey(
-    hexToBytes(viewKey),
+    viewKey,
     event.pubkey,
   );
   return nip44.v2.decrypt(event.content, conversationKey);
@@ -62,6 +63,3 @@ export const fetchFormTemplate = async (
   }
   return decryptedTags;
 };
-function hexToBytes(viewKey: string): string {
-  throw new Error("Function not implemented.");
-}

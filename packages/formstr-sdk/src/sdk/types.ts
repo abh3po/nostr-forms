@@ -11,6 +11,7 @@ export interface NormalizedForm {
   sections?: SectionData[];
   fieldOrder: string[];
   blocks?: FormBlock[];
+  relays: string[];
 }
 
 export type FormBlock = IntroBlock | SectionBlock;

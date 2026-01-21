@@ -3,12 +3,10 @@
   <head>
     <meta charset="UTF-8" />
     <title>Formstr SDK Demo</title>
-
     <style>
       /* ===========================
-         Base Page Styling
-         =========================== */
-
+       Base Page Styling
+       =========================== */
       body {
         font-family:
           Inter,
@@ -31,6 +29,7 @@
         box-shadow:
           0 20px 40px rgba(0, 0, 0, 0.08),
           0 1px 0 rgba(0, 0, 0, 0.04);
+        position: relative;
       }
 
       h1 {
@@ -42,53 +41,28 @@
       }
 
       /* ===========================
-         Formstr SDK Theme
-         =========================== */
-
-      .formstr-theme form {
+       Horizontal Sections Wrapper
+       =========================== */
+      .formstr-theme .form-body {
         display: flex;
         flex-direction: row;
         gap: 0;
         overflow-x: auto;
         scroll-snap-type: x mandatory;
         scroll-behavior: smooth;
+        padding-bottom: 2rem;
+        position: relative;
       }
 
-      /* Hide scrollbar (still scrollable) */
-      .formstr-theme form::-webkit-scrollbar {
+      .formstr-theme .form-body::-webkit-scrollbar {
         height: 8px;
       }
-
-      .formstr-theme form::-webkit-scrollbar-thumb {
+      .formstr-theme .form-body::-webkit-scrollbar-thumb {
         background: #d1d5db;
         border-radius: 999px;
       }
 
-      /* ===========================
-         Form Header
-         =========================== */
-
-      .formstr-theme .form-name {
-        font-size: 1.6rem;
-        font-weight: 700;
-        letter-spacing: -0.02em;
-        color: #111827;
-        margin-bottom: 0.25rem;
-      }
-
-      .formstr-theme .form-description {
-        font-size: 0.95rem;
-        color: #6b7280;
-        line-height: 1.6;
-        margin-bottom: 1.5rem;
-        width: "100%";
-      }
-
-      /* ===========================
-         Sections as Carousel Slides
-         =========================== */
-
-      .formstr-theme .form-section {
+      .formstr-theme .form-body .form-section {
         scroll-snap-align: start;
         min-width: 100%;
         box-sizing: border-box;
@@ -97,26 +71,44 @@
         gap: 1.5rem;
       }
 
-      .formstr-theme .section-title {
-        font-size: 1.35rem;
-        font-weight: 700;
-        letter-spacing: -0.02em;
+      /* ===========================
+       Scroll Arrows
+       =========================== */
+      .scroll-arrow {
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 2rem;
+        height: 2rem;
+        background: rgba(0, 0, 0, 0.05);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        z-index: 10;
+        transition: background 0.2s ease;
+      }
+      .scroll-arrow:hover {
+        background: rgba(0, 0, 0, 0.1);
+      }
+      .scroll-left {
+        left: 0.5rem;
+      }
+      .scroll-right {
+        right: 0.5rem;
       }
 
-      .formstr-theme .section-description {
-        font-size: 0.95rem;
-        color: #6b7280;
-        line-height: 1.6;
+      .scroll-arrow svg {
+        width: 1rem;
+        height: 1rem;
+        fill: #6366f1;
       }
 
       /* ===========================
-         Field Cards
-         =========================== */
-
-      .formstr-theme
-        form
-        > section.form-section
-        > *:not(.section-title):not(.section-description) {
+       Field Cards
+       =========================== */
+      .form-section > *:not(.section-title):not(.section-description) {
         background: #ffffff;
         border-radius: 14px;
         padding: 1.1rem 1.25rem;
@@ -124,16 +116,14 @@
         box-shadow: 0 1px 0 rgba(0, 0, 0, 0.02);
       }
 
-      /* Labels */
-      .formstr-theme label {
+      label {
         font-weight: 500;
         font-size: 0.9rem;
         color: #111827;
       }
 
-      /* Text inputs */
-      .formstr-theme input[type="text"],
-      .formstr-theme textarea {
+      input[type="text"],
+      textarea {
         width: 100%;
         padding: 0.7rem 0.85rem;
         font-size: 0.95rem;
@@ -144,19 +134,14 @@
           border-color 0.15s ease,
           box-shadow 0.15s ease;
       }
-
-      .formstr-theme input[type="text"]:focus,
-      .formstr-theme textarea:focus {
+      input[type="text"]:focus,
+      textarea:focus {
         outline: none;
         border-color: #6366f1;
         box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.18);
       }
 
-      /* ===========================
-         Option / Radio Groups
-         =========================== */
-
-      .formstr-theme .option-group {
+      .option-group {
         display: flex;
         flex-direction: column;
         gap: 0.6rem;
@@ -165,24 +150,18 @@
         padding: 1rem 1.1rem;
         border: 1px solid #e5e7eb;
       }
-
-      .formstr-theme .option-group label {
+      .option-group label {
         display: flex;
         align-items: center;
         gap: 0.6rem;
         font-size: 0.95rem;
         cursor: pointer;
       }
-
-      .formstr-theme input[type="radio"] {
+      input[type="radio"] {
         accent-color: #6366f1;
       }
 
-      /* ===========================
-         Label-only fields
-         =========================== */
-
-      .formstr-theme p {
+      p {
         font-size: 0.95rem;
         color: #374151;
         line-height: 1.6;
@@ -193,12 +172,19 @@
       }
 
       /* ===========================
-         Submit Button
-         =========================== */
-
-      .formstr-theme button[type="submit"] {
-        align-self: flex-start;
-        margin-top: 1rem;
+       Submit Button (fixed)
+       =========================== */
+      #submit-container {
+        position: sticky;
+        bottom: 0;
+        display: flex;
+        justify-content: center;
+        padding: 1rem 0;
+        background: #fafafa;
+        border-top: 1px solid #e5e7eb;
+        z-index: 10;
+      }
+      #submit-container button {
         padding: 0.8rem 1.25rem;
         font-size: 0.95rem;
         font-weight: 600;
@@ -206,48 +192,74 @@
         border: none;
         cursor: pointer;
         background: linear-gradient(135deg, #6366f1, #4f46e5);
-        color: #ffffff;
+        color: #fff;
         transition:
           transform 0.12s ease,
           box-shadow 0.12s ease;
       }
-
-      .formstr-theme button[type="submit"]:hover {
+      #submit-container button:hover {
         transform: translateY(-1px);
         box-shadow: 0 8px 22px rgba(79, 70, 229, 0.28);
       }
-
-      .formstr-theme button[type="submit"]:active {
+      #submit-container button:active {
         transform: translateY(0);
         box-shadow: 0 4px 14px rgba(79, 70, 229, 0.22);
       }
     </style>
   </head>
-
   <body>
     <div class="form-container">
       <h1>Formstr SDK Demo</h1>
-
       <div class="formstr-theme">
-        <div id="container"></div>
+        <form id="form-demo">
+          <div id="container"></div>
+          <div id="submit-container"></div>
+        </form>
+        <!-- scroll arrows -->
+        <div class="scroll-arrow scroll-left" id="scroll-left">
+          <svg viewBox="0 0 20 20">
+            <path
+              d="M12.707 15.707a1 1 0 0 1-1.414 0L6.586 11a1 1 0 0 1 0-1.414l4.707-4.707a1 1 0 1 1 1.414 1.414L9.414 10l3.293 3.293a1 1 0 0 1 0 1.414z"
+            />
+          </svg>
+        </div>
+        <div class="scroll-arrow scroll-right" id="scroll-right">
+          <svg viewBox="0 0 20 20">
+            <path
+              d="M7.293 4.293a1 1 0 0 1 1.414 0L13.414 10l-4.707 4.707a1 1 0 1 1-1.414-1.414L10.586 10 7.293 6.707a1 1 0 0 1 0-1.414z"
+            />
+          </svg>
+        </div>
       </div>
     </div>
 
     <script src="./dist/formstr.bundle.js"></script>
     <script>
       const sdk = new FormstrSDK.FormstrSDK();
-      const signer = async (event) => event;
-
-      const naddr =
-        "naddr1qvzqqqr4mqpzpssxaejy0t8pr0zfum94q29trdgqj5zs3emk4pqt5anwnq7reuxgqy2hwumn8ghj7un9d3shjtnyv9kh2uewd9hj7qghwaehxw309aex2mrp0yh8qunfd4skctnwv46z7qgdwaehxw309ahx7uewd3hkcqg7waehxw309aex2mrp0yhxummnw3ezuamfwfjkgmn9wshx5up0qyw8wumn8ghj7mn0wd68ytfsxyh8jcttd95x7mnwv5hxxmmdqyv8wumn8ghj7un9d3shjtnndehhyapwwdhkx6tpdsq3vamnwvaz7tmjv4kxz7fwdehhxarj9e3xzmnyqyghwumn8ghj7mn0wd68yv339e3k7mgqqe4hywt0w4tsr6xr0p";
 
       async function main() {
-        const form = await sdk.fetchForm(naddr);
+        const naddr =
+          "naddr1qvzqqqr4mqpzp4s20jn3nd8vrhwl3kkz48t52u43ktx5l5zed6rzc9uzh0v9rp73qy2hwumn8ghj7un9d3shjtnyv9kh2uewd9hj7qghwaehxw309aex2mrp0yh8qunfd4skctnwv46z7qgdwaehxw309ahx7uewd3hkcqg7waehxw309aex2mrp0yhxummnw3ezuamfwfjkgmn9wshx5up0qyw8wumn8ghj7mn0wd68ytfsxyh8jcttd95x7mnwv5hxxmmdqyv8wumn8ghj7un9d3shjtnndehhyapwwdhkx6tpdsq3vamnwvaz7tmjv4kxz7fwdehhxarj9e3xzmnyqyghwumn8ghj7mn0wd68yv339e3k7mgqqekyz7tt23eszuk4n8";
+        const viewKey =
+          "8cf912f49ea084ccaff51f6d9de6324eedad56110598cd381218c70fed800c8f";
 
-        // renderHtml now uses blocks internally
+        const form = await sdk.fetchFormWithViewKey(naddr, viewKey);
         sdk.renderHtml(form);
 
         document.getElementById("container").innerHTML = form.html.form;
+
+        // Move submit button out of sections wrapper
+        const submitBtn = document.getElementById(`form-submit-${form.id}`);
+        document.getElementById("submit-container").appendChild(submitBtn);
+
+        // Scroll arrows logic
+        const body = document.querySelector(".form-body");
+        document.getElementById("scroll-left").onclick = () => {
+          body.scrollBy({ left: -body.offsetWidth, behavior: "smooth" });
+        };
+        document.getElementById("scroll-right").onclick = () => {
+          body.scrollBy({ left: body.offsetWidth, behavior: "smooth" });
+        };
       }
 
       main();

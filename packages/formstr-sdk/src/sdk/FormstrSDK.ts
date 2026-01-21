@@ -1,4 +1,10 @@
 import {
+  finalizeEvent,
+  generateSecretKey,
+  getPublicKey,
+  UnsignedEvent,
+} from "nostr-tools";
+import {
   Field,
   FieldConfig,
   FormBlock,
@@ -9,10 +15,22 @@ import {
   Tag,
 } from "./types.js";
 import { fetchFormTemplate } from "./utils/fetchFormTemplate.js";
-import { getOrderedFieldIds, stripHtml } from "./utils/helper.js";
+import { stripHtml } from "./utils/helper.js";
+import { encodeNKeys } from "./utils/nkeys.js";
+import { pool } from "./pool.js";
 
 export class FormstrSDK {
   /** Fetch a form via NIP-101 naddr */
+
+  //Discouraged use, will completely move to NKeys once app migrates.
+  async fetchFormWithViewKey(
+    naddr: string,
+    viewKey: string,
+  ): Promise<NormalizedForm> {
+    const nkeys = encodeNKeys({ viewKey });
+    return await this.fetchForm(naddr, nkeys);
+  }
+
   async fetchForm(naddr: string, nkeys?: string): Promise<NormalizedForm> {
     const rawForm = await fetchFormTemplate(naddr, nkeys);
     if (!rawForm) return this.normalizeForm([["name", "Form Not Found"]]);
@@ -30,6 +48,8 @@ export class FormstrSDK {
     const idTag = raw.find((t) => t[0] === "d");
     const nameTag = raw.find((t) => t[0] === "name");
     const settingsTag = raw.find((t) => t[0] === "settings");
+    const relaysTag = raw.find((t) => t[0] === "relay");
+    const relays = relaysTag?.map((r) => r[1]) || [];
 
     const formSettings: FormSettings = settingsTag
       ? JSON.parse(settingsTag[1])
@@ -106,6 +126,7 @@ export class FormstrSDK {
       fields,
       fieldOrder,
       settings: formSettings,
+      relays,
     };
   }
 
@@ -179,12 +200,13 @@ export class FormstrSDK {
 
     const bodyHtml = form.blocks?.map(renderBlock).join("\n");
 
+    // Neutral wrapper
     form.html = {
       form: `
-      <form id="form-${form.id}">
+      <div class="form-body">
         ${bodyHtml}
-        <button type="submit">Submit</button>
-      </form>
+      </div>
+      <button id="form-submit-${form.id}" type="submit">Submit</button>
     `,
     };
 
@@ -197,6 +219,7 @@ export class FormstrSDK {
     values: Record<string, any>,
     signer: (event: any) => Promise<any>,
   ) {
+    const finalSigner = signer ?? createEphemeralSigner();
     const tags = Object.entries(values).map(([fieldId, value]) => {
       if (Array.isArray(value)) value = value.join(";"); // multi-choice
       return ["response", fieldId, value, "{}"];
@@ -207,10 +230,22 @@ export class FormstrSDK {
       content: "",
       tags: [["a", `30168:${form.id}:${form.id}`], ...tags],
       created_at: Math.floor(Date.now() / 1000),
-      pubkey: "", // signer will fill
     };
 
-    const signed = await signer(event);
-    // await sendResponseEvent(this.relays, signed);
+    const signed = await finalSigner(event);
+    await pool.publish(form.relays, signed);
   }
+}
+export function createEphemeralSigner() {
+  const sk = generateSecretKey();
+  const pk = getPublicKey(sk);
+
+  return async (event: UnsignedEvent) => {
+    return finalizeEvent(
+      {
+        ...event,
+      },
+      sk,
+    );
+  };
 }

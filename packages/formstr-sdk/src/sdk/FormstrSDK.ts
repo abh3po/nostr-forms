@@ -1,9 +1,11 @@
 import {
   Field,
   FieldConfig,
+  FormBlock,
   FormSettings,
   NormalizedField,
   NormalizedForm,
+  SectionBlock,
   Tag,
 } from "./types.js";
 import { fetchFormTemplate } from "./utils/fetchFormTemplate.js";
@@ -25,9 +27,10 @@ export class FormstrSDK {
 
   /** Normalize raw NIP-101 form tags into JS object */
   normalizeForm(raw: Tag[]): NormalizedForm {
-    const idTag = raw.find((t: any[]) => t[0] === "d");
-    const nameTag = raw.find((t: any[]) => t[0] === "name");
-    const settingsTag = raw.find((t: any[]) => t[0] === "settings");
+    const idTag = raw.find((t) => t[0] === "d");
+    const nameTag = raw.find((t) => t[0] === "name");
+    const settingsTag = raw.find((t) => t[0] === "settings");
+
     const formSettings: FormSettings = settingsTag
       ? JSON.parse(settingsTag[1])
       : {};
@@ -40,40 +43,70 @@ export class FormstrSDK {
       .forEach((t) => {
         const [_, fieldId, type, label, optionsStr, configStr] = t;
 
-        const options = optionsStr
-          ? JSON.parse(optionsStr).map((o: any[]) => ({
-              id: o[0],
-              labelHtml: o[1],
-              config: o[2] ? JSON.parse(o[2]) : undefined,
-            }))
-          : undefined;
-
-        const config: FieldConfig = configStr ? JSON.parse(configStr) : {};
-
         fields[fieldId] = {
           id: fieldId,
           type,
           labelHtml: label,
-          options,
-          config,
+          options: optionsStr
+            ? JSON.parse(optionsStr).map((o: any[]) => ({
+                id: o[0],
+                labelHtml: stripHtml(o[1]),
+                config: o[2] ? JSON.parse(o[2]) : undefined,
+              }))
+            : undefined,
+          config: configStr ? JSON.parse(configStr) : {},
         };
 
         fieldOrder.push(fieldId);
       });
 
-    const normalized: NormalizedForm = {
+    const blocks: FormBlock[] = [];
+
+    // Intro block (optional)
+    if (nameTag || formSettings.description) {
+      blocks.push({
+        type: "intro",
+        title: stripHtml(nameTag?.[1]),
+        description: stripHtml(formSettings.description),
+      });
+    }
+
+    // Section blocks
+    if (formSettings.sections?.length) {
+      blocks.push(
+        ...[...formSettings.sections]
+          .sort((a, b) => a.order - b.order)
+          .map(
+            (s): SectionBlock => ({
+              type: "section",
+              id: s.id,
+              title: s.title,
+              description: s.description,
+              questionIds: s.questionIds,
+              order: s.order,
+            }),
+          ),
+      );
+    } else {
+      // Fallback: single implicit section
+      blocks.push({
+        type: "section",
+        id: "default",
+        title: undefined,
+        description: undefined,
+        questionIds: fieldOrder,
+        order: 0,
+      });
+    }
+
+    return {
       id: idTag?.[1] || "",
+      blocks,
       name: stripHtml(nameTag?.[1]),
-      description: stripHtml(
-        settingsTag ? JSON.parse(settingsTag[1]).description : "",
-      ),
       fields,
       fieldOrder,
-      sections: formSettings.sections,
       settings: formSettings,
     };
-
-    return normalized;
   }
 
   /** Render HTML form with submit wired using FormData */
@@ -111,40 +144,50 @@ export class FormstrSDK {
       return "";
     };
 
-    const bodyHtml =
-      form.sections && form.sections.length
-        ? [...form.sections]
-            .sort((a, b) => a.order - b.order)
-            .map(
-              (section) => `
-          <section class="form-section">
-            <h2 class="section-title">${section.title}</h2>
-            ${
-              section.description
-                ? `<div class="section-description">${section.description}</div>`
-                : ""
-            }
-            ${section.questionIds
-              .map((id) => renderField(form.fields[id]))
-              .join("\n")}
-          </section>
-        `,
-            )
-            .join("\n")
-        : getOrderedFieldIds(form)
-            .map((id) => renderField(form.fields[id]))
-            .join("\n");
+    const renderBlock = (block: any) => {
+      if (block.type === "intro") {
+        return `
+        <section class="form-section form-intro">
+          ${block.title ? `<div class="form-name">${block.title}</div>` : ""}
+          ${
+            block.description
+              ? `<div class="form-description">${block.description}</div>`
+              : ""
+          }
+        </section>
+      `;
+      }
 
-    const formHtml = `
-    <form id="form-${form.id}">
-      <div class="form-name">${form.name}</div>
-      <div class="form-description">${form.settings.description || ""}</div>
-      ${bodyHtml}
-      <button type="submit">Submit</button>
-    </form>
-  `;
+      if (block.type === "section") {
+        return `
+        <section class="form-section">
+          ${block.title ? `<h2 class="section-title">${block.title}</h2>` : ""}
+          ${
+            block.description
+              ? `<div class="section-description">${block.description}</div>`
+              : ""
+          }
+          ${block.questionIds
+            .map((id: string) => renderField(form.fields[id]))
+            .join("\n")}
+        </section>
+      `;
+      }
 
-    form.html = { form: formHtml };
+      return "";
+    };
+
+    const bodyHtml = form.blocks?.map(renderBlock).join("\n");
+
+    form.html = {
+      form: `
+      <form id="form-${form.id}">
+        ${bodyHtml}
+        <button type="submit">Submit</button>
+      </form>
+    `,
+    };
+
     return form;
   }
 

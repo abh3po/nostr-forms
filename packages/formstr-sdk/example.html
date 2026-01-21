@@ -42,16 +42,32 @@
       }
 
       /* ===========================
-         Formstr SDK – Polished Theme
+         Formstr SDK Theme
          =========================== */
 
       .formstr-theme form {
         display: flex;
-        flex-direction: column;
-        gap: 1.75rem;
+        flex-direction: row;
+        gap: 0;
+        overflow-x: auto;
+        scroll-snap-type: x mandatory;
+        scroll-behavior: smooth;
       }
 
-      /* Form title */
+      /* Hide scrollbar (still scrollable) */
+      .formstr-theme form::-webkit-scrollbar {
+        height: 8px;
+      }
+
+      .formstr-theme form::-webkit-scrollbar-thumb {
+        background: #d1d5db;
+        border-radius: 999px;
+      }
+
+      /* ===========================
+         Form Header
+         =========================== */
+
       .formstr-theme .form-name {
         font-size: 1.6rem;
         font-weight: 700;
@@ -60,19 +76,52 @@
         margin-bottom: 0.25rem;
       }
 
-      /* Form description */
       .formstr-theme .form-description {
         font-size: 0.95rem;
         color: #6b7280;
         line-height: 1.6;
-        margin-bottom: 1.25rem;
+        margin-bottom: 1.5rem;
+        width: "100%";
       }
 
-      /* Field wrapper spacing */
-      .formstr-theme > div {
+      /* ===========================
+         Sections as Carousel Slides
+         =========================== */
+
+      .formstr-theme .form-section {
+        scroll-snap-align: start;
+        min-width: 100%;
+        box-sizing: border-box;
         display: flex;
         flex-direction: column;
-        gap: 0.35rem;
+        gap: 1.5rem;
+      }
+
+      .formstr-theme .section-title {
+        font-size: 1.35rem;
+        font-weight: 700;
+        letter-spacing: -0.02em;
+      }
+
+      .formstr-theme .section-description {
+        font-size: 0.95rem;
+        color: #6b7280;
+        line-height: 1.6;
+      }
+
+      /* ===========================
+         Field Cards
+         =========================== */
+
+      .formstr-theme
+        form
+        > section.form-section
+        > *:not(.section-title):not(.section-description) {
+        background: #ffffff;
+        border-radius: 14px;
+        padding: 1.1rem 1.25rem;
+        border: 1px solid #e5e7eb;
+        box-shadow: 0 1px 0 rgba(0, 0, 0, 0.02);
       }
 
       /* Labels */
@@ -82,7 +131,7 @@
         color: #111827;
       }
 
-      /* Inputs */
+      /* Text inputs */
       .formstr-theme input[type="text"],
       .formstr-theme textarea {
         width: 100%;
@@ -103,20 +152,36 @@
         box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.18);
       }
 
-      /* Option / radio groups */
-      .formstr-theme div[class] {
+      /* ===========================
+         Option / Radio Groups
+         =========================== */
+
+      .formstr-theme .option-group {
+        display: flex;
+        flex-direction: column;
+        gap: 0.6rem;
         background: #f9fafb;
         border-radius: 12px;
-        padding: 1rem;
+        padding: 1rem 1.1rem;
         border: 1px solid #e5e7eb;
+      }
+
+      .formstr-theme .option-group label {
+        display: flex;
+        align-items: center;
+        gap: 0.6rem;
+        font-size: 0.95rem;
+        cursor: pointer;
       }
 
       .formstr-theme input[type="radio"] {
         accent-color: #6366f1;
-        margin-right: 0.5rem;
       }
 
-      /* Paragraph / label-only fields */
+      /* ===========================
+         Label-only fields
+         =========================== */
+
       .formstr-theme p {
         font-size: 0.95rem;
         color: #374151;
@@ -127,10 +192,13 @@
         border: 1px solid #e5e7eb;
       }
 
-      /* Submit button */
+      /* ===========================
+         Submit Button
+         =========================== */
+
       .formstr-theme button[type="submit"] {
         align-self: flex-start;
-        margin-top: 0.5rem;
+        margin-top: 1rem;
         padding: 0.8rem 1.25rem;
         font-size: 0.95rem;
         font-weight: 600;
@@ -160,7 +228,6 @@
     <div class="form-container">
       <h1>Formstr SDK Demo</h1>
 
-      <!-- SDK styling boundary -->
       <div class="formstr-theme">
         <div id="container"></div>
       </div>
@@ -176,14 +243,11 @@
 
       async function main() {
         const form = await sdk.fetchForm(naddr);
-        sdk.renderHtml(form);
-        document.getElementById("container").innerHTML = form.html.form;
 
-        form.html.attachSubmit(async (values) => {
-          console.log("Form submitted values:", values);
-          await sdk.submit(form, values, signer);
-          alert("Form submitted successfully!");
-        });
+        // renderHtml now uses blocks internally
+        sdk.renderHtml(form);
+
+        document.getElementById("container").innerHTML = form.html.form;
       }
 
       main();

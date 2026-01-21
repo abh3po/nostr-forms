@@ -10,6 +10,24 @@ export interface NormalizedForm {
   };
   sections?: SectionData[];
   fieldOrder: string[];
+  blocks?: FormBlock[];
+}
+
+export type FormBlock = IntroBlock | SectionBlock;
+
+export interface IntroBlock {
+  type: "intro";
+  title?: string;
+  description?: string;
+}
+
+export interface SectionBlock {
+  type: "section";
+  id: string;
+  title?: string;
+  description?: string;
+  questionIds: string[];
+  order: number;
 }
 
 export interface Field {

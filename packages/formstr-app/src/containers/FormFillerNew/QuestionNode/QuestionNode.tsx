@@ -3,13 +3,14 @@ import { InputFiller } from "./InputFiller";
 import { AnswerTypes } from "../../../constants";
 import SafeMarkdown from "../../../components/SafeMarkdown";
 import { IFormSettings } from "../../CreateFormNew/components/FormSettings/types";
-import { Choice } from "../../../nostr/types";
+import { Option } from "../../../nostr/types";
+import Settings from "../../CreateFormNew/components/Settings";
 
 interface QuestionProps {
   label: string;
   fieldConfig: any;
   fieldId: string;
-  options: Choice[];
+  options: Option[];
   inputHandler: (questionId: string, answer: string, message?: string) => void;
   required: boolean;
   disabled?: boolean;
@@ -43,6 +44,7 @@ export const QuestionNode: React.FC<QuestionProps> = ({
       data-testid={`${testId}:card`}
       style={{
         backgroundColor: `rgba(255, 255, 255,${formSettings.cardTransparency})`, // 0.5 is opacity
+        color: formSettings.globalColor || "black",
       }}
     >
       {required && <span style={{ color: "#ea8dea" }}>* &nbsp;</span>}

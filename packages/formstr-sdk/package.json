@@ -1,6 +1,6 @@
 {
   "name": "@formstr/sdk",
-  "version": "0.0.4-alpha",
+  "version": "0.1.0",
   "repository": {
     "type": "git",
     "url": "https://github.com/abhay-raizada/nostr-forms"
@@ -18,17 +18,21 @@
     "ts-jest": "^29.1.1",
     "typescript": "^5.2.2"
   },
-  "main": "dist/formstr/formstr.js",
+  "main": "dist/main.js",
   "files": [
     "dist/**"
   ],
   "scripts": {
-    "build": "tsc --build",
+    "build": "tsc --build && rollup -c rollup.browser.config.js",
     "test": "jest --coverage",
     "lint": "eslint src/",
     "lint:fix": "eslint src/ --fix"
   },
   "devDependencies": {
-    "@babel/plugin-proposal-private-property-in-object": "^7.21.11"
+    "@babel/plugin-proposal-private-property-in-object": "^7.21.11",
+    "@rollup/plugin-commonjs": "^29.0.0",
+    "@rollup/plugin-node-resolve": "^16.0.3",
+    "rollup": "^4.55.2",
+    "rollup-plugin-terser": "^7.0.2"
   }
 }

@@ -52,7 +52,7 @@ export const FormRenderer: React.FC<FormRendererProps> = ({
 }) => {
   const name = formTemplate.find((tag) => tag[0] === "name")?.[1] || "";
   const settings = JSON.parse(
-    formTemplate.find((tag) => tag[0] === "settings")?.[1] || "{}"
+    formTemplate.find((tag) => tag[0] === "settings")?.[1] || "{}",
   ) as IFormSettings;
   const fields = formTemplate.filter((tag) => tag[0] === "field") as Field[];
 
@@ -78,12 +78,12 @@ export const FormRenderer: React.FC<FormRendererProps> = ({
 
     const contentItems: ContentItem[] = [];
     const sectionedQuestionIds = new Set(
-      sections.flatMap((section: SectionData) => section.questionIds)
+      sections.flatMap((section: SectionData) => section.questionIds),
     );
 
     // Get unsectioned questions that appear before any section
     const unsectionedFields = fields.filter(
-      (field) => !sectionedQuestionIds.has(field[1])
+      (field) => !sectionedQuestionIds.has(field[1]),
     );
 
     if (unsectionedFields.length > 0) {
@@ -101,7 +101,7 @@ export const FormRenderer: React.FC<FormRendererProps> = ({
     sections.forEach((section: SectionData) => {
       const sectionQuestionIds = new Set(section.questionIds);
       const sectionFields = fields.filter((field) =>
-        sectionQuestionIds.has(field[1])
+        sectionQuestionIds.has(field[1]),
       );
 
       if (sectionFields.length > 0) {
@@ -281,11 +281,15 @@ export const FormRenderer: React.FC<FormRendererProps> = ({
       <div className="filler-container">
         <div className="form-filler">
           {!hideTitleImage && (
-            <FormBanner imageUrl={settings.titleImageUrl} formTitle={name} />
+            <FormBanner
+              imageUrl={settings.titleImageUrl}
+              formTitle={name}
+              globalColor={settings.globalColor}
+            />
           )}
           {!hideDescription && settings?.description && (
             <div className="form-description">
-              <Text>
+              <Text style={{ color: settings.globalColor || "black" }}>
                 <SafeMarkdown>{settings.description}</SafeMarkdown>
               </Text>
             </div>

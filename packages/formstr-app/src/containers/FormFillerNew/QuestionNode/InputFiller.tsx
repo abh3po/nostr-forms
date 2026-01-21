@@ -7,11 +7,11 @@ import { DateFiller } from "./InputTypes/DateFiller";
 import { TimeFiller } from "./InputTypes/TimeFiller";
 import { SignatureFiller } from "./InputTypes/SignatureFiller";
 import { DateTimeFiller } from "./InputTypes/DateTimeFiller";
-import { AnswerTypes, Choice, Option } from "../../../nostr/types";
+import { AnswerTypes, Option } from "../../../nostr/types";
 
 interface InputFillerProps {
   fieldConfig: any;
-  options: Choice[];
+  options: Option[];
   onChange: (answer: string, message?: string) => void;
   defaultValue?: string | number | boolean;
   disabled?: boolean;

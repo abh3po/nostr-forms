@@ -6,18 +6,26 @@ const { Text } = Typography;
 function FormBanner({
   imageUrl,
   formTitle,
+  globalColor,
 }: {
   imageUrl?: string;
   formTitle: string;
+  globalColor?: string;
 }) {
   const settings = {
     name: formTitle,
     image: imageUrl,
+    globalColor,
   };
 
   return (
     <StyleWrapper className="form-title" $titleImageUrl={settings.image}>
-      <Text className="title-text"><SafeMarkdown>{settings.name}</SafeMarkdown></Text>
+      <Text
+        className="title-text"
+        style={{ color: settings.globalColor || "black" }}
+      >
+        <SafeMarkdown>{settings.name}</SafeMarkdown>
+      </Text>
     </StyleWrapper>
   );
 }

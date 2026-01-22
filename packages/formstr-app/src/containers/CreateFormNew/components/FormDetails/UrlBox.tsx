@@ -1,4 +1,4 @@
-import { Button, Tooltip } from "antd";
+import { Button, Tooltip, Typography } from "antd";
 import { CopyOutlined, LinkOutlined } from "@ant-design/icons";
 import { useState } from "react";
 import { isMobile } from "../../../../utils/utility";
@@ -8,11 +8,13 @@ export const UrlBox = ({
   url,
   showFullUrl = false,
   maxWidth = 400, // optional fixed width
+  warning,
 }: {
   label: string;
   url: string;
   showFullUrl?: boolean;
   maxWidth?: number;
+  warning?: string;
 }) => {
   const [copied, setCopied] = useState(false);
 
@@ -44,6 +46,7 @@ export const UrlBox = ({
               overflow: "hidden",
               whiteSpace: showFullUrl ? "normal" : "nowrap",
               textOverflow: showFullUrl ? "clip" : "ellipsis",
+
               flex: 1, // ✅ allow it to take remaining space, shrink if needed
             }}
           >
@@ -55,13 +58,27 @@ export const UrlBox = ({
                 display: "inline-block",
                 paddingTop: 10,
                 maxWidth: "100%",
-                overflow: "hidden",
                 textOverflow: showFullUrl ? "clip" : "ellipsis",
+
                 whiteSpace: showFullUrl ? "normal" : "nowrap",
               }}
             >
               {url}
             </a>
+            {warning && (
+              <div
+                style={{
+                  marginTop: 6,
+                  fontSize: 12,
+                  color: "#b45309",
+                  whiteSpace: "normal",
+                  wordBreak: "break-word",
+                  overflowWrap: "anywhere",
+                }}
+              >
+                ⚠️ {warning}
+              </div>
+            )}
           </div>
         </Tooltip>
 

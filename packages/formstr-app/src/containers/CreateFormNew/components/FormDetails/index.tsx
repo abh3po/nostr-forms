@@ -10,10 +10,11 @@ import {
 import { ShareTab } from "./ShareTab";
 import { EmbedTab } from "./EmbedTab";
 import { SaveStatus } from "./SaveStatus";
-import { saveToDevice, saveToMyForms } from "./utils/saveHelpers";
+import { saveToDevice } from "./utils/saveHelpers";
 import { CustomSlugForm } from "./payments/customSlugForm";
 import { useNavigate } from "react-router-dom";
 import { makeFormNAddr } from "../../../../utils/utility";
+import { useMyForms } from "../../../../provider/MyFormsProvider";
 
 export const FormDetails = ({
   isOpen,
@@ -37,10 +38,8 @@ export const FormDetails = ({
   disablePreview?: boolean;
 }) => {
   const [savedLocally, setSavedLocally] = useState(false);
-  const [savedOnNostr, setSavedOnNostr] = useState<null | "saving" | "saved">(
-    null
-  );
   const { pubkey: userPub, requestPubkey } = useProfileContext();
+  const { saveToMyForms, inMyForms } = useMyForms();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -53,18 +52,9 @@ export const FormDetails = ({
       () => {
         setSavedLocally(true);
       },
-      viewKey
+      viewKey,
     );
-    if (userPub)
-      saveToMyForms(
-        pubKey,
-        secretKey,
-        formId,
-        relays,
-        userPub,
-        setSavedOnNostr,
-        viewKey
-      );
+    if (userPub) saveToMyForms(pubKey, secretKey, formId, relays, viewKey);
   }, [userPub]);
 
   const formUrl = constructFormUrl(
@@ -72,14 +62,14 @@ export const FormDetails = ({
     formId,
     relays,
     viewKey,
-    disablePreview
+    disablePreview,
   );
   const responsesUrl = constructNewResponseUrl(
     secretKey,
     formId,
     relays,
     viewKey,
-    disablePreview
+    disablePreview,
   );
 
   const [activeTab, setActiveTab] = useState<"share" | "embed">("share");
@@ -128,8 +118,8 @@ export const FormDetails = ({
                   secretKey,
                   makeFormNAddr(pubKey, formId, relays),
                   viewKey,
-                  disablePreview
-                )
+                  disablePreview,
+                ),
               )
             }
           />
@@ -137,7 +127,7 @@ export const FormDetails = ({
           <Divider />
           <SaveStatus
             savedLocally={savedLocally}
-            savedOnNostr={savedOnNostr}
+            savedOnNostr={inMyForms(pubKey, formId)}
             userPub={userPub}
             requestPubkey={requestPubkey}
           />

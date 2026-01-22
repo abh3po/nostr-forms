@@ -9,7 +9,7 @@ export const SaveStatus = ({
   requestPubkey,
 }: {
   savedLocally: boolean;
-  savedOnNostr: null | "saving" | "saved";
+  savedOnNostr: boolean;
   userPub: string | undefined;
   requestPubkey: () => void;
 }) => {
@@ -18,15 +18,13 @@ export const SaveStatus = ({
       <div>Saved Locally? {savedLocally ? "✅" : "❌"}</div>
       {userPub ? (
         <div className="nostr-save-status">
-          {savedOnNostr === "saving" ? (
+          {!savedOnNostr ? (
             <div className="saving-indicator">
               <Text>Saving to nostr profile...</Text>
               <Spin size="small" style={{ marginLeft: 4 }} />
             </div>
           ) : (
-            <div>
-              Saved To Profile? {savedOnNostr === "saved" ? "✅" : "❌"}
-            </div>
+            <div>Saved To Profile? {savedOnNostr ? "✅" : "❌"}</div>
           )}
         </div>
       ) : (

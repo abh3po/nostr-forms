@@ -4,6 +4,7 @@ import Routing from "./components/Routing";
 import { ProfileProvider } from "./provider/ProfileProvider";
 import { ApplicationProvider } from "./provider/ApplicationProvider";
 import { TemplateProvider } from "./provider/TemplateProvider";
+import { MyFormsProvider } from "./provider/MyFormsProvider";
 
 function App() {
   return (
@@ -11,9 +12,11 @@ function App() {
       <div className="App">
         <ApplicationProvider>
           <ProfileProvider>
-            <TemplateProvider>
-              <Routing />
-            </TemplateProvider>
+            <MyFormsProvider>
+              <TemplateProvider>
+                <Routing />
+              </TemplateProvider>
+            </MyFormsProvider>
           </ProfileProvider>
         </ApplicationProvider>
       </div>

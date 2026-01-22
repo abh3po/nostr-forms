@@ -4,11 +4,8 @@ import {
   finalizeEvent,
   generateSecretKey,
   getPublicKey,
-  UnsignedEvent,
 } from "nostr-tools";
 import {
-  Field,
-  FieldConfig,
   FormBlock,
   FormSettings,
   NormalizedField,

@@ -90,8 +90,8 @@ export const FormDetails = ({
           bordered={false}
           tabList={[
             { key: "share", label: "Share" },
-            { key: "embed", label: "Embed as iframe" },
             { key: "sdk", label: "Embed with SDK " },
+            { key: "embed", label: "Embed as iframe" },
           ]}
           onTabChange={(key) => setActiveTab(key as "share" | "embed" | "sdk")}
           style={{

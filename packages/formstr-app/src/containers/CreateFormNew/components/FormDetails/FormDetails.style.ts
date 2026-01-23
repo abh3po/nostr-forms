@@ -36,7 +36,7 @@ export default styled.div`
   }
 
   .embedded-code {
-    width: 50%;
+    width: 100%;
     max-width: 100%;
     word-wrap: break-word;
     overflow-wrap: anywhere;

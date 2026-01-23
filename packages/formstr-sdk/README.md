@@ -1,174 +1,166 @@
 # Formstr SDK 📦
 
-A lightweight SDK for creating, rendering, and submitting Nostr-forms with NIP-101 compatibility. Built for developers who want to integrate dynamic forms into their Nostr-based applications.
+A lightweight JavaScript SDK for fetching, rendering, and submitting Nostr forms compatible with NIP-101.
 
----
+Designed for developers who want to embed dynamic, relay-hosted forms into web apps with minimal setup.
 
-## 📌 Key Features
+## Features
 
-- **NIP-101 Form Support**: Fetch and render forms using `naddr` identifiers
-- **HTML Rendering**: Auto-generates semantic HTML with customizable CSS classes
-- **Validation Framework**: Built-in field validation through `FieldConfig`
-- **Response Submission**: Sign and submit form responses via Nostr relays
-- **Modular Architecture**: Clean separation of form normalization, rendering, and submission
+NIP-101 compatible form fetching via naddr
 
----
+Automatic normalization of Nostr form events
 
-## 🧰 Getting Started
+HTML form rendering (framework-agnostic)
 
-### 1. Install
+Built-in submit handling using FormData
 
-```bash
+Nostr-native responses (kind 1069)
+
+Ephemeral signer by default, pluggable custom signer
+
+## Installation
+
+Node / Bundlers
+
+```
 npm install @formstr/sdk
-# or
+```
+
+### or
+
+```
 yarn add @formstr/sdk
 ```
 
-### 2. Basic Usage
+Browser (CDN, no build step)
+
+<script type="module">
+  import { FormstrSDK } from "https://cdn.jsdelivr.net/npm/@formstr/sdk/dist/main.js";
+</script>
+
+## What is naddr?
+
+Formstr uses Nostr address pointers (naddr) as defined in NIP-19.
+
+A valid naddr:
+
+references a kind 30168 event (NIP-101 form)
+
+encodes:
+
+```
+kind
+
+pubkey
+
+d tag (form identifier)
+```
+
+optional relays
+
+(Users will copy a real one from a client or relay, not hand-write this.)
+
+🚀 Basic Usage (Browser, ESM)
 
 ```html
-<!-- example.html -->
 <!doctype html>
 <html>
-  <head>
-    <style>
-      /* Override default styles */
-      .form-name {
-        color: #2563eb;
-        font-size: 24px;
-      }
-      .option-group {
-        border: 1px solid #e5e7eb;
-        padding: 10px;
-      }
-    </style>
-  </head>
   <body>
     <div id="form-container"></div>
 
     <script type="module">
-      import { FormstrSDK } from "@formstr/sdk";
+      import { FormstrSDK } from "https://cdn.jsdelivr.net/npm/@formstr/sdk/dist/main.js";
 
       const sdk = new FormstrSDK();
 
-      // Fetch and render form
-      sdk
-        .fetchForm("nip101:30168:example-form-id:example-form-id")
-        .then((form) => {
-          const html = sdk.renderHtml(form);
-          document.getElementById("form-container").innerHTML = html.form;
+      const form = await sdk.fetchForm(
+        "naddr1...", // valid NIP-19 naddr
+      );
 
-          // Handle submission
-          html.attachSubmit((values) => {
-            console.log("Form submitted with:", values);
-            // Implement your signer here
-            sdk.submit(form, values, async (event) => {
-              // Sign event with your Nostr key
-              return signedEvent;
-            });
-          });
-        });
+      sdk.renderHtml(form);
+      document.getElementById("form-container").innerHTML = form.html.form;
+
+      sdk.attachSubmitListener(form, async (event) => {
+        // Sign the Nostr event (kind 1069)
+        return signedEvent;
+      });
     </script>
   </body>
 </html>
 ```
 
----
+## Core Types
 
-## 🧱 Core Objects
-
-### `NormalizedForm`
-
-```ts
+```
+NormalizedForm
 {
-  id: string;
-  name: string;
-  description?: string;
-  fields: Record<string, NormalizedField>;
-  sections?: SectionData[];
-  settings: FormSettings;
+id: string;
+name?: string;
+blocks: FormBlock[];
+fields: Record<string, NormalizedField>;
+fieldOrder: string[];
+settings: FormSettings;
+relays: string[];
+pubkey: string;
+html?: {
+form: string;
+};
 }
-```
 
-### `NormalizedField`
-
-```ts
+NormalizedField
 {
-  id: string;
-  type: 'text' | 'option' | 'label' | ...;
-  labelHtml: string;
-  options?: NormalizedOption[];
-  config: FieldConfig;
+id: string;
+type: "text" | "option" | "label";
+labelHtml: string;
+options?: {
+id: string;
+labelHtml: string;
+config?: object;
+}[];
+config: object;
 }
 ```
 
-### `FieldConfig`
+## Submission Model
 
-```ts
-{
-  required?: boolean;
-  minLength?: number;
-  maxLength?: number;
-  pattern?: string;
-  multiple?: boolean;
-}
+Responses are published as Nostr events
+
+Event kind: 1069
+
+Tagged with:
+
+```
+["a", "30168:<form_pubkey>:<form_id>"]
+["response", "<field_id>", "<value>", "{}"]
 ```
 
-### `FormSettings`
+Default Signer
 
-```ts
-{
-  description?: string;
-  encryptForm?: boolean;
-  viewKeyInUrl?: boolean;
-  sections?: SectionData[];
-}
-```
+If no signer is provided:
 
----
+an ephemeral keypair is generated
 
-## 🎨 Customizable CSS Classes
+responses are still valid, but anonymous
 
-| Element          | Default Class       | Purpose                     |
-| ---------------- | ------------------- | --------------------------- |
-| Form Title       | `.form-name`        | Styles the form title       |
-| Section Header   | `.section-title`    | Styles section headings     |
-| Option Group     | `.option-group`     | Radio button groups         |
-| Field Labels     | `.option-label`     | Option group labels         |
-| Form Description | `.form-description` | Form-level description text |
-| Sections         | `.form-section`     | Container for form sections |
+## Styling
 
-**Override these classes in your CSS to match your design system.**
+Generated HTML uses stable CSS classes:
 
----
+Class Purpose
+.form-name Form title
+.form-description Form description
+.form-section Section wrapper
+.section-title Section heading
+.option-group Radio groups
 
-## 📤 Submission Workflow
+Override freely in your own CSS.
 
-1. **Fetch** form with `sdk.fetchForm()`
-2. **Render** HTML with `sdk.renderHtml()`
-3. **Attach** submit handler with `attachSubmit()`
-4. **Sign** and submit with `sdk.submit()`
+📄 License
 
-```ts
-submit(form, values, signer) {
-  // signer must be async function that signs Nostr events
-  // Example signer implementation:
-  const signer = async (event) => {
-    // Sign event with your Nostr key
-    return signedEvent;
-  };
-}
-```
+MIT
 
----
+🔗 References
 
-## 📄 License
+NIP-101
 
-MIT License - See [LICENSE](https://github.com/your-org/nostr-forms/blob/main/LICENSE)
-
----
-
-## 📚 Documentation
-
-- [API Reference](docs/v1/design.md)
-- [NIP-101 Specification](https://github.com/nostr-protocol/nips/blob/master/101.md)
+NIP-19

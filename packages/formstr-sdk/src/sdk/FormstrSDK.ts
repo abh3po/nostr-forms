@@ -33,6 +33,10 @@ export class FormstrSDK {
   attachSubmitListener(
     form: NormalizedForm,
     signer?: (event: any) => Promise<any>,
+    callbacks?: {
+      onSuccess?: (result: { event: Event; relays: string[] }) => void;
+      onError?: (error: unknown) => void;
+    },
   ) {
     const formEl = document.getElementById(
       `form-${form.id}`,
@@ -51,10 +55,14 @@ export class FormstrSDK {
       console.log(`[FormstrSDK] Submitting values:`, values);
 
       try {
-        await this.submit(form, values, signer);
-        console.log(`[FormstrSDK] Form submitted successfully!`);
+        const result = await this.submit(form, values, signer);
+
+        callbacks?.onSuccess?.({
+          event: result,
+          relays: form.relays,
+        });
       } catch (err) {
-        console.error(`[FormstrSDK] Submit failed:`, err);
+        callbacks?.onError?.(err);
       }
     });
   }
@@ -264,6 +272,7 @@ export class FormstrSDK {
     );
     const signed = await finalSigner(event);
     await Promise.allSettled(pool.publish(form.relays, signed));
+    return signed;
   }
 }
 export function createEphemeralSigner() {

@@ -242,7 +242,7 @@
       </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/@formstr/sdk/dist/formstr.bundle.js"></script>
+    <script src="../dist//formstr.bundle.js"></script>
     <script>
       const sdk = new FormstrSDK.FormstrSDK();
 
@@ -256,7 +256,21 @@
         sdk.renderHtml(form);
 
         document.getElementById("container").innerHTML = form.html.form;
-        sdk.attachSubmitListener(form);
+        sdk.attachSubmitListener(form, undefined, {
+          onSuccess() {
+            console.log("On success triggered, showing thank you screen");
+            document.getElementById("container").innerHTML = `
+      <div class="thank-you">
+        <h2>Thank you! 🎉</h2>
+        <p>Your response has been submitted.</p>
+      </div>
+    `;
+          },
+          onError(err) {
+            alert("Submission failed. Try again.");
+            console.error(err);
+          },
+        });
 
         // Scroll arrows logic
         const body = document.querySelector(".form-body");

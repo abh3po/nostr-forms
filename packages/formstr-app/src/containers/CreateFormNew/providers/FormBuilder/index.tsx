@@ -401,7 +401,7 @@ export default function FormBuilderProvider({
     ).then(
       (artifacts: {
         signingKey: Uint8Array;
-        viewKey: Uint8Array;
+        viewKey?: Uint8Array;
         acceptedRelays: string[];
       }) => {
         const { signingKey, viewKey: formViewKey, acceptedRelays } = artifacts;
@@ -410,7 +410,11 @@ export default function FormBuilderProvider({
             pubKey: getPublicKey(signingKey),
             formId: formSettings.formId,
             secretKey: bytesToHex(signingKey),
-            viewKey: formSettings.viewKeyInUrl ? bytesToHex(formViewKey) : null,
+            viewKey: formSettings.viewKeyInUrl
+              ? formViewKey
+                ? bytesToHex(formViewKey)
+                : null
+              : null,
             name: formName,
             relays: relayUrls,
             disablePreview: formSettings.disablePreview,

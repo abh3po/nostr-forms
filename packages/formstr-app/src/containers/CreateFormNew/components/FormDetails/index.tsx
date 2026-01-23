@@ -32,7 +32,7 @@ export const FormDetails = ({
   pubKey: string;
   formId: string;
   secretKey: string;
-  viewKey: string;
+  viewKey?: string;
   name: string;
   relays: string[];
   onClose: () => void;
@@ -42,7 +42,7 @@ export const FormDetails = ({
   const { pubkey: userPub, requestPubkey } = useProfileContext();
   const { saveToMyForms, inMyForms } = useMyForms();
   const navigate = useNavigate();
-
+  console.log("Got view keey as", viewKey);
   useEffect(() => {
     saveToDevice(
       pubKey,

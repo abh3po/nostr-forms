@@ -15,7 +15,6 @@ export const EmbedWithSDKTab = ({
   relays: string[];
   viewKey?: string;
 }) => {
-  console.log("pubkey", pubKey, viewKey);
   const naddr = makeFormNAddr(pubKey, formId, relays);
   const isPrivate = Boolean(viewKey);
 

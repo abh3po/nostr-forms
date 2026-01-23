@@ -1,99 +1,46 @@
-# Formstr SDK 📦
+# Formstr SDK – Usage Guide
 
-A lightweight JavaScript SDK for fetching, rendering, and submitting Nostr forms compatible with NIP-101.
-
-Designed for developers who want to embed dynamic, relay-hosted forms into web apps with minimal setup.
-
-## Features
-
-NIP-101 compatible form fetching via naddr
-
-Automatic normalization of Nostr form events
-
-HTML form rendering (framework-agnostic)
-
-Built-in submit handling using FormData
-
-Nostr-native responses (kind 1069)
-
-Ephemeral signer by default, pluggable custom signer
+Formstr SDK allows you to fetch, render, and submit NIP-101 forms stored on Nostr.
+It handles normalization, HTML rendering, signing, and publishing responses to relays.
 
 ## Installation
 
-Node / Bundlers
+### Browser (CDN)
+
+<script src="https://cdn.jsdelivr.net/npm/@formstr/sdk@0/dist/formstr.bundle.js"></script>
+
+const sdk = new FormstrSDK.FormstrSDK();
+
+### Bundlers / ESM
+
+import { FormstrSDK } from "@formstr/sdk";
+
+const sdk = new FormstrSDK();
+
+## Core Concepts
+
+Forms are Nostr events containing tags such as:
 
 ```
-npm install @formstr/sdk
-```
+field
 
-### or
+settings
 
-```
-yarn add @formstr/sdk
-```
-
-Browser (CDN, no build step)
-
-<script type="module">
-  import { FormstrSDK } from "https://cdn.jsdelivr.net/npm/@formstr/sdk/dist/main.js";
-</script>
-
-## What is naddr?
-
-Formstr uses Nostr address pointers (naddr) as defined in NIP-19.
-
-A valid naddr:
-
-references a kind 30168 event (NIP-101 form)
-
-encodes:
-
-```
-kind
+relay
 
 pubkey
 
-d tag (form identifier)
+d (form identifier)
 ```
 
-optional relays
+The SDK fetches and normalizes these tags into a usable JavaScript object.
 
-(Users will copy a real one from a client or relay, not hand-write this.)
+### NormalizedForm
 
-🚀 Basic Usage (Browser, ESM)
-
-```html
-<!doctype html>
-<html>
-  <body>
-    <div id="form-container"></div>
-
-    <script type="module">
-      import { FormstrSDK } from "https://cdn.jsdelivr.net/npm/@formstr/sdk/dist/main.js";
-
-      const sdk = new FormstrSDK();
-
-      const form = await sdk.fetchForm(
-        "naddr1...", // valid NIP-19 naddr
-      );
-
-      sdk.renderHtml(form);
-      document.getElementById("form-container").innerHTML = form.html.form;
-
-      sdk.attachSubmitListener(form, async (event) => {
-        // Sign the Nostr event (kind 1069)
-        return signedEvent;
-      });
-    </script>
-  </body>
-</html>
-```
-
-## Core Types
+All SDK operations revolve around the NormalizedForm object:
 
 ```
-NormalizedForm
-{
+interface NormalizedForm {
 id: string;
 name?: string;
 blocks: FormBlock[];
@@ -106,61 +53,349 @@ html?: {
 form: string;
 };
 }
+```
 
-NormalizedField
+## Fetching a Form
+
+### Fetch a Public Form
+
+const form = await sdk.fetchForm(naddr);
+
+Fetches the NIP-101 event
+
+Normalizes tags into a NormalizedForm
+
+Returns a fallback form if not found
+
+### Fetch with View Key
+
+```
+const form = await sdk.fetchFormWithViewKey(naddr, viewKey);
+```
+
+## Rendering a Form
+
+### Generate HTML
+
+```
+sdk.renderHtml(form);
+```
+
+This adds a rendered HTML string to:
+
+```
+form.html.form
+```
+
+### Mount to the DOM
+
+```
+document.getElementById("formstr-container").innerHTML =
+form.html.form;
+```
+
+The rendered output is neutral, unstyled HTML and can be styled freely.
+
+## Supported Field Types
+
+### Type Description
+
+```
+text Text input
+option Radio group
+label Static content / text block
+```
+
+## Handling Submissions
+
+### Attach Submit Listener
+
+```
+sdk.attachSubmitListener(form);
+```
+
+This:
+
+Listens for <form> submit
+
+Collects values using FormData
+
+Signs the response event
+
+Publishes to form relays
+
+With Callbacks
+
+```
+sdk.attachSubmitListener(form, undefined, {
+onSuccess: ({ event, relays }) => {
+console.log("Submitted", event);
+},
+onError: (err) => {
+console.error(err);
+},
+});
+```
+
+## Manual Submission (No HTML)
+
+You may submit responses programmatically:
+
+```
+await sdk.submit(form, {
+name: "Alice",
+feedback: "Great form!",
+});
+```
+
+Signing Responses
+Default: Ephemeral Signer
+
+If no signer is provided, the SDK automatically:
+
+Generates a temporary keypair
+
+Signs locally
+
+Publishes anonymously
+
+```
+await sdk.submit(form, values);
+
+Custom Signer (e.g. NIP-07)
+const signer = async (event) => {
+return await window.nostr.signEvent(event);
+};
+sdk.attachSubmitListener(form, signer);
+```
+
+Or:
+
+```
+await sdk.submit(form, values, signer);
+```
+
+Events Published
+
+Form responses are published as Nostr events:
+
+```
 {
-id: string;
-type: "text" | "option" | "label";
-labelHtml: string;
-options?: {
-id: string;
-labelHtml: string;
-config?: object;
-}[];
-config: object;
+kind: 1069,
+tags: [
+["a", "30168:<formPubkey>:<formId>"],
+["response", "<fieldId>", "<value>", "{}"]
+]
 }
 ```
 
-## Submission Model
+One response tag per field
 
-Responses are published as Nostr events
+Published to all relays specified in the form
 
-Event kind: 1069
+## Relays
 
-Tagged with:
+Relay URLs are defined in the form event itself:
 
 ```
-["a", "30168:<form_pubkey>:<form_id>"]
-["response", "<field_id>", "<value>", "{}"]
+form.relays;
 ```
 
-Default Signer
+All submissions are published to these relays using a relay pool.
 
-If no signer is provided:
+Full Minimal Example
 
-an ephemeral keypair is generated
+```
+<div id="formstr-container"></div>
 
-responses are still valid, but anonymous
+<script>
+  const sdk = new FormstrSDK.FormstrSDK();
 
-## Styling
+  async function mountForm() {
+    const form = await sdk.fetchForm(naddr);
+    sdk.renderHtml(form);
 
-Generated HTML uses stable CSS classes:
+    document.getElementById("formstr-container").innerHTML =
+      form.html.form;
 
-Class Purpose
-.form-name Form title
-.form-description Form description
-.form-section Section wrapper
-.section-title Section heading
-.option-group Radio groups
+    sdk.attachSubmitListener(form);
+  }
 
-Override freely in your own CSS.
+  mountForm();
+</script>
+```
 
-📄 License
+## Styling & CSS Customization
 
-MIT
+The Formstr SDK renders neutral, unopinionated HTML and exposes semantic CSS class names so you can fully control the appearance of forms.
 
-🔗 References
+No styles are bundled by default.
 
-NIP-101
+Top-Level Structure
 
-NIP-19
+```
+<form id="form-<formId>">
+  <div class="form-body">
+    <!-- blocks -->
+  </div>
+
+  <div id="submit-container">
+    <button type="submit">Submit</button>
+  </div>
+</form>
+```
+
+### Form Container Selectors
+
+```
+form : Root <form> element
+
+.form-body:	Wraps all form content
+
+#submit-container: 	Container for submit button
+
+button[type="submit"]: 	Submit button
+Intro Block
+```
+
+Rendered when the form has a name or description.
+
+```
+<section class="form-section form-intro">
+  <div class="form-name">Form Title</div>
+  <div class="form-description">Form description</div>
+</section>
+```
+
+### Selector Description
+
+```
+.form-section	Base class for all blocks
+.form-intro	Intro block wrapper
+.form-name	Form title
+.form-description	Form description
+```
+
+### Section Blocks
+
+Each logical section of the form:
+
+```
+<section class="form-section">
+  <h2 class="section-title">Section Title</h2>
+  <div class="section-description">Section description</div>
+
+  <!-- fields -->
+</section>
+```
+
+### Selector Description
+
+.form-section: Section container
+.section-title: Section heading
+.section-description: Section subtext
+
+### Text Fields
+
+```
+<label>Question label</label>
+<input type="text" name="field_id" />
+```
+
+You can target these with:
+
+```
+.form-section label { }
+.form-section input[type="text"] { }
+```
+
+### Option Fields (Radio Groups)
+
+```
+<div class="option-group">
+  <div class="option-label">Question</div>
+
+  <label>
+    <input type="radio" name="field_id" value="opt1" />
+    Option label
+  </label>
+</div>
+```
+
+### Selector Description
+
+```
+.option-group Radio group wrapper
+.option-label Group label
+input[type="radio"] Radio inputs
+Label / Static Content
+```
+
+Static text Rendered directly inside sections and can be styled with:
+
+```
+.form-section p { }
+```
+
+Example Styling
+
+```
+.form-section {
+margin-bottom: 2rem;
+}
+
+.form-name {
+font-size: 2rem;
+font-weight: bold;
+}
+
+.section-title {
+font-size: 1.25rem;
+margin-bottom: 0.5rem;
+}
+
+input[type="text"] {
+width: 100%;
+padding: 0.5rem;
+}
+
+.option-group label {
+display: block;
+margin: 0.25rem 0;
+}
+
+button[type="submit"] {
+padding: 0.75rem 1.5rem;
+font-weight: bold;
+}
+```
+
+## Notes & Guarantees
+
+Class names are stable and safe to rely on
+
+No inline styles are applied
+
+No CSS resets are included
+
+You may safely override everything
+
+The SDK does not manipulate styles at runtime
+
+Custom Layouts
+
+If deeper customization is required:
+
+Skip renderHtml()
+
+Use form.blocks and form.fields
+
+Render your own markup in React, Vue, Svelte, etc.
+
+## Advanced Usage
+
+Custom UI: Ignore renderHtml and build your own UI from form.blocks
+
+Validation: Add custom validation before calling submit
+
+Multi-step Forms: Render sections incrementally using form.blocks

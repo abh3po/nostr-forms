@@ -15,6 +15,7 @@ import { CustomSlugForm } from "./payments/customSlugForm";
 import { useNavigate } from "react-router-dom";
 import { makeFormNAddr } from "../../../../utils/utility";
 import { useMyForms } from "../../../../provider/MyFormsProvider";
+import { EmbedWithSDKTab } from "./EmbedWithSDKTab";
 
 export const FormDetails = ({
   isOpen,
@@ -31,7 +32,7 @@ export const FormDetails = ({
   pubKey: string;
   formId: string;
   secretKey: string;
-  viewKey: string;
+  viewKey?: string;
   name: string;
   relays: string[];
   onClose: () => void;
@@ -41,7 +42,7 @@ export const FormDetails = ({
   const { pubkey: userPub, requestPubkey } = useProfileContext();
   const { saveToMyForms, inMyForms } = useMyForms();
   const navigate = useNavigate();
-
+  console.log("Got view keey as", viewKey);
   useEffect(() => {
     saveToDevice(
       pubKey,
@@ -72,7 +73,9 @@ export const FormDetails = ({
     disablePreview,
   );
 
-  const [activeTab, setActiveTab] = useState<"share" | "embed">("share");
+  const [activeTab, setActiveTab] = useState<"share" | "embed" | "sdk">(
+    "share",
+  );
 
   return (
     <Modal
@@ -87,9 +90,10 @@ export const FormDetails = ({
           bordered={false}
           tabList={[
             { key: "share", label: "Share" },
-            { key: "embed", label: "Embed" },
+            { key: "sdk", label: "Embed with SDK " },
+            { key: "embed", label: "Embed as iframe" },
           ]}
-          onTabChange={(key) => setActiveTab(key as "share" | "embed")}
+          onTabChange={(key) => setActiveTab(key as "share" | "embed" | "sdk")}
           style={{
             width: "100%",
             minWidth: 0,
@@ -97,14 +101,23 @@ export const FormDetails = ({
         >
           {activeTab === "share" ? (
             <ShareTab formUrl={formUrl} responsesUrl={responsesUrl} />
-          ) : (
+          ) : null}
+          {activeTab === "embed" ? (
             <EmbedTab
               pubKey={pubKey}
               formId={formId}
               relays={relays}
               viewKey={viewKey}
             />
-          )}
+          ) : null}
+          {activeTab === "sdk" ? (
+            <EmbedWithSDKTab
+              pubKey={pubKey}
+              formId={formId}
+              relays={relays}
+              viewKey={viewKey}
+            />
+          ) : null}
 
           <CustomSlugForm
             formId={formId}

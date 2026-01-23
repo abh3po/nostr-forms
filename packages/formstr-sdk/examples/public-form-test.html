@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="">
+  <head>
+    <meta charset="utf-8" />
+    <title></title>
+  </head>
+  <body>
+    <header></header>
+    <main>
+      <div id="formstr-container"></div>
+    </main>
+    <footer></footer>
+  </body>
+
+  <!-- Container -->
+  <!-- Container -->
+  <div id="formstr-container"></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@formstr/sdk@0/dist/formstr.bundle.js"></script>
+
+  <script>
+    console.log("Formstr SDK version:", "__VERSION__");
+
+    const sdk = new FormstrSDK.FormstrSDK();
+
+    async function mountForm() {
+      const naddr =
+        "naddr1qvzqqqr4mqpzq9c75936y2na3cjxuz4lsl7j4e80y94nzntaax6e0a2mdyphzgynqythwumn8ghj7un9d3shjtnwdaehgu3wvfskuep0qythwumn8ghj7un9d3shjtnswf5k6ctv9ehx2ap0qy88wumn8ghj7mn0wvhxcmmv9uq32amnwvaz7tmjv4kxz7fwv3sk6atn9e5k7tcpzemhxue69uhhwmm59ehx7um5wgh8qctjw3uj7qgkwaehxw309aex2mrp0yhx6mmnw3ezuur4vghszymhwden5te0danxvcmgv95kutnsw43z7qgdwaehxw309ahx7uewd3hkcqg7waehxw309aex2mrp0yhxummnw3ezuamfwfjkgmn9wshx5up0qyw8wumn8ghj7mn0wd68ytfsxyh8jcttd95x7mnwv5hxxmmdqyv8wumn8ghj7un9d3shjtnndehhyapwwdhkx6tpdsq3vamnwvaz7tmjv4kxz7fwdehhxarj9e3xzmnyqyghwumn8ghj7mn0wd68yv339e3k7mgqqe9rv4zr2psssfw5yw";
+
+      const form = await sdk.fetchForm(naddr);
+      sdk.renderHtml(form);
+
+      document.getElementById("formstr-container").innerHTML = form.html.form;
+
+      sdk.attachSubmitListener(form);
+    }
+
+    mountForm();
+  </script>
+</html>

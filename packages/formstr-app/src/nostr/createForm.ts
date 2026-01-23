@@ -15,7 +15,7 @@ interface MergedNpub {
 
 const getMergedNpubs = (
   viewList: Set<string>,
-  editList: Set<string>
+  editList: Set<string>,
 ): MergedNpub[] => {
   let ViewNpubs = Array.from(viewList).map((hexPub) => {
     return {
@@ -34,7 +34,7 @@ const getMergedNpubs = (
   const map = new Map();
   ViewNpubs.forEach((item) => map.set(item.pubkey, item));
   EditNpubs.forEach((item) =>
-    map.set(item.pubkey, { ...map.get(item.pubkey), ...item })
+    map.set(item.pubkey, { ...map.get(item.pubkey), ...item }),
   );
   return Array.from(map.values());
 };
@@ -47,7 +47,7 @@ export const createForm = async (
   encryptContent?: boolean,
   onRelayAccepted?: (url: string) => void,
   secretKey?: string | null,
-  viewKeyParams?: string | null
+  viewKeyParams?: string | null,
 ) => {
   let acceptedRelays: string[] = [];
   let signingKey: Uint8Array;
@@ -74,7 +74,7 @@ export const createForm = async (
     content = nip44Encrypt(
       signingKey,
       getPublicKey(viewKey),
-      JSON.stringify(form)
+      JSON.stringify(form),
     );
   else {
     tags = [
@@ -99,7 +99,7 @@ export const createForm = async (
       profile.pubkey,
       signingKey,
       viewKey,
-      profile.isEditor
+      profile.isEditor,
     );
     wraps.push(wrap);
     if (profile.isParticipant) {
@@ -114,12 +114,12 @@ export const createForm = async (
     customPublish(relayList, templateEvent!, (url: string) => {
       acceptedRelays.push(url);
       onRelayAccepted?.(url);
-    })
+    }),
   );
   console.log("Accepted by relays", acceptedRelays);
   return {
     signingKey,
-    viewKey,
+    viewKey: templateEvent.content !== "" ? viewKey : undefined,
     acceptedRelays,
   };
 };

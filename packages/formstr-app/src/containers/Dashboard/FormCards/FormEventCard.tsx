@@ -220,7 +220,7 @@ export const FormEventCard: React.FC<FormEventCardProps> = ({
               pubKey={pubKey}
               formId={formId}
               secretKey={secretKey || ""}
-              viewKey={viewKey || ""}
+              viewKey={event.content !== "" ? viewKey || "" : undefined}
               name={name[1] || ""}
               relays={relays}
               disablePreview={settings.disablePreview}

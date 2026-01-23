@@ -50,10 +50,11 @@ export const fetchFormTemplate = async (
     throw Error(
       `Event not found on given relays: ${JSON.stringify(relayList)}`,
     );
+  console.log("Nostr Event content is", nostrEvent?.tags);
   if (nostrEvent?.content === "") {
     const returnTags = [...nostrEvent.tags, ["pubkey", nostrEvent.pubkey]];
+    return returnTags;
   }
-
   const decryptedEvent = decryptFormEvent(nostrEvent, nkeys);
   const nameTag = nostrEvent.tags.find((t) => t[0] === "name");
   const relayTags = nostrEvent.tags.filter((t) => t[0] === "relay");

@@ -7,6 +7,7 @@ import { DateFiller } from "./InputTypes/DateFiller";
 import { TimeFiller } from "./InputTypes/TimeFiller";
 import { SignatureFiller } from "./InputTypes/SignatureFiller";
 import { DateTimeFiller } from "./InputTypes/DateTimeFiller";
+import { GridFiller } from "./InputTypes/GridFiller";
 import { AnswerTypes, Option } from "../../../nostr/types";
 
 interface InputFillerProps {
@@ -128,6 +129,24 @@ export const InputFiller: React.FC<InputFillerProps> = ({
           onChange={handleValueChange}
           disabled={disabled}
           testId={`${testId}:datetime`}
+        />
+      ),
+      [AnswerTypes.multipleChoiceGrid]: (
+        <GridFiller
+          options={JSON.stringify(options)}
+          answerType={AnswerTypes.multipleChoiceGrid}
+          onChange={handleValueChange}
+          defaultValue={defaultValue as string}
+          disabled={disabled}
+        />
+      ),
+      [AnswerTypes.checkboxGrid]: (
+        <GridFiller
+          options={JSON.stringify(options)}
+          answerType={AnswerTypes.checkboxGrid}
+          onChange={handleValueChange}
+          defaultValue={defaultValue as string}
+          disabled={disabled}
         />
       ),
     };

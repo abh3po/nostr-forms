@@ -4,8 +4,9 @@ import { CheckboxCreator } from "./InputElements/OptionTypes/CheckBoxCreator";
 import { DropdownCreator } from "./InputElements/OptionTypes/DropdownCreator";
 import { DatePicker, Input, InputNumber, TimePicker } from "antd";
 import { Choice } from "./InputElements/OptionTypes/types";
-import { AnswerSettings, AnswerTypes } from "../../../../nostr/types";
+import { AnswerSettings, AnswerTypes, GridOptions } from "../../../../nostr/types";
 import SignatureInput from "./InputElements/Signature";
+import { GridCreator } from "./InputElements/GridCreator";
 
 interface InputsProps {
   inputType: string;
@@ -67,6 +68,19 @@ const Inputs: React.FC<InputsProps> = ({
         return <SignatureInput answerSettings={answerSettings} />;
       case AnswerTypes.datetime:
         return <DatePicker disabled={true} placeholder="Pick Date & Time" />;
+      case AnswerTypes.multipleChoiceGrid:
+      case AnswerTypes.checkboxGrid: {
+        const gridOptions = options as unknown as GridOptions;
+        return (
+          <GridCreator
+            initialValue={gridOptions}
+            onValuesChange={(newOptions) => {
+              optionsHandler(newOptions as unknown as Array<Choice>);
+            }}
+            allowMultiple={inputType === AnswerTypes.checkboxGrid}
+          />
+        );
+      }
       default:
         <></>;
         break;

@@ -62,7 +62,16 @@ export interface FieldConfig {
   minLength?: number;
   maxLength?: number;
   pattern?: string;
+  allowMultiplePerRow?: boolean;
+  requiredRows?: string[];
 }
+
+export interface GridOptions {
+  columns: Array<[columnId: string, columnLabel: string, columnConfig?: string]>;
+  rows: Array<[rowId: string, rowLabel: string, rowConfig?: string]>;
+}
+
+export type GridResponse = Record<string, string>; // rowId -> columnId(s)
 
 export interface FormSettings {
   description?: string;

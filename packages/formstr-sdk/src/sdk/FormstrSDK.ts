@@ -8,6 +8,7 @@ import {
 import {
   FormBlock,
   FormSettings,
+  GridOptions,
   NormalizedField,
   NormalizedForm,
   SectionBlock,
@@ -193,6 +194,51 @@ export class FormstrSDK {
         return `<p>${field.labelHtml}</p>`;
       }
 
+      if (field.type === "grid" && field.options) {
+        const gridOptions = field.options as unknown as GridOptions;
+        const isCheckbox = field.config.allowMultiplePerRow;
+        const inputType = isCheckbox ? "checkbox" : "radio";
+
+        return `
+        <div class="grid-question">
+          <div class="grid-label">${field.labelHtml}</div>
+          <table class="grid-table">
+            <thead>
+              <tr>
+                <th></th>
+                ${gridOptions.columns?.map((col) => `<th>${col[1]}</th>`).join("")}
+              </tr>
+            </thead>
+            <tbody>
+              ${gridOptions.rows
+                ?.map(
+                  (row) => `
+                <tr>
+                  <td>${row[1]}</td>
+                  ${gridOptions.columns
+                    ?.map(
+                      (col) => `
+                    <td>
+                      <input
+                        type="${inputType}"
+                        name="${field.id}_${row[0]}"
+                        value="${col[0]}"
+                        ${inputType === "radio" ? "" : ""}
+                      />
+                    </td>
+                  `,
+                    )
+                    .join("")}
+                </tr>
+              `,
+                )
+                .join("")}
+            </tbody>
+          </table>
+        </div>
+      `;
+      }
+
       return "";
     };
 
@@ -256,7 +302,18 @@ export class FormstrSDK {
   ) {
     const finalSigner = signer ?? createEphemeralSigner();
     const tags = Object.entries(values).map(([fieldId, value]) => {
-      if (Array.isArray(value)) value = value.join(";"); // multi-choice
+      const field = form.fields[fieldId];
+
+      // Handle grid responses
+      if (field?.type === "grid") {
+        // value is already a JSON object from grid filler
+        const jsonValue = typeof value === "string" ? value : JSON.stringify(value);
+        return ["response", fieldId, jsonValue, "{}"];
+      }
+
+      // Handle multi-select (existing logic)
+      if (Array.isArray(value)) value = value.join(";");
+
       return ["response", fieldId, value, "{}"];
     });
 

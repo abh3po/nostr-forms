@@ -6,6 +6,7 @@ import { RelayPublishModal } from "../../../components/RelayPublishModal/RelaysP
 import { Event, generateSecretKey } from "nostr-tools";
 import { Response, Tag } from "../../../nostr/types";
 import { getFormSettings } from "./utils";
+import { useProfileContext } from "../../../hooks/useProfileContext";
 
 const { Text } = Typography;
 
@@ -32,6 +33,7 @@ export const SubmitButton: React.FC<SubmitButtonProps> = ({
   relays,
   formTemplate,
 }) => {
+  const { pubkey: userPubKey, requestPubkey } = useProfileContext();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isValidating, setIsValidating] = useState(false);
   const [isDisabled, setIsDisabled] = useState(false);
@@ -131,6 +133,18 @@ export const SubmitButton: React.FC<SubmitButtonProps> = ({
 
   const submitForm = async (anonymous: boolean = true) => {
     setErrorMessage(null);
+
+    // Check if user is logged in when attempting non-anonymous submission
+    if (!anonymous && !userPubKey) {
+      setErrorMessage("Please login to submit with your identity");
+      requestPubkey().then((pubkey) => {
+        if (pubkey) {
+          setErrorMessage(null);
+        }
+      });
+      return;
+    }
+
     try {
       await form.validateFields();
 

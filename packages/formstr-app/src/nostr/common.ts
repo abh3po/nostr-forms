@@ -45,12 +45,6 @@ export const getDefaultRelays = () => {
   return defaultRelays;
 };
 
-function checkWindowNostr() {
-  if (!window?.nostr) {
-    throw Error("No method provided to access nostr");
-  }
-}
-
 function toHexNpub(npubOrHex: string): string {
   try {
     // Attempt to decode npub
@@ -74,7 +68,6 @@ export async function getUserPublicKey(userSecretKey: Uint8Array | null) {
     userPublicKey = getPublicKey(userSecretKey);
   } else {
     const signer = await signerManager.getSigner();
-    checkWindowNostr();
     userPublicKey = await signer.getPublicKey();
   }
   return userPublicKey;

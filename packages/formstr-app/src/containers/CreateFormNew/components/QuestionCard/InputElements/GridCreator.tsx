@@ -1,83 +1,42 @@
 import { CloseOutlined, PlusOutlined } from "@ant-design/icons";
-import { Button, Checkbox, Radio, Typography } from "antd";
+import { Button, Checkbox, Radio, Input } from "antd";
 import { useState, useEffect } from "react";
 import { GridOptions } from "../../../../../nostr/types";
 import { makeTag } from "../../../../../utils/utility";
-import { ColorfulMarkdownTextarea } from "../../../../../components/SafeMarkdown/ColorfulMarkdownInput";
 import styled from "styled-components";
-
-const { Text } = Typography;
 
 interface GridCreatorProps {
   initialValue?: GridOptions;
   onValuesChange: (options: GridOptions) => void;
-  allowMultiple: boolean; // Radio vs checkbox mode
+  allowMultiple: boolean;
 }
 
 type GridItem = [id: string, label: string, config?: string];
 
-const GridCreatorContainer = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: 24px;
-  padding: 16px 0;
+const GridContainer = styled.div`
+  width: 100%;
+  overflow-x: auto;
+  margin-top: 8px;
 `;
 
-const Section = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-`;
-
-const SectionTitle = styled(Text)`
-  font-weight: 600;
-  font-size: 14px;
-  color: #595959;
-`;
-
-const ItemList = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-`;
-
-const Item = styled.div`
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 8px;
-  background: #fafafa;
-  border-radius: 4px;
-
-  .ant-input {
-    flex: 1;
-  }
-
-  .anticon-close {
-    cursor: pointer;
-    color: #8c8c8c;
-    &:hover {
-      color: #ff4d4f;
-    }
-  }
-`;
-
-const GridPreview = styled.table`
+const GridTable = styled.table`
   width: 100%;
   border-collapse: collapse;
-  margin-top: 16px;
+  min-width: 400px;
 
   th,
   td {
-    padding: 12px;
+    padding: 8px;
     text-align: center;
-    border: 1px solid #e0e0e0;
+    border: 1px solid #d9d9d9;
+    position: relative;
   }
 
   th:first-child,
   td:first-child {
     text-align: left;
     font-weight: 500;
+    min-width: 150px;
     background: #fafafa;
   }
 
@@ -85,6 +44,53 @@ const GridPreview = styled.table`
     background: #f5f5f5;
     font-weight: 600;
   }
+
+  tbody tr:hover {
+    background: #fafafa;
+  }
+
+  .cell-input {
+    width: 100%;
+    border: none;
+    background: transparent;
+    text-align: inherit;
+    padding: 0;
+
+    &:focus {
+      outline: 2px solid #1890ff;
+      outline-offset: -2px;
+      background: white;
+    }
+  }
+
+  .delete-btn {
+    position: absolute;
+    right: 2px;
+    top: 50%;
+    transform: translateY(-50%);
+    cursor: pointer;
+    color: #8c8c8c;
+    padding: 2px;
+
+    &:hover {
+      color: #ff4d4f;
+    }
+  }
+
+  .add-column-cell {
+    background: #fafafa;
+    cursor: pointer;
+    color: #1890ff;
+
+    &:hover {
+      background: #e6f7ff;
+    }
+  }
+`;
+
+const AddRowButton = styled(Button)`
+  margin-top: 8px;
+  width: 100%;
 `;
 
 export const GridCreator: React.FC<GridCreatorProps> = ({
@@ -92,33 +98,29 @@ export const GridCreator: React.FC<GridCreatorProps> = ({
   onValuesChange,
   allowMultiple,
 }) => {
-  const [columns, setColumns] = useState<GridItem[]>(
-    initialValue?.columns || [
+  const [columns, setColumns] = useState<GridItem[]>(() => {
+    if (initialValue?.columns && Array.isArray(initialValue.columns) && initialValue.columns.length > 0) {
+      return initialValue.columns;
+    }
+    return [
       [makeTag(6), "Column 1", "{}"],
       [makeTag(6), "Column 2", "{}"],
-    ]
-  );
-  const [rows, setRows] = useState<GridItem[]>(
-    initialValue?.rows || [
+    ];
+  });
+
+  const [rows, setRows] = useState<GridItem[]>(() => {
+    if (initialValue?.rows && Array.isArray(initialValue.rows) && initialValue.rows.length > 0) {
+      return initialValue.rows;
+    }
+    return [
       [makeTag(6), "Row 1", "{}"],
       [makeTag(6), "Row 2", "{}"],
-    ]
-  );
+    ];
+  });
 
   useEffect(() => {
     onValuesChange({ columns, rows });
   }, [columns, rows]);
-
-  const handleColumnAdd = () => {
-    const newColumn: GridItem = [makeTag(6), `Column ${columns.length + 1}`, "{}"];
-    setColumns([...columns, newColumn]);
-  };
-
-  const handleColumnDelete = (id: string) => {
-    if (columns.length > 1) {
-      setColumns(columns.filter((col) => col[0] !== id));
-    }
-  };
 
   const handleColumnLabelChange = (id: string, label: string) => {
     setColumns(
@@ -126,15 +128,15 @@ export const GridCreator: React.FC<GridCreatorProps> = ({
     );
   };
 
-  const handleRowAdd = () => {
-    const newRow: GridItem = [makeTag(6), `Row ${rows.length + 1}`, "{}"];
-    setRows([...rows, newRow]);
+  const handleColumnAdd = () => {
+    if (columns.length >= 10) return;
+    const newColumn: GridItem = [makeTag(6), `Column ${columns.length + 1}`, "{}"];
+    setColumns([...columns, newColumn]);
   };
 
-  const handleRowDelete = (id: string) => {
-    if (rows.length > 1) {
-      setRows(rows.filter((row) => row[0] !== id));
-    }
+  const handleColumnDelete = (id: string) => {
+    if (columns.length <= 1) return;
+    setColumns(columns.filter((col) => col[0] !== id));
   };
 
   const handleRowLabelChange = (id: string, label: string) => {
@@ -143,93 +145,65 @@ export const GridCreator: React.FC<GridCreatorProps> = ({
     );
   };
 
-  const hasEmptyLabels = () => {
-    return (
-      columns.some((col) => !col[1]?.trim()) ||
-      rows.some((row) => !row[1]?.trim())
-    );
+  const handleRowAdd = () => {
+    if (rows.length >= 10) return;
+    const newRow: GridItem = [makeTag(6), `Row ${rows.length + 1}`, "{}"];
+    setRows([...rows, newRow]);
+  };
+
+  const handleRowDelete = (id: string) => {
+    if (rows.length <= 1) return;
+    setRows(rows.filter((row) => row[0] !== id));
   };
 
   return (
-    <GridCreatorContainer>
-      {/* Columns Section */}
-      <Section>
-        <SectionTitle>Columns</SectionTitle>
-        <ItemList>
-          {columns.map((column) => {
-            const [id, label] = column;
-            return (
-              <Item key={id}>
-                <ColorfulMarkdownTextarea
-                  value={label}
-                  onChange={(val) => handleColumnLabelChange(id, val)}
-                  placeholder="Enter column label"
-                  className="choice-input"
-                />
-                {columns.length > 1 && (
-                  <CloseOutlined onClick={() => handleColumnDelete(id)} />
-                )}
-              </Item>
-            );
-          })}
-        </ItemList>
-        <Button
-          type="dashed"
-          onClick={handleColumnAdd}
-          icon={<PlusOutlined />}
-          disabled={hasEmptyLabels() || columns.length >= 10}
-        >
-          Add Column
-        </Button>
-      </Section>
-
-      {/* Rows Section */}
-      <Section>
-        <SectionTitle>Rows</SectionTitle>
-        <ItemList>
-          {rows.map((row) => {
-            const [id, label] = row;
-            return (
-              <Item key={id}>
-                <ColorfulMarkdownTextarea
-                  value={label}
-                  onChange={(val) => handleRowLabelChange(id, val)}
-                  placeholder="Enter row label"
-                  className="choice-input"
-                />
-                {rows.length > 1 && (
-                  <CloseOutlined onClick={() => handleRowDelete(id)} />
-                )}
-              </Item>
-            );
-          })}
-        </ItemList>
-        <Button
-          type="dashed"
-          onClick={handleRowAdd}
-          icon={<PlusOutlined />}
-          disabled={hasEmptyLabels() || rows.length >= 10}
-        >
-          Add Row
-        </Button>
-      </Section>
-
-      {/* Grid Preview */}
-      <Section>
-        <SectionTitle>Preview</SectionTitle>
-        <GridPreview>
+    <div>
+      <GridContainer>
+        <GridTable>
           <thead>
             <tr>
               <th></th>
               {columns.map((col) => (
-                <th key={col[0]}>{col[1] || "Column"}</th>
+                <th key={col[0]}>
+                  <Input
+                    className="cell-input"
+                    value={col[1]}
+                    onChange={(e) => handleColumnLabelChange(col[0], e.target.value)}
+                    placeholder="Column"
+                    style={{ textAlign: "center", fontWeight: 600 }}
+                  />
+                  {columns.length > 1 && (
+                    <CloseOutlined
+                      className="delete-btn"
+                      onClick={() => handleColumnDelete(col[0])}
+                    />
+                  )}
+                </th>
               ))}
+              {columns.length < 10 && (
+                <th className="add-column-cell" onClick={handleColumnAdd}>
+                  <PlusOutlined /> Add column
+                </th>
+              )}
             </tr>
           </thead>
           <tbody>
             {rows.map((row) => (
               <tr key={row[0]}>
-                <td>{row[1] || "Row"}</td>
+                <td>
+                  <Input
+                    className="cell-input"
+                    value={row[1]}
+                    onChange={(e) => handleRowLabelChange(row[0], e.target.value)}
+                    placeholder="Row"
+                  />
+                  {rows.length > 1 && (
+                    <CloseOutlined
+                      className="delete-btn"
+                      onClick={() => handleRowDelete(row[0])}
+                    />
+                  )}
+                </td>
                 {columns.map((col) => (
                   <td key={col[0]}>
                     {allowMultiple ? (
@@ -239,11 +213,21 @@ export const GridCreator: React.FC<GridCreatorProps> = ({
                     )}
                   </td>
                 ))}
+                {columns.length < 10 && <td></td>}
               </tr>
             ))}
           </tbody>
-        </GridPreview>
-      </Section>
-    </GridCreatorContainer>
+        </GridTable>
+      </GridContainer>
+      {rows.length < 10 && (
+        <AddRowButton
+          type="dashed"
+          onClick={handleRowAdd}
+          icon={<PlusOutlined />}
+        >
+          Add row
+        </AddRowButton>
+      )}
+    </div>
   );
 };

@@ -6,7 +6,7 @@ import StyledWrapper from "./index.style";
 import QuestionTextStyle from "./question.style";
 import { Choice } from "./InputElements/OptionTypes/types";
 import UploadImage from "./UploadImage";
-import { AnswerSettings, Field } from "../../../../nostr/types";
+import { AnswerSettings, AnswerTypes, Field } from "../../../../nostr/types";
 import { ColorfulMarkdownTextarea } from "../../../../components/SafeMarkdown/ColorfulMarkdownInput";
 
 type QuestionCardProps = {
@@ -24,10 +24,28 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
   firstQuestion,
   lastQuestion,
 }) => {
-  let options = JSON.parse(question[4] || "[]") as Array<Choice>;
   const answerSettings = JSON.parse(
     question[5] || '{"renderElement": "shortText"}',
   );
+
+  // Parse options based on question type
+  let options: Array<Choice>;
+  if (
+    answerSettings.renderElement === AnswerTypes.multipleChoiceGrid ||
+    answerSettings.renderElement === AnswerTypes.checkboxGrid
+  ) {
+    // For grid questions, parse as GridOptions or use default
+    try {
+      const parsed = JSON.parse(question[4] || '{"columns":[],"rows":[]}');
+      // If it's already GridOptions format, use it; otherwise treat as empty grid
+      options = parsed as any; // Will be cast properly in Inputs.tsx
+    } catch {
+      options = { columns: [], rows: [] } as any;
+    }
+  } else {
+    // For regular option-based questions, parse as Array<Choice>
+    options = JSON.parse(question[4] || "[]") as Array<Choice>;
+  }
   const {
     setQuestionIdInFocus,
     sections,

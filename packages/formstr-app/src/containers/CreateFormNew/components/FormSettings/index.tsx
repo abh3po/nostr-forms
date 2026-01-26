@@ -89,14 +89,8 @@ function FormSettings() {
           </div>
           {formSettings.disallowAnonymous && (
             <Text type="secondary" style={{ fontSize: 12, display: "block" }}>
-              *This will require participants to have a nostr profile with a{" "}
-              <a
-                href="https://nostrcheck.me/register/browser-extension.php"
-                target="_blank"
-                rel="noreferrer"
-              >
-                nip-07 extension
-              </a>
+              *This will require participants to be logged in with their Nostr
+              account
             </Text>
           )}
           <Divider className="divider" />

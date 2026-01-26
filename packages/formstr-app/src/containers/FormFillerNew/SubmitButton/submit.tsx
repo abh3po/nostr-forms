@@ -137,7 +137,11 @@ export const SubmitButton: React.FC<SubmitButtonProps> = ({
     // Check if user is logged in when attempting non-anonymous submission
     if (!anonymous && !userPubKey) {
       setErrorMessage("Please login to submit with your identity");
-      requestPubkey();
+      requestPubkey().then((pubkey) => {
+        if (pubkey) {
+          setErrorMessage(null);
+        }
+      });
       return;
     }
 

@@ -20,7 +20,7 @@ interface ProfileProviderProps {
 
 export interface ProfileContextType {
   pubkey?: string;
-  requestPubkey: () => void;
+  requestPubkey: () => Promise<string | undefined>;
   logout: () => void;
   userRelays: string[];
 }
@@ -93,7 +93,7 @@ export const ProfileProvider: FC<ProfileProviderProps> = ({ children }) => {
     let publicKey = await (await signerManager.getSigner()).getPublicKey();
     setPubkey(publicKey);
     setItem(LOCAL_STORAGE_KEYS.PROFILE, { pubkey: publicKey });
-    return pubkey;
+    return publicKey;
   };
 
   return (

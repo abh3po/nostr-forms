@@ -17,14 +17,31 @@ export const RightAnswer: React.FC<RightAnswerProps> = ({
   choices,
   onChange,
 }) => {
+  // Skip grid questions - they don't have "right answers"
+  if (
+    answerType === AnswerTypes.multipleChoiceGrid ||
+    answerType === AnswerTypes.checkboxGrid
+  ) {
+    return null;
+  }
+
+  // Parse choices - only for option-based questions
+  let parsedChoices = [];
+  try {
+    const parsed = JSON.parse(choices || "[]");
+    if (Array.isArray(parsed)) {
+      parsedChoices = parsed;
+    }
+  } catch {
+    parsedChoices = [];
+  }
+
   const processedAnswerSettings = {
     ...answerSettings,
-    choices: choices
-      ? JSON.parse(choices).map(([choiceId, label]: [string, string]) => ({
-          choiceId,
-          label,
-        }))
-      : [],
+    choices: parsedChoices.map(([choiceId, label]: [string, string]) => ({
+      choiceId,
+      label,
+    })),
   };
 
   const isMultipleChoice = answerType === AnswerTypes.checkboxes;
@@ -41,7 +58,7 @@ export const RightAnswer: React.FC<RightAnswerProps> = ({
         </Text>
         <InputFiller
           defaultValue={answerSettings?.validationRules?.match?.answer}
-          options={JSON.parse(choices || "[]")}
+          options={parsedChoices}
           fieldConfig={processedAnswerSettings}
           onChange={onChange}
         />

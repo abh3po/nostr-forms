@@ -49,7 +49,6 @@ export const CheckboxCreator: React.FC<CheckboxCreatorProps> = ({
             <ColorfulMarkdownTextarea
               key={choiceId + "input"}
               onChange={(val) => {
-                console.log("Getting val", val);
                 handleLabelChange(val, choiceId!, choices, handleNewChoices);
               }}
               placeholder="Enter an option"

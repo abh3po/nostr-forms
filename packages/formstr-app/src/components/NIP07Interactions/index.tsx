@@ -54,7 +54,6 @@ export const NIP07Interactions: React.FC<NIP07InteractionProps> = ({
       if (!senderPubKey) {
         throw Error("No message provided to decrypt");
       }
-      console.log("Sender pubkey,", senderPubKey);
       returnValue = await signer.nip44Decrypt!(senderPubKey, cipherText);
     } else if (action === Actions.NIP04_DECRYPT) {
       if (!cipherText) {

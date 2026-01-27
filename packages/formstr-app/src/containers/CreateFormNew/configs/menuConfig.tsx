@@ -3,15 +3,29 @@ import {
   INPUTS_TYPES,
   PRE_BUILT_MENU_KEYS,
 } from "./constants";
-import { ReactComponent as InputIcon } from "../../../Images/Frame.svg";
 import { AnswerTypes } from "../../../nostr/types";
-import { TableOutlined } from "@ant-design/icons";
+import {
+  TableOutlined,
+  FontColorsOutlined,
+  AppstoreOutlined,
+  FormOutlined,
+  FileTextOutlined,
+  NumberOutlined,
+  CheckSquareOutlined,
+  CheckCircleOutlined,
+  CaretDownOutlined,
+  CalendarOutlined,
+  ClockCircleOutlined,
+  EditOutlined,
+  FieldTimeOutlined,
+  MailOutlined,
+} from "@ant-design/icons";
 
 export const BASIC_MENU = [
   {
     key: BASIC_MENU_KEYS.TITLE,
     label: "Label",
-    icon: <InputIcon style={{ color: "#800080", fill: "#800080" }} />,
+    icon: <FontColorsOutlined style={{ color: "#800080" }} />,
     primitive: "label",
     answerSettings: {
       renderElement: AnswerTypes.label,
@@ -20,7 +34,7 @@ export const BASIC_MENU = [
   {
     key: BASIC_MENU_KEYS.SECTION,
     label: "Section",
-    icon: <InputIcon style={{ color: "#1e3f66", fill: "#1e3f66" }} />,
+    icon: <AppstoreOutlined style={{ color: "#1e3f66" }} />,
     primitive: "section",
     answerSettings: undefined,
   },
@@ -30,7 +44,7 @@ export const INPUTS_MENU = [
   {
     key: INPUTS_TYPES.SHORT_ANSWER,
     label: "Short answer",
-    icon: <InputIcon style={{ color: "#FFD580", fill: "#FFD580" }} />,
+    icon: <FormOutlined style={{ color: "#a3ec66ff" }} />,
     primitive: "text",
     answerSettings: {
       renderElement: AnswerTypes.shortText,
@@ -39,7 +53,7 @@ export const INPUTS_MENU = [
   {
     key: INPUTS_TYPES.PARAGRAPH,
     label: "Paragraph",
-    icon: <InputIcon style={{ color: "#FFD580", fill: "#FFD580" }} />,
+    icon: <FileTextOutlined style={{ color: "#b7ce51ff" }} />,
     primitive: "text",
     answerSettings: {
       renderElement: AnswerTypes.paragraph,
@@ -48,7 +62,7 @@ export const INPUTS_MENU = [
   {
     key: INPUTS_TYPES.NUMBER,
     label: "Number",
-    icon: <InputIcon style={{ color: "#FFD580", fill: "#FFD580" }} />,
+    icon: <NumberOutlined style={{ color: "#e6b85eff" }} />,
     primitive: "number",
     answerSettings: {
       renderElement: AnswerTypes.number,
@@ -57,7 +71,7 @@ export const INPUTS_MENU = [
   {
     key: INPUTS_TYPES.MULTIPLE_CHOICE,
     label: "Multiple choice",
-    icon: <InputIcon style={{ color: "#FFD580", fill: "#FFD580" }} />,
+    icon: <CheckSquareOutlined style={{ color: "#5dc4d6ff" }} />,
     primitive: "option",
     answerSettings: {
       renderElement: AnswerTypes.checkboxes,
@@ -66,7 +80,7 @@ export const INPUTS_MENU = [
   {
     key: INPUTS_TYPES.SINGLE_CHOICE,
     label: "Single choice",
-    icon: <InputIcon style={{ color: "#FFD580", fill: "#FFD580" }} />,
+    icon: <CheckCircleOutlined style={{ color: "#8bd6d2ff" }} />,
     primitive: "option",
     answerSettings: {
       renderElement: AnswerTypes.radioButton,
@@ -75,7 +89,7 @@ export const INPUTS_MENU = [
   {
     key: INPUTS_TYPES.SELECT,
     label: "Select",
-    icon: <InputIcon style={{ color: "#FFD580", fill: "#FFD580" }} />,
+    icon: <CaretDownOutlined style={{ color: "#FFD580" }} />,
     primitive: "option",
     answerSettings: {
       renderElement: AnswerTypes.dropdown,
@@ -84,7 +98,7 @@ export const INPUTS_MENU = [
   {
     key: INPUTS_TYPES.DATE,
     label: "Date",
-    icon: <InputIcon style={{ color: "#FFD580", fill: "#FFD580" }} />,
+    icon: <CalendarOutlined style={{ color: "#fdc4adff" }} />,
     primitive: "text",
     answerSettings: {
       renderElement: AnswerTypes.date,
@@ -93,7 +107,7 @@ export const INPUTS_MENU = [
   {
     key: INPUTS_TYPES.TIME,
     label: "Time",
-    icon: <InputIcon style={{ color: "#FFD580", fill: "#FFD580" }} />,
+    icon: <ClockCircleOutlined style={{ color: "#f7a2f7ff" }} />,
     primitive: "text",
     answerSettings: {
       renderElement: AnswerTypes.time,
@@ -102,7 +116,7 @@ export const INPUTS_MENU = [
   {
     key: INPUTS_TYPES.SIGNATURE,
     label: "Signature",
-    icon: <InputIcon style={{ color: "#FFD580", fill: "#FFD580" }} />,
+    icon: <EditOutlined style={{ color: "#eba5b1ff" }} />,
     primitive: "text",
     answerSettings: {
       renderElement: AnswerTypes.signature,
@@ -114,7 +128,7 @@ export const INPUTS_MENU = [
   {
     key: INPUTS_TYPES.DATETIME,
     label: "Date & Time",
-    icon: <InputIcon style={{ color: "#FFD580", fill: "#FFD580" }} />,
+    icon: <FieldTimeOutlined style={{ color: "#FFD580" }} />,
     primitive: "datetime",
     answerSettings: {
       renderElement: AnswerTypes.datetime,
@@ -122,7 +136,7 @@ export const INPUTS_MENU = [
   },
   {
     key: INPUTS_TYPES.MULTIPLE_CHOICE_GRID,
-    label: "Multiple choice grid",
+    label: "Single choice grid",
     icon: <TableOutlined style={{ color: "#B5E7A0" }} />,
     primitive: "grid",
     answerSettings: {
@@ -132,7 +146,7 @@ export const INPUTS_MENU = [
   },
   {
     key: INPUTS_TYPES.CHECKBOX_GRID,
-    label: "Checkbox grid",
+    label: "Multiple choice grid",
     icon: <TableOutlined style={{ color: "#A0D3E7" }} />,
     primitive: "grid",
     answerSettings: {
@@ -146,7 +160,7 @@ export const PRE_BUILT_MENU = [
   {
     key: PRE_BUILT_MENU_KEYS.DATE_OF_BIRTH,
     label: "Date of birth",
-    icon: <InputIcon style={{ color: "#1e3f66.17", fill: "#1e3f66" }} />,
+    icon: <CalendarOutlined style={{ color: "#1e3f66" }} />,
     primitive: "text",
     answerSettings: {
       renderElement: AnswerTypes.date,
@@ -155,7 +169,7 @@ export const PRE_BUILT_MENU = [
   {
     key: PRE_BUILT_MENU_KEYS.EMAIL,
     label: "Email",
-    icon: <InputIcon style={{ color: "#1e3f66.17", fill: "#1e3f66" }} />,
+    icon: <MailOutlined style={{ color: "#1e3f66" }} />,
     answerSettings: {
       renderElement: AnswerTypes.shortText,
       validationRules: {

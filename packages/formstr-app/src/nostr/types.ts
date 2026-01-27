@@ -55,6 +55,8 @@ export enum AnswerTypes {
   time = "time",
   signature = "signature",
   datetime = "datetime",
+  multipleChoiceGrid = "multipleChoiceGrid",
+  checkboxGrid = "checkboxGrid",
 }
 
 export interface FormSpec {
@@ -114,6 +116,22 @@ export interface MaxRule {
 export interface MinRule {
   min: number;
 }
+export interface GridOptions {
+  columns: Array<
+    [columnId: string, columnLabel: string, columnConfig?: string]
+  >;
+  rows: Array<[rowId: string, rowLabel: string, rowConfig?: string]>;
+}
+
+export type GridResponse = Record<string, string>; // rowId -> columnId(s)
+
+export interface GridFieldSettings extends AnswerSettings {
+  renderElement: "multipleChoiceGrid" | "checkboxGrid";
+  allowMultiplePerRow: boolean;
+  required?: boolean;
+  requiredRows?: string[]; // Specific rows that must be answered
+}
+
 export interface AnswerSettings {
   renderElement?: string;
   choices?: Array<Choice>;

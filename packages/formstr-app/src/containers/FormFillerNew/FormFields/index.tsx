@@ -2,7 +2,7 @@ import { getValidationRules } from "../validations";
 import { Form } from "antd";
 import { QuestionNode } from "../QuestionNode/QuestionNode";
 import { IFormSettings } from "../../CreateFormNew/components/FormSettings/types";
-import { Field, Option } from "../../../nostr/types";
+import { Field, GridOptions, Option } from "../../../nostr/types";
 
 interface FormFieldsProps {
   fields: Array<Field>;
@@ -24,7 +24,15 @@ export const FormFields: React.FC<FormFieldsProps> = ({
   return fields.map((field) => {
     let [_, fieldId, type, label, optionsString, config] = field;
     let fieldConfig = JSON.parse(config);
-    let options = JSON.parse(optionsString || "[]") as Option[];
+    let gridOptions: GridOptions | null;
+    let options: Option[];
+    if (type === "grid") {
+      gridOptions = JSON.parse(optionsString || "{}");
+      options = [];
+    } else {
+      options = JSON.parse(optionsString || "[]");
+      gridOptions = null;
+    }
     let rules = [
       {
         required: fieldConfig.required,
@@ -50,6 +58,7 @@ export const FormFields: React.FC<FormFieldsProps> = ({
           value={values[fieldId]}
           testId={`${testId}:question-${fieldId}`}
           formSettings={formSettings}
+          gridOptions={gridOptions}
         />
       </Form.Item>
     );

@@ -1,5 +1,5 @@
 import { Event, nip44 } from "nostr-tools";
-import { Field, Tag } from "../nostr/types";
+import { Field, Tag, GridOptions, GridResponse } from "../nostr/types";
 import { getDefaultRelays } from "../nostr/common";
 import { hexToBytes } from "nostr-tools/utils";
 
@@ -93,6 +93,35 @@ export const getResponseLabels = (
         }
       } catch (e) {
         console.warn("Error processing options for fieldId:", fieldId, e);
+      }
+    }
+
+    if (questionField[2] === "grid" && answerValue) {
+      try {
+        const gridOptions: GridOptions = JSON.parse(
+          questionField[4] || '{"columns":[],"rows":[]}'
+        );
+        const responses: GridResponse = JSON.parse(answerValue);
+
+        // Convert to human-readable format
+        const readable: string[] = [];
+        for (const [rowId, columnIds] of Object.entries(responses)) {
+          const row = gridOptions.rows.find((r) => r[0] === rowId);
+          const rowLabel = row ? row[1] : rowId;
+
+          // Split for multiple selections (checkbox grid)
+          const selectedCols = columnIds.split(";").filter(Boolean);
+          const colLabels = selectedCols.map((colId) => {
+            const col = gridOptions.columns.find((c) => c[0] === colId);
+            return col ? col[1] : colId;
+          });
+
+          readable.push(`${rowLabel}: ${colLabels.join(", ")}`);
+        }
+
+        responseLabel = readable.join(" | ");
+      } catch (e) {
+        console.warn("Error processing grid response:", e);
       }
     }
 

@@ -3,7 +3,7 @@ import { InputFiller } from "./InputFiller";
 import { AnswerTypes } from "../../../constants";
 import SafeMarkdown from "../../../components/SafeMarkdown";
 import { IFormSettings } from "../../CreateFormNew/components/FormSettings/types";
-import { Option } from "../../../nostr/types";
+import { GridOptions, Option } from "../../../nostr/types";
 import Settings from "../../CreateFormNew/components/Settings";
 
 interface QuestionProps {
@@ -17,6 +17,7 @@ interface QuestionProps {
   value?: any;
   testId: string;
   formSettings: IFormSettings;
+  gridOptions?: GridOptions | null;
 }
 
 export const QuestionNode: React.FC<QuestionProps> = ({
@@ -30,12 +31,14 @@ export const QuestionNode: React.FC<QuestionProps> = ({
   value,
   testId,
   formSettings,
+  gridOptions,
 }) => {
   const answerHandler = (questionId: string) => {
     return (answer: string, message?: string) => {
       return inputHandler(questionId, answer, message);
     };
   };
+  console.log("options", options, fieldConfig);
 
   return (
     <Card
@@ -61,6 +64,7 @@ export const QuestionNode: React.FC<QuestionProps> = ({
         disabled={disabled}
         defaultValue={value ? value[0] : undefined}
         testId={`${testId}:input`}
+        gridOptions={gridOptions}
       />
     </Card>
   );

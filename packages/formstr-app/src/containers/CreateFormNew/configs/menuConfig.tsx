@@ -5,6 +5,7 @@ import {
 } from "./constants";
 import { ReactComponent as InputIcon } from "../../../Images/Frame.svg";
 import { AnswerTypes } from "../../../nostr/types";
+import { TableOutlined } from "@ant-design/icons";
 
 export const BASIC_MENU = [
   {
@@ -117,6 +118,26 @@ export const INPUTS_MENU = [
     primitive: "datetime",
     answerSettings: {
       renderElement: AnswerTypes.datetime,
+    },
+  },
+  {
+    key: INPUTS_TYPES.MULTIPLE_CHOICE_GRID,
+    label: "Multiple choice grid",
+    icon: <TableOutlined style={{ color: "#B5E7A0" }} />,
+    primitive: "grid",
+    answerSettings: {
+      renderElement: AnswerTypes.multipleChoiceGrid,
+      allowMultiplePerRow: false,
+    },
+  },
+  {
+    key: INPUTS_TYPES.CHECKBOX_GRID,
+    label: "Checkbox grid",
+    icon: <TableOutlined style={{ color: "#A0D3E7" }} />,
+    primitive: "grid",
+    answerSettings: {
+      renderElement: AnswerTypes.checkboxGrid,
+      allowMultiplePerRow: true,
     },
   },
 ];

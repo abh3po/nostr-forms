@@ -1,6 +1,10 @@
 import { Tooltip, Typography } from "antd";
 import { InputFiller } from "../../../FormFillerNew/QuestionNode/InputFiller";
-import { AnswerSettings, AnswerTypes } from "../../../../nostr/types";
+import {
+  AnswerSettings,
+  AnswerTypes,
+  GridOptions,
+} from "../../../../nostr/types";
 
 const { Text } = Typography;
 
@@ -17,14 +21,50 @@ export const RightAnswer: React.FC<RightAnswerProps> = ({
   choices,
   onChange,
 }) => {
+  // Parse choices - only for option-based questions
+  let parsedChoices = [];
+  try {
+    const parsed = JSON.parse(choices || "[]");
+    if (Array.isArray(parsed)) {
+      parsedChoices = parsed;
+    }
+  } catch {
+    parsedChoices = [];
+  }
+  // Handle grid questions
+  if (
+    answerType === AnswerTypes.multipleChoiceGrid ||
+    answerType === AnswerTypes.checkboxGrid
+  ) {
+    let gridOptions: GridOptions;
+    try {
+      gridOptions = JSON.parse(choices || '{"columns":[],"rows":[]}');
+    } catch {
+      gridOptions = { columns: [], rows: [] };
+    }
+
+    return (
+      <Tooltip title="Select the correct answer for each row in this quiz grid">
+        <div className="right-answer">
+          <Text className="property-name">Right answers</Text>
+          <InputFiller
+            defaultValue={answerSettings?.validationRules?.match?.answer}
+            options={parsedChoices}
+            gridOptions={gridOptions}
+            fieldConfig={answerSettings}
+            onChange={onChange}
+          />
+        </div>
+      </Tooltip>
+    );
+  }
+
   const processedAnswerSettings = {
     ...answerSettings,
-    choices: choices
-      ? JSON.parse(choices).map(([choiceId, label]: [string, string]) => ({
-          choiceId,
-          label,
-        }))
-      : [],
+    choices: parsedChoices.map(([choiceId, label]: [string, string]) => ({
+      choiceId,
+      label,
+    })),
   };
 
   const isMultipleChoice = answerType === AnswerTypes.checkboxes;
@@ -41,7 +81,7 @@ export const RightAnswer: React.FC<RightAnswerProps> = ({
         </Text>
         <InputFiller
           defaultValue={answerSettings?.validationRules?.match?.answer}
-          options={JSON.parse(choices || "[]")}
+          options={parsedChoices}
           fieldConfig={processedAnswerSettings}
           onChange={onChange}
         />

@@ -7,7 +7,8 @@ import { DateFiller } from "./InputTypes/DateFiller";
 import { TimeFiller } from "./InputTypes/TimeFiller";
 import { SignatureFiller } from "./InputTypes/SignatureFiller";
 import { DateTimeFiller } from "./InputTypes/DateTimeFiller";
-import { AnswerTypes, Option } from "../../../nostr/types";
+import { GridFiller } from "./InputTypes/GridFiller";
+import { AnswerTypes, GridOptions, Option } from "../../../nostr/types";
 
 interface InputFillerProps {
   fieldConfig: any;
@@ -16,6 +17,7 @@ interface InputFillerProps {
   defaultValue?: string | number | boolean;
   disabled?: boolean;
   testId?: string;
+  gridOptions?: GridOptions | null;
 }
 
 export const InputFiller: React.FC<InputFillerProps> = ({
@@ -25,6 +27,7 @@ export const InputFiller: React.FC<InputFillerProps> = ({
   defaultValue,
   disabled = false,
   testId = "input-filler",
+  gridOptions,
 }) => {
   const handleInputChange = (
     e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
@@ -128,6 +131,24 @@ export const InputFiller: React.FC<InputFillerProps> = ({
           onChange={handleValueChange}
           disabled={disabled}
           testId={`${testId}:datetime`}
+        />
+      ),
+      [AnswerTypes.multipleChoiceGrid]: (
+        <GridFiller
+          options={JSON.stringify(gridOptions!)}
+          answerType={AnswerTypes.multipleChoiceGrid}
+          onChange={handleValueChange}
+          defaultValue={defaultValue as string}
+          disabled={disabled}
+        />
+      ),
+      [AnswerTypes.checkboxGrid]: (
+        <GridFiller
+          options={JSON.stringify(gridOptions)}
+          answerType={AnswerTypes.checkboxGrid}
+          onChange={handleValueChange}
+          defaultValue={defaultValue as string}
+          disabled={disabled}
         />
       ),
     };

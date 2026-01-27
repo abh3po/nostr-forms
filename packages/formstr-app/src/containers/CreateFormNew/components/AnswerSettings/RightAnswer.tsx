@@ -1,6 +1,10 @@
 import { Tooltip, Typography } from "antd";
 import { InputFiller } from "../../../FormFillerNew/QuestionNode/InputFiller";
-import { AnswerSettings, AnswerTypes, GridOptions } from "../../../../nostr/types";
+import {
+  AnswerSettings,
+  AnswerTypes,
+  GridOptions,
+} from "../../../../nostr/types";
 
 const { Text } = Typography;
 
@@ -17,6 +21,16 @@ export const RightAnswer: React.FC<RightAnswerProps> = ({
   choices,
   onChange,
 }) => {
+  // Parse choices - only for option-based questions
+  let parsedChoices = [];
+  try {
+    const parsed = JSON.parse(choices || "[]");
+    if (Array.isArray(parsed)) {
+      parsedChoices = parsed;
+    }
+  } catch {
+    parsedChoices = [];
+  }
   // Handle grid questions
   if (
     answerType === AnswerTypes.multipleChoiceGrid ||
@@ -35,24 +49,14 @@ export const RightAnswer: React.FC<RightAnswerProps> = ({
           <Text className="property-name">Right answers</Text>
           <InputFiller
             defaultValue={answerSettings?.validationRules?.match?.answer}
-            options={gridOptions}
+            options={parsedChoices}
+            gridOptions={gridOptions}
             fieldConfig={answerSettings}
             onChange={onChange}
           />
         </div>
       </Tooltip>
     );
-  }
-
-  // Parse choices - only for option-based questions
-  let parsedChoices = [];
-  try {
-    const parsed = JSON.parse(choices || "[]");
-    if (Array.isArray(parsed)) {
-      parsedChoices = parsed;
-    }
-  } catch {
-    parsedChoices = [];
   }
 
   const processedAnswerSettings = {

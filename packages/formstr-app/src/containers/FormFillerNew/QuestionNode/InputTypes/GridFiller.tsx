@@ -1,6 +1,10 @@
 import { Radio, Checkbox } from "antd";
 import { useState, useEffect } from "react";
-import { AnswerTypes, GridOptions, GridResponse } from "../../../../nostr/types";
+import {
+  AnswerTypes,
+  GridOptions,
+  GridResponse,
+} from "../../../../nostr/types";
 import styled from "styled-components";
 import SafeMarkdown from "../../../../components/SafeMarkdown";
 
@@ -13,7 +17,7 @@ interface GridFillerProps {
 }
 
 const GridContainer = styled.div`
-  width: 100%;
+  // width: 100%;
   overflow-x: auto;
   margin-top: 8px;
 `;
@@ -21,7 +25,7 @@ const GridContainer = styled.div`
 const GridTable = styled.table`
   width: 100%;
   border-collapse: collapse;
-  min-width: 400px;
+  // min-width: 400px;
 
   th,
   td {
@@ -34,7 +38,7 @@ const GridTable = styled.table`
   td:first-child {
     text-align: left;
     font-weight: 500;
-    min-width: 150px;
+    // min-width: 150px;
   }
 
   thead th {
@@ -56,7 +60,7 @@ const GridTable = styled.table`
 
     th:first-child,
     td:first-child {
-      min-width: 100px;
+      // min-width: 100px;
     }
   }
 `;
@@ -68,7 +72,9 @@ export const GridFiller: React.FC<GridFillerProps> = ({
   defaultValue,
   disabled = false,
 }) => {
-  const gridOptions: GridOptions = JSON.parse(options || '{"columns":[],"rows":[]}');
+  const gridOptions: GridOptions = JSON.parse(
+    options || '{"columns":[],"rows":[]}',
+  );
   const [responses, setResponses] = useState<GridResponse>(() => {
     try {
       return defaultValue ? JSON.parse(defaultValue) : {};
@@ -95,7 +101,11 @@ export const GridFiller: React.FC<GridFillerProps> = ({
     onChange(JSON.stringify(newResponses));
   };
 
-  const handleCheckboxChange = (rowId: string, columnId: string, checked: boolean) => {
+  const handleCheckboxChange = (
+    rowId: string,
+    columnId: string,
+    checked: boolean,
+  ) => {
     if (disabled) return;
 
     const current = responses[rowId]?.split(";").filter(Boolean) || [];
@@ -152,7 +162,9 @@ export const GridFiller: React.FC<GridFillerProps> = ({
                   ) : (
                     <Checkbox
                       checked={isCheckboxChecked(rowId, colId)}
-                      onChange={(e) => handleCheckboxChange(rowId, colId, e.target.checked)}
+                      onChange={(e) =>
+                        handleCheckboxChange(rowId, colId, e.target.checked)
+                      }
                       disabled={disabled}
                     />
                   )}

@@ -15,15 +15,25 @@ export const CreateFormHeader: React.FC = () => {
 
   const { Header } = Layout;
   const { Text } = Typography;
-  const { saveForm, setSelectedTab, formSettings, relayList,setIsAiModalOpen,selectedTab, questionsList } =
-    useFormBuilderContext();
+  const {
+    saveForm,
+    setSelectedTab,
+    formSettings,
+    relayList,
+    setIsAiModalOpen,
+    selectedTab,
+    questionsList,
+  } = useFormBuilderContext();
 
   const onMenuClickHandler: MenuProps["onClick"] = (e) => {
     if (e.key === HEADER_MENU_KEYS.AI_BUILDER) {
       setIsAiModalOpen(true);
       return;
     }
-    if (e.key === HEADER_MENU_KEYS.BUILDER || e.key === HEADER_MENU_KEYS.PREVIEW) {
+    if (
+      e.key === HEADER_MENU_KEYS.BUILDER ||
+      e.key === HEADER_MENU_KEYS.PREVIEW
+    ) {
       setSelectedTab(e.key);
     }
   };
@@ -58,19 +68,30 @@ export const CreateFormHeader: React.FC = () => {
         <Row className="header-row" justify="space-between" align="middle">
           <Col>
             <Row className="header-row" justify="space-between" align="middle">
-              <Col style={{ paddingRight: 10, display: 'flex', alignItems: 'center' }}>
+              <Col
+                style={{
+                  paddingRight: 10,
+                  display: "flex",
+                  alignItems: "center",
+                }}
+              >
                 <Link className="app-link" to="/">
                   <ArrowLeftOutlined style={{ color: "black" }} />
                 </Link>
               </Col>
-              <Col>
+              <Col style={{ paddingTop: 5 }}>
                 <Text>All Forms</Text>
               </Col>
             </Row>
           </Col>
 
           <Col md={10} xs={12} sm={12}>
-            <Row className="header-row" justify="end" align="middle" gutter={[8, 0]}>
+            <Row
+              className="header-row"
+              justify="end"
+              align="middle"
+              gutter={[8, 0]}
+            >
               <Col>
                 <Button
                   type="primary"
@@ -89,7 +110,7 @@ export const CreateFormHeader: React.FC = () => {
                   overflowedIndicator={<MenuOutlined />}
                   items={HEADER_MENU}
                   onClick={onMenuClickHandler}
-                  style={{ borderBottom: 'none' }}
+                  style={{ borderBottom: "none" }}
                 />
               </Col>
             </Row>

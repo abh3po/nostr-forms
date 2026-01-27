@@ -80,7 +80,7 @@ const GridTable = styled.table`
   .add-column-cell {
     background: #fafafa;
     cursor: pointer;
-    color: #1890ff;
+    color: #ff4d4f;
 
     &:hover {
       background: #e6f7ff;
@@ -99,7 +99,11 @@ export const GridCreator: React.FC<GridCreatorProps> = ({
   allowMultiple,
 }) => {
   const [columns, setColumns] = useState<GridItem[]>(() => {
-    if (initialValue?.columns && Array.isArray(initialValue.columns) && initialValue.columns.length > 0) {
+    if (
+      initialValue?.columns &&
+      Array.isArray(initialValue.columns) &&
+      initialValue.columns.length > 0
+    ) {
       return initialValue.columns;
     }
     return [
@@ -109,7 +113,11 @@ export const GridCreator: React.FC<GridCreatorProps> = ({
   });
 
   const [rows, setRows] = useState<GridItem[]>(() => {
-    if (initialValue?.rows && Array.isArray(initialValue.rows) && initialValue.rows.length > 0) {
+    if (
+      initialValue?.rows &&
+      Array.isArray(initialValue.rows) &&
+      initialValue.rows.length > 0
+    ) {
       return initialValue.rows;
     }
     return [
@@ -124,13 +132,19 @@ export const GridCreator: React.FC<GridCreatorProps> = ({
 
   const handleColumnLabelChange = (id: string, label: string) => {
     setColumns(
-      columns.map((col) => (col[0] === id ? [col[0], label, col[2] || "{}"] : col))
+      columns.map((col) =>
+        col[0] === id ? [col[0], label, col[2] || "{}"] : col,
+      ),
     );
   };
 
   const handleColumnAdd = () => {
     if (columns.length >= 10) return;
-    const newColumn: GridItem = [makeTag(6), `Column ${columns.length + 1}`, "{}"];
+    const newColumn: GridItem = [
+      makeTag(6),
+      `Column ${columns.length + 1}`,
+      "{}",
+    ];
     setColumns([...columns, newColumn]);
   };
 
@@ -141,7 +155,9 @@ export const GridCreator: React.FC<GridCreatorProps> = ({
 
   const handleRowLabelChange = (id: string, label: string) => {
     setRows(
-      rows.map((row) => (row[0] === id ? [row[0], label, row[2] || "{}"] : row))
+      rows.map((row) =>
+        row[0] === id ? [row[0], label, row[2] || "{}"] : row,
+      ),
     );
   };
 
@@ -168,7 +184,9 @@ export const GridCreator: React.FC<GridCreatorProps> = ({
                   <Input
                     className="cell-input"
                     value={col[1]}
-                    onChange={(e) => handleColumnLabelChange(col[0], e.target.value)}
+                    onChange={(e) =>
+                      handleColumnLabelChange(col[0], e.target.value)
+                    }
                     placeholder="Column"
                     style={{ textAlign: "center", fontWeight: 600 }}
                   />
@@ -194,7 +212,9 @@ export const GridCreator: React.FC<GridCreatorProps> = ({
                   <Input
                     className="cell-input"
                     value={row[1]}
-                    onChange={(e) => handleRowLabelChange(row[0], e.target.value)}
+                    onChange={(e) =>
+                      handleRowLabelChange(row[0], e.target.value)
+                    }
                     placeholder="Row"
                   />
                   {rows.length > 1 && (
@@ -206,11 +226,7 @@ export const GridCreator: React.FC<GridCreatorProps> = ({
                 </td>
                 {columns.map((col) => (
                   <td key={col[0]}>
-                    {allowMultiple ? (
-                      <Checkbox disabled />
-                    ) : (
-                      <Radio disabled />
-                    )}
+                    {allowMultiple ? <Checkbox disabled /> : <Radio disabled />}
                   </td>
                 ))}
                 {columns.length < 10 && <td></td>}

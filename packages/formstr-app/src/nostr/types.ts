@@ -117,7 +117,9 @@ export interface MinRule {
   min: number;
 }
 export interface GridOptions {
-  columns: Array<[columnId: string, columnLabel: string, columnConfig?: string]>;
+  columns: Array<
+    [columnId: string, columnLabel: string, columnConfig?: string]
+  >;
   rows: Array<[rowId: string, rowLabel: string, rowConfig?: string]>;
 }
 

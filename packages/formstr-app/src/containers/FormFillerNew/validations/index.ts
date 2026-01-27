@@ -90,23 +90,36 @@ function Match(rule: MatchRule, answerType?: AnswerTypes): Rule {
       ) {
         try {
           const userResponse: GridResponse = JSON.parse(userValue);
-          const correctResponse: GridResponse = JSON.parse(rule.answer);
+          const correctResponse: GridResponse = JSON.parse(
+            rule.answer as string,
+          );
 
           // Check if all rows match
-          for (const [rowId, correctColumnIds] of Object.entries(correctResponse)) {
+          for (const [rowId, correctColumnIds] of Object.entries(
+            correctResponse,
+          )) {
             const userColumnIds = userResponse[rowId];
 
             if (!userColumnIds) {
-              return Promise.reject(`This is not the correct answer for this question`);
+              return Promise.reject(
+                `This is not the correct answer for this question`,
+              );
             }
 
             // For checkbox grids, compare sorted arrays
-            const userIds = userColumnIds.split(';').filter(Boolean).sort();
-            const correctIds = correctColumnIds.split(';').filter(Boolean).sort();
+            const userIds = userColumnIds.split(";").filter(Boolean).sort();
+            const correctIds = correctColumnIds
+              .split(";")
+              .filter(Boolean)
+              .sort();
 
-            if (userIds.length !== correctIds.length ||
-                !userIds.every((id, idx) => id === correctIds[idx])) {
-              return Promise.reject(`This is not the correct answer for this question`);
+            if (
+              userIds.length !== correctIds.length ||
+              !userIds.every((id, idx) => id === correctIds[idx])
+            ) {
+              return Promise.reject(
+                `This is not the correct answer for this question`,
+              );
             }
           }
 
@@ -156,7 +169,9 @@ function GridValidator(gridOptions: GridOptions): Rule {
         // Check if all rows are answered
         for (const [rowId, rowLabel] of gridOptions.rows) {
           if (!responses[rowId] || responses[rowId] === "") {
-            return Promise.reject(`Please answer all rows: "${rowLabel}" is missing`);
+            return Promise.reject(
+              `Please answer all rows: "${rowLabel}" is missing`,
+            );
           }
         }
 

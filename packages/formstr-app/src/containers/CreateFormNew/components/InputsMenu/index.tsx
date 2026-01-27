@@ -10,15 +10,20 @@ function InputsMenu() {
     addQuestion(
       selectedItem?.primitive,
       undefined,
-      selectedItem?.answerSettings
+      selectedItem?.answerSettings,
     );
-    console.log("after add question");
   };
 
   const items = [
     { key: "Inputs", label: "Inputs", children: INPUTS_MENU, type: "group" },
   ];
-  return <Menu selectedKeys={[]} items={items} onClick={onMenuClick} />;
+  return (
+    <Menu
+      selectedKeys={[]}
+      items={items}
+      onClick={onMenuClick}
+    />
+  );
 }
 
 export default InputsMenu;

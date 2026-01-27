@@ -75,18 +75,14 @@ export async function getUserPublicKey(userSecretKey: Uint8Array | null) {
 
 export async function signEvent(
   baseEvent: EventTemplate,
-  userSecretKey: Uint8Array | null
+  userSecretKey: Uint8Array | null,
 ) {
-  console.log("INSIDE SIGNEVENT", baseEvent, userSecretKey);
   let nostrEvent;
   if (userSecretKey) {
     nostrEvent = finalizeEvent(baseEvent, userSecretKey);
   } else {
-    console.log("Trying to get singer");
     const singer = await signerManager.getSigner();
-    console.log("GOT SIGNER", singer);
     nostrEvent = await singer.signEvent(baseEvent);
-    console.log("FINALIZED EVENT", nostrEvent);
   }
   return nostrEvent;
 }
@@ -94,7 +90,7 @@ export async function signEvent(
 export const customPublish = (
   relays: string[],
   event: Event,
-  onAcceptedRelays?: (relay: string) => void
+  onAcceptedRelays?: (relay: string) => void,
 ): Promise<string>[] => {
   return relays.map(normalizeURL).map(async (url, i, arr) => {
     if (arr.indexOf(url) !== i) {
@@ -111,7 +107,7 @@ export const customPublish = (
           return reason;
         }),
         new Promise<string>((_, reject) =>
-          setTimeout(() => reject("timeout"), 5000)
+          setTimeout(() => reject("timeout"), 5000),
         ),
       ]);
     } finally {
@@ -150,11 +146,11 @@ const getDisplayAnswer = (answer: string | number | boolean, field: Field) => {
 
 export const sendNotification = async (
   form: Tag[],
-  response: Array<Response>
+  response: Array<Response>,
 ) => {
   const name = form.filter((f) => f[0] === "name")?.[0][1];
   const settings = JSON.parse(
-    form.filter((f) => f[0] === "settings")?.[0][1]
+    form.filter((f) => f[0] === "settings")?.[0][1],
   ) as IFormSettings;
   let message = 'New response for form: "' + name + '"';
   const questionMap = createQuestionMap(form);
@@ -193,7 +189,7 @@ export const sendNRPCWebhook = async (
   form: Tag[],
   responses: Response[],
   relays: string[],
-  privateKey?: Uint8Array
+  privateKey?: Uint8Array,
 ) => {
   const settingsTag = form.find((f) => f[0] === "settings");
   let settings: IFormSettings = {} as IFormSettings;
@@ -225,7 +221,7 @@ export const sendNRPCWebhook = async (
       nrpcPubkey,
       nrpcMethod,
       params,
-      privateKey
+      privateKey,
     );
     return resp;
   } catch (err) {
@@ -236,7 +232,7 @@ export const sendNRPCWebhook = async (
 
 export const ensureRelay = async (
   url: string,
-  params?: { connectionTimeout?: number }
+  params?: { connectionTimeout?: number },
 ): Promise<AbstractRelay> => {
   url = normalizeURL(url);
   const relay = new Relay(url);
@@ -249,7 +245,7 @@ export const ensureRelay = async (
 const encryptResponse = async (
   message: string,
   receiverPublicKey: string,
-  senderPrivateKey: Uint8Array | null
+  senderPrivateKey: Uint8Array | null,
 ) => {
   if (!senderPrivateKey) {
     const signer = await signerManager.getSigner();
@@ -257,7 +253,7 @@ const encryptResponse = async (
   }
   const conversationKey = nip44.v2.utils.getConversationKey(
     senderPrivateKey,
-    receiverPublicKey
+    receiverPublicKey,
   );
   return nip44.v2.encrypt(message, conversationKey);
 };
@@ -269,7 +265,7 @@ export const sendResponses = async (
   responderSecretKey: Uint8Array | null = null,
   encryptResponses = true,
   relays: string[] = [],
-  onAcceptedRelays?: (url: string) => void
+  onAcceptedRelays?: (url: string) => void,
 ) => {
   if (!formId) {
     alert("FORM ID NOT FOUND");
@@ -285,7 +281,7 @@ export const sendResponses = async (
     content = await encryptResponse(
       JSON.stringify(responses),
       formAuthorPub,
-      responderSecretKey
+      responderSecretKey,
     );
   }
   const baseEvent: UnsignedEvent = {
@@ -301,7 +297,7 @@ export const sendResponses = async (
     relayList = defaultRelays;
   }
   const messages = await Promise.allSettled(
-    customPublish(relayList, fullEvent!, onAcceptedRelays)
+    customPublish(relayList, fullEvent!, onAcceptedRelays),
   );
   console.log("Message from relays", messages);
 };
@@ -312,7 +308,7 @@ export const sendResponses = async (
 function buildRumor(
   serverPubkey: string,
   method: string,
-  params: string[][] = []
+  params: string[][] = [],
 ): any {
   return {
     kind: 68,
@@ -328,7 +324,7 @@ function buildRumor(
 async function sealRumor(
   rumor: any,
   serverPubkey: string,
-  callerSk?: Uint8Array
+  callerSk?: Uint8Array,
 ): Promise<Event> {
   let encryptedRumor;
   if (callerSk) {
@@ -346,7 +342,7 @@ async function sealRumor(
       tags: [["p", serverPubkey]],
       content: encryptedRumor,
     },
-    callerSk || null
+    callerSk || null,
   );
 }
 
@@ -355,7 +351,7 @@ async function sealRumor(
 //
 function giftwrapSeal(
   seal: Event,
-  serverPubkey: string
+  serverPubkey: string,
 ): { giftwrap: Event; ephSk: Uint8Array } {
   const ephSk = generateSecretKey();
   const wrapConvKey = nip44.getConversationKey(ephSk, serverPubkey);
@@ -369,7 +365,7 @@ function giftwrapSeal(
         tags: [["p", serverPubkey]],
         content: encryptedSeal,
       },
-      ephSk
+      ephSk,
     ),
     ephSk,
   };
@@ -390,7 +386,7 @@ async function publishGiftwrap(relays: string[], giftwrap: any) {
 async function unwrapGiftwrap(
   resp: any,
   serverPubkey: string,
-  callerSk?: Uint8Array
+  callerSk?: Uint8Array,
 ): Promise<any> {
   let sealJson;
   if (callerSk) {
@@ -420,7 +416,7 @@ async function unwrapGiftwrap(
 //
 function extractResultsByType(rumorResp: any, type: string): string[][] {
   return rumorResp.tags.filter(
-    (t: string[]) => t[0] === "result" && t[1] === type
+    (t: string[]) => t[0] === "result" && t[1] === type,
   );
 }
 
@@ -433,7 +429,7 @@ async function callRPC(
   serverPubkey: string,
   method: string,
   params: string[][] = [],
-  anonUser?: Uint8Array | null
+  anonUser?: Uint8Array | null,
 ): Promise<UnsignedEvent> {
   // caller identity
   let callerPk;
@@ -469,7 +465,7 @@ async function callRPC(
             const rumorResp = await unwrapGiftwrap(
               resp,
               serverPubkey,
-              callerSk
+              callerSk,
             );
 
             if (rumorResp.kind === 69) {
@@ -483,7 +479,7 @@ async function callRPC(
         oneose() {
           console.log("Relay reports EOSE");
         },
-      }
+      },
     );
   });
 }
@@ -495,7 +491,7 @@ export async function fetchNRPCMethods(relays: string[], serverPubkey: string) {
     serverPubkey,
     "getMethods",
     [],
-    generateSecretKey()
+    generateSecretKey(),
   );
   return extractMethods(resp);
 }
@@ -503,7 +499,7 @@ export async function fetchKind0Events(
   relayUrls: string[],
   tag: string,
   limit = 100,
-  timeoutMs = 8000
+  timeoutMs = 8000,
 ): Promise<Event[]> {
   const filter: Filter = {
     kinds: [0],
@@ -530,7 +526,7 @@ export async function fetchKind0Events(
 
     // Return newest first
     return Array.from(latestByPubkey.values()).sort(
-      (a, b) => b.created_at - a.created_at
+      (a, b) => b.created_at - a.created_at,
     );
   } catch (err) {
     clearTimeout(timeout);

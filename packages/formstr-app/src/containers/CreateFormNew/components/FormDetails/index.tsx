@@ -42,7 +42,6 @@ export const FormDetails = ({
   const { pubkey: userPub, requestPubkey } = useProfileContext();
   const { saveToMyForms, inMyForms } = useMyForms();
   const navigate = useNavigate();
-  console.log("Got view keey as", viewKey);
   useEffect(() => {
     saveToDevice(
       pubKey,

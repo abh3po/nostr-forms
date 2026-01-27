@@ -27,7 +27,7 @@ function BasicMenu() {
     <Menu
       items={BASIC_MENU}
       onClick={onMenuClick}
-      style={{ width: "100%", border: "none" }}
+      style={{ width: "100%", border: "none", wordBreak: "break-word", whiteSpace: "normal" }}
     />
   );
 }

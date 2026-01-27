@@ -27,7 +27,6 @@ export const RadioButtonCreator: React.FC<RadioButtonCreatorProps> = ({
   return (
     <OptionsStyle>
       {choices?.map((choice) => {
-        console.log("Choice is", choice);
         let [choiceId, label, settingsString] = choice;
         let settings = JSON.parse(settingsString || "{}") as ChoiceSettings;
         return (

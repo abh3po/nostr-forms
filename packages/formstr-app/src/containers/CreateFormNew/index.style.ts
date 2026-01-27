@@ -6,7 +6,7 @@ export default styled.div<{
   $isRightSettingsOpen?: boolean;
 }>`
   .left-sidebar {
-    overflow: scroll;
+    overflow: wrap;
     background-color: white;
     ${MEDIA_QUERY_MOBILE} {
       display: ${(props) => (props.$isOpen ? "block" : "none")};

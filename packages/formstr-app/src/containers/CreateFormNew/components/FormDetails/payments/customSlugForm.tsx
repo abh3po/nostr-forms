@@ -97,11 +97,8 @@ export const CustomSlugForm = ({
         const amountPath = `/api/amount`;
         const apiUrl = `${appConfig.apiBaseUrl}${amountPath}`;
         const res = await axios.get(apiUrl);
-        console.log("Fetched amount:", res.data.amount);
         setPrice(res.data.amount);
-      } catch (error) {
-        console.error("Failed to fetch amount:", error);
-      }
+      } catch (error) {}
     };
     fetchAmount();
   }, []);
@@ -125,7 +122,7 @@ export const CustomSlugForm = ({
       const res = await axios.post(
         apiUrl,
         { slug, formId, formPubkey, relays, viewKey },
-        { headers: { Authorization: authHeader } }
+        { headers: { Authorization: authHeader } },
       );
 
       const { invoice, paymentHash, amount } = res.data;

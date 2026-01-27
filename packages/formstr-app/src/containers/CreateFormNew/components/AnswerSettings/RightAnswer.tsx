@@ -1,6 +1,6 @@
 import { Tooltip, Typography } from "antd";
 import { InputFiller } from "../../../FormFillerNew/QuestionNode/InputFiller";
-import { AnswerSettings, AnswerTypes } from "../../../../nostr/types";
+import { AnswerSettings, AnswerTypes, GridOptions } from "../../../../nostr/types";
 
 const { Text } = Typography;
 
@@ -17,12 +17,31 @@ export const RightAnswer: React.FC<RightAnswerProps> = ({
   choices,
   onChange,
 }) => {
-  // Skip grid questions - they don't have "right answers"
+  // Handle grid questions
   if (
     answerType === AnswerTypes.multipleChoiceGrid ||
     answerType === AnswerTypes.checkboxGrid
   ) {
-    return null;
+    let gridOptions: GridOptions;
+    try {
+      gridOptions = JSON.parse(choices || '{"columns":[],"rows":[]}');
+    } catch {
+      gridOptions = { columns: [], rows: [] };
+    }
+
+    return (
+      <Tooltip title="Select the correct answer for each row in this quiz grid">
+        <div className="right-answer">
+          <Text className="property-name">Right answers</Text>
+          <InputFiller
+            defaultValue={answerSettings?.validationRules?.match?.answer}
+            options={gridOptions}
+            fieldConfig={answerSettings}
+            onChange={onChange}
+          />
+        </div>
+      </Tooltip>
+    );
   }
 
   // Parse choices - only for option-based questions

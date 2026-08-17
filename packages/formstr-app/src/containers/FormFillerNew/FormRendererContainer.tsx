@@ -23,6 +23,7 @@ import {
   FormValues,
   validateFields,
 } from "./validations";
+import type { ResponseSubmitMeta } from "../../utils/responsePermalink";
 
 // Helper to get the draft storage key for a form
 const getDraftStorageKey = (formEvent: Event): string => {
@@ -57,7 +58,11 @@ const isFileUploadMetadata = (
 
 interface FormRendererContainerProps {
   formEvent: Event;
-  onSubmitClick: (responses: Response[], formTemplate: Tag[]) => void;
+  onSubmitClick: (
+    responses: Response[],
+    formTemplate: Tag[],
+    meta?: ResponseSubmitMeta,
+  ) => void;
   viewKey: string | null;
   hideTitleImage?: boolean;
   hideDescription?: boolean;
@@ -335,12 +340,12 @@ export const FormRendererContainer: React.FC<FormRendererContainerProps> = ({
     });
   }, []);
 
-  const onSubmit = async () => {
+  const onSubmit = async (meta?: ResponseSubmitMeta) => {
     try {
       const responses = getResponses();
       // Clear draft on successful submit
       clearDraft();
-      onSubmitClick(responses, formTemplate!);
+      onSubmitClick(responses, formTemplate!, meta);
     } catch (error) {
       console.error("Form validation failed:", error);
       // The form will automatically show validation errors

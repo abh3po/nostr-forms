@@ -1,4 +1,5 @@
 import { Event } from "nostr-tools";
+import { IFormSettings } from "../containers/CreateFormNew/components/FormSettings/types";
 
 export type Field = [
   placeholder: string,
@@ -200,12 +201,4 @@ export interface FormResponses {
 export interface FormResponse {
   response: Array<V1Response>;
   createdAt: string;
-}
-export interface IFormSettings {
-  titleImageUrl?: string;
-  description?: string;
-  thankYouPage?: boolean;
-  notifyNpubs?: Array<string>;
-  publicForm?: boolean;
-  disallowAnonymous?: boolean;
 }

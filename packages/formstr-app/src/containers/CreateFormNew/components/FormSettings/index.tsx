@@ -25,6 +25,7 @@ import { useState } from "react";
 import { ThankYouScreenImageSetting } from "./ThankYouImage";
 import { IColorSettings } from "./types";
 import Automations from "./Automations";
+import Payments from "./Payments";
 
 type ColorKey = keyof IColorSettings;
 
@@ -354,6 +355,25 @@ function FormSettings() {
           </AccordionSummary>
           <AccordionDetails sx={detailsSx}>
             <Automations />
+          </AccordionDetails>
+        </Accordion>
+
+        <Accordion
+          disableGutters
+          elevation={0}
+          sx={{
+            ...accordionSx,
+            borderBottom: "1px solid",
+            borderColor: "divider",
+          }}
+        >
+          <AccordionSummary expandIcon={<ExpandMoreIcon />} sx={summarySx}>
+            <Typography>
+              {t("builder.formSettings.sections.payments")}
+            </Typography>
+          </AccordionSummary>
+          <AccordionDetails sx={detailsSx}>
+            <Payments />
           </AccordionDetails>
         </Accordion>
       </Box>

@@ -355,6 +355,13 @@ const encryptResponse = async (
   return nip44.v2.encrypt(message, conversationKey);
 };
 
+export interface SendResponsesResult {
+  /** The signed kind-1069 response event (null if signing failed / no formId). */
+  event: Event | null;
+  /** Relays that accepted the response event. */
+  acceptedRelays: string[];
+}
+
 export const sendResponses = async (
   formAuthorPub: string,
   formId: string,
@@ -363,10 +370,10 @@ export const sendResponses = async (
   encryptResponses = true,
   relays: string[] = [],
   onAcceptedRelays?: (url: string) => void,
-) => {
+): Promise<SendResponsesResult> => {
   if (!formId) {
     alert("FORM ID NOT FOUND");
-    return;
+    return { event: null, acceptedRelays: [] };
   }
   let responderPub;
   responderPub = await getUserPublicKey(responderSecretKey);
@@ -393,10 +400,20 @@ export const sendResponses = async (
   if (relayList.length === 0) {
     relayList = defaultRelays;
   }
+  // Accumulate accepted relays locally so callers that need the response event
+  // id + the relays that accepted it (e.g. the zap-gated pay flow) don't have to
+  // thread a callback through. The optional callback is still invoked for
+  // backward-compatible UI (the RelayPublishModal).
+  const acceptedRelays: string[] = [];
+  const trackAccepted = (url: string) => {
+    acceptedRelays.push(url);
+    onAcceptedRelays?.(url);
+  };
   const messages = await Promise.allSettled(
-    customPublish(relayList, fullEvent!, onAcceptedRelays, responderSecretKey),
+    customPublish(relayList, fullEvent!, trackAccepted, responderSecretKey),
   );
   console.log("Message from relays", messages);
+  return { event: fullEvent, acceptedRelays };
 };
 
 //

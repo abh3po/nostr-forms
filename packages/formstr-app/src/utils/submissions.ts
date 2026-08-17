@@ -8,6 +8,12 @@ export interface ISubmission {
   submittedAt: string;
   anonymous: boolean;
   submittedAs?: string;
+  /** Kind-1069 response event id (set for submissions made after the permalink feature). */
+  responseEventId?: string;
+  /** NIP-19 nevent pointer to the response. */
+  nevent?: string;
+  /** Full shareable response URL (a capability URL for anonymous submissions). */
+  permalink?: string;
 }
 
 const submissionKey = (

@@ -2478,6 +2478,11 @@
   resolved "https://registry.npmjs.org/@rushstack/eslint-patch/-/eslint-patch-1.5.1.tgz"
   integrity sha512-6i/8UoL0P5y4leBIGzvkZdS85RDMG9y1ihZzmTZQ5LdHUYmZ7pKFoj8X0236s3lusPs1Fa5HTQUpwI+UfTcmeA==
 
+"@scure/base@1.1.1":
+  version "1.1.1"
+  resolved "https://registry.yarnpkg.com/@scure/base/-/base-1.1.1.tgz#ebb651ee52ff84f420097055f4bf46cfba403938"
+  integrity sha512-ZxOhsSyxYwLJj3pLZCefNitxsj093tb2vq90mp2txoYeBqbcjDjqFhyM8eUjq/uFm6zJ+mUuqxlS2FkuSY1MTA==
+
 "@scure/base@2.0.0":
   version "2.0.0"
   resolved "https://registry.yarnpkg.com/@scure/base/-/base-2.0.0.tgz#ba6371fddf92c2727e88ad6ab485db6e624f9a98"
@@ -8503,6 +8508,13 @@ levn@~0.3.0:
   dependencies:
     prelude-ls "~1.1.2"
     type-check "~0.3.2"
+
+light-bolt11-decoder@^3.1.0:
+  version "3.2.0"
+  resolved "https://registry.yarnpkg.com/light-bolt11-decoder/-/light-bolt11-decoder-3.2.0.tgz#2d48f78386cde526c4131db8f9dfd3250a2d5d4d"
+  integrity sha512-3QEofgiBOP4Ehs9BI+RkZdXZNtSys0nsJ6fyGeSiAGCBsMwHGUDS/JQlY/sTnWs91A2Nh0S9XXfA8Sy9g6QpuQ==
+  dependencies:
+    "@scure/base" "1.1.1"
 
 lilconfig@^2.0.3:
   version "2.1.0"

@@ -1,8 +1,14 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Event, getPublicKey, nip19 } from "nostr-tools";
 import { useParams, useSearchParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { fetchFormResponses } from "../../nostr/responses";
+import {
+  fetchQualifyingResponseIds,
+  subscribeZapReceipts,
+  formACoord,
+} from "../../nostr/zap";
+import { getFormSettings } from "../FormFillerNew/SubmitButton/utils";
 import {
   Box,
   Button,
@@ -221,18 +227,75 @@ export const Response = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [formPubkey, formId]);
 
+  // --- Zap-gating ---
+  // For paid forms the raw 1069 stream is filtered down to responses backed by
+  // a qualifying kind-9735 zap receipt (paid amount >= required). We keep the
+  // raw `responses` stream intact (a 1069 may arrive before its 9735) and gate
+  // at display via `visibleResponses`. The live 9735 subscription grows the paid
+  // set so a response appears the moment its payment settles.
+  const [paidResponseIds, setPaidResponseIds] = useState<Set<string>>(
+    new Set(),
+  );
+  const [paidIdsLoading, setPaidIdsLoading] = useState(false);
+
+  const paymentSettings = formSpec ? getFormSettings(formSpec) : null;
+  const collectsPayments = paymentSettings?.collectsPayments ?? false;
+  const paymentAmountSats = paymentSettings?.paymentAmountSats ?? 0;
+
+  useEffect(() => {
+    if (!collectsPayments || !formPubkey || !formId) return;
+    const aCoord = formACoord(formPubkey, formId);
+    const requiredMsats = paymentAmountSats * 1000;
+    const formRelays = formEvent ? getResponseRelays(formEvent) : [];
+    setPaidIdsLoading(true);
+    let cancelled = false;
+    fetchQualifyingResponseIds({
+      formACoord: aCoord,
+      authorPubkey: formPubkey,
+      requiredMsats,
+      relays: formRelays,
+    }).then((set) => {
+      if (cancelled) return;
+      setPaidResponseIds(set);
+      setPaidIdsLoading(false);
+    });
+    const sub = subscribeZapReceipts({
+      formACoord: aCoord,
+      authorPubkey: formPubkey,
+      requiredMsats,
+      relays: formRelays,
+      onReceipt: ({ responseId }) =>
+        setPaidResponseIds((prev) => {
+          if (prev.has(responseId)) return prev;
+          const next = new Set(prev);
+          next.add(responseId);
+          return next;
+        }),
+    });
+    return () => {
+      cancelled = true;
+      sub.close();
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [formPubkey, formId, collectsPayments, paymentAmountSats]);
+
+  const visibleResponses = useMemo<Event[] | undefined>(() => {
+    if (!collectsPayments || !responses) return responses;
+    return responses.filter((r) => paidResponseIds.has(r.id));
+  }, [responses, paidResponseIds, collectsPayments]);
+
   const getResponderCount = () => {
-    if (!responses) return 0;
-    return new Set(responses.map((r) => r.pubkey)).size;
+    if (!visibleResponses) return 0;
+    return new Set(visibleResponses.map((r) => r.pubkey)).size;
   };
 
   const handleRowClick = (record: any) => {
     const authorPubKey = record.key;
-    if (!responses || !formSpec || formSpec.length === 0) {
+    if (!visibleResponses || !formSpec || formSpec.length === 0) {
       console.warn("Form spec not ready or no responses, cannot open modal.");
       return;
     }
-    const authorEvents = responses.filter(
+    const authorEvents = visibleResponses.filter(
       (event) => event.pubkey === authorPubKey,
     );
     if (authorEvents.length === 0) return;
@@ -280,9 +343,9 @@ export const Response = () => {
     let answers: Array<{
       [key: string]: string;
     }> = [];
-    if (!formSpec || !responses) return answers;
+    if (!formSpec || !visibleResponses) return answers;
     let responsePerPubkey = new Map<string, Event[]>();
-    responses.forEach((r: Event) => {
+    visibleResponses.forEach((r: Event) => {
       let existingResponse = responsePerPubkey.get(r.pubkey);
       if (!existingResponse) responsePerPubkey.set(r.pubkey, [r]);
       else responsePerPubkey.set(r.pubkey, [...existingResponse, r]);
@@ -385,7 +448,7 @@ export const Response = () => {
       },
     ];
     let uniqueQuestionIdsInResponses: Set<string> = new Set();
-    responses?.forEach((response: Event) => {
+    visibleResponses?.forEach((response: Event) => {
       let responseTags = getInputsFromResponseEvent(response, editKey);
       responseTags.forEach((t: Tag) => {
         if (Array.isArray(t) && t.length > 1)
@@ -551,7 +614,7 @@ export const Response = () => {
     });
     if (
       formSpec === null &&
-      responses &&
+      visibleResponses &&
       extraFieldIdsFromResponses.length > 0 &&
       fieldsFromSpec.length === 0
     ) {
@@ -621,7 +684,7 @@ export const Response = () => {
     );
   }
 
-  const hasResponses = responses && responses.length > 0;
+  const hasResponses = visibleResponses && visibleResponses.length > 0;
 
   const renderResponsesTab = () => {
     // Mobile: swipeable, filled-form navigator. Desktop: data table.
@@ -647,7 +710,7 @@ export const Response = () => {
       return formSpec ? (
         <ResponseNavigator
           formSpec={formSpec}
-          responses={responses}
+          responses={visibleResponses ?? []}
           editKey={editKey}
           formstrBranding={getformstrBranding(formSpec)}
         />
@@ -701,6 +764,25 @@ export const Response = () => {
                       <CircularProgress size={28} />
                       <Typography color="text.secondary">
                         {t("responses.lookingForResponses")}
+                      </Typography>
+                    </Box>
+                  </TableCell>
+                </TableRow>
+              ) : collectsPayments && paidIdsLoading && pagedRows.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={columns.length} align="center">
+                    <Box
+                      sx={{
+                        display: "flex",
+                        flexDirection: "column",
+                        alignItems: "center",
+                        gap: 1,
+                        py: 6,
+                      }}
+                    >
+                      <CircularProgress size={28} />
+                      <Typography color="text.secondary">
+                        {t("responses.paidResponsesChecking")}
                       </Typography>
                     </Box>
                   </TableCell>
@@ -780,6 +862,11 @@ export const Response = () => {
               <Typography variant="body2">
                 {t("responses.responderLabel")}
               </Typography>
+              {collectsPayments && (
+                <Typography color="text.secondary" sx={{ fontSize: 12, mt: 0.5 }}>
+                  {t("responses.paidResponsesHint")}
+                </Typography>
+              )}
             </Box>
           </CardContent>
         </Card>

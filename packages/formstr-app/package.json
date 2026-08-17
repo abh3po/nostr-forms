@@ -51,6 +51,7 @@
     "jest": "^27.4.3",
     "jest-resolve": "^27.4.2",
     "jest-watch-typeahead": "^1.0.0",
+    "light-bolt11-decoder": "^3.1.0",
     "mini-css-extract-plugin": "^2.4.5",
     "nostr-tools": "^2.23.12",
     "postcss": "^8.4.4",
@@ -149,7 +150,7 @@
       "^(?!.*\\.(js|jsx|mjs|cjs|ts|tsx|css|json)$)": "<rootDir>/config/jest/fileTransform.js"
     },
     "transformIgnorePatterns": [
-      "[/\\\\]node_modules[/\\\\](?!(?:@noble|@scure|@formstr|nostr-tools|react-markdown|rehype-.*|remark-.*|unified|unist-.*|mdast-.*|hast-.*|hastscript|micromark.*|vfile.*|bail|trough|zwitch|devlop|extend|is-plain-obj|property-information|space-separated-tokens|comma-separated-tokens|web-namespaces|html-void-elements|ccount|escape-string-regexp|decode-named-character-reference|character-entities.*|stringify-entities|trim-lines|estree-util-.*|periscopic|is-reference|html-url-attributes)/).+\\.(js|jsx|mjs|cjs|ts|tsx)$",
+      "[/\\\\]node_modules[/\\\\](?!(?:@noble|@scure|@formstr|nostr-tools|react-markdown|rehype-.*|remark-.*|unified|unist-.*|mdast-.*|hast-.*|hastscript|micromark.*|vfile.*|bail|trough|zwitch|devlop|extend|is-plain-obj|property-information|space-separated-tokens|comma-separated-tokens|web-namespaces|html-void-elements|ccount|escape-string-regexp|decode-named-character-reference|character-entities.*|stringify-entities|trim-lines|estree-util-.*|periscopic|is-reference|html-url-attributes|light-bolt11-decoder)/).+\\.(js|jsx|mjs|cjs|ts|tsx)$",
       "^.+\\.module\\.(css|sass|scss)$"
     ],
     "modulePaths": [],

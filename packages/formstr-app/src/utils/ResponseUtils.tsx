@@ -14,7 +14,16 @@ export const getResponseRelays = (formEvent: Event): string[] => {
 
 export const getInputsFromResponseEvent = (
   responseEvent: Event,
-  editKey: string | undefined | null
+  editKey: string | undefined | null,
+  /**
+   * The ECDH counterparty pubkey. Defaults to `responseEvent.pubkey` (the
+   * responder), which is correct for the FORM AUTHOR viewing (author secret +
+   * responder pubkey). For the RESPONDER viewing their own encrypted response
+   * (anonymous, with their ephemeral secret in the permalink), pass the FORM
+   * AUTHOR pubkey — NIP-44 v2 is symmetric so `ECDH(responderSecret,
+   * formAuthorPub)` yields the same conversation key.
+   */
+  otherPubkey?: string
 ): Tag[] => {
   if (responseEvent.content === "") {
     return responseEvent.tags.filter(
@@ -24,7 +33,7 @@ export const getInputsFromResponseEvent = (
     try {
       const conversationKey = nip44.v2.utils.getConversationKey(
         hexToBytes(editKey),
-        responseEvent.pubkey
+        otherPubkey ?? responseEvent.pubkey
       );
       const decryptedContent = nip44.v2.decrypt(
         responseEvent.content,

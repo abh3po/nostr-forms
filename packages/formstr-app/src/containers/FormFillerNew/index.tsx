@@ -13,6 +13,7 @@ import { ROUTES } from "../../constants/routes";
 
 import { decodeNKeys } from "../../utils/nkeys";
 import { Response, Tag } from "../../nostr/types";
+import type { ResponseSubmitMeta } from "../../utils/responsePermalink";
 
 function getViewKeyFromUrl(explicitProp?: string | null): string | null {
   let viewKey: string | undefined;
@@ -70,6 +71,9 @@ export const FormFiller: React.FC<FormFillerProps> = ({
   const relays = decodedData?.relays;
   const { pubkey: userPubKey, requestPubkey } = useProfileContext();
   const [formSubmitted, setFormSubmitted] = useState(false);
+  const [responseMeta, setResponseMeta] = useState<ResponseSubmitMeta | null>(
+    null,
+  );
   const [formEvent, setFormEvent] = useState<Event | undefined>(
     preFetchedFormContent,
   );
@@ -106,8 +110,13 @@ export const FormFiller: React.FC<FormFillerProps> = ({
     if (!formEvent) initialize(pubKey, formId, relays);
   }, []);
 
-  const onSubmit = async (responses: Response[], formTemplate: Tag[]) => {
+  const onSubmit = async (
+    responses: Response[],
+    formTemplate: Tag[],
+    meta?: ResponseSubmitMeta,
+  ) => {
     sendNotification(formTemplate, responses);
+    setResponseMeta(meta ?? null);
     setFormSubmitted(true);
   };
 
@@ -167,6 +176,7 @@ export const FormFiller: React.FC<FormFillerProps> = ({
           viewKey={viewKeyParams}
           formEvent={formEvent}
           isOpen={formSubmitted}
+          permalink={responseMeta?.permalink}
           onClose={() => navigate(ROUTES.DASHBOARD)}
         />
       </>

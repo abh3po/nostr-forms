@@ -12,6 +12,7 @@ import CreateForm from "../../containers/CreateFormNew";
 import { Dashboard } from "../../containers/Dashboard";
 import EditForm from "../../containers/EditForm";
 import { CustomUrlForm } from "../../containers/FormFillerNew/CustomUrlForm";
+import { ViewResponse } from "../../containers/ViewResponse";
 import { AppLayout } from "../AppLayout";
 
 const withNewCreateFormHeaderWrapper = (Component, props) => {
@@ -42,6 +43,7 @@ function Routing() {
 
       {/* Respondent-facing routes: no app chrome */}
       <Route path={`${ROUTES.FORM_FILLER_NEW}/*`} element={<FormFiller />} />
+      <Route path={`${ROUTES.VIEW_RESPONSE}`} element={<ViewResponse />} />
       <Route path={`${ROUTES.CUSTOM_URL}`} element={<CustomUrlForm />} />
       <Route path={`${ROUTES.FORM_FILLER}/*`} element={<DeprecatedRoute />} />
       <Route

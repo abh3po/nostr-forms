@@ -1,22 +1,27 @@
-import { Dialog } from "@mui/material";
+import { Dialog, Box, Typography, Link } from "@mui/material";
 import ThankYouStyle from "./thankyou.style";
 import { Event } from "nostr-tools";
 import { IFormSettings } from "../../CreateFormNew/components/FormSettings/types";
 import { useState, useEffect } from "react";
 import { getFormSpec } from "../../../utils/formUtils";
 import { useProfileContext } from "../../../hooks/useProfileContext";
+import { useTranslation } from "react-i18next";
+import { CopyButton } from "../../../components/CopyButton";
 
 export const ThankYouScreen = ({
   formEvent,
   isOpen,
   onClose,
   viewKey,
+  permalink,
 }: {
   formEvent: Event;
   isOpen: boolean;
   onClose: () => void;
   viewKey: string | null;
+  permalink?: string | null;
 }) => {
+  const { t } = useTranslation();
   const { pubkey: userPubKey } = useProfileContext();
   const [settings, setSettings] = useState<IFormSettings>();
 
@@ -64,6 +69,43 @@ export const ThankYouScreen = ({
             alt="Thank you"
           />
         </div>
+        {permalink && (
+          <Box sx={{ p: 2, pt: 0, width: "100%" }}>
+            <Typography sx={{ fontSize: 14, mb: 0.5 }}>
+              {t("filler.submit.pay.permalink")}
+            </Typography>
+            <Typography color="text.secondary" sx={{ fontSize: 12, mb: 1 }}>
+              {t("filler.submit.pay.permalinkHint")}
+            </Typography>
+            <Box
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                gap: 1,
+                p: 1,
+                border: "1px solid",
+                borderColor: "divider",
+                borderRadius: 1,
+                wordBreak: "break-all",
+              }}
+            >
+              <Link
+                href={permalink}
+                target="_blank"
+                rel="noopener noreferrer"
+                sx={{ fontSize: 12, wordBreak: "break-all" }}
+              >
+                {permalink.length > 60
+                  ? `${permalink.slice(0, 40)}…${permalink.slice(-16)}`
+                  : permalink}
+              </Link>
+              <CopyButton getText={() => permalink} />
+            </Box>
+            <Typography color="text.secondary" sx={{ fontSize: 11, mt: 1 }}>
+              {t("filler.submit.pay.permalinkEncryptedNote")}
+            </Typography>
+          </Box>
+        )}
       </ThankYouStyle>
     </Dialog>
   );

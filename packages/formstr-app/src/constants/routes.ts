@@ -21,4 +21,5 @@ export const ROUTES = {
   DASHBOARD_SUBMISSIONS: "/dashboard/submissions",
   CUSTOM_URL: "/i/:formSlug",
   DASHBOARD_PURCHASES: "/dashboard/purchases",
+  VIEW_RESPONSE: "/view/:nevent",
 };

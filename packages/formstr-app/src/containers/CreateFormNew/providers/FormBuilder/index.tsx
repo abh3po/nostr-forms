@@ -101,6 +101,7 @@ const createInitialFormSettings = (
   formstrBranding: true,
   thankYouScreenImageUrl: sampleThankYouScreens[0],
   disablePreview: false,
+  collectsPayments: false,
 });
 
 const getDefaultSectionTitle = (

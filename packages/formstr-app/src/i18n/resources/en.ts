@@ -380,6 +380,28 @@ const resources = {
       validating: "Validating...",
       submitting: "Submitting...",
       errorPrefix: "Error",
+      pay: {
+        payButton: "Pay {{amount}} sats",
+        paying: "Preparing payment...",
+        awaitingPayment: "Waiting for payment...",
+        paid: "Payment received. Thank you!",
+        payFailed: "Payment failed.",
+        resolveLud16Failed:
+          "This form's Lightning address could not be reached. Please contact the form author.",
+        invoiceFailed: "Could not generate a Lightning invoice. Please try again.",
+        noResponseEvent: "Could not submit your response. Please try again.",
+        paymentHash: "Payment hash",
+        recipient: "Paying",
+        disclaimer:
+          "You are paying the form author directly via the Lightning Network. Formstr is not involved and does not handle your payment.",
+        contactForIssues: "If anything goes wrong, contact the form author:",
+        openWallet: "Open in wallet",
+        cancelPayment: "Cancel",
+        permalink: "Your response link",
+        permalinkHint: "Save this link to view your submitted response later.",
+        permalinkEncryptedNote:
+          "For anonymous submissions anyone with this link can read your answers. For identified submissions only the form author can read it.",
+      },
     },
     settings: {
       title: "Form Settings",
@@ -474,6 +496,9 @@ const resources = {
     analyticsTab: "Analytics",
     submissions: "Submissions",
     responderLabel: "responder(s)",
+    paidResponsesHint:
+      "Only responses with a confirmed Lightning payment are shown.",
+    paidResponsesChecking: "Checking payments...",
     fileUploadedOldVersion:
       "This file was uploaded with an older version. Please re-upload the file to download it.",
     fileDownloadUnavailable: "Cannot download: Form edit key not available",
@@ -503,6 +528,19 @@ const resources = {
       submitted: "Submitted",
       unavailable: "N/A",
       waiting: "Waiting for form details or response data...",
+    },
+    viewer: {
+      title: "Your Response",
+      loading: "Loading response…",
+      notFound:
+        "This response could not be found on the configured relays. It may not have propagated yet, or the link is invalid.",
+      accessDenied:
+        "You cannot read this response. Only the form author, or anyone holding the response link for anonymous submissions, can view it.",
+      decryptFailed:
+        "The response could not be decrypted. The link may be incomplete or the response was not encrypted with this key.",
+      backToDashboard: "Back to Dashboard",
+      degradedLabelsNote:
+        "Question labels are unavailable for this form; answers are shown with their field IDs.",
     },
     analytics: {
       noResponses: "No responses yet to analyze.",
@@ -675,12 +713,35 @@ const resources = {
         customization: "Customization",
         relays: "Relay Configuration",
         automations: "Automations",
+        payments: "Payments",
       },
       colorLabels: {
         global: "Global",
         title: "Title",
         description: "Description",
         question: "Question",
+      },
+      payments: {
+        collectsPayments: "Collect Payment (Zap-Gated)",
+        collectsPaymentsHint:
+          "Respondents must send a Lightning zap to your Lightning address before their response is counted.",
+        lud16: "Lightning Address",
+        lud16Placeholder: "you@wallet.com",
+        lud16Hint: "Your Lightning address (LUD-16). Must support NIP-57 zaps.",
+        lud16Checking: "Checking zap support…",
+        lud16Ok: "This address supports zaps.",
+        lud16Invalid: "This address does not support NIP-57 zaps.",
+        lud16Required: "Enter a valid Lightning address to enable payments.",
+        amountSats: "Amount (sats)",
+        amountSatsHint: "Whole sats. Respondents must zap at least this amount.",
+        amountRequired: "Enter an amount greater than 0 to enable payments.",
+        contact: "Contact for issues",
+        contactPlaceholder: "npub1… or you@example.com",
+        contactHint:
+          "Shown to respondents so they can reach you if payment fails.",
+        contactRequired: "Add a contact to enable payments.",
+        disallowAnonymousHint:
+          "Tip: anonymous submissions produce a per-response link that anyone can open.",
       },
     },
     relayManager: {
